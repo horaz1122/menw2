@@ -1,0 +1,770 @@
+<!DOCTYPE html>
+<html lang="ku" dir="rtl">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>مینووی کافێ</title>
+    <style>
+        * {
+            margin: 0;
+            padding: 0;
+            box-sizing: border-box;
+        }
+
+        body {
+            font-family: 'Georgia', serif;
+            background: #1a1410;
+            color: #f5f5dc;
+            min-height: 100vh;
+            padding: 20px;
+            direction: rtl;
+            background-image: 
+                radial-gradient(circle at 20% 50%, rgba(139, 69, 19, 0.1) 0%, transparent 50%),
+                radial-gradient(circle at 80% 80%, rgba(101, 67, 33, 0.1) 0%, transparent 50%);
+        }
+
+        .container {
+            max-width: 1400px;
+            margin: 0 auto;
+            background: linear-gradient(135deg, #2d1810 0%, #1f1108 100%);
+            border-radius: 0;
+            padding: 0;
+            box-shadow: 0 30px 80px rgba(0, 0, 0, 0.6);
+            border: 2px solid #8b4513;
+        }
+
+        header {
+            background: linear-gradient(135deg, #3e2723 0%, #4e342e 100%);
+            text-align: center;
+            padding: 60px 40px 30px;
+            border-bottom: 3px solid #d4a574;
+            position: relative;
+            overflow: hidden;
+        }
+
+        header::before {
+            content: '☕';
+            position: absolute;
+            font-size: 200px;
+            opacity: 0.05;
+            top: 50%;
+            left: 50%;
+            transform: translate(-50%, -50%);
+        }
+
+        h1 {
+            font-size: 4em;
+            color: #d4a574;
+            margin-bottom: 15px;
+            text-shadow: 3px 3px 6px rgba(0, 0, 0, 0.5);
+            letter-spacing: 3px;
+            font-weight: normal;
+            position: relative;
+        }
+
+        .subtitle {
+            font-size: 1.4em;
+            color: #c9a882;
+            font-style: italic;
+            letter-spacing: 2px;
+            position: relative;
+            margin-bottom: 40px;
+        }
+
+        .category-nav {
+            display: flex;
+            justify-content: center;
+            gap: 15px;
+            flex-wrap: wrap;
+            padding: 30px 20px;
+            position: sticky;
+            top: 0;
+            background: rgba(45, 24, 16, 0.98);
+            z-index: 100;
+            backdrop-filter: blur(10px);
+        }
+
+        .category-btn {
+            padding: 12px 25px;
+            background: rgba(62, 39, 35, 0.6);
+            border: 2px solid #5d4037;
+            color: #c9a882;
+            font-size: 1.1em;
+            cursor: pointer;
+            transition: all 0.3s ease;
+            border-radius: 0;
+            letter-spacing: 1px;
+            font-family: 'Georgia', serif;
+        }
+
+        .category-btn:hover {
+            background: #5d4037;
+            border-color: #d4a574;
+            color: #d4a574;
+            transform: translateY(-2px);
+        }
+
+        .category-btn.active {
+            background: #d4a574;
+            border-color: #d4a574;
+            color: #1a1410;
+            font-weight: bold;
+        }
+
+        .menu-content {
+            padding: 60px 40px;
+        }
+
+        .menu-section {
+            margin-bottom: 60px;
+        }
+
+        .section-header {
+            text-align: center;
+            margin-bottom: 40px;
+            position: relative;
+        }
+
+        .section-title {
+            font-size: 2.5em;
+            color: #d4a574;
+            margin-bottom: 10px;
+            font-weight: normal;
+            letter-spacing: 2px;
+            display: inline-block;
+            padding: 0 30px;
+            position: relative;
+        }
+
+        .section-title::before,
+        .section-title::after {
+            content: '◆';
+            position: absolute;
+            color: #8b4513;
+            font-size: 0.5em;
+            top: 50%;
+            transform: translateY(-50%);
+        }
+
+        .section-title::before {
+            right: 0;
+        }
+
+        .section-title::after {
+            left: 0;
+        }
+
+        .section-divider {
+            width: 200px;
+            height: 2px;
+            background: linear-gradient(90deg, transparent, #d4a574, transparent);
+            margin: 20px auto;
+        }
+
+        .items-grid {
+            display: grid;
+            grid-template-columns: repeat(auto-fit, minmax(450px, 1fr));
+            gap: 40px;
+            max-width: 1200px;
+            margin: 0 auto;
+        }
+
+        .menu-item {
+            background: rgba(62, 39, 35, 0.4);
+            border: 1px solid #5d4037;
+            border-radius: 0;
+            padding: 25px;
+            display: flex;
+            gap: 25px;
+            align-items: center;
+            transition: all 0.4s ease;
+            position: relative;
+            overflow: hidden;
+        }
+
+        .menu-item::before {
+            content: '';
+            position: absolute;
+            top: 0;
+            right: 0;
+            width: 100%;
+            height: 100%;
+            background: linear-gradient(135deg, rgba(212, 165, 116, 0.1) 0%, transparent 100%);
+            opacity: 0;
+            transition: opacity 0.4s ease;
+        }
+
+        .menu-item:hover {
+            transform: translateX(-10px);
+            border-color: #d4a574;
+            box-shadow: 0 10px 30px rgba(212, 165, 116, 0.2);
+        }
+
+        .menu-item:hover::before {
+            opacity: 1;
+        }
+
+        .item-image {
+            width: 120px;
+            height: 120px;
+            border-radius: 50%;
+            object-fit: cover;
+            border: 3px solid #8b4513;
+            box-shadow: 0 5px 15px rgba(0, 0, 0, 0.5);
+            flex-shrink: 0;
+        }
+
+        .item-info {
+            flex: 1;
+        }
+
+        .item-header {
+            display: flex;
+            justify-content: space-between;
+            align-items: center;
+            margin-bottom: 12px;
+            padding-bottom: 12px;
+            border-bottom: 1px dashed #5d4037;
+        }
+
+        .item-name {
+            font-size: 1.6em;
+            color: #d4a574;
+            font-weight: normal;
+            letter-spacing: 1px;
+        }
+
+        .item-price {
+            font-size: 1.5em;
+            color: #c9a882;
+            font-weight: bold;
+            white-space: nowrap;
+        }
+
+        .item-description {
+            font-size: 1em;
+            color: #a89176;
+            line-height: 1.6;
+            font-style: italic;
+        }
+
+        footer {
+            background: #3e2723;
+            text-align: center;
+            padding: 40px;
+            border-top: 3px solid #d4a574;
+            color: #c9a882;
+        }
+
+        .footer-content {
+            max-width: 800px;
+            margin: 0 auto;
+        }
+
+        .footer-info {
+            font-size: 1.2em;
+            margin: 15px 0;
+            letter-spacing: 1px;
+        }
+
+        .coffee-beans {
+            font-size: 2em;
+            margin: 20px 0;
+            opacity: 0.3;
+        }
+
+        @media (max-width: 1024px) {
+            .items-grid {
+                grid-template-columns: 1fr;
+            }
+        }
+
+        @media (max-width: 768px) {
+            h1 {
+                font-size: 2.5em;
+            }
+
+            .subtitle {
+                font-size: 1.1em;
+            }
+
+            .section-title {
+                font-size: 1.8em;
+            }
+
+            .menu-content {
+                padding: 40px 20px;
+            }
+
+            .menu-item {
+                flex-direction: row;
+                padding: 20px;
+            }
+
+            .item-header {
+                flex-direction: column;
+                gap: 8px;
+                align-items: flex-start;
+            }
+
+            .item-image {
+                width: 90px;
+                height: 90px;
+            }
+
+            .item-name {
+                font-size: 1.3em;
+            }
+
+            .item-price {
+                font-size: 1.3em;
+            }
+
+            .item-description {
+                font-size: 0.95em;
+            }
+
+            .category-nav {
+                padding: 20px 10px;
+                gap: 10px;
+            }
+
+            .category-btn {
+                padding: 10px 18px;
+                font-size: 1em;
+            }
+
+            header {
+                padding: 40px 20px 20px;
+            }
+        }
+
+        @media (max-width: 480px) {
+            h1 {
+                font-size: 2em;
+                letter-spacing: 2px;
+            }
+
+            .subtitle {
+                font-size: 1em;
+            }
+
+            .items-grid {
+                gap: 20px;
+            }
+
+            .menu-item {
+                flex-direction: column;
+                text-align: center;
+            }
+
+            .item-image {
+                width: 100px;
+                height: 100px;
+            }
+
+            .item-header {
+                align-items: center;
+            }
+
+            .category-btn {
+                padding: 8px 15px;
+                font-size: 0.95em;
+            }
+        }
+    </style>
+</head>
+<body>
+    <div class="container">
+        <header>
+            <h1>پاشافروتی کــافــێ</h1>
+            <p class="subtitle">تامی ئاسایشی ڕاستەقینە</p>
+        </header>
+
+        <div class="category-nav">
+            <button class="category-btn active" onclick="filterCategory('all')">هەموو</button>
+            <button class="category-btn" onclick="filterCategory('hot')"> خواردنەوە گەرمەکان</button>
+            <button class="category-btn" onclick="filterCategory('cold')"> خواردنەوە ساردەکان</button>
+            <button class="category-btn" onclick="filterCategory('dessert')">کریپ نۆتێلا</button>
+            <button class="category-btn" onclick="filterCategory('drinks')">خواردنەوە</button>
+        </div>
+
+        <div class="menu-content">
+            <!-- خواردنەوە گەرمەکان-->
+            <div class="menu-section" data-category="hot">
+                <div class="section-header">
+                    <h2 class="section-title"> پاشافروتی کــافــێ بەخێرهاتنتان داکات</h2>
+                    <div class="section-divider"></div>
+                </div>
+                <div class="items-grid">
+                    <div class="menu-item" data-category="hot">
+                        <img src="rasm/m1.png" alt="محەلەبی گەرم" class="item-image">
+                        <div class="item-info">
+                            <div class="item-header">
+                                <h3 class="item-name"> محەلەبی گەرم</h3>
+                                <span class="item-price">1,000 د.ع</span>
+                            </div>
+                        </div>
+                    </div>
+
+                    <div class="menu-item" data-category="hot">
+                        <img src="rasm/k1.387Z.png" alt="کاستەری گەرم" class="item-image">
+                        <div class="item-info">
+                            <div class="item-header">
+                                <h3 class="item-name"> کاستەری گەرم</h3>
+                                <span class="item-price">1,500 د.ع</span>
+                            </div>
+                        </div>
+                    </div>
+
+                    <div class="menu-item" data-category="hot">
+                        <img src="rasm/q1.111Z.png" alt="قاوەی ئێسپرێسۆ" class="item-image">
+                        <div class="item-info">
+                            <div class="item-header">
+                                <h3 class="item-name"> قاوەی ئێسپرێسۆ</h3>
+                                <span class="item-price">1,500 د.ع</span>
+                            </div>
+                        </div>
+                    </div>
+
+                    <div class="menu-item" data-category="hot">
+                        <img src="https://images.unsplash.com/photo-1517487881594-2787fef5ebf7?w=300&h=300&fit=crop" alt="کافێ مۆکا" class="item-image">
+                        <div class="item-info">
+                            <div class="item-header">
+                                <h3 class="item-name">کافێ مۆکا</h3>
+                                <span class="item-price">4,500 د.ع</span>
+                            </div>
+                        </div>
+                    </div>
+
+                    <div class="menu-item" data-category="hot">
+                        <img src="https://images.unsplash.com/photo-1485808191679-5f86510681a2?w=300&h=300&fit=crop" alt="قاوەی تورکی" class="item-image">
+                        <div class="item-info">
+                            <div class="item-header">
+                                <h3 class="item-name">قاوەی تورکی</h3>
+                                <span class="item-price">1,500 د.ع</span>
+                            </div>
+                        </div>
+                    </div>
+
+                    <div class="menu-item" data-category="hot">
+                        <img src="rasm/a1.222Z.png" alt="ئەمریکانۆ" class="item-image">
+                        <div class="item-info">
+                            <div class="item-header">
+                                <h3 class="item-name">ئەمریکانۆ</h3>
+                                <span class="item-price">2,000 د.ع</span>
+                            </div>
+                        </div>
+                    </div>
+                    
+                    <div class="menu-item" data-category="hot">
+                        <img src="rasm/h1.831Z.png" alt="هۆت چوکولێت" class="item-image">
+                        <div class="item-info">
+                            <div class="item-header">
+                                <h3 class="item-name">  هۆت چوکولێت</h3>
+                                <span class="item-price">1,500 د.ع</span>
+                            </div>
+                        </div>
+                    </div>
+
+                    <div class="menu-item" data-category="hot">
+                        <img src="rasm/q2.651Z.png" alt="قاوەی قەزوان" class="item-image">
+                        <div class="item-info">
+                            <div class="item-header">
+                                <h3 class="item-name">   قاوەی قەزوان</h3>
+                                <span class="item-price">1,500 د.ع</span>
+                            </div>
+                        </div> 
+                    </div>
+                    
+                    <div class="menu-item" data-category="hot">
+                        <img src="rasm/k2.590Z.png" alt="کاپوچینۆ" class="item-image">
+                        <div class="item-info">
+                            <div class="item-header">
+                                <h3 class="item-name">   کاپوچینۆ</h3>
+                                <span class="item-price">1,500 د.ع</span>
+                            </div>
+                        </div>
+                    </div>
+                    
+                    <div class="menu-item" data-category="hot">
+                        <img src="rasm/k3.079Z.png" alt="کافێ لاتێ" class="item-image">
+                        <div class="item-info">
+                            <div class="item-header">
+                                <h3 class="item-name">   کافێ لاتێ</h3>
+                                <span class="item-price">2,500 د.ع</span>
+                            </div>
+                        </div>
+                    </div>
+
+                    <div class="menu-item" data-category="hot">
+                        <img src="rasm/m2.631Z.png" alt="مۆکا" class="item-image">
+                        <div class="item-info">
+                            <div class="item-header">
+                                <h3 class="item-name">   مۆکا</h3>
+                                <span class="item-price">2,000 د.ع</span>
+                            </div>
+                        </div>
+                    </div>
+
+                    <div class="menu-item" data-category="hot">
+                        <img src="rasm/m3.695Z.png" alt="ماکیاتۆ" class="item-image">
+                        <div class="item-info">
+                            <div class="item-header">
+                                <h3 class="item-name">   ماکیاتۆ</h3>
+                                <span class="item-price">2,000 د.ع</span>
+                            </div>
+                        </div>
+                    </div>
+                    
+                    <div class="menu-item" data-category="hot">
+                        <img src="rasm/a2.499Z.png" alt="ئەڤەگاتۆ" class="item-image">
+                        <div class="item-info">
+                            <div class="item-header">
+                                <h3 class="item-name">   ئەڤەگاتۆ</h3>
+                                <span class="item-price">2,000 د.ع</span>
+                            </div>
+                        </div>
+                    </div>
+                    
+                    <div class="menu-item" data-category="hot">
+                        <img src="rasm/f1.819Z.png" alt="فراپی یۆنانی" class="item-image">
+                        <div class="item-info">
+                            <div class="item-header">
+                                <h3 class="item-name">    فراپی یۆنانی</h3>
+                                <span class="item-price">2,500 د.ع</span>
+                            </div>
+                        </div>
+                    </div>
+                </div>
+            </div>
+
+            <!--  خواردنەوە ساردەکان -->
+            <div class="menu-section" data-category="cold">
+                <div class="section-header">
+                    <h2 class="section-title">قاوەکانی سارد</h2>
+                    <div class="section-divider"></div>
+                </div>
+                <div class="items-grid">
+                    <div class="menu-item" data-category="cold">
+                        <img src="https://images.unsplash.com/photo-1517487881594-2787fef5ebf7?w=300&h=300&fit=crop" alt="قاوەی سارد" class="item-image">
+                        <div class="item-info">
+                            <div class="item-header">
+                                <h3 class="item-name">ئایس کافێ</h3>
+                                <span class="item-price">4,000 د.ع</span>
+                            </div>
+                            <p class="item-description">قاوە لەگەڵ سەهۆڵ و شیر، سەرکەوتوو و خۆش</p>
+                        </div>
+                    </div>
+
+                    <div class="menu-item" data-category="cold">
+                        <img src="https://images.unsplash.com/photo-1461023058943-07fcbe16d735?w=300&h=300&fit=crop" alt="فراپێ" class="item-image">
+                        <div class="item-info">
+                            <div class="item-header">
+                                <h3 class="item-name">کافێ فراپێ</h3>
+                                <span class="item-price">4,500 د.ع</span>
+                            </div>
+                            <p class="item-description">قاوەی شەکەراوی سارد لەگەڵ کەف، تامێکی بێ وێنە</p>
+                        </div>
+                    </div>
+
+                    <div class="menu-item" data-category="cold">
+                        <img src="https://images.unsplash.com/photo-1562133567-b6a0a9c8c8b0?w=300&h=300&fit=crop" alt="لاتێی سارد" class="item-image">
+                        <div class="item-info">
+                            <div class="item-header">
+                                <h3 class="item-name">ئایس لاتێ</h3>
+                                <span class="item-price">4,500 د.ع</span>
+                            </div>
+                            <p class="item-description">لاتێی سارد لەگەڵ سەهۆڵ، سەرکەوتوو و نەرم</p>
+                        </div>
+                    </div>
+
+                    <div class="menu-item" data-category="cold">
+                        <img src="https://images.unsplash.com/photo-1551024506-0bccd828d307?w=300&h=300&fit=crop" alt="کۆڵد برو" class="item-image">
+                        <div class="item-info">
+                            <div class="item-header">
+                                <h3 class="item-name">کۆڵد برو کافێ</h3>
+                                <span class="item-price">5,000 د.ع</span>
+                            </div>
+                            <p class="item-description">قاوەی دەمێنراو بە ئاوی سارد، تامێکی نایاب</p>
+                        </div>
+                    </div>
+                </div>
+            </div>
+
+            <!-- کریپ نوتێلا -->
+            <div class="menu-section" data-category="dessert">
+                <div class="section-header">
+                    <h2 class="section-title">شیرینەمەنی و نان</h2>
+                    <div class="section-divider"></div>
+                </div>
+                <div class="items-grid">
+                    <div class="menu-item" data-category="dessert">
+                        <img src="rasm/km1.560Z.png" alt="کریپ نۆتێلای مۆز" class="item-image">
+                        <div class="item-info">
+                            <div class="item-header">
+                                <h3 class="item-name"> کریپ نۆتێلای مۆز</h3>
+                                <span class="item-price">1,000 د.ع</span>
+                            </div>
+                        </div>
+                    </div>
+
+                    <div class="menu-item" data-category="dessert">
+                        <img src="https://images.unsplash.com/photo-1509440159596-0249088772ff?w=300&h=300&fit=crop" alt="کرواسان" class="item-image">
+                        <div class="item-info">
+                            <div class="item-header">
+                                <h3 class="item-name"> کریپ نۆتێلای پسکیت</h3>
+                                <span class="item-price">2,500 د.ع</span>
+                            </div>
+                            <p class="item-description">کرواسانی تازە و نەرم، تەواو بۆ بەیانی</p>
+                        </div>
+                    </div>
+
+                    <div class="menu-item" data-category="dessert">
+                        <img src="https://images.unsplash.com/photo-1563805042-7684c019e1cb?w=300&h=300&fit=crop" alt="چیزکێک" class="item-image">
+                        <div class="item-info">
+                            <div class="item-header">
+                                <h3 class="item-name">چیزکێکی نیویۆرک</h3>
+                                <span class="item-price">4,000 د.ع</span>
+                            </div>
+                            <p class="item-description">چیزکێکی کرێمی لەگەڵ توێکڵی هێنجی</p>
+                        </div>
+                    </div>
+
+                    <div class="menu-item" data-category="dessert">
+                        <img src="https://images.unsplash.com/photo-1486427944299-d1955d23e34d?w=300&h=300&fit=crop" alt="تایرامیسو" class="item-image">
+                        <div class="item-info">
+                            <div class="item-header">
+                                <h3 class="item-name">تایرامیسو</h3>
+                                <span class="item-price">5,000 د.ع</span>
+                            </div>
+                            <p class="item-description">شیرینی کلاسیکی ئیتاڵی لەگەڵ قاوە و ماسکارپۆنێ</p>
+                        </div>
+                    </div>
+
+                    <div class="menu-item" data-category="dessert">
+                        <img src="https://images.unsplash.com/photo-1587241321921-91a834d82ccf?w=300&h=300&fit=crop" alt="مافین" class="item-image">
+                        <div class="item-info">
+                            <div class="item-header">
+                                <h3 class="item-name">مافینی بلوبێری</h3>
+                                <span class="item-price">2,000 د.ع</span>
+                            </div>
+                            <p class="item-description">مافینی تازە پڕ لە بلوبێری ڕاستەقینە</p>
+                        </div>
+                    </div>
+
+                    <div class="menu-item" data-category="dessert">
+                        <img src="https://images.unsplash.com/photo-1621303837174-89787a7d4729?w=300&h=300&fit=crop" alt="براونی" class="item-image">
+                        <div class="item-info">
+                            <div class="item-header">
+                                <h3 class="item-name">براونی چۆکلێت</h3>
+                                <span class="item-price">3,000 د.ع</span>
+                            </div>
+                            <p class="item-description">براونی چۆکلێتی قەڵەو لەگەڵ گوێز</p>
+                        </div>
+                    </div>
+                </div>
+            </div>
+
+            <!-- خواردنەوەکانی تر -->
+            <div class="menu-section" data-category="drinks">
+                <div class="section-header">
+                    <h2 class="section-title">خواردنەوەکانی تر</h2>
+                    <div class="section-divider"></div>
+                </div>
+                <div class="items-grid">
+                    <div class="menu-item" data-category="drinks">
+                        <img src="https://images.unsplash.com/photo-1556679343-c7306c1976bc?w=300&h=300&fit=crop" alt="شێک" class="item-image">
+                        <div class="item-info">
+                            <div class="item-header">
+                                <h3 class="item-name">میلک شێک</h3>
+                                <span class="item-price">4,500 د.ع</span>
+                            </div>
+                            <p class="item-description">شێکی قەڵەو لەگەڵ تامی چۆکلێت، فرێوتی، یان ڤانیلیا</p>
+                        </div>
+                    </div>
+
+                    <div class="menu-item" data-category="drinks">
+                        <img src="https://images.unsplash.com/photo-1497534547324-0ebb3f052e88?w=300&h=300&fit=crop" alt="لیمۆناتە" class="item-image">
+                        <div class="item-info">
+                            <div class="item-header">
+                                <h3 class="item-name">لیمۆناتەی تازە</h3>
+                                <span class="item-price">2,500 د.ع</span>
+                            </div>
+                            <p class="item-description">لیمۆناتەی گوشراو لە لیمۆی تازە</p>
+                        </div>
+                    </div>
+
+                    <div class="menu-item" data-category="drinks">
+                        <img src="https://images.unsplash.com/photo-1622483767028-3f66f32aef97?w=300&h=300&fit=crop" alt="شێکی میوە" class="item-image">
+                        <div class="item-info">
+                            <div class="item-header">
+                                <h3 class="item-name">سموزی میوە</h3>
+                                <span class="item-price">5,000 د.ع</span>
+                            </div>
+                            <p class="item-description">شێکی میوەی تازە و تەندروست، تێکەڵەی ڕۆژانە</p>
+                        </div>
+                    </div>
+
+                    <div class="menu-item" data-category="drinks">
+                        <img src="https://images.unsplash.com/photo-1556679343-c7306c1976bc?w=300&h=300&fit=crop" alt="شای" class="item-image">
+                        <div class="item-info">
+                            <div class="item-header">
+                                <h3 class="item-name">شایی نەریتی</h3>
+                                <span class="item-price">1,500 د.ع</span>
+                            </div>
+                            <p class="item-description">شایی ڕەش یان سەوز، لەگەڵ لیمۆ یان پونچ</p>
+                        </div>
+                    </div>
+                </div>
+            </div>
+        </div>
+
+        <footer>
+            <div class="footer-content">
+                <div class="coffee-beans">☕ ☕ ☕</div>
+                <p class="footer-info">کاتەکانی کارکردن: ٨:٠٠ بەیانی - ١١:٠٠ شەو</p>
+                <p class="footer-info">هەموو ڕۆژێک</p>
+                <p class="footer-info">پێوەندی: ٠٧٥٠ ١٢٣ ٤٥٦٧</p>
+                <p style="margin-top: 30px; opacity: 0.7; font-size: 0.9em;">تامی ئاسایشی ڕاستەقینە لە هەر جامێکدا</p>
+            </div>
+        </footer>
+    </div>
+
+    <script>
+        function filterCategory(category) {
+            const sections = document.querySelectorAll('.menu-section');
+            const buttons = document.querySelectorAll('.category-btn');
+            const items = document.querySelectorAll('.menu-item');
+            
+            buttons.forEach(btn => btn.classList.remove('active'));
+            event.target.classList.add('active');
+            
+            if (category === 'all') {
+                sections.forEach(section => {
+                    section.style.display = 'block';
+                });
+                items.forEach(item => {
+                    item.style.display = 'flex';
+                });
+            } else {
+                sections.forEach(section => {
+                    if (section.dataset.category === category) {
+                        section.style.display = 'block';
+                    } else {
+                        section.style.display = 'none';
+                    }
+                });
+                
+                items.forEach(item => {
+                    if (item.dataset.category === category) {
+                        item.style.display = 'flex';
+                    } else {
+                        item.style.display = 'none';
+                    }
+                });
+            }
+        }
+    </script>
+</body>
+</html>
