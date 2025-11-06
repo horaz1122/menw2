@@ -33,13 +33,14 @@
 
         .container {
             max-width: 1400px;
-            margin: 0 auto;
+            margin: 20px auto; /* Margin for desktop */
             background: linear-gradient(135deg, #2d1810 0%, #1f1108 100%);
-            border-radius: 0;
+            border-radius: 12px; /* Rounded corners for desktop */
             padding: 0;
             box-shadow: 0 30px 80px rgba(0, 0, 0, 0.6);
             border: 2px solid #8b4513;
             transition: all 0.5s ease;
+            overflow: hidden; /* To contain rounded corners */
         }
 
         .container.cold-theme {
@@ -107,11 +108,12 @@
             color: #b0e0e6;
         }
 
+        /* --- گۆڕانکاری بۆ مینیوی پۆلەکان --- */
         .category-nav {
             display: flex;
-            justify-content: center;
+            justify-content: center; /* Will center on desktop if it fits */
+            flex-wrap: wrap; /* Allows wrapping on desktop if needed */
             gap: 15px;
-            flex-wrap: wrap;
             padding: 30px 20px;
             position: sticky;
             top: 0;
@@ -136,6 +138,7 @@
             border-radius: 0;
             letter-spacing: 1px;
             font-family: 'Georgia', serif;
+            flex-shrink: 0; /* Prevents buttons from shrinking */
         }
 
         .cold-theme .category-btn {
@@ -247,9 +250,11 @@
             background: linear-gradient(90deg, transparent, #87ceeb, transparent);
         }
 
+        /* --- گۆڕانکاری بۆ گرید --- */
         .items-grid {
             display: grid;
-            grid-template-columns: repeat(auto-fit, minmax(450px, 1fr));
+            /* Updated for better responsiveness */
+            grid-template-columns: repeat(auto-fit, minmax(350px, 1fr));
             gap: 40px;
             max-width: 1200px;
             margin: 0 auto;
@@ -415,6 +420,7 @@
             border-top: 3px solid #d4a574;
             color: #c9a882;
             transition: all 0.5s ease;
+            /* No border-radius here, will be clipped by container */
         }
 
         .cold-theme footer {
@@ -495,13 +501,25 @@
             margin-top: 20px;
         }
 
-        @media (max-width: 1024px) {
+        /* --- لابردنی ئەم یاسایە چونکە .items-grid نوێکراوەتەوە --- */
+        /* @media (max-width: 1024px) {
             .items-grid {
                 grid-template-columns: 1fr;
             }
-        }
+        } */
 
         @media (max-width: 768px) {
+            body {
+                padding: 0; /* Full width on mobile */
+            }
+
+            .container {
+                margin: 0;
+                border-radius: 0;
+                border: none;
+                box-shadow: none;
+            }
+
             h1 {
                 font-size: 2.5em;
             }
@@ -518,9 +536,13 @@
                 padding: 40px 20px;
             }
 
-            .menu-item {
-                flex-direction: row;
-                padding: 20px;
+            /* --- ستایلی نوێ بۆ مینیوی پۆلەکان لەسەر مۆبایل --- */
+            .category-nav {
+                flex-wrap: nowrap; /* Prevents wrapping */
+                overflow-x: auto; /* Enables horizontal scroll */
+                justify-content: flex-start; /* Aligns to the right (due to RTL) */
+                padding: 20px 15px; /* Smaller padding */
+                gap: 10px;
             }
 
             .item-header {
@@ -546,11 +568,6 @@
                 font-size: 0.95em;
             }
 
-            .category-nav {
-                padding: 20px 10px;
-                gap: 10px;
-            }
-
             .category-btn {
                 padding: 10px 18px;
                 font-size: 1em;
@@ -571,7 +588,7 @@
 
         @media (max-width: 480px) {
             h1 {
-                font-size: 2em;
+                font-size: 2.2em; /* Slightly larger */
                 letter-spacing: 2px;
             }
 
@@ -579,22 +596,28 @@
                 font-size: 1em;
             }
 
+            .menu-content {
+                padding: 30px 15px;
+            }
+
             .items-grid {
-                gap: 20px;
+                gap: 15px; /* Smaller gap */
             }
 
             .menu-item {
                 flex-direction: column;
                 text-align: center;
+                gap: 15px; /* Smaller gap for stacked items */
+                padding: 20px;
             }
 
             .item-image {
-                width: 100px;
-                height: 100px;
+                width: 80px; /* Smaller image when stacked */
+                height: 80px;
             }
 
             .item-header {
-                align-items: center;
+                align-items: center; /* Center header when stacked */
             }
 
             .category-btn {
@@ -619,8 +642,8 @@
 
     <div class="container" id="mainContainer">
         <header>
-            <h1>مینۆی خواردنو خواردنە وەکانمان  </h1>
-            <p class="subtitle">بەخێرهاتنی میوانەبەڕێزەکانمان داکەین   </p>
+            <h1>پاشافروتی کــافــێ</h1>
+            <p class="subtitle">تامی ئاسایشی ڕاستەقینە</p>
         </header>
 
         <div class="category-nav">
@@ -640,7 +663,7 @@
                 </div>
                 <div class="items-grid">
                     <div class="menu-item">
-                        <img src="https://i.ibb.co/Y72mDxH3/m1.png" alt="محەلەبی گەرم" class="item-image">
+                        <img src="https://i.ibb.co/Y72mDxH3/m1.png" alt="محەلەبی گەرم" class="item-image" onerror="this.src='https://placehold.co/120x120/5d4037/f5f5dc?text=وێنە'; this.onerror=null;">
                         <div class="item-info">
                             <div class="item-header">
                                 <h3 class="item-name">محەلەبی گەرم</h3>
@@ -650,7 +673,7 @@
                     </div>
 
                     <div class="menu-item">
-                        <img src="https://i.ibb.co/DPG04BDH/k1-387Z.png" alt="کاستەری گەرم" class="item-image">
+                        <img src="https://i.ibb.co/DPG04BDH/k1-387Z.png" alt="کاستەری گەرم" class="item-image" onerror="this.src='https://placehold.co/120x120/5d4037/f5f5dc?text=وێنە'; this.onerror=null;">
                         <div class="item-info">
                             <div class="item-header">
                                 <h3 class="item-name">کاستەری گەرم</h3>
@@ -660,7 +683,7 @@
                     </div>
 
                     <div class="menu-item">
-                        <img src="https://i.ibb.co/RkhK7ZDX/q1-111Z.png" alt="قاوەی ئێسپرێسۆ" class="item-image">
+                        <img src="https://i.ibb.co/RkhK7ZDX/q1-111Z.png" alt="قاوەی ئێسپرێسۆ" class="item-image" onerror="this.src='https://placehold.co/120x120/5d4037/f5f5dc?text=وێنە'; this.onerror=null;">
                         <div class="item-info">
                             <div class="item-header">
                                 <h3 class="item-name">قاوەی ئێسپرێسۆ</h3>
@@ -670,17 +693,17 @@
                     </div>
 
                     <div class="menu-item">
-                        <img src="https://images.unsplash.com/photo-1517487881594-2787fef5ebf7?w=300&h=300&fit=crop" alt="کافێ مۆکا" class="item-image">
+                        <img src="https://images.unsplash.com/photo-1517487881594-2787fef5ebf7?w=300&h=300&fit=crop" alt="کافێ مۆکا" class="item-image" onerror="this.src='https://placehold.co/120x120/5d4037/f5f5dc?text=وێنە'; this.onerror=null;">
                         <div class="item-info">
                             <div class="item-header">
                                 <h3 class="item-name">کافێ مۆکا</h3>
-                                <span class="item-price">2,500 د.ع</span>
+                                <span class="item-price">4,500 د.ع</span>
                             </div>
                         </div>
                     </div>
 
                     <div class="menu-item">
-                        <img src="https://images.unsplash.com/photo-1485808191679-5f86510681a2?w=300&h=300&fit=crop" alt="قاوەی تورکی" class="item-image">
+                        <img src="https://images.unsplash.com/photo-1485808191679-5f86510681a2?w=300&h=300&fit=crop" alt="قاوەی تورکی" class="item-image" onerror="this.src='https://placehold.co/120x120/5d4037/f5f5dc?text=وێنە'; this.onerror=null;">
                         <div class="item-info">
                             <div class="item-header">
                                 <h3 class="item-name">قاوەی تورکی</h3>
@@ -690,7 +713,7 @@
                     </div>
 
                     <div class="menu-item">
-                        <img src="https://i.ibb.co/S7tq2y6r/a1-222Z.png" alt="ئەمریکانۆ" class="item-image">
+                        <img src="https://i.ibb.co/S7tq2y6r/a1-222Z.png" alt="ئەمریکانۆ" class="item-image" onerror="this.src='https://placehold.co/120x120/5d4037/f5f5dc?text=وێنە'; this.onerror=null;">
                         <div class="item-info">
                             <div class="item-header">
                                 <h3 class="item-name">ئەمریکانۆ</h3>
@@ -700,7 +723,7 @@
                     </div>
                     
                     <div class="menu-item">
-                        <img src="https://i.ibb.co/pBLgdX8d/h1-831Z.png" alt="هۆت چوکولێت" class="item-image">
+                        <img src="https://i.ibb.co/pBLgdX8d/h1-831Z.png" alt="هۆت چوکولێت" class="item-image" onerror="this.src='https://placehold.co/120x120/5d4037/f5f5dc?text=وێنە'; this.onerror=null;">
                         <div class="item-info">
                             <div class="item-header">
                                 <h3 class="item-name">هۆت چوکولێت</h3>
@@ -710,17 +733,17 @@
                     </div>
 
                     <div class="menu-item">
-                        <img src="https://i.ibb.co/NgpL8YGV/q2-651Z.png" alt="قاوەی قەزوان" class="item-image">
+                        <img src="https://i.ibb.co/NgpL8YGV/q2-651Z.png" alt="قاوەی قەزوان" class="item-image" onerror="this.src='https://placehold.co/120x120/5d4037/f5f5dc?text=وێنە'; this.onerror=null;">
                         <div class="item-info">
                             <div class="item-header">
                                 <h3 class="item-name">قاوەی قەزوان</h3>
                                 <span class="item-price">1,500 د.ع</span>
                             </div>
-                        </div> 
+                        </div>  
                     </div>
                     
                     <div class="menu-item">
-                        <img src="https://i.ibb.co/n80ntPmN/k2-590Z.png" alt="کاپوچینۆ" class="item-image">
+                        <img src="https://i.ibb.co/n80ntPmN/k2-590Z.png" alt="کاپوچینۆ" class="item-image" onerror="this.src='https://placehold.co/120x120/5d4037/f5f5dc?text=وێنە'; this.onerror=null;">
                         <div class="item-info">
                             <div class="item-header">
                                 <h3 class="item-name">کاپوچینۆ</h3>
@@ -730,7 +753,7 @@
                     </div>
                     
                     <div class="menu-item">
-                        <img src="https://i.ibb.co/pr6BNtyh/k3-079Z.png" alt="کافێ لاتێ" class="item-image">
+                        <img src="https://i.ibb.co/pr6BNtyh/k3-079Z.png" alt="کافێ لاتێ" class="item-image" onerror="this.src='https://placehold.co/120x120/5d4037/f5f5dc?text=وێنە'; this.onerror=null;">
                         <div class="item-info">
                             <div class="item-header">
                                 <h3 class="item-name">کافێ لاتێ</h3>
@@ -740,7 +763,7 @@
                     </div>
 
                     <div class="menu-item">
-                        <img src="https://i.ibb.co/gbb2tHs4/m2-631Z.png" alt="مۆکا" class="item-image">
+                        <img src="https://i.ibb.co/gbb2tHs4/m2-631Z.png" alt="مۆکا" class="item-image" onerror="this.src='https://placehold.co/120x120/5d4037/f5f5dc?text=وێنە'; this.onerror=null;">
                         <div class="item-info">
                             <div class="item-header">
                                 <h3 class="item-name">مۆکا</h3>
@@ -750,7 +773,7 @@
                     </div>
 
                     <div class="menu-item">
-                        <img src="https://i.ibb.co/NnGCwxxw/m3-695Z.png" alt="ماکیاتۆ" class="item-image">
+                        <img src="https://i.ibb.co/NnGCwxxw/m3-695Z.png" alt="ماکیاتۆ" class="item-image" onerror="this.src='https://placehold.co/120x120/5d4037/f5f5dc?text=وێنە'; this.onerror=null;">
                         <div class="item-info">
                             <div class="item-header">
                                 <h3 class="item-name">ماکیاتۆ</h3>
@@ -760,7 +783,7 @@
                     </div>
                     
                     <div class="menu-item">
-                        <img src="https://i.ibb.co/FqqSTqG0/a2-499Z.png" alt="ئەڤەگاتۆ" class="item-image">
+                        <img src="https://i.ibb.co/FqqSTqG0/a2-499Z.png" alt="ئەڤەگاتۆ" class="item-image" onerror="this.src='https://placehold.co/120x120/5d4037/f5f5dc?text=وێنە'; this.onerror=null;">
                         <div class="item-info">
                             <div class="item-header">
                                 <h3 class="item-name">ئەڤەگاتۆ</h3>
@@ -770,7 +793,7 @@
                     </div>
                     
                     <div class="menu-item">
-                        <img src="https://i.ibb.co/GQTdzqqZ/f1-819Z.png" alt="فراپی یۆنانی" class="item-image">
+                        <img src="https://i.ibb.co/GQTdzqqZ/f1-819Z.png" alt="فراپی یۆنانی" class="item-image" onerror="this.src='https://placehold.co/120x120/5d4037/f5f5dc?text=وێنە'; this.onerror=null;">
                         <div class="item-info">
                             <div class="item-header">
                                 <h3 class="item-name">فراپی یۆنانی</h3>
@@ -789,7 +812,7 @@
                 </div>
                 <div class="items-grid">
                     <div class="menu-item" data-category="iced-coffee">
-                        <img src="https://i.ibb.co/nN5QZf47/sh1-729Z.png" alt="ئایس کافێ" class="item-image">
+                        <img src="https://i.ibb.co/nN5QZf47/sh1-729Z.png" alt="ئایس کافێ" class="item-image" onerror="this.src='https://placehold.co/120x120/5d4037/f5f5dc?text=وێنە'; this.onerror=null;">
                         <div class="item-info">
                             <div class="item-header">
                                 <h3 class="item-name">بەشی  شەربەتی فرێسی</h3>
@@ -798,7 +821,7 @@
                     </div>
 
                     <div class="menu-item" data-category="frappe">
-                        <img src="https://i.ibb.co/WpDzLwZD/sh2-040Z.png" alt="فراپێ" class="item-image">
+                        <img src="https://i.ibb.co/WpDzLwZD/sh2-040Z.png" alt="فراپێ" class="item-image" onerror="this.src='https://placehold.co/120x120/5d4037/f5f5dc?text=وێنە'; this.onerror=null;">
                         <div class="item-info">
                             <div class="item-header">
                                 <h3 class="item-name">بەشی   شەربەتی فرێش شەیک</h3>
@@ -807,7 +830,7 @@
                     </div>
 
                     <div class="menu-item" data-category="iced-latte">
-                        <img src="https://i.ibb.co/BSNY4mF/mk1-468Z.png" alt="لاتێی سارد" class="item-image">
+                        <img src="https://i.ibb.co/BSNY4mF/mk1-468Z.png" alt="لاتێی سارد" class="item-image" onerror="this.src='https://placehold.co/120x120/5d4037/f5f5dc?text=وێنە'; this.onerror=null;">
                         <div class="item-info">
                             <div class="item-header">
                                 <h3 class="item-name">بەشی  مۆکتێل</h3>
@@ -816,7 +839,7 @@
                     </div>
 
                     <div class="menu-item" data-category="cold-brew">
-                        <img src="https://i.ibb.co/MDfwGbNR/shm-990Z.png" alt="کۆڵد برو" class="item-image">
+                        <img src="https://i.ibb.co/MDfwGbNR/shm-990Z.png" alt="کۆڵد برو" class="item-image" onerror="this.src='https://placehold.co/120x120/5d4037/f5f5dc?text=وێنە'; this.onerror=null;">
                         <div class="item-info">
                             <div class="item-header">
                                 <h3 class="item-name">بەشی   شیرمۆزەکان</h3>
@@ -825,7 +848,7 @@
                     </div>
                     
                     <div class="menu-item" data-category="special">
-                        <img src="https://i.ibb.co/wZWgjdJc/as1-264Z.png" alt="ئایس ئەمریکانۆ" class="item-image">
+                        <img src="https://i.ibb.co/wZWgjdJc/as1-264Z.png" alt="ئایس ئەمریکانۆ" class="item-image" onerror="this.src='https://placehold.co/120x120/5d4037/f5f5dc?text=وێنە'; this.onerror=null;">
                         <div class="item-info">
                             <div class="item-header">
                                 <h3 class="item-name">بەشی  ئایسکرێمەکان</h3>
@@ -839,7 +862,7 @@
                     <h3 class="food-category-title"> بەشی شەربەتەفرێشەکان </h3>
                     <div class="items-grid">
                         <div class="menu-item">
-                            <img src="https://i.ibb.co/HLdqmnNt/pq-518Z.png" alt="کێکی قاوە" class="item-image">
+                            <img src="https://i.ibb.co/HLdqmnNt/pq-518Z.png" alt="کێکی قاوە" class="item-image" onerror="this.src='https://placehold.co/120x120/5d4037/f5f5dc?text=وێنە'; this.onerror=null;">
                             <div class="item-info">
                                 <div class="item-header">
                                     <h3 class="item-name"> پرتەقاڵی فرێش</h3>
@@ -848,7 +871,7 @@
                             </div>
                         </div>
                         <div class="menu-item">
-                            <img src="https://i.ibb.co/hR0xkfXP/shs-492Z.png" alt="کوکی قاوە" class="item-image">
+                            <img src="https://i.ibb.co/hR0xkfXP/shs-492Z.png" alt="کوکی قاوە" class="item-image" onerror="this.src='https://placehold.co/120x120/5d4037/f5f5dc?text=وێنە'; this.onerror=null;">
                             <div class="item-info">
                                 <div class="item-header">
                                     <h3 class="item-name"> سێوی سەوز</h3>
@@ -857,7 +880,7 @@
                             </div>
                         </div>
                          <div class="menu-item">
-                            <img src="https://i.ibb.co/vxQp7v4v/g-019Z.png" alt="کوکی قاوە" class="item-image">
+                            <img src="https://i.ibb.co/vxQp7v4v/g-019Z.png" alt="کوکی قاوە" class="item-image" onerror="this.src='https://placehold.co/120x120/5d4037/f5f5dc?text=وێنە'; this.onerror=null;">
                             <div class="item-info">
                                 <div class="item-header">
                                     <h3 class="item-name">  گێزەر</h3>
@@ -866,7 +889,7 @@
                             </div>
                         </div>
                            <div class="menu-item">
-                            <img src="https://i.ibb.co/9kDcXr8V/sn-299Z.png" alt="کوکی قاوە" class="item-image">
+                            <img src="https://i.ibb.co/9kDcXr8V/sn-299Z.png" alt="کوکی قاوە" class="item-image" onerror="this.src='https://placehold.co/120x120/5d4037/f5f5dc?text=وێنە'; this.onerror=null;">
                             <div class="item-info">
                                 <div class="item-header">
                                     <h3 class="item-name">  سندی</h3>
@@ -875,7 +898,7 @@
                             </div>
                         </div>
                         <div class="menu-item">
-                            <img src="https://i.ibb.co/zHm38grF/ha-630Z.png" alt="کوکی قاوە" class="item-image">
+                            <img src="https://i.ibb.co/zHm38grF/ha-630Z.png" alt="کوکی قاوە" class="item-image" onerror="this.src='https://placehold.co/120x120/5d4037/f5f5dc?text=وێنە'; this.onerror=null;">
                             <div class="item-info">
                                 <div class="item-header">
                                     <h3 class="item-name"> هەنار </h3>
@@ -884,7 +907,7 @@
                             </div>
                         </div>
                         <div class="menu-item">
-                            <img src="https://i.ibb.co/twgTCqVV/za-582Z.png" alt="کوکی قاوە" class="item-image">
+                            <img src="https://i.ibb.co/twgTCqVV/za-582Z.png" alt="کوکی قاوە" class="item-image" onerror="this.src='https://placehold.co/120x120/5d4037/f5f5dc?text=وێنە'; this.onerror=null;">
                             <div class="item-info">
                                 <div class="item-header">
                                     <h3 class="item-name"> زەنجەفیل </h3>
@@ -893,7 +916,7 @@
                             </div>
                         </div>
                         <div class="menu-item">
-                            <img src="https://i.ibb.co/WvYnhCvP/ka-713Z.png" alt="کوکی قاوە" class="item-image">
+                            <img src="https://i.ibb.co/WvYnhCvP/ka-713Z.png" alt="کوکی قاوە" class="item-image" onerror="this.src='https://placehold.co/120x120/5d4037/f5f5dc?text=وێنە'; this.onerror=null;">
                             <div class="item-info">
                                 <div class="item-header">
                                     <h3 class="item-name"> کاڵەک </h3>
@@ -902,7 +925,7 @@
                             </div>
                         </div>
                         <div class="menu-item">
-                            <img src="https://i.ibb.co/WpGSsLHZ/le-471Z.png" alt="کوکی قاوە" class="item-image">
+                            <img src="https://i.ibb.co/WpGSsLHZ/le-471Z.png" alt="کوکی قاوە" class="item-image" onerror="this.src='https://placehold.co/120x120/5d4037/f5f5dc?text=وێنە'; this.onerror=null;">
                             <div class="item-info">
                                 <div class="item-header">
                                     <h3 class="item-name"> لیمۆ </h3>
@@ -911,7 +934,7 @@
                             </div>
                         </div>
                         <div class="menu-item">
-                            <img src="https://i.ibb.co/cXSNJZBV/han-113Z.png" alt="کوکی قاوە" class="item-image">
+                            <img src="https://i.ibb.co/cXSNJZBV/han-113Z.png" alt="کوکی قاوە" class="item-image" onerror="this.src='https://placehold.co/120x120/5d4037/f5f5dc?text=وێنە'; this.onerror=null;">
                             <div class="item-info">
                                 <div class="item-header">
                                     <h3 class="item-name"> هەنجیر </h3>
@@ -920,7 +943,7 @@
                             </div>
                         </div>
                         <div class="menu-item">
-                            <img src="https://i.ibb.co/nqyzcvD0/qo-164Z.png" alt="کوکی قاوە" class="item-image">
+                            <img src="https://i.ibb.co/nqyzcvD0/qo-164Z.png" alt="کوکی قاوە" class="item-image" onerror="this.src='https://placehold.co/120x120/5d4037/f5f5dc?text=وێنە'; this.onerror=null;">
                             <div class="item-info">
                                 <div class="item-header">
                                     <h3 class="item-name"> قۆخ </h3>
@@ -929,7 +952,7 @@
                             </div>
                         </div>
                         <div class="menu-item">
-                            <img src="https://i.ibb.co/QFfpSv1T/shl-335Z.png" alt="کوکی قاوە" class="item-image">
+                            <img src="https://i.ibb.co/QFfpSv1T/shl-335Z.png" alt="کوکی قاوە" class="item-image" onerror="this.src='https://placehold.co/120x120/5d4037/f5f5dc?text=وێنە'; this.onerror=null;">
                             <div class="item-info">
                                 <div class="item-header">
                                     <h3 class="item-name"> شلک </h3>
@@ -938,7 +961,7 @@
                             </div>
                         </div>
                         <div class="menu-item">
-                            <img src="https://i.ibb.co/yFzGggXn/an-596Z.png" alt="کوکی قاوە" class="item-image">
+                            <img src="https://i.ibb.co/yFzGggXn/an-596Z.png" alt="کوکی قاوە" class="item-image" onerror="this.src='https://placehold.co/120x120/5d4037/f5f5dc?text=وێنە'; this.onerror=null;">
                             <div class="item-info">
                                 <div class="item-header">
                                     <h3 class="item-name"> ئەناناس </h3>
@@ -947,7 +970,7 @@
                             </div>
                         </div>
                         <div class="menu-item">
-                            <img src="https://i.ibb.co/r25TNK5r/ko-027Z.png" alt="کوکی قاوە" class="item-image">
+                            <img src="https://i.ibb.co/r25TNK5r/ko-027Z.png" alt="کوکی قاوە" class="item-image" onerror="this.src='https://placehold.co/120x120/5d4037/f5f5dc?text=وێنە'; this.onerror=null;">
                             <div class="item-info">
                                 <div class="item-header">
                                     <h3 class="item-name"> کۆکتێلی میوەکان </h3>
@@ -956,7 +979,7 @@
                             </div>
                         </div>
                         <div class="menu-item">
-                            <img src="https://i.ibb.co/03Z2sw9/ma-071Z.png" alt="کوکی قاوە" class="item-image">
+                            <img src="https://i.ibb.co/03Z2sw9/ma-071Z.png" alt="کوکی قاوە" class="item-image" onerror="this.src='https://placehold.co/120x120/5d4037/f5f5dc?text=وێنە'; this.onerror=null;">
                             <div class="item-info">
                                 <div class="item-header">
                                     <h3 class="item-name"> مانگۆ </h3>
@@ -965,7 +988,7 @@
                             </div>
                         </div>
                         <div class="menu-item">
-                            <img src="https://i.ibb.co/Gv2P7n2t/av-417Z.png" alt="کوکی قاوە" class="item-image">
+                            <img src="https://i.ibb.co/Gv2P7n2t/av-417Z.png" alt="کوکی قاوە" class="item-image" onerror="this.src='https://placehold.co/120x120/5d4037/f5f5dc?text=وێنە'; this.onerror=null;">
                             <div class="item-info">
                                 <div class="item-header">
                                     <h3 class="item-name"> ئەڤۆگادۆ </h3>
@@ -981,7 +1004,7 @@
                     <h3 class="food-category-title"> بەشی شەربەتی فرێسی شەیک</h3>
                     <div class="items-grid">
                         <div class="menu-item">
-                            <img src="https://i.ibb.co/9HKnrRBq/ml-482Z.png" alt="کرواسان" class="item-image">
+                            <img src="https://i.ibb.co/9HKnrRBq/ml-482Z.png" alt="کرواسان" class="item-image" onerror="this.src='https://placehold.co/120x120/5d4037/f5f5dc?text=وێنە'; this.onerror=null;">
                             <div class="item-info">
                                 <div class="item-header">
                                     <h3 class="item-name">میڵک شەیکی سادە</h3>
@@ -990,7 +1013,7 @@
                             </div>
                         </div>
                         <div class="menu-item">
-                            <img src="https://i.ibb.co/C38C33bg/no-767Z.png" alt="دۆنات" class="item-image">
+                            <img src="https://i.ibb.co/C38C33bg/no-767Z.png" alt="دۆنات" class="item-image" onerror="this.src='https://placehold.co/120x120/5d4037/f5f5dc?text=وێنە'; this.onerror=null;">
                             <div class="item-info">
                                 <div class="item-header">
                                     <h3 class="item-name">نۆتێلاشەیک</h3>
@@ -999,7 +1022,7 @@
                             </div>
                         </div>
                         <div class="menu-item">
-                            <img src="https://i.ibb.co/MxGTVThT/fs-924Z.png" alt="دۆنات" class="item-image">
+                            <img src="https://i.ibb.co/MxGTVThT/fs-924Z.png" alt="دۆنات" class="item-image" onerror="this.src='https://placehold.co/120x120/5d4037/f5f5dc?text=وێنە'; this.onerror=null;">
                             <div class="item-info">
                                 <div class="item-header">
                                     <h3 class="item-name">فستق شەیک</h3>
@@ -1008,7 +1031,7 @@
                             </div>
                         </div>
                          <div class="menu-item">
-                            <img src="https://i.ibb.co/VYYrkXrj/kr-751Z.png" alt="دۆنات" class="item-image">
+                            <img src="https://i.ibb.co/VYYrkXrj/kr-751Z.png" alt="دۆنات" class="item-image" onerror="this.src='https://placehold.co/120x120/5d4037/f5f5dc?text=وێنە'; this.onerror=null;">
                             <div class="item-info">
                                 <div class="item-header">
                                     <h3 class="item-name">کرامێڵ شەیک</h3>
@@ -1017,7 +1040,7 @@
                             </div>
                         </div>
                          <div class="menu-item">
-                            <img src="https://i.ibb.co/kgbPH5QM/ch-038Z.png" alt="دۆنات" class="item-image">
+                            <img src="https://i.ibb.co/kgbPH5QM/ch-038Z.png" alt="دۆنات" class="item-image" onerror="this.src='https://placehold.co/120x120/5d4037/f5f5dc?text=وێنە'; this.onerror=null;">
                             <div class="item-info">
                                 <div class="item-header">
                                     <h3 class="item-name">چوکولێت شەیک</h3>
@@ -1026,7 +1049,7 @@
                             </div>
                         </div>
                          <div class="menu-item">
-                            <img src="https://i.ibb.co/0pwYF337/mlk-814Z.png" alt="دۆنات" class="item-image">
+                            <img src="https://i.ibb.co/0pwYF337/mlk-814Z.png" alt="دۆنات" class="item-image" onerror="this.src='https://placehold.co/120x120/5d4037/f5f5dc?text=وێنە'; this.onerror=null;">
                             <div class="item-info">
                                 <div class="item-header">
                                     <h3 class="item-name">میڵک شەیکی تایبەت</h3>
@@ -1034,7 +1057,7 @@
                                 </div>
                             </div>
                         </div> <div class="menu-item">
-                            <img src="https://i.ibb.co/20ZT7ZbY/sp-204Z.png" alt="دۆنات" class="item-image">
+                            <img src="https://i.ibb.co/20ZT7ZbY/sp-204Z.png" alt="دۆنات" class="item-image" onerror="this.src='https://placehold.co/120x120/5d4037/f5f5dc?text=وێنە'; this.onerror=null;">
                             <div class="item-info">
                                 <div class="item-header">
                                     <h3 class="item-name">سپێشڵ نۆتێلا شەیک</h3>
@@ -1049,7 +1072,7 @@
                     <h3 class="food-category-title"> بەشی خواردنەوە مۆکتێلەکان </h3>
                     <div class="items-grid">
                         <div class="menu-item">
-                            <img src="https://i.ibb.co/XZkrz36F/tgg.png" alt="چیزکێک" class="item-image">
+                            <img src="https://i.ibb.co/XZkrz36F/tgg.png" alt="چیزکێک" class="item-image" onerror="this.src='https://placehold.co/120x120/5d4037/f5f5dc?text=وێنە'; this.onerror=null;">
                             <div class="item-info">
                                 <div class="item-header">
                                     <h3 class="item-name">تایگەر مەکسیکی</h3>
@@ -1058,7 +1081,7 @@
                             </div>
                         </div>
                         <div class="menu-item">
-                            <img src="https://i.ibb.co/HTDbgz9V/tgh-179Z.png" alt="مافین" class="item-image">
+                            <img src="https://i.ibb.co/HTDbgz9V/tgh-179Z.png" alt="مافین" class="item-image" onerror="this.src='https://placehold.co/120x120/5d4037/f5f5dc?text=وێنە'; this.onerror=null;">
                             <div class="item-info">
                                 <div class="item-header">
                                     <h3 class="item-name"> تایگەرمەکسیکی هەنار</h3>
@@ -1067,7 +1090,7 @@
                             </div>
                         </div>
                           <div class="menu-item">
-                            <img src="https://i.ibb.co/xtvNxvkc/tgb-394Z.png" alt="مافین" class="item-image">
+                            <img src="https://i.ibb.co/xtvNxvkc/tgb-394Z.png" alt="مافین" class="item-image" onerror="this.src='https://placehold.co/120x120/5d4037/f5f5dc?text=وێنە'; this.onerror=null;">
                             <div class="item-info">
                                 <div class="item-header">
                                     <h3 class="item-name"> بلو تایگەر مەکسیکی</h3>
@@ -1076,7 +1099,7 @@
                             </div>
                         </div>
                           <div class="menu-item">
-                            <img src="https://i.ibb.co/xrvGRW9/gsh-777Z.png" alt="مافین" class="item-image">
+                            <img src="https://i.ibb.co/xrvGRW9/gsh-777Z.png" alt="مافین" class="item-image" onerror="this.src='https://placehold.co/120x120/5d4037/f5f5dc?text=وێنە'; this.onerror=null;">
                             <div class="item-info">
                                 <div class="item-header">
                                     <h3 class="item-name"> شەربەتە شینەکە بلوکۆراسۆ</h3>
@@ -1085,7 +1108,7 @@
                             </div>
                         </div>
                           <div class="menu-item">
-                            <img src="https://i.ibb.co/V0VyQbCP/mo-334Z.png" alt="مافین" class="item-image">
+                            <img src="https://i.ibb.co/V0VyQbCP/mo-334Z.png" alt="مافین" class="item-image" onerror="this.src='https://placehold.co/120x120/5d4037/f5f5dc?text=وێنە'; this.onerror=null;">
                             <div class="item-info">
                                 <div class="item-header">
                                     <h3 class="item-name"> مۆهیتۆ</h3>
@@ -1094,7 +1117,7 @@
                             </div>
                         </div>
                           <div class="menu-item">
-                            <img src="https://i.ibb.co/C3kdzV8j/moc-764Z.png" alt="مافین" class="item-image">
+                            <img src="https://i.ibb.co/C3kdzV8j/moc-764Z.png" alt="مافین" class="item-image" onerror="this.src='https://placehold.co/120x120/5d4037/f5f5dc?text=وێنە'; this.onerror=null;">
                             <div class="item-info">
                                 <div class="item-header">
                                     <h3 class="item-name"> مۆکتێلی چێری</h3>
@@ -1103,7 +1126,7 @@
                             </div>
                         </div>
                           <div class="menu-item">
-                            <img src="https://i.ibb.co/k6rg7Ny5/mox-825Z.png" alt="مافین" class="item-image">
+                            <img src="https://i.ibb.co/k6rg7Ny5/mox-825Z.png" alt="مافین" class="item-image" onerror="this.src='https://placehold.co/120x120/5d4037/f5f5dc?text=وێنە'; this.onerror=null;">
                             <div class="item-info">
                                 <div class="item-header">
                                     <h3 class="item-name"> نۆکتێلی قۆخ</h3>
@@ -1112,7 +1135,7 @@
                             </div>
                         </div>
                           <div class="menu-item">
-                            <img src="https://i.ibb.co/FLn93fy6/tm-883Z.png" alt="مافین" class="item-image">
+                            <img src="https://i.ibb.co/FLn93fy6/tm-883Z.png" alt="مافین" class="item-image" onerror="this.src='https://placehold.co/120x120/5d4037/f5f5dc?text=وێنە'; this.onerror=null;">
                             <div class="item-info">
                                 <div class="item-header">
                                     <h3 class="item-name"> مۆکتێلی تەمەرهندی</h3>
@@ -1121,7 +1144,7 @@
                             </div>
                         </div>
                           <div class="menu-item">
-                            <img src="https://i.ibb.co/zhw6zLXb/bl-780Z.png" alt="مافین" class="item-image">
+                            <img src="https://i.ibb.co/zhw6zLXb/bl-780Z.png" alt="مافین" class="item-image" onerror="this.src='https://placehold.co/120x120/5d4037/f5f5dc?text=وێنە'; this.onerror=null;">
                             <div class="item-info">
                                 <div class="item-header">
                                     <h3 class="item-name"> مۆکتێلی بلاک فلاوەر</h3>
@@ -1130,7 +1153,7 @@
                             </div>
                         </div>
                           <div class="menu-item">
-                            <img src="https://i.ibb.co/YBK1Pjhd/blw-900Z.png" alt="مافین" class="item-image">
+                            <img src="https://i.ibb.co/YBK1Pjhd/blw-900Z.png" alt="مافین" class="item-image" onerror="this.src='https://placehold.co/120x120/5d4037/f5f5dc?text=وێنە'; this.onerror=null;">
                             <div class="item-info">
                                 <div class="item-header">
                                     <h3 class="item-name"> مۆکتێلی بلوهاوای</h3>
@@ -1138,8 +1161,8 @@
                                 </div>
                             </div>
                         </div>
-                        <div class="menu-item">
-                            <img src="https://i.ibb.co/nKg68KL/ta-896Z.png" alt="مافین" class="item-image">
+                         <div class="menu-item">
+                            <img src="https://i.ibb.co/nKg68KL/ta-896Z.png" alt="مافین" class="item-image" onerror="this.src='https://placehold.co/120x120/5d4037/f5f5dc?text=وێنە'; this.onerror=null;">
                             <div class="item-info">
                                 <div class="item-header">
                                     <h3 class="item-name"> مۆکتێلی تایبەت</h3>
@@ -1154,7 +1177,7 @@
                     <h3 class="food-category-title"> بەشی شیر مۆزەکان </h3>
                     <div class="items-grid">
                         <div class="menu-item">
-                            <img src="https://i.ibb.co/nq8hTKNT/she-927Z.png" alt="سەندویچ" class="item-image">
+                            <img src="https://i.ibb.co/nq8hTKNT/she-927Z.png" alt="سەندویچ" class="item-image" onerror="this.src='https://placehold.co/120x120/5d4037/f5f5dc?text=وێنە'; this.onerror=null;">
                             <div class="item-info">
                                 <div class="item-header">
                                     <h3 class="item-name">شیرمۆزی سادە</h3>
@@ -1163,7 +1186,7 @@
                             </div>
                         </div>
                         <div class="menu-item">
-                            <img src="https://i.ibb.co/1tfQc3SY/shx-044Z.png" alt="سلاد" class="item-image">
+                            <img src="https://i.ibb.co/1tfQc3SY/shx-044Z.png" alt="سلاد" class="item-image" onerror="this.src='https://placehold.co/120x120/5d4037/f5f5dc?text=وێنە'; this.onerror=null;">
                             <div class="item-info">
                                 <div class="item-header">
                                     <h3 class="item-name">شیر خورما</h3>
@@ -1172,7 +1195,7 @@
                             </div>
                         </div>
                         <div class="menu-item">
-                            <img src="https://i.ibb.co/zTbS8b7T/shk-620Z.png" alt="سلاد" class="item-image">
+                            <img src="https://i.ibb.co/zTbS8b7T/shk-620Z.png" alt="سلاد" class="item-image" onerror="this.src='https://placehold.co/120x120/5d4037/f5f5dc?text=وێنە'; this.onerror=null;">
                             <div class="item-info">
                                 <div class="item-header">
                                     <h3 class="item-name">شیر کاڵەک</h3>
@@ -1181,7 +1204,7 @@
                             </div>
                         </div>
                         <div class="menu-item">
-                            <img src="https://i.ibb.co/0d3btsG/sho-060Z.png" alt="سلاد" class="item-image">
+                            <img src="https://i.ibb.co/0d3btsG/sho-060Z.png" alt="سلاد" class="item-image" onerror="this.src='https://placehold.co/120x120/5d4037/f5f5dc?text=وێنە'; this.onerror=null;">
                             <div class="item-info">
                                 <div class="item-header">
                                     <h3 class="item-name">شۆفان </h3>
@@ -1190,7 +1213,7 @@
                             </div>
                         </div>
                         <div class="menu-item">
-                            <img src="https://i.ibb.co/dwdGHjNg/shh-553Z.png" alt="سلاد" class="item-image">
+                            <img src="https://i.ibb.co/dwdGHjNg/shh-553Z.png" alt="سلاد" class="item-image" onerror="this.src='https://placehold.co/120x120/5d4037/f5f5dc?text=وێنە'; this.onerror=null;">
                             <div class="item-info">
                                 <div class="item-header">
                                     <h3 class="item-name">شیر هەنجیر </h3>
@@ -1199,7 +1222,7 @@
                             </div>
                         </div>
                         <div class="menu-item">
-                            <img src="https://i.ibb.co/rfQZdr5g/shf-878Z.png" alt="سلاد" class="item-image">
+                            <img src="https://i.ibb.co/rfQZdr5g/shf-878Z.png" alt="سلاد" class="item-image" onerror="this.src='https://placehold.co/120x120/5d4037/f5f5dc?text=وێنە'; this.onerror=null;">
                             <div class="item-info">
                                 <div class="item-header">
                                     <h3 class="item-name">شیر فستق </h3>
@@ -1208,7 +1231,7 @@
                             </div>
                         </div>
                         <div class="menu-item">
-                            <img src="https://i.ibb.co/bq4NZrx/shot-562-Z.png" alt="سلاد" class="item-image">
+                            <img src="https://i.ibb.co/bq4NZrx/shot-562-Z.png" alt="سلاد" class="item-image" onerror="this.src='https://placehold.co/120x120/5d4037/f5f5dc?text=وێنە'; this.onerror=null;">
                             <div class="item-info">
                                 <div class="item-header">
                                     <h3 class="item-name">شیرمۆزی تایبەت </h3>
@@ -1223,17 +1246,17 @@
                     <h3 class="food-category-title">بەشی ئایسکرێمەکان  </h3>
                     <div class="items-grid">
                         <div class="menu-item">
-                            <img src="https://i.ibb.co/v4Tz8xb5/ass-324Z.png alt="براونی" class="item-image">
+                            <img src="https://i.ibb.co/v4Tz8xb5/ass-324Z.png" alt="براونی" class="item-image" onerror="this.src='https://placehold.co/120x120/5d4037/f5f5dc?text=وێنە'; this.onerror=null;">
                             <div class="item-info">
                                 <div class="item-header">
                                     <h3 class="item-name">قاپ ئایسکرێم ٣تام</h3>
                                     <span class="item-price">1,000 د.ع</span>
                                 </div>
-                                <p class="item-description">      تامی ئایشکرێمەکان {شیر،ڤانێلا،جوکولێت،قاوە،کرامێڵ،هەنجیر،لیمۆ،قەیسی،کاڵەک،فستق } </p>
+                                <p class="item-description">    تامی ئایشکرێمەکان {شیر،ڤانێلا،جوکولێت،قاوە،کرامێڵ،هەنجیر،لیمۆ،قەیسی،کاڵەک،فستق } </p>
                             </div>
                         </div>
                         <div class="menu-item">
-                            <img src="https://i.ibb.co/b51G75LD/assm-237-Z.png" alt="تایرامیسو" class="item-image">
+                            <img src="https://i.ibb.co/b51G75LD/assm-237-Z.png" alt="تایرامیسو" class="item-image" onerror="this.src='https://placehold.co/120x120/5d4037/f5f5dc?text=وێنە'; this.onerror=null;">
                             <div class="item-info">
                                 <div class="item-header">
                                     <h3 class="item-name">ئایسکرێم بەمیوە</h3>
@@ -1242,7 +1265,7 @@
                             </div>
                         </div>
                            <div class="menu-item">
-                            <img src="https://i.ibb.co/fdktvZxW/asn-419Z.png" alt="تایرامیسو" class="item-image">
+                            <img src="https://i.ibb.co/fdktvZxW/asn-419Z.png" alt="تایرامیسو" class="item-image" onerror="this.src='https://placehold.co/120x120/5d4037/f5f5dc?text=وێنە'; this.onerror=null;">
                             <div class="item-info">
                                 <div class="item-header">
                                     <h3 class="item-name">ئایسکرێم نۆتێلا</h3>
@@ -1251,7 +1274,7 @@
                             </div>
                         </div>
                            <div class="menu-item">
-                            <img src="https://i.ibb.co/tw8Ysjhp/ast-584Z.png" alt="تایرامیسو" class="item-image">
+                            <img src="https://i.ibb.co/tw8Ysjhp/ast-584Z.png" alt="تایرامیسو" class="item-image" onerror="this.src='https://placehold.co/120x120/5d4037/f5f5dc?text=وێنە'; this.onerror=null;">
                             <div class="item-info">
                                 <div class="item-header">
                                     <h3 class="item-name">ئایسکرێم تایبەت</h3>
@@ -1271,7 +1294,7 @@
                 </div>
                 <div class="items-grid">
                     <div class="menu-item">
-                        <img src="https://i.ibb.co/60B7cKcq/km1-560Z.png" alt="کریپ نۆتێلای مۆز" class="item-image">
+                        <img src="https://i.ibb.co/60B7cKcq/km1-560Z.png" alt="کریپ نۆتێلای مۆز" class="item-image" onerror="this.src='https://placehold.co/120x120/5d4037/f5f5dc?text=وێنە'; this.onerror=null;">
                         <div class="item-info">
                             <div class="item-header">
                                 <h3 class="item-name">کریپ نۆتێلای مۆز</h3>
@@ -1281,7 +1304,7 @@
                     </div>
 
                     <div class="menu-item">
-                        <img src="https://i.ibb.co/FbYJfkK4/km3-718Z.png" alt="کرواسان" class="item-image">
+                        <img src="https://i.ibb.co/FbYJfkK4/km3-718Z.png" alt="کرواسان" class="item-image" onerror="this.src='https://placehold.co/120x120/5d4037/f5f5dc?text=وێنە'; this.onerror=null;">
                         <div class="item-info">
                             <div class="item-header">
                                 <h3 class="item-name">کریپ نۆتێلای پسکیت</h3>
@@ -1291,7 +1314,7 @@
                     </div>
 
                     <div class="menu-item">
-                        <img src="https://i.ibb.co/wvVpVk6/km4-243Z.png" alt="چیزکێک" class="item-image">
+                        <img src="https://i.ibb.co/wvVpVk6/km4-243Z.png" alt="چیزکێک" class="item-image" onerror="this.src='https://placehold.co/120x120/5d4037/f5f5dc?text=وێنە'; this.onerror=null;">
                         <div class="item-info">
                             <div class="item-header">
                                 <h3 class="item-name">کریپ نۆتێلا سەرقاپ</h3>
@@ -1301,7 +1324,7 @@
                     </div>
 
                     <div class="menu-item">
-                        <img src="https://i.ibb.co/bj275kMw/km5-599Z.png" alt="تایرامیسو" class="item-image">
+                        <img src="https://i.ibb.co/bj275kMw/km5-599Z.png" alt="تایرامیسو" class="item-image" onerror="this.src='https://placehold.co/120x120/5d4037/f5f5dc?text=وێنە'; this.onerror=null;">
                         <div class="item-info">
                             <div class="item-header">
                                 <h3 class="item-name">کریپ نۆتێلای مۆزوپسکیت</h3>
@@ -1311,7 +1334,7 @@
                     </div>
 
                     <div class="menu-item">
-                        <img src="https://i.ibb.co/0pwtxHW8/km6-356Z.png" alt="مافین" class="item-image">
+                        <img src="https://i.ibb.co/0pwtxHW8/km6-356Z.png" alt="مافین" class="item-image" onerror="this.src='https://placehold.co/120x120/5d4037/f5f5dc?text=وێنە'; this.onerror=null;">
                         <div class="item-info">
                             <div class="item-header">
                                 <h3 class="item-name">کریپ نۆتێلابەگوێز</h3>
@@ -1321,7 +1344,7 @@
                     </div>
 
                     <div class="menu-item">
-                        <img src="https://i.ibb.co/TqW5FzpD/km7-201Z.png" alt="براونی" class="item-image">
+                        <img src="https://i.ibb.co/TqW5FzpD/km7-201Z.png" alt="براونی" class="item-image" onerror="this.src='https://placehold.co/120x120/5d4037/f5f5dc?text=وێنە'; this.onerror=null;">
                         <div class="item-info">
                             <div class="item-header">
                                 <h3 class="item-name">کریپ نۆتێلاشلک</h3>
@@ -1330,7 +1353,7 @@
                         </div>
                     </div>
                      <div class="menu-item">
-                        <img src="https://i.ibb.co/gZr7wBVs/km8-974Z.png" alt="براونی" class="item-image">
+                        <img src="https://i.ibb.co/gZr7wBVs/km8-974Z.png" alt="براونی" class="item-image" onerror="this.src='https://placehold.co/120x120/5d4037/f5f5dc?text=وێنە'; this.onerror=null;">
                         <div class="item-info">
                             <div class="item-header">
                                 <h3 class="item-name">کریپ نۆتێلافستق</h3>
@@ -1339,7 +1362,7 @@
                         </div>
                     </div>
                      <div class="menu-item">
-                        <img src="https://i.ibb.co/C4njmhC/km9-903Z.png" alt="براونی" class="item-image">
+                        <img src="https://i.ibb.co/C4njmhC/km9-903Z.png" alt="براونی" class="item-image" onerror="this.src='https://placehold.co/120x120/5d4037/f5f5dc?text=وێنە'; this.onerror=null;">
                         <div class="item-info">
                             <div class="item-header">
                                 <h3 class="item-name">کریپ نۆتێلامۆزوفستق</h3>
@@ -1348,7 +1371,7 @@
                         </div>
                     </div>
                      <div class="menu-item">
-                        <img src="https://i.ibb.co/mVwRMrD6/km0-084Z.png" alt="براونی" class="item-image">
+                        <img src="https://i.ibb.co/mVwRMrD6/km0-084Z.png" alt="براونی" class="item-image" onerror="this.src='https://placehold.co/120x120/5d4037/f5f5dc?text=وێنە'; this.onerror=null;">
                         <div class="item-info">
                             <div class="item-header">
                                 <h3 class="item-name">کریپ نۆتێلامشەکەل</h3>
@@ -1357,7 +1380,7 @@
                         </div>
                     </div>
                      <div class="menu-item">
-                        <img src="https://i.ibb.co/Cf1spz0/km01-594-Z.png" alt="براونی" class="item-image">
+                        <img src="https://i.ibb.co/Cf1spz0/km01-594-Z.png" alt="براونی" class="item-image" onerror="this.src='https://placehold.co/120x120/5d4037/f5f5dc?text=وێنە'; this.onerror=null;">
                         <div class="item-info">
                             <div class="item-header">
                                 <h3 class="item-name">کریپ نۆتێلاشاومەیی</h3>
@@ -1366,7 +1389,7 @@
                         </div>
                     </div>
                      <div class="menu-item">
-                        <img src="https://i.ibb.co/LhYGpWv5/km02-870-Z.png" alt="براونی" class="item-image">
+                        <img src="https://i.ibb.co/LhYGpWv5/km02-870-Z.png" alt="براونی" class="item-image" onerror="this.src='https://placehold.co/120x120/5d4037/f5f5dc?text=وێنە'; this.onerror=null;">
                         <div class="item-info">
                             <div class="item-header">
                                 <h3 class="item-name">کریپ نۆتێلای تایبەت</h3>
@@ -1375,7 +1398,7 @@
                         </div>
                     </div>
                      <div class="menu-item">
-                        <img src="https://i.ibb.co/TDqsJg4B/km03-812-Z.png" alt="براونی" class="item-image">
+                        <img src="https://i.ibb.co/TDqsJg4B/km03-812-Z.png" alt="براونی" class="item-image" onerror="this.src='https://placehold.co/120x120/5d4037/f5f5dc?text=وێنە'; this.onerror=null;">
                         <div class="item-info">
                             <div class="item-header">
                                 <h3 class="item-name">پانکێک</h3>
@@ -1394,7 +1417,7 @@
                 </div>
                 <div class="items-grid">
                     <div class="menu-item">
-                        <img src="https://i.ibb.co/Y4sHpVFV/kw-936Z.png" alt="شێک" class="item-image">
+                        <img src="https://i.ibb.co/Y4sHpVFV/kw-936Z.png" alt="شێک" class="item-image" onerror="this.src='https://placehold.co/120x120/5d4037/f5f5dc?text=وێنە'; this.onerror=null;">
                         <div class="item-info">
                             <div class="item-header">
                                 <h3 class="item-name"> کونافەی پەنیر بەئایسکرێم </h3>
@@ -1404,7 +1427,7 @@
                     </div>
 
                     <div class="menu-item">
-                        <img src="https://i.ibb.co/6RdXvCHj/kwf-886Z.png" alt="لیمۆناتە" class="item-image">
+                        <img src="https://i.ibb.co/6RdXvCHj/kwf-886Z.png" alt="لیمۆناتە" class="item-image" onerror="this.src='https://placehold.co/120x120/5d4037/f5f5dc?text=وێنە'; this.onerror=null;">
                         <div class="item-info">
                             <div class="item-header">
                                 <h3 class="item-name"> کونافەی فستق زادەبەئایسکرێم </h3>
@@ -1420,7 +1443,7 @@
                 <div class="coffee-beans">☕ ☕ ☕</div>
                 <p class="footer-info">کاتەکانی کارکردن: ٨:٠٠ بەیانی - ١٢:٠٠ شەو</p>
                 <p class="footer-info">هەموو ڕۆژێک</p>
-                <p style="margin-top: 30px; opacity: 0.7; font-size: 0.9em;">   horaz IT <br>ئامادەی بۆ دروست کردنی هەموو جۆرە سیستەمێکو وێب سایتەک <br>07501784002  </p>
+                <p style="margin-top: 30px; opacity: 0.7; font-size: 0.9em;">  horaz IT <br>ئامادەی بۆ دروست کردنی هەموو جۆرە سیستەمێکو وێب سایتەک <br>07501784002  </p>
             </div>
         </footer>
     </div>
@@ -1438,7 +1461,7 @@
             const mainContainer = document.getElementById('mainContainer');
             
             // سیستەمی بەروار - ڕێکخستنی بەرواری کۆتایی
-            const expirationDate = new Date('2025-11-15'); // بەرواری کۆتایی دلخواز
+            const expirationDate = new Date('2025-12-2'); // بەرواری کۆتایی دلخواز
             
             // تێستکردن بۆ بەرواری کۆتایی
             const currentDate = new Date();
@@ -1535,8 +1558,4 @@
         });
     </script>
 </body>
-
 </html>
-
-
-
