@@ -3,636 +3,156 @@
 <head>
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
-    <title>مینووی کافێ</title>
-    <style>
-        * {
-            margin: 0;
-            padding: 0;
-            box-sizing: border-box;
-        }
+    <title>مینووی کافێ - دیزاینی نوێ</title>
+    <!-- وەشانی CDNـی Tailwind CSS -->
+    <script src="https://cdn.tailwindcss.com"></script>
+    
+    <style type="text/tailwindcss">
+        @tailwind base;
+        @tailwind components;
+        @tailwind utilities;
 
+        /* زیادکردنی فۆنتێکی گونجاو بۆ کوردی - فۆنتی سیستەم بەکاردێنین */
         body {
-            font-family: 'Georgia', serif;
-            background: #1a1410;
-            color: #f5f5dc;
-            min-height: 100vh;
-            padding: 20px;
-            direction: rtl;
-            background-image: 
-                radial-gradient(circle at 20% 50%, rgba(139, 69, 19, 0.1) 0%, transparent 50%),
-                radial-gradient(circle at 80% 80%, rgba(101, 67, 33, 0.1) 0%, transparent 50%);
-            transition: all 0.5s ease;
+            font-family: system-ui, -apple-system, BlinkMacSystemFont, "Segoe UI", Roboto, "Helvetica Neue", Arial, "Noto Sans", sans-serif, "Apple Color Emoji", "Segoe UI Emoji", "Segoe UI Symbol", "Noto Color Emoji";
+            @apply bg-gray-900 text-gray-200 transition-colors duration-500;
         }
 
-        body.cold-theme {
-            background: #0a1f2f;
-            background-image: 
-                radial-gradient(circle at 20% 50%, rgba(32, 156, 238, 0.1) 0%, transparent 50%),
-                radial-gradient(circle at 80% 80%, rgba(32, 156, 238, 0.1) 0%, transparent 50%);
+        /* ستایلی بنەڕەتی (گەرم) */
+        .theme-container {
+            @apply bg-gray-800 shadow-2xl border-4 border-yellow-700 transition-all duration-500;
+        }
+        .theme-header {
+            @apply bg-yellow-900/20 border-b-4 border-yellow-700 transition-all duration-500;
+        }
+        .theme-header-title {
+            @apply text-yellow-400 transition-all duration-500;
+        }
+        .theme-header-subtitle {
+            @apply text-yellow-200 transition-all duration-500;
+        }
+        .theme-nav {
+            @apply bg-gray-800/90 border-b border-gray-700 transition-all duration-500;
+        }
+        .theme-nav-btn {
+            @apply text-yellow-200 bg-yellow-800/50 hover:bg-yellow-800/80 transition-all duration-300;
+        }
+        .theme-nav-btn.active {
+            @apply bg-yellow-400 text-gray-900 font-bold ring-2 ring-yellow-300;
+        }
+        .theme-section-title {
+            @apply text-yellow-400 transition-all duration-500;
+        }
+        .theme-section-divider {
+            @apply bg-yellow-700 transition-all duration-500;
+        }
+        .theme-item-card {
+            @apply bg-gray-900/50 border border-yellow-800 hover:border-yellow-600 hover:shadow-xl transition-all duration-300;
+        }
+        .theme-item-image-border {
+            @apply border-yellow-700 transition-all duration-500;
+        }
+        .theme-item-name {
+            @apply text-yellow-400 transition-all duration-500;
+        }
+        .theme-item-price {
+            @apply text-yellow-200 transition-all duration-500;
+        }
+        .theme-footer {
+            @apply bg-yellow-900/20 border-t-4 border-yellow-700 text-yellow-200 transition-all duration-500;
         }
 
-        .container {
-            max-width: 1400px;
-            margin: 20px auto; /* Margin for desktop */
-            background: linear-gradient(135deg, #2d1810 0%, #1f1108 100%);
-            border-radius: 12px; /* Rounded corners for desktop */
-            padding: 0;
-            box-shadow: 0 30px 80px rgba(0, 0, 0, 0.6);
-            border: 2px solid #8b4513;
-            transition: all 0.5s ease;
-            overflow: hidden; /* To contain rounded corners */
+        /* ستایلی سارد - کاتێک کلاسی .cold-theme زیاد دەبێت */
+        .cold-theme .theme-container {
+            @apply bg-blue-900 border-blue-400;
+        }
+        .cold-theme .theme-header {
+            @apply bg-blue-900/20 border-b-4 border-blue-400;
+        }
+        .cold-theme .theme-header-title {
+            @apply text-blue-300;
+        }
+        .cold-theme .theme-header-subtitle {
+            @apply text-blue-100;
+        }
+        .cold-theme .theme-nav {
+            @apply bg-blue-900/90 border-b border-blue-700;
+        }
+        .cold-theme .theme-nav-btn {
+            @apply text-blue-200 bg-blue-800/50 hover:bg-blue-800/80;
+        }
+        .cold-theme .theme-nav-btn.active {
+            @apply bg-blue-300 text-blue-900 font-bold ring-2 ring-blue-200;
+        }
+        .cold-theme .theme-section-title {
+            @apply text-blue-300;
+        }
+        .cold-theme .theme-section-divider {
+            @apply bg-blue-400;
+        }
+        .cold-theme .theme-item-card {
+            @apply bg-blue-950/50 border border-blue-700 hover:border-blue-500;
+        }
+        .cold-theme .theme-item-image-border {
+            @apply border-blue-400;
+        }
+        .cold-theme .theme-item-name {
+            @apply text-blue-300;
+        }
+        .cold-theme .theme-item-price {
+            @apply text-blue-100;
+        }
+        .cold-theme .theme-footer {
+            @apply bg-blue-900/20 border-t-4 border-blue-400 text-blue-200;
         }
 
-        .container.cold-theme {
-            background: linear-gradient(135deg, #1a2f3f 0%, #0a1f2f 100%);
-            border: 2px solid #1e90ff;
-            box-shadow: 0 30px 80px rgba(0, 0, 0, 0.6);
+        /* ستایلی تایبەت بۆ کارتی پۆلەکان لە بەشی سارددا */
+        .cold-category-card {
+            @apply flex-col text-center p-6 cursor-pointer bg-blue-800/50 border-blue-600 hover:bg-blue-800/80;
         }
-
-        header {
-            background: linear-gradient(135deg, #3e2723 0%, #4e342e 100%);
-            text-align: center;
-            padding: 60px 40px 30px;
-            border-bottom: 3px solid #d4a574;
-            position: relative;
-            overflow: hidden;
-            transition: all 0.5s ease;
+        .cold-category-card .item-image {
+            @apply w-28 h-28 rounded-lg border-blue-400;
         }
-
-        header.cold-theme {
-            background: linear-gradient(135deg, #1e3a5f 0%, #2a4a7a 100%);
-            border-bottom: 3px solid #87ceeb;
+        .cold-category-card .item-name {
+            @apply text-xl text-blue-200 mt-4;
         }
-
-        header::before {
-            content: '☕';
-            position: absolute;
-            font-size: 200px;
-            opacity: 0.05;
-            top: 50%;
-            left: 50%;
-            transform: translate(-50%, -50%);
+        .cold-category-card .item-price {
+            @apply hidden; /* نرخەکان بشارەوە بۆ کارتی پۆلەکان */
         }
-
-        header.cold-theme::before {
-            content: '❄️';
-            opacity: 0.1;
-        }
-
-        h1 {
-            font-size: 4em;
-            color: #d4a574;
-            margin-bottom: 15px;
-            text-shadow: 3px 3px 6px rgba(0, 0, 0, 0.5);
-            letter-spacing: 3px;
-            font-weight: normal;
-            position: relative;
-            transition: all 0.5s ease;
-        }
-
-        .cold-theme h1 {
-            color: #87ceeb;
-        }
-
-        .subtitle {
-            font-size: 1.4em;
-            color: #c9a882;
-            font-style: italic;
-            letter-spacing: 2px;
-            position: relative;
-            margin-bottom: 40px;
-            transition: all 0.5s ease;
-        }
-
-        .cold-theme .subtitle {
-            color: #b0e0e6;
-        }
-
-        /* --- گۆڕانکاری بۆ مینیوی پۆلەکان --- */
-        .category-nav {
-            display: flex;
-            justify-content: center; /* Will center on desktop if it fits */
-            flex-wrap: wrap; /* Allows wrapping on desktop if needed */
-            gap: 15px;
-            padding: 30px 20px;
-            position: sticky;
-            top: 0;
-            background: rgba(45, 24, 16, 0.98);
-            z-index: 100;
-            backdrop-filter: blur(10px);
-            transition: all 0.5s ease;
-        }
-
-        .cold-theme .category-nav {
-            background: rgba(26, 47, 63, 0.98);
-        }
-
-        .category-btn {
-            padding: 12px 25px;
-            background: rgba(62, 39, 35, 0.6);
-            border: 2px solid #5d4037;
-            color: #c9a882;
-            font-size: 1.1em;
-            cursor: pointer;
-            transition: all 0.3s ease;
-            border-radius: 0;
-            letter-spacing: 1px;
-            font-family: 'Georgia', serif;
-            flex-shrink: 0; /* Prevents buttons from shrinking */
-        }
-
-        .cold-theme .category-btn {
-            background: rgba(30, 58, 95, 0.6);
-            border: 2px solid #4169e1;
-            color: #b0e0e6;
-        }
-
-        .category-btn:hover {
-            background: #5d4037;
-            border-color: #d4a574;
-            color: #d4a574;
-            transform: translateY(-2px);
-        }
-
-        .cold-theme .category-btn:hover {
-            background: #4169e1;
-            border-color: #87ceeb;
-            color: #87ceeb;
-        }
-
-        .category-btn.active {
-            background: #d4a574;
-            border-color: #d4a574;
-            color: #1a1410;
-            font-weight: bold;
-        }
-
-        .cold-theme .category-btn.active {
-            background: #87ceeb;
-            border-color: #87ceeb;
-            color: #0a1f2f;
-        }
-
-        .menu-content {
-            padding: 60px 40px;
-        }
-
-        .menu-section {
-            margin-bottom: 60px;
+        
+        /* شاردنەوەی بەشەکان و پۆلەکانی خواردن */
+        .menu-section, .food-category {
             display: none;
         }
-
-        .menu-section.active {
+        .menu-section.active, .food-category.active {
             display: block;
             animation: fadeIn 0.5s ease;
         }
 
+        /* ئەنیمەیشنی هاتنەناوەوە */
         @keyframes fadeIn {
-            from { opacity: 0; }
-            to { opacity: 1; }
+            from { opacity: 0; transform: translateY(10px); }
+            to { opacity: 1; transform: translateY(0); }
         }
 
-        .section-header {
-            text-align: center;
-            margin-bottom: 40px;
-            position: relative;
+        /* بۆ شریتی سکڕۆڵی مۆبایل */
+        .category-nav::-webkit-scrollbar {
+            display: none; /* شاردنەوەی سکڕۆڵبار */
         }
-
-        .section-title {
-            font-size: 2.5em;
-            color: #d4a574;
-            margin-bottom: 10px;
-            font-weight: normal;
-            letter-spacing: 2px;
-            display: inline-block;
-            padding: 0 30px;
-            position: relative;
-            transition: all 0.5s ease;
-        }
-
-        .cold-theme .section-title {
-            color: #87ceeb;
-        }
-
-        .section-title::before,
-        .section-title::after {
-            content: '◆';
-            position: absolute;
-            color: #8b4513;
-            font-size: 0.5em;
-            top: 50%;
-            transform: translateY(-50%);
-            transition: all 0.5s ease;
-        }
-
-        .cold-theme .section-title::before,
-        .cold-theme .section-title::after {
-            color: #1e90ff;
-        }
-
-        .section-title::before {
-            right: 0;
-        }
-
-        .section-title::after {
-            left: 0;
-        }
-
-        .section-divider {
-            width: 200px;
-            height: 2px;
-            background: linear-gradient(90deg, transparent, #d4a574, transparent);
-            margin: 20px auto;
-            transition: all 0.5s ease;
-        }
-
-        .cold-theme .section-divider {
-            background: linear-gradient(90deg, transparent, #87ceeb, transparent);
-        }
-
-        /* --- گۆڕانکاری بۆ گرید --- */
-        .items-grid {
-            display: grid;
-            /* Updated for better responsiveness */
-            grid-template-columns: repeat(auto-fit, minmax(350px, 1fr));
-            gap: 40px;
-            max-width: 1200px;
-            margin: 0 auto;
-        }
-
-        .menu-item {
-            background: rgba(62, 39, 35, 0.4);
-            border: 1px solid #5d4037;
-            border-radius: 0;
-            padding: 25px;
-            display: flex;
-            gap: 25px;
-            align-items: center;
-            transition: all 0.4s ease;
-            position: relative;
-            overflow: hidden;
-            cursor: pointer;
-        }
-
-        .cold-theme .menu-item {
-            background: rgba(30, 58, 95, 0.4);
-            border: 1px solid #4169e1;
-        }
-
-        .menu-item::before {
-            content: '';
-            position: absolute;
-            top: 0;
-            right: 0;
-            width: 100%;
-            height: 100%;
-            background: linear-gradient(135deg, rgba(212, 165, 116, 0.1) 0%, transparent 100%);
-            opacity: 0;
-            transition: opacity 0.4s ease;
-        }
-
-        .cold-theme .menu-item::before {
-            background: linear-gradient(135deg, rgba(135, 206, 235, 0.1) 0%, transparent 100%);
-        }
-
-        .menu-item:hover {
-            transform: translateX(-10px);
-            border-color: #d4a574;
-            box-shadow: 0 10px 30px rgba(212, 165, 116, 0.2);
-        }
-
-        .cold-theme .menu-item:hover {
-            border-color: #87ceeb;
-            box-shadow: 0 10px 30px rgba(135, 206, 235, 0.2);
-        }
-
-        .menu-item:hover::before {
-            opacity: 1;
-        }
-
-        .item-image {
-            width: 120px;
-            height: 120px;
-            border-radius: 50%;
-            object-fit: cover;
-            border: 3px solid #8b4513;
-            box-shadow: 0 5px 15px rgba(0, 0, 0, 0.5);
-            flex-shrink: 0;
-            transition: all 0.5s ease;
-        }
-
-        .cold-theme .item-image {
-            border: 3px solid #1e90ff;
-        }
-
-        .item-info {
-            flex: 1;
-        }
-
-        .item-header {
-            display: flex;
-            justify-content: space-between;
-            align-items: center;
-            margin-bottom: 12px;
-            padding-bottom: 12px;
-            border-bottom: 1px dashed #5d4037;
-            transition: all 0.5s ease;
-        }
-
-        .cold-theme .item-header {
-            border-bottom: 1px dashed #4169e1;
-        }
-
-        .item-name {
-            font-size: 1.6em;
-            color: #d4a574;
-            font-weight: normal;
-            letter-spacing: 1px;
-            transition: all 0.5s ease;
-        }
-
-        .cold-theme .item-name {
-            color: #87ceeb;
-        }
-
-        .item-price {
-            font-size: 1.5em;
-            color: #c9a882;
-            font-weight: bold;
-            white-space: nowrap;
-            transition: all 0.5s ease;
-        }
-
-        .cold-theme .item-price {
-            color: #b0e0e6;
-        }
-
-        .item-description {
-            font-size: 1em;
-            color: #a89176;
-            line-height: 1.6;
-            font-style: italic;
-            transition: all 0.5s ease;
-        }
-
-        .cold-theme .item-description {
-            color: #a8c6d6;
-        }
-
-        /* ستایلی بۆ پۆلەکانی خواردن */
-        .food-category {
-            display: none;
-            margin-top: 30px;
-            padding: 20px;
-            background: rgba(62, 39, 35, 0.3);
-            border: 1px solid #5d4037;
-            border-radius: 10px;
-        }
-
-        .cold-theme .food-category {
-            background: rgba(30, 58, 95, 0.3);
-            border: 1px solid #4169e1;
-        }
-
-        .food-category.active {
-            display: block;
-            animation: fadeIn 0.5s ease;
-        }
-
-        .food-category-title {
-            font-size: 1.8em;
-            color: #d4a574;
-            margin-bottom: 20px;
-            text-align: center;
-            border-bottom: 2px solid #8b4513;
-            padding-bottom: 10px;
-        }
-
-        .cold-theme .food-category-title {
-            color: #87ceeb;
-            border-bottom: 2px solid #1e90ff;
-        }
-
-        footer {
-            background: #3e2723;
-            text-align: center;
-            padding: 40px;
-            border-top: 3px solid #d4a574;
-            color: #c9a882;
-            transition: all 0.5s ease;
-            /* No border-radius here, will be clipped by container */
-        }
-
-        .cold-theme footer {
-            background: #1e3a5f;
-            border-top: 3px solid #87ceeb;
-            color: #b0e0e6;
-        }
-
-        .footer-content {
-            max-width: 800px;
-            margin: 0 auto;
-        }
-
-        .footer-info {
-            font-size: 1.2em;
-            margin: 15px 0;
-            letter-spacing: 1px;
-        }
-
-        .coffee-beans {
-            font-size: 2em;
-            margin: 20px 0;
-            opacity: 0.3;
-            transition: all 0.5s ease;
-        }
-
-        .cold-theme .coffee-beans {
-            opacity: 0.2;
-        }
-
-        /* ستایلە نوێیەکان بۆ بەروار */
-        .expired-message {
-            display: none;
-            position: fixed;
-            top: 0;
-            left: 0;
-            width: 100%;
-            height: 100%;
-            background: rgba(0, 0, 0, 0.9);
-            z-index: 1000;
-            justify-content: center;
-            align-items: center;
-            flex-direction: column;
-            color: white;
-            text-align: center;
-            padding: 20px;
-        }
-
-        .expired-message.active {
-            display: flex;
-        }
-
-        .expired-content {
-            background: linear-gradient(135deg, #2d1810 0%, #1f1108 100%);
-            padding: 60px 40px;
-            border-radius: 10px;
-            border: 3px solid #d4a574;
-            max-width: 600px;
-            box-shadow: 0 10px 30px rgba(0, 0, 0, 0.5);
-        }
-
-        .expired-title {
-            font-size: 2.5em;
-            color: #d4a574;
-            margin-bottom: 20px;
-        }
-
-        .expired-text {
-            font-size: 1.2em;
-            margin-bottom: 30px;
-            line-height: 1.6;
-        }
-
-        .contact-info {
-            background: rgba(212, 165, 116, 0.1);
-            padding: 20px;
-            border-radius: 5px;
-            margin-top: 20px;
-        }
-
-        /* --- لابردنی ئەم یاسایە چونکە .items-grid نوێکراوەتەوە --- */
-        /* @media (max-width: 1024px) {
-            .items-grid {
-                grid-template-columns: 1fr;
-            }
-        } */
-
-        @media (max-width: 768px) {
-            body {
-                padding: 0; /* Full width on mobile */
-            }
-
-            .container {
-                margin: 0;
-                border-radius: 0;
-                border: none;
-                box-shadow: none;
-            }
-
-            h1 {
-                font-size: 2.5em;
-            }
-
-            .subtitle {
-                font-size: 1.1em;
-            }
-
-            .section-title {
-                font-size: 1.8em;
-            }
-
-            .menu-content {
-                padding: 40px 20px;
-            }
-
-            /* --- ستایلی نوێ بۆ مینیوی پۆلەکان لەسەر مۆبایل --- */
-            .category-nav {
-                flex-wrap: nowrap; /* Prevents wrapping */
-                overflow-x: auto; /* Enables horizontal scroll */
-                justify-content: flex-start; /* Aligns to the right (due to RTL) */
-                padding: 20px 15px; /* Smaller padding */
-                gap: 10px;
-            }
-
-            .item-header {
-                flex-direction: column;
-                gap: 8px;
-                align-items: flex-start;
-            }
-
-            .item-image {
-                width: 90px;
-                height: 90px;
-            }
-
-            .item-name {
-                font-size: 1.3em;
-            }
-
-            .item-price {
-                font-size: 1.3em;
-            }
-
-            .item-description {
-                font-size: 0.95em;
-            }
-
-            .category-btn {
-                padding: 10px 18px;
-                font-size: 1em;
-            }
-
-            header {
-                padding: 40px 20px 20px;
-            }
-
-            .expired-content {
-                padding: 40px 20px;
-            }
-
-            .expired-title {
-                font-size: 2em;
-            }
-        }
-
-        @media (max-width: 480px) {
-            h1 {
-                font-size: 2.2em; /* Slightly larger */
-                letter-spacing: 2px;
-            }
-
-            .subtitle {
-                font-size: 1em;
-            }
-
-            .menu-content {
-                padding: 30px 15px;
-            }
-
-            .items-grid {
-                gap: 15px; /* Smaller gap */
-            }
-
-            .menu-item {
-                flex-direction: column;
-                text-align: center;
-                gap: 15px; /* Smaller gap for stacked items */
-                padding: 20px;
-            }
-
-            .item-image {
-                width: 80px; /* Smaller image when stacked */
-                height: 80px;
-            }
-
-            .item-header {
-                align-items: center; /* Center header when stacked */
-            }
-
-            .category-btn {
-                padding: 8px 15px;
-                font-size: 0.95em;
-            }
+        .category-nav {
+            -ms-overflow-style: none;  /* IE and Edge */
+            scrollbar-width: none;  /* Firefox */
         }
     </style>
 </head>
-<body>
-    <div class="expired-message" id="expiredMessage">
-        <div class="expired-content">
-            <h2 class="expired-title">پەیوەندی بکە بە دروستکەری وێبسایتەکە</h2>
-            <p class="expired-text">ئەم وێبسایتە ماوەی کارکردنی تەواو بووە. تکایە پەیوەندی بکە بە دروستکەری وێبسایتەکە بۆ نوێکردنەوە.</p>
-            <div class="contact-info">
+<body class="bg-gray-900">
+
+    <!-- پەیامی کۆتاییهاتن (وەک خۆی ماوەتەوە بەڵام بە ستایلی نوێ) -->
+    <div class="expired-message fixed inset-0 bg-black/90 z-[1000] flex items-center justify-center p-4" id="expiredMessage">
+        <div class="expired-content bg-gray-800 rounded-lg shadow-xl p-6 md:p-8 max-w-md w-full border-4 border-red-600 text-center">
+            <h2 class="expired-title text-2xl md:text-3xl font-bold text-red-400 mb-4">پەیوەندی بکە بە دروستکەری وێبسایتەکە</h2>
+            <p class="expired-text text-base md:text-lg mb-6 text-gray-200">ئەم وێبسایتە ماوەی کارکردنی تەواو بووە. تکایە پەیوەندی بکە بە دروستکەری وێبسایتەکە بۆ نوێکردنەوە.</p>
+            <div class="contact-info bg-gray-700/50 p-4 rounded-lg text-right text-gray-300">
                 <p><strong>ناو:</strong> horaz IT</p>
                 <p><strong>ژمارەی مۆبایل:</strong> 07501784002</p>
                 <p><strong>خزمەتگوزاری:</strong> دروستکردنی هەموو جۆرە سیستەم و وێبسایتێک</p>
@@ -640,164 +160,163 @@
         </div>
     </div>
 
-    <div class="container" id="mainContainer">
-        <header>
-            <h1>پاشافروتی کــافــێ</h1>
-            <p class="subtitle">تامی ئاسایشی ڕاستەقینە</p>
+    <!-- دەفرە سەرەکییەکە -->
+    <div class="container theme-container max-w-7xl mx-auto rounded-none md:rounded-lg overflow-hidden my-0 md:my-8" id="mainContainer">
+        
+        <!-- سەردێڕ -->
+        <header class="theme-header text-center p-8 md:p-16 relative overflow-hidden">
+            <!-- ئایمۆجییەکە لە پاشتەوە وەک ستایلی پێشوو -->
+            <div class="absolute inset-0 flex items-center justify-center text-[200px] opacity-10" id="header-icon">☕</div>
+            
+            <h1 class="theme-header-title text-4xl md:text-6xl font-bold relative z-10">پاشافروتی کــافــێ</h1>
+            <p class="theme-header-subtitle text-xl md:text-2xl font-light italic mt-4 relative z-10">تامی ئاسایشی ڕاستەقینە</p>
         </header>
 
-        <div class="category-nav">
-            <button class="category-btn active" data-category="all">هەموو</button>
-            <button class="category-btn" data-category="hot">خواردنەوە گەرمەکان</button>
-            <button class="category-btn" data-category="cold">خواردنەوە ساردەکان</button>
-            <button class="category-btn" data-category="dessert">کریپ نۆتێلا</button>
-            <button class="category-btn" data-category="drinks">کونافەکان</button>
+        <!-- ناڤیگەیشنی بەشەکان (گونجاو بۆ مۆبایل بە سکڕۆڵ) -->
+        <div class="category-nav theme-nav sticky top-0 z-50 p-4 overflow-x-auto backdrop-blur-sm">
+            <div class="flex gap-3 whitespace-nowrap max-w-full mx-auto justify-start md:justify-center">
+                <button class="category-btn theme-nav-btn px-5 py-2 rounded-full font-medium text-sm md:text-base active" data-category="all">هەموو</button>
+                <button class="category-btn theme-nav-btn px-5 py-2 rounded-full font-medium text-sm md:text-base" data-category="hot">خواردنەوە گەرمەکان</button>
+                <button class="category-btn theme-nav-btn px-5 py-2 rounded-full font-medium text-sm md:text-base" data-category="cold">خواردنەوە ساردەکان</button>
+                <button class="category-btn theme-nav-btn px-5 py-2 rounded-full font-medium text-sm md:text-base" data-category="dessert">کریپ نۆتێلا</button>
+                <button class="category-btn theme-nav-btn px-5 py-2 rounded-full font-medium text-sm md:text-base" data-category="drinks">کونافەکان</button>
+            </div>
         </div>
 
-        <div class="menu-content">
-            <!-- خواردنەوە گەرمەکان-->
-            <div class="menu-section active" data-category="hot">
-                <div class="section-header">
-                    <h2 class="section-title">بەشی خواردنەوەگەرمەکان</h2>
-                    <div class="section-divider"></div>
+        <!-- ناوەڕۆکی مینو -->
+        <div class="menu-content p-4 md:p-10">
+            
+            <!-- خواردنەوە گەرمەکان -->
+            <div class="menu-section" data-category="hot">
+                <div class="section-header text-center mb-8">
+                    <h2 class="section-title theme-section-title text-3xl md:text-4xl font-bold">بەشی خواردنەوەگەرمەکان</h2>
+                    <div class="section-divider theme-section-divider h-1 w-24 mx-auto mt-4"></div>
                 </div>
-                <div class="items-grid">
-                    <div class="menu-item">
-                        <img src="https://i.ibb.co/Y72mDxH3/m1.png" alt="محەلەبی گەرم" class="item-image" onerror="this.src='https://placehold.co/120x120/5d4037/f5f5dc?text=وێنە'; this.onerror=null;">
-                        <div class="item-info">
-                            <div class="item-header">
-                                <h3 class="item-name">محەلەبی گەرم</h3>
-                                <span class="item-price">1,000 د.ع</span>
+                <div class="items-grid grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 gap-4 md:gap-6">
+                    <!-- ئایتمەکان لێرە دادەنرێن -->
+                    <div class="menu-item theme-item-card rounded-lg shadow-lg overflow-hidden flex items-center gap-4 p-4">
+                        <img src="https://i.ibb.co/Y72mDxH3/m1.png" alt="محەلەبی گەرم" class="item-image theme-item-image-border w-20 h-20 md:w-24 md:h-24 rounded-full object-cover border-4 flex-shrink-0" onerror="this.src='https://placehold.co/100x100/3e2723/d4a574?text=وێنە'">
+                        <div class="item-info flex-1 min-w-0">
+                            <div class="item-header flex flex-col sm:flex-row justify-between items-start sm:items-center gap-1 sm:gap-2">
+                                <h3 class="item-name theme-item-name text-lg md:text-xl font-semibold truncate">محەلەبی گەرم</h3>
+                                <span class="item-price theme-item-price text-base md:text-lg font-bold whitespace-nowrap">1,000 د.ع</span>
                             </div>
                         </div>
                     </div>
-
-                    <div class="menu-item">
-                        <img src="https://i.ibb.co/DPG04BDH/k1-387Z.png" alt="کاستەری گەرم" class="item-image" onerror="this.src='https://placehold.co/120x120/5d4037/f5f5dc?text=وێنە'; this.onerror=null;">
-                        <div class="item-info">
-                            <div class="item-header">
-                                <h3 class="item-name">کاستەری گەرم</h3>
-                                <span class="item-price">1,500 د.ع</span>
+                    <div class="menu-item theme-item-card rounded-lg shadow-lg overflow-hidden flex items-center gap-4 p-4">
+                        <img src="https://i.ibb.co/DPG04BDH/k1-387Z.png" alt="کاستەری گەرم" class="item-image theme-item-image-border w-20 h-20 md:w-24 md:h-24 rounded-full object-cover border-4 flex-shrink-0" onerror="this.src='https://placehold.co/100x100/3e2723/d4a574?text=وێنە'">
+                        <div class="item-info flex-1 min-w-0">
+                            <div class="item-header flex flex-col sm:flex-row justify-between items-start sm:items-center gap-1 sm:gap-2">
+                                <h3 class="item-name theme-item-name text-lg md:text-xl font-semibold truncate">کاستەری گەرم</h3>
+                                <span class="item-price theme-item-price text-base md:text-lg font-bold whitespace-nowrap">1,500 د.ع</span>
                             </div>
                         </div>
                     </div>
-
-                    <div class="menu-item">
-                        <img src="https://i.ibb.co/RkhK7ZDX/q1-111Z.png" alt="قاوەی ئێسپرێسۆ" class="item-image" onerror="this.src='https://placehold.co/120x120/5d4037/f5f5dc?text=وێنە'; this.onerror=null;">
-                        <div class="item-info">
-                            <div class="item-header">
-                                <h3 class="item-name">قاوەی ئێسپرێسۆ</h3>
-                                <span class="item-price">1,500 د.ع</span>
+                    <div class="menu-item theme-item-card rounded-lg shadow-lg overflow-hidden flex items-center gap-4 p-4">
+                        <img src="https://i.ibb.co/RkhK7ZDX/q1-111Z.png" alt="قاوەی ئێسپرێسۆ" class="item-image theme-item-image-border w-20 h-20 md:w-24 md:h-24 rounded-full object-cover border-4 flex-shrink-0" onerror="this.src='https://placehold.co/100x100/3e2723/d4a574?text=وێنە'">
+                        <div class="item-info flex-1 min-w-0">
+                            <div class="item-header flex flex-col sm:flex-row justify-between items-start sm:items-center gap-1 sm:gap-2">
+                                <h3 class="item-name theme-item-name text-lg md:text-xl font-semibold truncate">قاوەی ئێسپرێسۆ</h3>
+                                <span class="item-price theme-item-price text-base md:text-lg font-bold whitespace-nowrap">1,500 د.ع</span>
                             </div>
                         </div>
                     </div>
-
-                    <div class="menu-item">
-                        <img src="https://images.unsplash.com/photo-1517487881594-2787fef5ebf7?w=300&h=300&fit=crop" alt="کافێ مۆکا" class="item-image" onerror="this.src='https://placehold.co/120x120/5d4037/f5f5dc?text=وێنە'; this.onerror=null;">
-                        <div class="item-info">
-                            <div class="item-header">
-                                <h3 class="item-name">کافێ مۆکا</h3>
-                                <span class="item-price">4,500 د.ع</span>
+                    <div class="menu-item theme-item-card rounded-lg shadow-lg overflow-hidden flex items-center gap-4 p-4">
+                        <img src="https://images.unsplash.com/photo-1517487881594-2787fef5ebf7?w=300&h=300&fit=crop" alt="کافێ مۆکا" class="item-image theme-item-image-border w-20 h-20 md:w-24 md:h-24 rounded-full object-cover border-4 flex-shrink-0" onerror="this.src='https://placehold.co/100x100/3e2723/d4a574?text=وێنە'">
+                        <div class="item-info flex-1 min-w-0">
+                            <div class="item-header flex flex-col sm:flex-row justify-between items-start sm:items-center gap-1 sm:gap-2">
+                                <h3 class="item-name theme-item-name text-lg md:text-xl font-semibold truncate">کافێ مۆکا</h3>
+                                <span class="item-price theme-item-price text-base md:text-lg font-bold whitespace-nowrap">4,500 د.ع</span>
                             </div>
                         </div>
                     </div>
-
-                    <div class="menu-item">
-                        <img src="https://images.unsplash.com/photo-1485808191679-5f86510681a2?w=300&h=300&fit=crop" alt="قاوەی تورکی" class="item-image" onerror="this.src='https://placehold.co/120x120/5d4037/f5f5dc?text=وێنە'; this.onerror=null;">
-                        <div class="item-info">
-                            <div class="item-header">
-                                <h3 class="item-name">قاوەی تورکی</h3>
-                                <span class="item-price">1,500 د.ع</span>
+                    <div class="menu-item theme-item-card rounded-lg shadow-lg overflow-hidden flex items-center gap-4 p-4">
+                        <img src="https://images.unsplash.com/photo-1485808191679-5f86510681a2?w=300&h=300&fit=crop" alt="قاوەی تورکی" class="item-image theme-item-image-border w-20 h-20 md:w-24 md:h-24 rounded-full object-cover border-4 flex-shrink-0" onerror="this.src='https://placehold.co/100x100/3e2723/d4a574?text=وێنە'">
+                        <div class="item-info flex-1 min-w-0">
+                            <div class="item-header flex flex-col sm:flex-row justify-between items-start sm:items-center gap-1 sm:gap-2">
+                                <h3 class="item-name theme-item-name text-lg md:text-xl font-semibold truncate">قاوەی تورکی</h3>
+                                <span class="item-price theme-item-price text-base md:text-lg font-bold whitespace-nowrap">1,500 د.ع</span>
                             </div>
                         </div>
                     </div>
-
-                    <div class="menu-item">
-                        <img src="https://i.ibb.co/S7tq2y6r/a1-222Z.png" alt="ئەمریکانۆ" class="item-image" onerror="this.src='https://placehold.co/120x120/5d4037/f5f5dc?text=وێنە'; this.onerror=null;">
-                        <div class="item-info">
-                            <div class="item-header">
-                                <h3 class="item-name">ئەمریکانۆ</h3>
-                                <span class="item-price">2,000 د.ع</span>
+                    <div class="menu-item theme-item-card rounded-lg shadow-lg overflow-hidden flex items-center gap-4 p-4">
+                        <img src="https://i.ibb.co/S7tq2y6r/a1-222Z.png" alt="ئەمریکانۆ" class="item-image theme-item-image-border w-20 h-20 md:w-24 md:h-24 rounded-full object-cover border-4 flex-shrink-0" onerror="this.src='https://placehold.co/100x100/3e2723/d4a574?text=وێنە'">
+                        <div class="item-info flex-1 min-w-0">
+                            <div class="item-header flex flex-col sm:flex-row justify-between items-start sm:items-center gap-1 sm:gap-2">
+                                <h3 class="item-name theme-item-name text-lg md:text-xl font-semibold truncate">ئەمریکانۆ</h3>
+                                <span class="item-price theme-item-price text-base md:text-lg font-bold whitespace-nowrap">2,000 د.ع</span>
                             </div>
                         </div>
                     </div>
-                    
-                    <div class="menu-item">
-                        <img src="https://i.ibb.co/pBLgdX8d/h1-831Z.png" alt="هۆت چوکولێت" class="item-image" onerror="this.src='https://placehold.co/120x120/5d4037/f5f5dc?text=وێنە'; this.onerror=null;">
-                        <div class="item-info">
-                            <div class="item-header">
-                                <h3 class="item-name">هۆت چوکولێت</h3>
-                                <span class="item-price">1,500 د.ع</span>
+                    <div class="menu-item theme-item-card rounded-lg shadow-lg overflow-hidden flex items-center gap-4 p-4">
+                        <img src="https://i.ibb.co/pBLgdX8d/h1-831Z.png" alt="هۆت چوکولێت" class="item-image theme-item-image-border w-20 h-20 md:w-24 md:h-24 rounded-full object-cover border-4 flex-shrink-0" onerror="this.src='https://placehold.co/100x100/3e2723/d4a574?text=وێنە'">
+                        <div class="item-info flex-1 min-w-0">
+                            <div class="item-header flex flex-col sm:flex-row justify-between items-start sm:items-center gap-1 sm:gap-2">
+                                <h3 class="item-name theme-item-name text-lg md:text-xl font-semibold truncate">هۆت چوکولێت</h3>
+                                <span class="item-price theme-item-price text-base md:text-lg font-bold whitespace-nowrap">1,500 د.ع</span>
                             </div>
                         </div>
                     </div>
-
-                    <div class="menu-item">
-                        <img src="https://i.ibb.co/NgpL8YGV/q2-651Z.png" alt="قاوەی قەزوان" class="item-image" onerror="this.src='https://placehold.co/120x120/5d4037/f5f5dc?text=وێنە'; this.onerror=null;">
-                        <div class="item-info">
-                            <div class="item-header">
-                                <h3 class="item-name">قاوەی قەزوان</h3>
-                                <span class="item-price">1,500 د.ع</span>
-                            </div>
-                        </div>  
-                    </div>
-                    
-                    <div class="menu-item">
-                        <img src="https://i.ibb.co/n80ntPmN/k2-590Z.png" alt="کاپوچینۆ" class="item-image" onerror="this.src='https://placehold.co/120x120/5d4037/f5f5dc?text=وێنە'; this.onerror=null;">
-                        <div class="item-info">
-                            <div class="item-header">
-                                <h3 class="item-name">کاپوچینۆ</h3>
-                                <span class="item-price">1,500 د.ع</span>
+                    <div class="menu-item theme-item-card rounded-lg shadow-lg overflow-hidden flex items-center gap-4 p-4">
+                        <img src="https://i.ibb.co/NgpL8YGV/q2-651Z.png" alt="قاوەی قەزوان" class="item-image theme-item-image-border w-20 h-20 md:w-24 md:h-24 rounded-full object-cover border-4 flex-shrink-0" onerror="this.src='https://placehold.co/100x100/3e2723/d4a574?text=وێنە'">
+                        <div class="item-info flex-1 min-w-0">
+                            <div class="item-header flex flex-col sm:flex-row justify-between items-start sm:items-center gap-1 sm:gap-2">
+                                <h3 class="item-name theme-item-name text-lg md:text-xl font-semibold truncate">قاوەی قەزوان</h3>
+                                <span class="item-price theme-item-price text-base md:text-lg font-bold whitespace-nowrap">1,500 د.ع</span>
                             </div>
                         </div>
                     </div>
-                    
-                    <div class="menu-item">
-                        <img src="https://i.ibb.co/pr6BNtyh/k3-079Z.png" alt="کافێ لاتێ" class="item-image" onerror="this.src='https://placehold.co/120x120/5d4037/f5f5dc?text=وێنە'; this.onerror=null;">
-                        <div class="item-info">
-                            <div class="item-header">
-                                <h3 class="item-name">کافێ لاتێ</h3>
-                                <span class="item-price">2,500 د.ع</span>
+                    <div class="menu-item theme-item-card rounded-lg shadow-lg overflow-hidden flex items-center gap-4 p-4">
+                        <img src="https://i.ibb.co/n80ntPmN/k2-590Z.png" alt="کاپوچینۆ" class="item-image theme-item-image-border w-20 h-20 md:w-24 md:h-24 rounded-full object-cover border-4 flex-shrink-0" onerror="this.src='https://placehold.co/100x100/3e2723/d4a574?text=وێنە'">
+                        <div class="item-info flex-1 min-w-0">
+                            <div class="item-header flex flex-col sm:flex-row justify-between items-start sm:items-center gap-1 sm:gap-2">
+                                <h3 class="item-name theme-item-name text-lg md:text-xl font-semibold truncate">کاپوچینۆ</h3>
+                                <span class="item-price theme-item-price text-base md:text-lg font-bold whitespace-nowrap">1,500 د.ع</span>
                             </div>
                         </div>
                     </div>
-
-                    <div class="menu-item">
-                        <img src="https://i.ibb.co/gbb2tHs4/m2-631Z.png" alt="مۆکا" class="item-image" onerror="this.src='https://placehold.co/120x120/5d4037/f5f5dc?text=وێنە'; this.onerror=null;">
-                        <div class="item-info">
-                            <div class="item-header">
-                                <h3 class="item-name">مۆکا</h3>
-                                <span class="item-price">2,000 د.ع</span>
+                    <div class="menu-item theme-item-card rounded-lg shadow-lg overflow-hidden flex items-center gap-4 p-4">
+                        <img src="https://i.ibb.co/pr6BNtyh/k3-079Z.png" alt="کافێ لاتێ" class="item-image theme-item-image-border w-20 h-20 md:w-24 md:h-24 rounded-full object-cover border-4 flex-shrink-0" onerror="this.src='https://placehold.co/100x100/3e2723/d4a574?text=وێنە'">
+                        <div class="item-info flex-1 min-w-0">
+                            <div class="item-header flex flex-col sm:flex-row justify-between items-start sm:items-center gap-1 sm:gap-2">
+                                <h3 class="item-name theme-item-name text-lg md:text-xl font-semibold truncate">کافێ لاتێ</h3>
+                                <span class="item-price theme-item-price text-base md:text-lg font-bold whitespace-nowrap">2,500 د.ع</span>
                             </div>
                         </div>
                     </div>
-
-                    <div class="menu-item">
-                        <img src="https://i.ibb.co/NnGCwxxw/m3-695Z.png" alt="ماکیاتۆ" class="item-image" onerror="this.src='https://placehold.co/120x120/5d4037/f5f5dc?text=وێنە'; this.onerror=null;">
-                        <div class="item-info">
-                            <div class="item-header">
-                                <h3 class="item-name">ماکیاتۆ</h3>
-                                <span class="item-price">2,000 د.ع</span>
+                    <div class="menu-item theme-item-card rounded-lg shadow-lg overflow-hidden flex items-center gap-4 p-4">
+                        <img src="https://i.ibb.co/gbb2tHs4/m2-631Z.png" alt="مۆکا" class="item-image theme-item-image-border w-20 h-20 md:w-24 md:h-24 rounded-full object-cover border-4 flex-shrink-0" onerror="this.src='https://placehold.co/100x100/3e2723/d4a574?text=وێنە'">
+                        <div class="item-info flex-1 min-w-0">
+                            <div class="item-header flex flex-col sm:flex-row justify-between items-start sm:items-center gap-1 sm:gap-2">
+                                <h3 class="item-name theme-item-name text-lg md:text-xl font-semibold truncate">مۆکا</h3>
+                                <span class="item-price theme-item-price text-base md:text-lg font-bold whitespace-nowrap">2,000 د.ع</span>
                             </div>
                         </div>
                     </div>
-                    
-                    <div class="menu-item">
-                        <img src="https://i.ibb.co/FqqSTqG0/a2-499Z.png" alt="ئەڤەگاتۆ" class="item-image" onerror="this.src='https://placehold.co/120x120/5d4037/f5f5dc?text=وێنە'; this.onerror=null;">
-                        <div class="item-info">
-                            <div class="item-header">
-                                <h3 class="item-name">ئەڤەگاتۆ</h3>
-                                <span class="item-price">2,000 د.ع</span>
+                    <div class="menu-item theme-item-card rounded-lg shadow-lg overflow-hidden flex items-center gap-4 p-4">
+                        <img src="https://i.ibb.co/NnGCwxxw/m3-695Z.png" alt="ماکیاتۆ" class="item-image theme-item-image-border w-20 h-20 md:w-24 md:h-24 rounded-full object-cover border-4 flex-shrink-0" onerror="this.src='https://placehold.co/100x100/3e2723/d4a574?text=وێنە'">
+                        <div class="item-info flex-1 min-w-0">
+                            <div class="item-header flex flex-col sm:flex-row justify-between items-start sm:items-center gap-1 sm:gap-2">
+                                <h3 class="item-name theme-item-name text-lg md:text-xl font-semibold truncate">ماکیاتۆ</h3>
+                                <span class="item-price theme-item-price text-base md:text-lg font-bold whitespace-nowrap">2,000 د.ع</span>
                             </div>
                         </div>
                     </div>
-                    
-                    <div class="menu-item">
-                        <img src="https://i.ibb.co/GQTdzqqZ/f1-819Z.png" alt="فراپی یۆنانی" class="item-image" onerror="this.src='https://placehold.co/120x120/5d4037/f5f5dc?text=وێنە'; this.onerror=null;">
-                        <div class="item-info">
-                            <div class="item-header">
-                                <h3 class="item-name">فراپی یۆنانی</h3>
-                                <span class="item-price">2,500 د.ع</span>
+                    <div class="menu-item theme-item-card rounded-lg shadow-lg overflow-hidden flex items-center gap-4 p-4">
+                        <img src="https://i.ibb.co/FqqSTqG0/a2-499Z.png" alt="ئەڤەگاتۆ" class="item-image theme-item-image-border w-20 h-20 md:w-24 md:h-24 rounded-full object-cover border-4 flex-shrink-0" onerror="this.src='https://placehold.co/100x100/3e2723/d4a574?text=وێنە'">
+                        <div class="item-info flex-1 min-w-0">
+                            <div class="item-header flex flex-col sm:flex-row justify-between items-start sm:items-center gap-1 sm:gap-2">
+                                <h3 class="item-name theme-item-name text-lg md:text-xl font-semibold truncate">ئەڤەگاتۆ</h3>
+                                <span class="item-price theme-item-price text-base md:text-lg font-bold whitespace-nowrap">2,000 د.ع</span>
+                            </div>
+                        </div>
+                    </div>
+                    <div class="menu-item theme-item-card rounded-lg shadow-lg overflow-hidden flex items-center gap-4 p-4">
+                        <img src="https://i.ibb.co/GQTdzqqZ/f1-819Z.png" alt="فراپی یۆنانی" class="item-image theme-item-image-border w-20 h-20 md:w-24 md:h-24 rounded-full object-cover border-4 flex-shrink-0" onerror="this.src='https://placehold.co/100x100/3e2723/d4a574?text=وێنە'">
+                        <div class="item-info flex-1 min-w-0">
+                            <div class="item-header flex flex-col sm:flex-row justify-between items-start sm:items-center gap-1 sm:gap-2">
+                                <h3 class="item-name theme-item-name text-lg md:text-xl font-semibold truncate">فراپی یۆنانی</h3>
+                                <span class="item-price theme-item-price text-base md:text-lg font-bold whitespace-nowrap">2,500 د.ع</span>
                             </div>
                         </div>
                     </div>
@@ -806,479 +325,481 @@
 
             <!-- خواردنەوە ساردەکان -->
             <div class="menu-section" data-category="cold">
-                <div class="section-header">
-                    <h2 class="section-title">بەشی خواردنەوە ساردەکان</h2>
-                    <div class="section-divider"></div>
+                <div class="section-header text-center mb-8">
+                    <h2 class="section-title theme-section-title text-3xl md:text-4xl font-bold">بەشی خواردنەوە ساردەکان</h2>
+                    <div class="section-divider theme-section-divider h-1 w-24 mx-auto mt-4"></div>
                 </div>
-                <div class="items-grid">
-                    <div class="menu-item" data-category="iced-coffee">
-                        <img src="https://i.ibb.co/nN5QZf47/sh1-729Z.png" alt="ئایس کافێ" class="item-image" onerror="this.src='https://placehold.co/120x120/5d4037/f5f5dc?text=وێنە'; this.onerror=null;">
+                <!-- پۆلەکانی خواردنەوە ساردەکان (وەک دوگمە دیارن) -->
+                <div class="items-grid grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 gap-4 md:gap-6">
+                    <div class="menu-item theme-item-card cold-category-card rounded-lg shadow-lg" data-category="iced-coffee">
+                        <img src="https://i.ibb.co/nN5QZf47/sh1-729Z.png" alt="شەربەتی فرێس" class="item-image theme-item-image-border" onerror="this.src='https://placehold.co/100x100/1e3a5f/87ceeb?text=وێنە'">
                         <div class="item-info">
-                            <div class="item-header">
-                                <h3 class="item-name">بەشی  شەربەتی فرێسی</h3>
+                            <div class="item-header justify-center">
+                                <h3 class="item-name theme-item-name">بەشی شەربەتی فرێس</h3>
                             </div>
                         </div>
                     </div>
-
-                    <div class="menu-item" data-category="frappe">
-                        <img src="https://i.ibb.co/WpDzLwZD/sh2-040Z.png" alt="فراپێ" class="item-image" onerror="this.src='https://placehold.co/120x120/5d4037/f5f5dc?text=وێنە'; this.onerror=null;">
+                    <div class="menu-item theme-item-card cold-category-card rounded-lg shadow-lg" data-category="frappe">
+                        <img src="https://i.ibb.co/WpDzLwZD/sh2-040Z.png" alt="شەربەتی فرێش شەیک" class="item-image theme-item-image-border" onerror="this.src='https://placehold.co/100x100/1e3a5f/87ceeb?text=وێنە'">
                         <div class="item-info">
-                            <div class="item-header">
-                                <h3 class="item-name">بەشی   شەربەتی فرێش شەیک</h3>
+                            <div class="item-header justify-center">
+                                <h3 class="item-name theme-item-name">بەشی شەربەتی فرێش شەیک</h3>
                             </div>
                         </div>
                     </div>
-
-                    <div class="menu-item" data-category="iced-latte">
-                        <img src="https://i.ibb.co/BSNY4mF/mk1-468Z.png" alt="لاتێی سارد" class="item-image" onerror="this.src='https://placehold.co/120x120/5d4037/f5f5dc?text=وێنە'; this.onerror=null;">
+                    <div class="menu-item theme-item-card cold-category-card rounded-lg shadow-lg" data-category="iced-latte">
+                        <img src="https://i.ibb.co/BSNY4mF/mk1-468Z.png" alt="مۆکتێل" class="item-image theme-item-image-border" onerror="this.src='https://placehold.co/100x100/1e3a5f/87ceeb?text=وێنە'">
                         <div class="item-info">
-                            <div class="item-header">
-                                <h3 class="item-name">بەشی  مۆکتێل</h3>
+                            <div class="item-header justify-center">
+                                <h3 class="item-name theme-item-name">بەشی مۆکتێل</h3>
                             </div>
                         </div>
                     </div>
-
-                    <div class="menu-item" data-category="cold-brew">
-                        <img src="https://i.ibb.co/MDfwGbNR/shm-990Z.png" alt="کۆڵد برو" class="item-image" onerror="this.src='https://placehold.co/120x120/5d4037/f5f5dc?text=وێنە'; this.onerror=null;">
+                    <div class="menu-item theme-item-card cold-category-card rounded-lg shadow-lg" data-category="cold-brew">
+                        <img src="https://i.ibb.co/MDfwGbNR/shm-990Z.png" alt="شیرمۆزەکان" class="item-image theme-item-image-border" onerror="this.src='https://placehold.co/100x100/1e3a5f/87ceeb?text=وێنە'">
                         <div class="item-info">
-                            <div class="item-header">
-                                <h3 class="item-name">بەشی   شیرمۆزەکان</h3>
+                            <div class="item-header justify-center">
+                                <h3 class="item-name theme-item-name">بەشی شیرمۆزەکان</h3>
                             </div>
                         </div>
                     </div>
-                    
-                    <div class="menu-item" data-category="special">
-                        <img src="https://i.ibb.co/wZWgjdJc/as1-264Z.png" alt="ئایس ئەمریکانۆ" class="item-image" onerror="this.src='https://placehold.co/120x120/5d4037/f5f5dc?text=وێنە'; this.onerror=null;">
+                    <div class="menu-item theme-item-card cold-category-card rounded-lg shadow-lg" data-category="special">
+                        <img src="https://i.ibb.co/wZWgjdJc/as1-264Z.png" alt="ئایسکرێمەکان" class="item-image theme-item-image-border" onerror="this.src='https://placehold.co/100x100/1e3a5f/87ceeb?text=وێنە'">
                         <div class="item-info">
-                            <div class="item-header">
-                                <h3 class="item-name">بەشی  ئایسکرێمەکان</h3>
+                            <div class="item-header justify-center">
+                                <h3 class="item-name theme-item-name">بەشی ئایسکرێمەکان</h3>
                             </div>
                         </div>
                     </div>
                 </div>
 
-                <!-- پۆلەکانی خواردن -->
-                <div class="food-category" id="iced-coffee-category">
-                    <h3 class="food-category-title"> بەشی شەربەتەفرێشەکان </h3>
-                    <div class="items-grid">
-                        <div class="menu-item">
-                            <img src="https://i.ibb.co/HLdqmnNt/pq-518Z.png" alt="کێکی قاوە" class="item-image" onerror="this.src='https://placehold.co/120x120/5d4037/f5f5dc?text=وێنە'; this.onerror=null;">
-                            <div class="item-info">
-                                <div class="item-header">
-                                    <h3 class="item-name"> پرتەقاڵی فرێش</h3>
-                                    <span class="item-price">1,000 د.ع</span>
+                <!-- پۆلەکانی خواردن (سەرەتا شاردراوەن) -->
+                <div class="food-category mt-8 bg-blue-950/30 p-4 md:p-6 rounded-lg" id="iced-coffee-category">
+                    <h3 class="food-category-title theme-section-title text-2xl font-bold text-center mb-6">بەشی شەربەتەفرێشەکان</h3>
+                    <div class="items-grid grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 gap-4 md:gap-6">
+                        <!-- ئایتمەکانی ئەم پۆلە -->
+                        <div class="menu-item theme-item-card rounded-lg shadow-lg overflow-hidden flex items-center gap-4 p-4">
+                            <img src="https://i.ibb.co/HLdqmnNt/pq-518Z.png" alt="پرتەقاڵی فرێش" class="item-image theme-item-image-border w-20 h-20 md:w-24 md:h-24 rounded-full object-cover border-4 flex-shrink-0" onerror="this.src='https://placehold.co/100x100/1e3a5f/87ceeb?text=وێنە'">
+                            <div class="item-info flex-1 min-w-0">
+                                <div class="item-header flex flex-col sm:flex-row justify-between items-start sm:items-center gap-1 sm:gap-2">
+                                    <h3 class="item-name theme-item-name text-lg md:text-xl font-semibold truncate">پرتەقاڵی فرێش</h3>
+                                    <span class="item-price theme-item-price text-base md:text-lg font-bold whitespace-nowrap">1,000 د.ع</span>
                                 </div>
                             </div>
                         </div>
-                        <div class="menu-item">
-                            <img src="https://i.ibb.co/hR0xkfXP/shs-492Z.png" alt="کوکی قاوە" class="item-image" onerror="this.src='https://placehold.co/120x120/5d4037/f5f5dc?text=وێنە'; this.onerror=null;">
-                            <div class="item-info">
-                                <div class="item-header">
-                                    <h3 class="item-name"> سێوی سەوز</h3>
-                                    <span class="item-price">1,000 د.ع</span>
+                        <div class="menu-item theme-item-card rounded-lg shadow-lg overflow-hidden flex items-center gap-4 p-4">
+                            <img src="https://i.ibb.co/hR0xkfXP/shs-492Z.png" alt="سێوی سەوز" class="item-image theme-item-image-border w-20 h-20 md:w-24 md:h-24 rounded-full object-cover border-4 flex-shrink-0" onerror="this.src='https://placehold.co/100x100/1e3a5f/87ceeb?text=وێنە'">
+                            <div class="item-info flex-1 min-w-0">
+                                <div class="item-header flex flex-col sm:flex-row justify-between items-start sm:items-center gap-1 sm:gap-2">
+                                    <h3 class="item-name theme-item-name text-lg md:text-xl font-semibold truncate">سێوی سەوز</h3>
+                                    <span class="item-price theme-item-price text-base md:text-lg font-bold whitespace-nowrap">1,000 د.ع</span>
                                 </div>
                             </div>
                         </div>
-                         <div class="menu-item">
-                            <img src="https://i.ibb.co/vxQp7v4v/g-019Z.png" alt="کوکی قاوە" class="item-image" onerror="this.src='https://placehold.co/120x120/5d4037/f5f5dc?text=وێنە'; this.onerror=null;">
-                            <div class="item-info">
-                                <div class="item-header">
-                                    <h3 class="item-name">  گێزەر</h3>
-                                    <span class="item-price">1,000 د.ع</span>
+                        <div class="menu-item theme-item-card rounded-lg shadow-lg overflow-hidden flex items-center gap-4 p-4">
+                            <img src="https://i.ibb.co/vxQp7v4v/g-019Z.png" alt="گێزەر" class="item-image theme-item-image-border w-20 h-20 md:w-24 md:h-24 rounded-full object-cover border-4 flex-shrink-0" onerror="this.src='https://placehold.co/100x100/1e3a5f/87ceeb?text=وێنە'">
+                            <div class="item-info flex-1 min-w-0">
+                                <div class="item-header flex flex-col sm:flex-row justify-between items-start sm:items-center gap-1 sm:gap-2">
+                                    <h3 class="item-name theme-item-name text-lg md:text-xl font-semibold truncate">گێزەر</h3>
+                                    <span class="item-price theme-item-price text-base md:text-lg font-bold whitespace-nowrap">1,000 د.ع</span>
                                 </div>
                             </div>
                         </div>
-                           <div class="menu-item">
-                            <img src="https://i.ibb.co/9kDcXr8V/sn-299Z.png" alt="کوکی قاوە" class="item-image" onerror="this.src='https://placehold.co/120x120/5d4037/f5f5dc?text=وێنە'; this.onerror=null;">
-                            <div class="item-info">
-                                <div class="item-header">
-                                    <h3 class="item-name">  سندی</h3>
-                                    <span class="item-price">1,500 د.ع</span>
+                        <div class="menu-item theme-item-card rounded-lg shadow-lg overflow-hidden flex items-center gap-4 p-4">
+                            <img src="https://i.ibb.co/9kDcXr8V/sn-299Z.png" alt="سندی" class="item-image theme-item-image-border w-20 h-20 md:w-24 md:h-24 rounded-full object-cover border-4 flex-shrink-0" onerror="this.src='https://placehold.co/100x100/1e3a5f/87ceeb?text=وێنە'">
+                            <div class="item-info flex-1 min-w-0">
+                                <div class="item-header flex flex-col sm:flex-row justify-between items-start sm:items-center gap-1 sm:gap-2">
+                                    <h3 class="item-name theme-item-name text-lg md:text-xl font-semibold truncate">سندی</h3>
+                                    <span class="item-price theme-item-price text-base md:text-lg font-bold whitespace-nowrap">1,500 د.ع</span>
                                 </div>
                             </div>
                         </div>
-                        <div class="menu-item">
-                            <img src="https://i.ibb.co/zHm38grF/ha-630Z.png" alt="کوکی قاوە" class="item-image" onerror="this.src='https://placehold.co/120x120/5d4037/f5f5dc?text=وێنە'; this.onerror=null;">
-                            <div class="item-info">
-                                <div class="item-header">
-                                    <h3 class="item-name"> هەنار </h3>
-                                    <span class="item-price">1,500 د.ع</span>
+                        <div class="menu-item theme-item-card rounded-lg shadow-lg overflow-hidden flex items-center gap-4 p-4">
+                            <img src="https://i.ibb.co/zHm38grF/ha-630Z.png" alt="هەنار" class="item-image theme-item-image-border w-20 h-20 md:w-24 md:h-24 rounded-full object-cover border-4 flex-shrink-0" onerror="this.src='https://placehold.co/100x100/1e3a5f/87ceeb?text=وێنە'">
+                            <div class="item-info flex-1 min-w-0">
+                                <div class="item-header flex flex-col sm:flex-row justify-between items-start sm:items-center gap-1 sm:gap-2">
+                                    <h3 class="item-name theme-item-name text-lg md:text-xl font-semibold truncate">هەنار</h3>
+                                    <span class="item-price theme-item-price text-base md:text-lg font-bold whitespace-nowrap">1,500 د.ع</span>
                                 </div>
                             </div>
                         </div>
-                        <div class="menu-item">
-                            <img src="https://i.ibb.co/twgTCqVV/za-582Z.png" alt="کوکی قاوە" class="item-image" onerror="this.src='https://placehold.co/120x120/5d4037/f5f5dc?text=وێنە'; this.onerror=null;">
-                            <div class="item-info">
-                                <div class="item-header">
-                                    <h3 class="item-name"> زەنجەفیل </h3>
-                                    <span class="item-price">1,500 د.ع</span>
+                        <div class="menu-item theme-item-card rounded-lg shadow-lg overflow-hidden flex items-center gap-4 p-4">
+                            <img src="https://i.ibb.co/twgTCqVV/za-582Z.png" alt="زەنجەفیل" class="item-image theme-item-image-border w-20 h-20 md:w-24 md:h-24 rounded-full object-cover border-4 flex-shrink-0" onerror="this.src='https://placehold.co/100x100/1e3a5f/87ceeb?text=وێنە'">
+                            <div class="item-info flex-1 min-w-0">
+                                <div class="item-header flex flex-col sm:flex-row justify-between items-start sm:items-center gap-1 sm:gap-2">
+                                    <h3 class="item-name theme-item-name text-lg md:text-xl font-semibold truncate">زەنجەفیل</h3>
+                                    <span class="item-price theme-item-price text-base md:text-lg font-bold whitespace-nowrap">1,500 د.ع</span>
                                 </div>
                             </div>
                         </div>
-                        <div class="menu-item">
-                            <img src="https://i.ibb.co/WvYnhCvP/ka-713Z.png" alt="کوکی قاوە" class="item-image" onerror="this.src='https://placehold.co/120x120/5d4037/f5f5dc?text=وێنە'; this.onerror=null;">
-                            <div class="item-info">
-                                <div class="item-header">
-                                    <h3 class="item-name"> کاڵەک </h3>
-                                    <span class="item-price">1,500 د.ع</span>
+                        <div class="menu-item theme-item-card rounded-lg shadow-lg overflow-hidden flex items-center gap-4 p-4">
+                            <img src="https://i.ibb.co/WvYnhCvP/ka-713Z.png" alt="کاڵەک" class="item-image theme-item-image-border w-20 h-20 md:w-24 md:h-24 rounded-full object-cover border-4 flex-shrink-0" onerror="this.src='https://placehold.co/100x100/1e3a5f/87ceeb?text=وێنە'">
+                            <div class="item-info flex-1 min-w-0">
+                                <div class="item-header flex flex-col sm:flex-row justify-between items-start sm:items-center gap-1 sm:gap-2">
+                                    <h3 class="item-name theme-item-name text-lg md:text-xl font-semibold truncate">کاڵەک</h3>
+                                    <span class="item-price theme-item-price text-base md:text-lg font-bold whitespace-nowrap">1,500 د.ع</span>
                                 </div>
                             </div>
                         </div>
-                        <div class="menu-item">
-                            <img src="https://i.ibb.co/WpGSsLHZ/le-471Z.png" alt="کوکی قاوە" class="item-image" onerror="this.src='https://placehold.co/120x120/5d4037/f5f5dc?text=وێنە'; this.onerror=null;">
-                            <div class="item-info">
-                                <div class="item-header">
-                                    <h3 class="item-name"> لیمۆ </h3>
-                                    <span class="item-price">1,500 د.ع</span>
+                        <div class="menu-item theme-item-card rounded-lg shadow-lg overflow-hidden flex items-center gap-4 p-4">
+                            <img src="https://i.ibb.co/WpGSsLHZ/le-471Z.png" alt="لیمۆ" class="item-image theme-item-image-border w-20 h-20 md:w-24 md:h-24 rounded-full object-cover border-4 flex-shrink-0" onerror="this.src='https://placehold.co/100x100/1e3a5f/87ceeb?text=وێنە'">
+                            <div class="item-info flex-1 min-w-0">
+                                <div class="item-header flex flex-col sm:flex-row justify-between items-start sm:items-center gap-1 sm:gap-2">
+                                    <h3 class="item-name theme-item-name text-lg md:text-xl font-semibold truncate">لیمۆ</h3>
+                                    <span class="item-price theme-item-price text-base md:text-lg font-bold whitespace-nowrap">1,500 د.ع</span>
                                 </div>
                             </div>
                         </div>
-                        <div class="menu-item">
-                            <img src="https://i.ibb.co/cXSNJZBV/han-113Z.png" alt="کوکی قاوە" class="item-image" onerror="this.src='https://placehold.co/120x120/5d4037/f5f5dc?text=وێنە'; this.onerror=null;">
-                            <div class="item-info">
-                                <div class="item-header">
-                                    <h3 class="item-name"> هەنجیر </h3>
-                                    <span class="item-price">1,500 د.ع</span>
+                        <div class="menu-item theme-item-card rounded-lg shadow-lg overflow-hidden flex items-center gap-4 p-4">
+                            <img src="https://i.ibb.co/cXSNJZBV/han-113Z.png" alt="هەنجیر" class="item-image theme-item-image-border w-20 h-20 md:w-24 md:h-24 rounded-full object-cover border-4 flex-shrink-0" onerror="this.src='https://placehold.co/100x100/1e3a5f/87ceeb?text=وێنە'">
+                            <div class="item-info flex-1 min-w-0">
+                                <div class="item-header flex flex-col sm:flex-row justify-between items-start sm:items-center gap-1 sm:gap-2">
+                                    <h3 class="item-name theme-item-name text-lg md:text-xl font-semibold truncate">هەنجیر</h3>
+                                    <span class="item-price theme-item-price text-base md:text-lg font-bold whitespace-nowrap">1,500 د.ع</span>
                                 </div>
                             </div>
                         </div>
-                        <div class="menu-item">
-                            <img src="https://i.ibb.co/nqyzcvD0/qo-164Z.png" alt="کوکی قاوە" class="item-image" onerror="this.src='https://placehold.co/120x120/5d4037/f5f5dc?text=وێنە'; this.onerror=null;">
-                            <div class="item-info">
-                                <div class="item-header">
-                                    <h3 class="item-name"> قۆخ </h3>
-                                    <span class="item-price">2,000 د.ع</span>
+                        <div class="menu-item theme-item-card rounded-lg shadow-lg overflow-hidden flex items-center gap-4 p-4">
+                            <img src="https://i.ibb.co/nqyzcvD0/qo-164Z.png" alt="قۆخ" class="item-image theme-item-image-border w-20 h-20 md:w-24 md:h-24 rounded-full object-cover border-4 flex-shrink-0" onerror="this.src='https://placehold.co/100x100/1e3a5f/87ceeb?text=وێنە'">
+                            <div class="item-info flex-1 min-w-0">
+                                <div class="item-header flex flex-col sm:flex-row justify-between items-start sm:items-center gap-1 sm:gap-2">
+                                    <h3 class="item-name theme-item-name text-lg md:text-xl font-semibold truncate">قۆخ</h3>
+                                    <span class="item-price theme-item-price text-base md:text-lg font-bold whitespace-nowrap">2,000 د.ع</span>
                                 </div>
                             </div>
                         </div>
-                        <div class="menu-item">
-                            <img src="https://i.ibb.co/QFfpSv1T/shl-335Z.png" alt="کوکی قاوە" class="item-image" onerror="this.src='https://placehold.co/120x120/5d4037/f5f5dc?text=وێنە'; this.onerror=null;">
-                            <div class="item-info">
-                                <div class="item-header">
-                                    <h3 class="item-name"> شلک </h3>
-                                    <span class="item-price">2,000 د.ع</span>
+                        <div class="menu-item theme-item-card rounded-lg shadow-lg overflow-hidden flex items-center gap-4 p-4">
+                            <img src="https://i.ibb.co/QFfpSv1T/shl-335Z.png" alt="شلک" class="item-image theme-item-image-border w-20 h-20 md:w-24 md:h-24 rounded-full object-cover border-4 flex-shrink-0" onerror="this.src='https://placehold.co/100x100/1e3a5f/87ceeb?text=وێنە'">
+                            <div class="item-info flex-1 min-w-0">
+                                <div class="item-header flex flex-col sm:flex-row justify-between items-start sm:items-center gap-1 sm:gap-2">
+                                    <h3 class="item-name theme-item-name text-lg md:text-xl font-semibold truncate">شلک</h3>
+                                    <span class="item-price theme-item-price text-base md:text-lg font-bold whitespace-nowrap">2,000 د.ع</span>
                                 </div>
                             </div>
                         </div>
-                        <div class="menu-item">
-                            <img src="https://i.ibb.co/yFzGggXn/an-596Z.png" alt="کوکی قاوە" class="item-image" onerror="this.src='https://placehold.co/120x120/5d4037/f5f5dc?text=وێنە'; this.onerror=null;">
-                            <div class="item-info">
-                                <div class="item-header">
-                                    <h3 class="item-name"> ئەناناس </h3>
-                                    <span class="item-price">2,000 د.ع</span>
+                        <div class="menu-item theme-item-card rounded-lg shadow-lg overflow-hidden flex items-center gap-4 p-4">
+                            <img src="https://i.ibb.co/yFzGggXn/an-596Z.png" alt="ئەناناس" class="item-image theme-item-image-border w-20 h-20 md:w-24 md:h-24 rounded-full object-cover border-4 flex-shrink-0" onerror="this.src='https://placehold.co/100x100/1e3a5f/87ceeb?text=وێنە'">
+                            <div class="item-info flex-1 min-w-0">
+                                <div class="item-header flex flex-col sm:flex-row justify-between items-start sm:items-center gap-1 sm:gap-2">
+                                    <h3 class="item-name theme-item-name text-lg md:text-xl font-semibold truncate">ئەناناس</h3>
+                                    <span class="item-price theme-item-price text-base md:text-lg font-bold whitespace-nowrap">2,000 د.ع</span>
                                 </div>
                             </div>
                         </div>
-                        <div class="menu-item">
-                            <img src="https://i.ibb.co/r25TNK5r/ko-027Z.png" alt="کوکی قاوە" class="item-image" onerror="this.src='https://placehold.co/120x120/5d4037/f5f5dc?text=وێنە'; this.onerror=null;">
-                            <div class="item-info">
-                                <div class="item-header">
-                                    <h3 class="item-name"> کۆکتێلی میوەکان </h3>
-                                    <span class="item-price">2,000 د.ع</span>
+                        <div class="menu-item theme-item-card rounded-lg shadow-lg overflow-hidden flex items-center gap-4 p-4">
+                            <img src="https://i.ibb.co/r25TNK5r/ko-027Z.png" alt="کۆکتێلی میوەکان" class="item-image theme-item-image-border w-20 h-20 md:w-24 md:h-24 rounded-full object-cover border-4 flex-shrink-0" onerror="this.src='https://placehold.co/100x100/1e3a5f/87ceeb?text=وێنە'">
+                            <div class="item-info flex-1 min-w-0">
+                                <div class="item-header flex flex-col sm:flex-row justify-between items-start sm:items-center gap-1 sm:gap-2">
+                                    <h3 class="item-name theme-item-name text-lg md:text-xl font-semibold truncate">کۆکتێلی میوەکان</h3>
+                                    <span class="item-price theme-item-price text-base md:text-lg font-bold whitespace-nowrap">2,000 د.ع</span>
                                 </div>
                             </div>
                         </div>
-                        <div class="menu-item">
-                            <img src="https://i.ibb.co/03Z2sw9/ma-071Z.png" alt="کوکی قاوە" class="item-image" onerror="this.src='https://placehold.co/120x120/5d4037/f5f5dc?text=وێنە'; this.onerror=null;">
-                            <div class="item-info">
-                                <div class="item-header">
-                                    <h3 class="item-name"> مانگۆ </h3>
-                                    <span class="item-price">4,000 د.ع</span>
+                        <div class="menu-item theme-item-card rounded-lg shadow-lg overflow-hidden flex items-center gap-4 p-4">
+                            <img src="https://i.ibb.co/03Z2sw9/ma-071Z.png" alt="مانگۆ" class="item-image theme-item-image-border w-20 h-20 md:w-24 md:h-24 rounded-full object-cover border-4 flex-shrink-0" onerror="this.src='https://placehold.co/100x100/1e3a5f/87ceeb?text=وێنە'">
+                            <div class="item-info flex-1 min-w-0">
+                                <div class="item-header flex flex-col sm:flex-row justify-between items-start sm:items-center gap-1 sm:gap-2">
+                                    <h3 class="item-name theme-item-name text-lg md:text-xl font-semibold truncate">مانگۆ</h3>
+                                    <span class="item-price theme-item-price text-base md:text-lg font-bold whitespace-nowrap">4,000 د.ع</span>
                                 </div>
                             </div>
                         </div>
-                        <div class="menu-item">
-                            <img src="https://i.ibb.co/Gv2P7n2t/av-417Z.png" alt="کوکی قاوە" class="item-image" onerror="this.src='https://placehold.co/120x120/5d4037/f5f5dc?text=وێنە'; this.onerror=null;">
-                            <div class="item-info">
-                                <div class="item-header">
-                                    <h3 class="item-name"> ئەڤۆگادۆ </h3>
-                                    <span class="item-price">3,000 د.ع</span>
-                                </div>
-                            </div>
-                        </div>
-
-                    </div>
-                </div>
-
-                <div class="food-category" id="frappe-category">
-                    <h3 class="food-category-title"> بەشی شەربەتی فرێسی شەیک</h3>
-                    <div class="items-grid">
-                        <div class="menu-item">
-                            <img src="https://i.ibb.co/9HKnrRBq/ml-482Z.png" alt="کرواسان" class="item-image" onerror="this.src='https://placehold.co/120x120/5d4037/f5f5dc?text=وێنە'; this.onerror=null;">
-                            <div class="item-info">
-                                <div class="item-header">
-                                    <h3 class="item-name">میڵک شەیکی سادە</h3>
-                                    <span class="item-price">2,000 د.ع</span>
-                                </div>
-                            </div>
-                        </div>
-                        <div class="menu-item">
-                            <img src="https://i.ibb.co/C38C33bg/no-767Z.png" alt="دۆنات" class="item-image" onerror="this.src='https://placehold.co/120x120/5d4037/f5f5dc?text=وێنە'; this.onerror=null;">
-                            <div class="item-info">
-                                <div class="item-header">
-                                    <h3 class="item-name">نۆتێلاشەیک</h3>
-                                    <span class="item-price">2,500 د.ع</span>
-                                </div>
-                            </div>
-                        </div>
-                        <div class="menu-item">
-                            <img src="https://i.ibb.co/MxGTVThT/fs-924Z.png" alt="دۆنات" class="item-image" onerror="this.src='https://placehold.co/120x120/5d4037/f5f5dc?text=وێنە'; this.onerror=null;">
-                            <div class="item-info">
-                                <div class="item-header">
-                                    <h3 class="item-name">فستق شەیک</h3>
-                                    <span class="item-price">2,500 د.ع</span>
-                                </div>
-                            </div>
-                        </div>
-                         <div class="menu-item">
-                            <img src="https://i.ibb.co/VYYrkXrj/kr-751Z.png" alt="دۆنات" class="item-image" onerror="this.src='https://placehold.co/120x120/5d4037/f5f5dc?text=وێنە'; this.onerror=null;">
-                            <div class="item-info">
-                                <div class="item-header">
-                                    <h3 class="item-name">کرامێڵ شەیک</h3>
-                                    <span class="item-price">2,500 د.ع</span>
-                                </div>
-                            </div>
-                        </div>
-                         <div class="menu-item">
-                            <img src="https://i.ibb.co/kgbPH5QM/ch-038Z.png" alt="دۆنات" class="item-image" onerror="this.src='https://placehold.co/120x120/5d4037/f5f5dc?text=وێنە'; this.onerror=null;">
-                            <div class="item-info">
-                                <div class="item-header">
-                                    <h3 class="item-name">چوکولێت شەیک</h3>
-                                    <span class="item-price">2,500 د.ع</span>
-                                </div>
-                            </div>
-                        </div>
-                         <div class="menu-item">
-                            <img src="https://i.ibb.co/0pwYF337/mlk-814Z.png" alt="دۆنات" class="item-image" onerror="this.src='https://placehold.co/120x120/5d4037/f5f5dc?text=وێنە'; this.onerror=null;">
-                            <div class="item-info">
-                                <div class="item-header">
-                                    <h3 class="item-name">میڵک شەیکی تایبەت</h3>
-                                    <span class="item-price">3,500 د.ع</span>
-                                </div>
-                            </div>
-                        </div> <div class="menu-item">
-                            <img src="https://i.ibb.co/20ZT7ZbY/sp-204Z.png" alt="دۆنات" class="item-image" onerror="this.src='https://placehold.co/120x120/5d4037/f5f5dc?text=وێنە'; this.onerror=null;">
-                            <div class="item-info">
-                                <div class="item-header">
-                                    <h3 class="item-name">سپێشڵ نۆتێلا شەیک</h3>
-                                    <span class="item-price">4,000 د.ع</span>
+                        <div class="menu-item theme-item-card rounded-lg shadow-lg overflow-hidden flex items-center gap-4 p-4">
+                            <img src="https://i.ibb.co/Gv2P7n2t/av-417Z.png" alt="ئەڤۆگادۆ" class="item-image theme-item-image-border w-20 h-20 md:w-24 md:h-24 rounded-full object-cover border-4 flex-shrink-0" onerror="this.src='https://placehold.co/100x100/1e3a5f/87ceeb?text=وێنە'">
+                            <div class="item-info flex-1 min-w-0">
+                                <div class="item-header flex flex-col sm:flex-row justify-between items-start sm:items-center gap-1 sm:gap-2">
+                                    <h3 class="item-name theme-item-name text-lg md:text-xl font-semibold truncate">ئەڤۆگادۆ</h3>
+                                    <span class="item-price theme-item-price text-base md:text-lg font-bold whitespace-nowrap">3,000 د.ع</span>
                                 </div>
                             </div>
                         </div>
                     </div>
                 </div>
 
-                <div class="food-category" id="iced-latte-category">
-                    <h3 class="food-category-title"> بەشی خواردنەوە مۆکتێلەکان </h3>
-                    <div class="items-grid">
-                        <div class="menu-item">
-                            <img src="https://i.ibb.co/XZkrz36F/tgg.png" alt="چیزکێک" class="item-image" onerror="this.src='https://placehold.co/120x120/5d4037/f5f5dc?text=وێنە'; this.onerror=null;">
-                            <div class="item-info">
-                                <div class="item-header">
-                                    <h3 class="item-name">تایگەر مەکسیکی</h3>
-                                    <span class="item-price">1,500 د.ع</span>
+                <div class="food-category mt-8 bg-blue-950/30 p-4 md:p-6 rounded-lg" id="frappe-category">
+                    <h3 class="food-category-title theme-section-title text-2xl font-bold text-center mb-6">بەشی شەربەتی فرێسی شەیک</h3>
+                    <div class="items-grid grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 gap-4 md:gap-6">
+                        <!-- ئایتمەکانی ئەم پۆلە -->
+                        <div class="menu-item theme-item-card rounded-lg shadow-lg overflow-hidden flex items-center gap-4 p-4">
+                            <img src="https://i.ibb.co/9HKnrRBq/ml-482Z.png" alt="میڵک شەیکی سادە" class="item-image theme-item-image-border w-20 h-20 md:w-24 md:h-24 rounded-full object-cover border-4 flex-shrink-0" onerror="this.src='https://placehold.co/100x100/1e3a5f/87ceeb?text=وێنە'">
+                            <div class="item-info flex-1 min-w-0">
+                                <div class="item-header flex flex-col sm:flex-row justify-between items-start sm:items-center gap-1 sm:gap-2">
+                                    <h3 class="item-name theme-item-name text-lg md:text-xl font-semibold truncate">میڵک شەیکی سادە</h3>
+                                    <span class="item-price theme-item-price text-base md:text-lg font-bold whitespace-nowrap">2,000 د.ع</span>
                                 </div>
                             </div>
                         </div>
-                        <div class="menu-item">
-                            <img src="https://i.ibb.co/HTDbgz9V/tgh-179Z.png" alt="مافین" class="item-image" onerror="this.src='https://placehold.co/120x120/5d4037/f5f5dc?text=وێنە'; this.onerror=null;">
-                            <div class="item-info">
-                                <div class="item-header">
-                                    <h3 class="item-name"> تایگەرمەکسیکی هەنار</h3>
-                                    <span class="item-price">2,000 د.ع</span>
+                        <div class="menu-item theme-item-card rounded-lg shadow-lg overflow-hidden flex items-center gap-4 p-4">
+                            <img src="https://i.ibb.co/C38C33bg/no-767Z.png" alt="نۆتێلاشەیک" class="item-image theme-item-image-border w-20 h-20 md:w-24 md:h-24 rounded-full object-cover border-4 flex-shrink-0" onerror="this.src='https://placehold.co/100x100/1e3a5f/87ceeb?text=وێنە'">
+                            <div class="item-info flex-1 min-w-0">
+                                <div class="item-header flex flex-col sm:flex-row justify-between items-start sm:items-center gap-1 sm:gap-2">
+                                    <h3 class="item-name theme-item-name text-lg md:text-xl font-semibold truncate">نۆتێلاشەیک</h3>
+                                    <span class="item-price theme-item-price text-base md:text-lg font-bold whitespace-nowrap">2,500 د.ع</span>
                                 </div>
                             </div>
                         </div>
-                          <div class="menu-item">
-                            <img src="https://i.ibb.co/xtvNxvkc/tgb-394Z.png" alt="مافین" class="item-image" onerror="this.src='https://placehold.co/120x120/5d4037/f5f5dc?text=وێنە'; this.onerror=null;">
-                            <div class="item-info">
-                                <div class="item-header">
-                                    <h3 class="item-name"> بلو تایگەر مەکسیکی</h3>
-                                    <span class="item-price">2,500 د.ع</span>
+                        <div class="menu-item theme-item-card rounded-lg shadow-lg overflow-hidden flex items-center gap-4 p-4">
+                            <img src="https://i.ibb.co/MxGTVThT/fs-924Z.png" alt="فستق شەیک" class="item-image theme-item-image-border w-20 h-20 md:w-24 md:h-24 rounded-full object-cover border-4 flex-shrink-0" onerror="this.src='https://placehold.co/100x100/1e3a5f/87ceeb?text=وێنە'">
+                            <div class="item-info flex-1 min-w-0">
+                                <div class="item-header flex flex-col sm:flex-row justify-between items-start sm:items-center gap-1 sm:gap-2">
+                                    <h3 class="item-name theme-item-name text-lg md:text-xl font-semibold truncate">فستق شەیک</h3>
+                                    <span class="item-price theme-item-price text-base md:text-lg font-bold whitespace-nowrap">2,500 د.ع</span>
                                 </div>
                             </div>
                         </div>
-                          <div class="menu-item">
-                            <img src="https://i.ibb.co/xrvGRW9/gsh-777Z.png" alt="مافین" class="item-image" onerror="this.src='https://placehold.co/120x120/5d4037/f5f5dc?text=وێنە'; this.onerror=null;">
-                            <div class="item-info">
-                                <div class="item-header">
-                                    <h3 class="item-name"> شەربەتە شینەکە بلوکۆراسۆ</h3>
-                                    <span class="item-price">2,500 د.ع</span>
+                        <div class="menu-item theme-item-card rounded-lg shadow-lg overflow-hidden flex items-center gap-4 p-4">
+                            <img src="https://i.ibb.co/VYYrkXrj/kr-751Z.png" alt="کرامێڵ شەیک" class="item-image theme-item-image-border w-20 h-20 md:w-24 md:h-24 rounded-full object-cover border-4 flex-shrink-0" onerror="this.src='https://placehold.co/100x100/1e3a5f/87ceeb?text=وێنە'">
+                            <div class="item-info flex-1 min-w-0">
+                                <div class="item-header flex flex-col sm:flex-row justify-between items-start sm:items-center gap-1 sm:gap-2">
+                                    <h3 class="item-name theme-item-name text-lg md:text-xl font-semibold truncate">کرامێڵ شەیک</h3>
+                                    <span class="item-price theme-item-price text-base md:text-lg font-bold whitespace-nowrap">2,500 د.ع</span>
                                 </div>
                             </div>
                         </div>
-                          <div class="menu-item">
-                            <img src="https://i.ibb.co/V0VyQbCP/mo-334Z.png" alt="مافین" class="item-image" onerror="this.src='https://placehold.co/120x120/5d4037/f5f5dc?text=وێنە'; this.onerror=null;">
-                            <div class="item-info">
-                                <div class="item-header">
-                                    <h3 class="item-name"> مۆهیتۆ</h3>
-                                    <span class="item-price">2,500 د.ع</span>
+                        <div class="menu-item theme-item-card rounded-lg shadow-lg overflow-hidden flex items-center gap-4 p-4">
+                            <img src="https://i.ibb.co/kgbPH5QM/ch-038Z.png" alt="چوکولێت شەیک" class="item-image theme-item-image-border w-20 h-20 md:w-24 md:h-24 rounded-full object-cover border-4 flex-shrink-0" onerror="this.src='https://placehold.co/100x100/1e3a5f/87ceeb?text=وێنە'">
+                            <div class="item-info flex-1 min-w-0">
+                                <div class="item-header flex flex-col sm:flex-row justify-between items-start sm:items-center gap-1 sm:gap-2">
+                                    <h3 class="item-name theme-item-name text-lg md:text-xl font-semibold truncate">چوکولێت شەیک</h3>
+                                    <span class="item-price theme-item-price text-base md:text-lg font-bold whitespace-nowrap">2,500 د.ع</span>
                                 </div>
                             </div>
                         </div>
-                          <div class="menu-item">
-                            <img src="https://i.ibb.co/C3kdzV8j/moc-764Z.png" alt="مافین" class="item-image" onerror="this.src='https://placehold.co/120x120/5d4037/f5f5dc?text=وێنە'; this.onerror=null;">
-                            <div class="item-info">
-                                <div class="item-header">
-                                    <h3 class="item-name"> مۆکتێلی چێری</h3>
-                                    <span class="item-price">2,500 د.ع</span>
+                        <div class="menu-item theme-item-card rounded-lg shadow-lg overflow-hidden flex items-center gap-4 p-4">
+                            <img src="https://i.ibb.co/0pwYF337/mlk-814Z.png" alt="میڵک شەیکی تایبەت" class="item-image theme-item-image-border w-20 h-20 md:w-24 md:h-24 rounded-full object-cover border-4 flex-shrink-0" onerror="this.src='https://placehold.co/100x100/1e3a5f/87ceeb?text=وێنە'">
+                            <div class="item-info flex-1 min-w-0">
+                                <div class="item-header flex flex-col sm:flex-row justify-between items-start sm:items-center gap-1 sm:gap-2">
+                                    <h3 class="item-name theme-item-name text-lg md:text-xl font-semibold truncate">میڵک شەیکی تایبەت</h3>
+                                    <span class="item-price theme-item-price text-base md:text-lg font-bold whitespace-nowrap">3,500 د.ع</span>
                                 </div>
                             </div>
                         </div>
-                          <div class="menu-item">
-                            <img src="https://i.ibb.co/k6rg7Ny5/mox-825Z.png" alt="مافین" class="item-image" onerror="this.src='https://placehold.co/120x120/5d4037/f5f5dc?text=وێنە'; this.onerror=null;">
-                            <div class="item-info">
-                                <div class="item-header">
-                                    <h3 class="item-name"> نۆکتێلی قۆخ</h3>
-                                    <span class="item-price">2,500 د.ع</span>
-                                </div>
-                            </div>
-                        </div>
-                          <div class="menu-item">
-                            <img src="https://i.ibb.co/FLn93fy6/tm-883Z.png" alt="مافین" class="item-image" onerror="this.src='https://placehold.co/120x120/5d4037/f5f5dc?text=وێنە'; this.onerror=null;">
-                            <div class="item-info">
-                                <div class="item-header">
-                                    <h3 class="item-name"> مۆکتێلی تەمەرهندی</h3>
-                                    <span class="item-price">2,500 د.ع</span>
-                                </div>
-                            </div>
-                        </div>
-                          <div class="menu-item">
-                            <img src="https://i.ibb.co/zhw6zLXb/bl-780Z.png" alt="مافین" class="item-image" onerror="this.src='https://placehold.co/120x120/5d4037/f5f5dc?text=وێنە'; this.onerror=null;">
-                            <div class="item-info">
-                                <div class="item-header">
-                                    <h3 class="item-name"> مۆکتێلی بلاک فلاوەر</h3>
-                                    <span class="item-price">2,500 د.ع</span>
-                                </div>
-                            </div>
-                        </div>
-                          <div class="menu-item">
-                            <img src="https://i.ibb.co/YBK1Pjhd/blw-900Z.png" alt="مافین" class="item-image" onerror="this.src='https://placehold.co/120x120/5d4037/f5f5dc?text=وێنە'; this.onerror=null;">
-                            <div class="item-info">
-                                <div class="item-header">
-                                    <h3 class="item-name"> مۆکتێلی بلوهاوای</h3>
-                                    <span class="item-price">2,500 د.ع</span>
-                                </div>
-                            </div>
-                        </div>
-                         <div class="menu-item">
-                            <img src="https://i.ibb.co/nKg68KL/ta-896Z.png" alt="مافین" class="item-image" onerror="this.src='https://placehold.co/120x120/5d4037/f5f5dc?text=وێنە'; this.onerror=null;">
-                            <div class="item-info">
-                                <div class="item-header">
-                                    <h3 class="item-name"> مۆکتێلی تایبەت</h3>
-                                    <span class="item-price">3,000 د.ع</span>
+                        <div class="menu-item theme-item-card rounded-lg shadow-lg overflow-hidden flex items-center gap-4 p-4">
+                            <img src="https://i.ibb.co/20ZT7ZbY/sp-204Z.png" alt="سپێشڵ نۆتێلا شەیک" class="item-image theme-item-image-border w-20 h-20 md:w-24 md:h-24 rounded-full object-cover border-4 flex-shrink-0" onerror="this.src='https://placehold.co/100x100/1e3a5f/87ceeb?text=وێنە'">
+                            <div class="item-info flex-1 min-w-0">
+                                <div class="item-header flex flex-col sm:flex-row justify-between items-start sm:items-center gap-1 sm:gap-2">
+                                    <h3 class="item-name theme-item-name text-lg md:text-xl font-semibold truncate">سپێشڵ نۆتێلا شەیک</h3>
+                                    <span class="item-price theme-item-price text-base md:text-lg font-bold whitespace-nowrap">4,000 د.ع</span>
                                 </div>
                             </div>
                         </div>
                     </div>
                 </div>
 
-                <div class="food-category" id="cold-brew-category">
-                    <h3 class="food-category-title"> بەشی شیر مۆزەکان </h3>
-                    <div class="items-grid">
-                        <div class="menu-item">
-                            <img src="https://i.ibb.co/nq8hTKNT/she-927Z.png" alt="سەندویچ" class="item-image" onerror="this.src='https://placehold.co/120x120/5d4037/f5f5dc?text=وێنە'; this.onerror=null;">
-                            <div class="item-info">
-                                <div class="item-header">
-                                    <h3 class="item-name">شیرمۆزی سادە</h3>
-                                    <span class="item-price">1,000 د.ع</span>
+                <div class="food-category mt-8 bg-blue-950/30 p-4 md:p-6 rounded-lg" id="iced-latte-category">
+                    <h3 class="food-category-title theme-section-title text-2xl font-bold text-center mb-6">بەشی خواردنەوە مۆکتێلەکان</h3>
+                    <div class="items-grid grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 gap-4 md:gap-6">
+                        <!-- ئایتمەکانی ئەم پۆلە -->
+                        <div class="menu-item theme-item-card rounded-lg shadow-lg overflow-hidden flex items-center gap-4 p-4">
+                            <img src="https://i.ibb.co/XZkrz36F/tgg.png" alt="تایگەر مەکسیکی" class="item-image theme-item-image-border w-20 h-20 md:w-24 md:h-24 rounded-full object-cover border-4 flex-shrink-0" onerror="this.src='https://placehold.co/100x100/1e3a5f/87ceeb?text=وێنە'">
+                            <div class="item-info flex-1 min-w-0">
+                                <div class="item-header flex flex-col sm:flex-row justify-between items-start sm:items-center gap-1 sm:gap-2">
+                                    <h3 class="item-name theme-item-name text-lg md:text-xl font-semibold truncate">تایگەر مەکسیکی</h3>
+                                    <span class="item-price theme-item-price text-base md:text-lg font-bold whitespace-nowrap">1,500 د.ع</span>
                                 </div>
                             </div>
                         </div>
-                        <div class="menu-item">
-                            <img src="https://i.ibb.co/1tfQc3SY/shx-044Z.png" alt="سلاد" class="item-image" onerror="this.src='https://placehold.co/120x120/5d4037/f5f5dc?text=وێنە'; this.onerror=null;">
-                            <div class="item-info">
-                                <div class="item-header">
-                                    <h3 class="item-name">شیر خورما</h3>
-                                    <span class="item-price">1,500 د.ع</span>
+                        <div class="menu-item theme-item-card rounded-lg shadow-lg overflow-hidden flex items-center gap-4 p-4">
+                            <img src="https://i.ibb.co/HTDbgz9V/tgh-179Z.png" alt="تایگەرمەکسیکی هەنار" class="item-image theme-item-image-border w-20 h-20 md:w-24 md:h-24 rounded-full object-cover border-4 flex-shrink-0" onerror="this.src='https://placehold.co/100x100/1e3a5f/87ceeb?text=وێنە'">
+                            <div class="item-info flex-1 min-w-0">
+                                <div class="item-header flex flex-col sm:flex-row justify-between items-start sm:items-center gap-1 sm:gap-2">
+                                    <h3 class="item-name theme-item-name text-lg md:text-xl font-semibold truncate">تایگەرمەکسیکی هەنار</h3>
+                                    <span class="item-price theme-item-price text-base md:text-lg font-bold whitespace-nowrap">2,000 د.ع</span>
                                 </div>
                             </div>
                         </div>
-                        <div class="menu-item">
-                            <img src="https://i.ibb.co/zTbS8b7T/shk-620Z.png" alt="سلاد" class="item-image" onerror="this.src='https://placehold.co/120x120/5d4037/f5f5dc?text=وێنە'; this.onerror=null;">
-                            <div class="item-info">
-                                <div class="item-header">
-                                    <h3 class="item-name">شیر کاڵەک</h3>
-                                    <span class="item-price">2,000 د.ع</span>
+                        <div class="menu-item theme-item-card rounded-lg shadow-lg overflow-hidden flex items-center gap-4 p-4">
+                            <img src="https://i.ibb.co/xtvNxvkc/tgb-394Z.png" alt="بلو تایگەر مەکسیکی" class="item-image theme-item-image-border w-20 h-20 md:w-24 md:h-24 rounded-full object-cover border-4 flex-shrink-0" onerror="this.src='https://placehold.co/100x100/1e3a5f/87ceeb?text=وێنە'">
+                            <div class="item-info flex-1 min-w-0">
+                                <div class="item-header flex flex-col sm:flex-row justify-between items-start sm:items-center gap-1 sm:gap-2">
+                                    <h3 class="item-name theme-item-name text-lg md:text-xl font-semibold truncate">بلو تایگەر مەکسیکی</h3>
+                                    <span class="item-price theme-item-price text-base md:text-lg font-bold whitespace-nowrap">2,500 د.ع</span>
                                 </div>
                             </div>
                         </div>
-                        <div class="menu-item">
-                            <img src="https://i.ibb.co/0d3btsG/sho-060Z.png" alt="سلاد" class="item-image" onerror="this.src='https://placehold.co/120x120/5d4037/f5f5dc?text=وێنە'; this.onerror=null;">
-                            <div class="item-info">
-                                <div class="item-header">
-                                    <h3 class="item-name">شۆفان </h3>
-                                    <span class="item-price">2,000 د.ع</span>
+                        <div class="menu-item theme-item-card rounded-lg shadow-lg overflow-hidden flex items-center gap-4 p-4">
+                            <img src="https://i.ibb.co/xrvGRW9/gsh-777Z.png" alt="شەربەتە شینەکە بلوکۆراسۆ" class="item-image theme-item-image-border w-20 h-20 md:w-24 md:h-24 rounded-full object-cover border-4 flex-shrink-0" onerror="this.src='https://placehold.co/100x100/1e3a5f/87ceeb?text=وێنە'">
+                            <div class="item-info flex-1 min-w-0">
+                                <div class="item-header flex flex-col sm:flex-row justify-between items-start sm:items-center gap-1 sm:gap-2">
+                                    <h3 class="item-name theme-item-name text-lg md:text-xl font-semibold truncate">شەربەتە شینەکە بلوکۆراسۆ</h3>
+                                    <span class="item-price theme-item-price text-base md:text-lg font-bold whitespace-nowrap">2,500 د.ع</span>
                                 </div>
                             </div>
                         </div>
-                        <div class="menu-item">
-                            <img src="https://i.ibb.co/dwdGHjNg/shh-553Z.png" alt="سلاد" class="item-image" onerror="this.src='https://placehold.co/120x120/5d4037/f5f5dc?text=وێنە'; this.onerror=null;">
-                            <div class="item-info">
-                                <div class="item-header">
-                                    <h3 class="item-name">شیر هەنجیر </h3>
-                                    <span class="item-price">2,000 د.ع</span>
+                        <div class="menu-item theme-item-card rounded-lg shadow-lg overflow-hidden flex items-center gap-4 p-4">
+                            <img src="https://i.ibb.co/V0VyQbCP/mo-334Z.png" alt="مۆهیتۆ" class="item-image theme-item-image-border w-20 h-20 md:w-24 md:h-24 rounded-full object-cover border-4 flex-shrink-0" onerror="this.src='https://placehold.co/100x100/1e3a5f/87ceeb?text=وێنە'">
+                            <div class="item-info flex-1 min-w-0">
+                                <div class="item-header flex flex-col sm:flex-row justify-between items-start sm:items-center gap-1 sm:gap-2">
+                                    <h3 class="item-name theme-item-name text-lg md:text-xl font-semibold truncate">مۆهیتۆ</h3>
+                                    <span class="item-price theme-item-price text-base md:text-lg font-bold whitespace-nowrap">2,500 د.ع</span>
                                 </div>
                             </div>
                         </div>
-                        <div class="menu-item">
-                            <img src="https://i.ibb.co/rfQZdr5g/shf-878Z.png" alt="سلاد" class="item-image" onerror="this.src='https://placehold.co/120x120/5d4037/f5f5dc?text=وێنە'; this.onerror=null;">
-                            <div class="item-info">
-                                <div class="item-header">
-                                    <h3 class="item-name">شیر فستق </h3>
-                                    <span class="item-price">2,000 د.ع</span>
+                        <div class="menu-item theme-item-card rounded-lg shadow-lg overflow-hidden flex items-center gap-4 p-4">
+                            <img src="https://i.ibb.co/C3kdzV8j/moc-764Z.png" alt="مۆکتێلی چێری" class="item-image theme-item-image-border w-20 h-20 md:w-24 md:h-24 rounded-full object-cover border-4 flex-shrink-0" onerror="this.src='https://placehold.co/100x100/1e3a5f/87ceeb?text=وێنە'">
+                            <div class="item-info flex-1 min-w-0">
+                                <div class="item-header flex flex-col sm:flex-row justify-between items-start sm:items-center gap-1 sm:gap-2">
+                                    <h3 class="item-name theme-item-name text-lg md:text-xl font-semibold truncate">مۆکتێلی چێری</h3>
+                                    <span class="item-price theme-item-price text-base md:text-lg font-bold whitespace-nowrap">2,500 د.ع</span>
                                 </div>
                             </div>
                         </div>
-                        <div class="menu-item">
-                            <img src="https://i.ibb.co/bq4NZrx/shot-562-Z.png" alt="سلاد" class="item-image" onerror="this.src='https://placehold.co/120x120/5d4037/f5f5dc?text=وێنە'; this.onerror=null;">
-                            <div class="item-info">
-                                <div class="item-header">
-                                    <h3 class="item-name">شیرمۆزی تایبەت </h3>
-                                    <span class="item-price">2,000 د.ع</span>
+                        <div class="menu-item theme-item-card rounded-lg shadow-lg overflow-hidden flex items-center gap-4 p-4">
+                            <img src="https://i.ibb.co/k6rg7Ny5/mox-825Z.png" alt="نۆکتێلی قۆخ" class="item-image theme-item-image-border w-20 h-20 md:w-24 md:h-24 rounded-full object-cover border-4 flex-shrink-0" onerror="this.src='https://placehold.co/100x100/1e3a5f/87ceeb?text=وێنە'">
+                            <div class="item-info flex-1 min-w-0">
+                                <div class="item-header flex flex-col sm:flex-row justify-between items-start sm:items-center gap-1 sm:gap-2">
+                                    <h3 class="item-name theme-item-name text-lg md:text-xl font-semibold truncate">نۆکتێلی قۆخ</h3>
+                                    <span class="item-price theme-item-price text-base md:text-lg font-bold whitespace-nowrap">2,500 د.ع</span>
+                                </div>
+                            </div>
+                        </div>
+                        <div class="menu-item theme-item-card rounded-lg shadow-lg overflow-hidden flex items-center gap-4 p-4">
+                            <img src="https://i.ibb.co/FLn93fy6/tm-883Z.png" alt="مۆکتێلی تەمەرهندی" class="item-image theme-item-image-border w-20 h-20 md:w-24 md:h-24 rounded-full object-cover border-4 flex-shrink-0" onerror="this.src='https://placehold.co/100x100/1e3a5f/87ceeb?text=وێنە'">
+                            <div class="item-info flex-1 min-w-0">
+                                <div class="item-header flex flex-col sm:flex-row justify-between items-start sm:items-center gap-1 sm:gap-2">
+                                    <h3 class="item-name theme-item-name text-lg md:text-xl font-semibold truncate">مۆکتێلی تەمەرهندی</h3>
+                                    <span class="item-price theme-item-price text-base md:text-lg font-bold whitespace-nowrap">2,500 د.ع</span>
+                                </div>
+                            </div>
+                        </div>
+                        <div class="menu-item theme-item-card rounded-lg shadow-lg overflow-hidden flex items-center gap-4 p-4">
+                            <img src="https://i.ibb.co/zhw6zLXb/bl-780Z.png" alt="مۆکتێلی بلاک فلاوەر" class="item-image theme-item-image-border w-20 h-20 md:w-24 md:h-24 rounded-full object-cover border-4 flex-shrink-0" onerror="this.src='https://placehold.co/100x100/1e3a5f/87ceeb?text=وێنە'">
+                            <div class="item-info flex-1 min-w-0">
+                                <div class="item-header flex flex-col sm:flex-row justify-between items-start sm:items-center gap-1 sm:gap-2">
+                                    <h3 class="item-name theme-item-name text-lg md:text-xl font-semibold truncate">مۆکتێلی بلاک فلاوەر</h3>
+                                    <span class="item-price theme-item-price text-base md:text-lg font-bold whitespace-nowrap">2,500 د.ع</span>
+                                </div>
+                            </div>
+                        </div>
+                        <div class="menu-item theme-item-card rounded-lg shadow-lg overflow-hidden flex items-center gap-4 p-4">
+                            <img src="https://i.ibb.co/YBK1Pjhd/blw-900Z.png" alt="مۆکتێلی بلوهاوای" class="item-image theme-item-image-border w-20 h-20 md:w-24 md:h-24 rounded-full object-cover border-4 flex-shrink-0" onerror="this.src='https://placehold.co/100x100/1e3a5f/87ceeb?text=وێنە'">
+                            <div class="item-info flex-1 min-w-0">
+                                <div class="item-header flex flex-col sm:flex-row justify-between items-start sm:items-center gap-1 sm:gap-2">
+                                    <h3 class="item-name theme-item-name text-lg md:text-xl font-semibold truncate">مۆکتێلی بلوهاوای</h3>
+                                    <span class="item-price theme-item-price text-base md:text-lg font-bold whitespace-nowrap">2,500 د.ع</span>
+                                </div>
+                            </div>
+                        </div>
+                        <div class="menu-item theme-item-card rounded-lg shadow-lg overflow-hidden flex items-center gap-4 p-4">
+                            <img src="https://i.ibb.co/nKg68KL/ta-896Z.png" alt="مۆکتێلی تایبەت" class="item-image theme-item-image-border w-20 h-20 md:w-24 md:h-24 rounded-full object-cover border-4 flex-shrink-0" onerror="this.src='https://placehold.co/100x100/1e3a5f/87ceeb?text=وێنە'">
+                            <div class="item-info flex-1 min-w-0">
+                                <div class="item-header flex flex-col sm:flex-row justify-between items-start sm:items-center gap-1 sm:gap-2">
+                                    <h3 class="item-name theme-item-name text-lg md:text-xl font-semibold truncate">مۆکتێلی تایبەت</h3>
+                                    <span class="item-price theme-item-price text-base md:text-lg font-bold whitespace-nowrap">3,000 د.ع</span>
                                 </div>
                             </div>
                         </div>
                     </div>
                 </div>
 
-                <div class="food-category" id="special-category">
-                    <h3 class="food-category-title">بەشی ئایسکرێمەکان  </h3>
-                    <div class="items-grid">
-                        <div class="menu-item">
-                            <img src="https://i.ibb.co/v4Tz8xb5/ass-324Z.png" alt="براونی" class="item-image" onerror="this.src='https://placehold.co/120x120/5d4037/f5f5dc?text=وێنە'; this.onerror=null;">
-                            <div class="item-info">
-                                <div class="item-header">
-                                    <h3 class="item-name">قاپ ئایسکرێم ٣تام</h3>
-                                    <span class="item-price">1,000 د.ع</span>
-                                </div>
-                                <p class="item-description">    تامی ئایشکرێمەکان {شیر،ڤانێلا،جوکولێت،قاوە،کرامێڵ،هەنجیر،لیمۆ،قەیسی،کاڵەک،فستق } </p>
-                            </div>
-                        </div>
-                        <div class="menu-item">
-                            <img src="https://i.ibb.co/b51G75LD/assm-237-Z.png" alt="تایرامیسو" class="item-image" onerror="this.src='https://placehold.co/120x120/5d4037/f5f5dc?text=وێنە'; this.onerror=null;">
-                            <div class="item-info">
-                                <div class="item-header">
-                                    <h3 class="item-name">ئایسکرێم بەمیوە</h3>
-                                    <span class="item-price">2,000 د.ع</span>
+                <div class="food-category mt-8 bg-blue-950/30 p-4 md:p-6 rounded-lg" id="cold-brew-category">
+                    <h3 class="food-category-title theme-section-title text-2xl font-bold text-center mb-6">بەشی شیر مۆزەکان</h3>
+                    <div class="items-grid grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 gap-4 md:gap-6">
+                        <!-- ئایتمەکانی ئەم پۆلە -->
+                        <div class="menu-item theme-item-card rounded-lg shadow-lg overflow-hidden flex items-center gap-4 p-4">
+                            <img src="https://i.ibb.co/nq8hTKNT/she-927Z.png" alt="شیرمۆزی سادە" class="item-image theme-item-image-border w-20 h-20 md:w-24 md:h-24 rounded-full object-cover border-4 flex-shrink-0" onerror="this.src='https://placehold.co/100x100/1e3a5f/87ceeb?text=وێنە'">
+                            <div class="item-info flex-1 min-w-0">
+                                <div class="item-header flex flex-col sm:flex-row justify-between items-start sm:items-center gap-1 sm:gap-2">
+                                    <h3 class="item-name theme-item-name text-lg md:text-xl font-semibold truncate">شیرمۆزی سادە</h3>
+                                    <span class="item-price theme-item-price text-base md:text-lg font-bold whitespace-nowrap">1,000 د.ع</span>
                                 </div>
                             </div>
                         </div>
-                           <div class="menu-item">
-                            <img src="https://i.ibb.co/fdktvZxW/asn-419Z.png" alt="تایرامیسو" class="item-image" onerror="this.src='https://placehold.co/120x120/5d4037/f5f5dc?text=وێنە'; this.onerror=null;">
-                            <div class="item-info">
-                                <div class="item-header">
-                                    <h3 class="item-name">ئایسکرێم نۆتێلا</h3>
-                                    <span class="item-price">2,000 د.ع</span>
+                        <div class="menu-item theme-item-card rounded-lg shadow-lg overflow-hidden flex items-center gap-4 p-4">
+                            <img src="https://i.ibb.co/1tfQc3SY/shx-044Z.png" alt="شیر خورما" class="item-image theme-item-image-border w-20 h-20 md:w-24 md:h-24 rounded-full object-cover border-4 flex-shrink-0" onerror="this.src='https://placehold.co/100x100/1e3a5f/87ceeb?text=وێنە'">
+                            <div class="item-info flex-1 min-w-0">
+                                <div class="item-header flex flex-col sm:flex-row justify-between items-start sm:items-center gap-1 sm:gap-2">
+                                    <h3 class="item-name theme-item-name text-lg md:text-xl font-semibold truncate">شیر خورما</h3>
+                                    <span class="item-price theme-item-price text-base md:text-lg font-bold whitespace-nowrap">1,500 د.ع</span>
                                 </div>
                             </div>
                         </div>
-                           <div class="menu-item">
-                            <img src="https://i.ibb.co/tw8Ysjhp/ast-584Z.png" alt="تایرامیسو" class="item-image" onerror="this.src='https://placehold.co/120x120/5d4037/f5f5dc?text=وێنە'; this.onerror=null;">
-                            <div class="item-info">
-                                <div class="item-header">
-                                    <h3 class="item-name">ئایسکرێم تایبەت</h3>
-                                    <span class="item-price">2,500 د.ع</span>
+                        <div class="menu-item theme-item-card rounded-lg shadow-lg overflow-hidden flex items-center gap-4 p-4">
+                            <img src="https://i.ibb.co/zTbS8b7T/shk-620Z.png" alt="شیر کاڵەک" class="item-image theme-item-image-border w-20 h-20 md:w-24 md:h-24 rounded-full object-cover border-4 flex-shrink-0" onerror="this.src='https://placehold.co/100x100/1e3a5f/87ceeb?text=وێنە'">
+                            <div class="item-info flex-1 min-w-0">
+                                <div class="item-header flex flex-col sm:flex-row justify-between items-start sm:items-center gap-1 sm:gap-2">
+                                    <h3 class="item-name theme-item-name text-lg md:text-xl font-semibold truncate">شیر کاڵەک</h3>
+                                    <span class="item-price theme-item-price text-base md:text-lg font-bold whitespace-nowrap">2,000 د.ع</span>
+                                </div>
+                            </div>
+                        </div>
+                        <div class="menu-item theme-item-card rounded-lg shadow-lg overflow-hidden flex items-center gap-4 p-4">
+                            <img src="https://i.ibb.co/0d3btsG/sho-060Z.png" alt="شۆفان" class="item-image theme-item-image-border w-20 h-20 md:w-24 md:h-24 rounded-full object-cover border-4 flex-shrink-0" onerror="this.src='https://placehold.co/100x100/1e3a5f/87ceeb?text=وێنە'">
+                            <div class="item-info flex-1 min-w-0">
+                                <div class="item-header flex flex-col sm:flex-row justify-between items-start sm:items-center gap-1 sm:gap-2">
+                                    <h3 class="item-name theme-item-name text-lg md:text-xl font-semibold truncate">شۆفان</h3>
+                                    <span class="item-price theme-item-price text-base md:text-lg font-bold whitespace-nowrap">2,000 د.ع</span>
+                                </div>
+                            </div>
+                        </div>
+                        <div class="menu-item theme-item-card rounded-lg shadow-lg overflow-hidden flex items-center gap-4 p-4">
+                            <img src="https://i.ibb.co/dwdGHjNg/shh-553Z.png" alt="شیر هەنجیر" class="item-image theme-item-image-border w-20 h-20 md:w-24 md:h-24 rounded-full object-cover border-4 flex-shrink-0" onerror="this.src='https://placehold.co/100x100/1e3a5f/87ceeb?text=وێنە'">
+                            <div class="item-info flex-1 min-w-0">
+                                <div class="item-header flex flex-col sm:flex-row justify-between items-start sm:items-center gap-1 sm:gap-2">
+                                    <h3 class="item-name theme-item-name text-lg md:text-xl font-semibold truncate">شیر هەنجیر</h3>
+                                    <span class="item-price theme-item-price text-base md:text-lg font-bold whitespace-nowrap">2,000 د.ع</span>
+                                </div>
+                            </div>
+                        </div>
+                        <div class="menu-item theme-item-card rounded-lg shadow-lg overflow-hidden flex items-center gap-4 p-4">
+                            <img src="https://i.ibb.co/rfQZdr5g/shf-878Z.png" alt="شیر فستق" class="item-image theme-item-image-border w-20 h-20 md:w-24 md:h-24 rounded-full object-cover border-4 flex-shrink-0" onerror="this.src='https://placehold.co/100x100/1e3a5f/87ceeb?text=وێنە'">
+                            <div class="item-info flex-1 min-w-0">
+                                <div class="item-header flex flex-col sm:flex-row justify-between items-start sm:items-center gap-1 sm:gap-2">
+                                    <h3 class="item-name theme-item-name text-lg md:text-xl font-semibold truncate">شیر فستق</h3>
+                                    <span class="item-price theme-item-price text-base md:text-lg font-bold whitespace-nowrap">2,000 د.ع</span>
+                                </div>
+                            </div>
+                        </div>
+                        <div class="menu-item theme-item-card rounded-lg shadow-lg overflow-hidden flex items-center gap-4 p-4">
+                            <img src="https://i.ibb.co/bq4NZrx/shot-562-Z.png" alt="شیرمۆزی تایبەت" class="item-image theme-item-image-border w-20 h-20 md:w-24 md:h-24 rounded-full object-cover border-4 flex-shrink-0" onerror="this.src='https://placehold.co/100x100/1e3a5f/87ceeb?text=وێنە'">
+                            <div class="item-info flex-1 min-w-0">
+                                <div class="item-header flex flex-col sm:flex-row justify-between items-start sm:items-center gap-1 sm:gap-2">
+                                    <h3 class="item-name theme-item-name text-lg md:text-xl font-semibold truncate">شیرمۆزی تایبەت</h3>
+                                    <span class="item-price theme-item-price text-base md:text-lg font-bold whitespace-nowrap">2,000 د.ع</span>
+                                </div>
+                            </div>
+                        </div>
+                    </div>
+                </div>
+
+                <div class="food-category mt-8 bg-blue-950/30 p-4 md:p-6 rounded-lg" id="special-category">
+                    <h3 class="food-category-title theme-section-title text-2xl font-bold text-center mb-6">بەشی ئایسکرێمەکان</h3>
+                    <div class="items-grid grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 gap-4 md:gap-6">
+                        <!-- ئایتمەکانی ئەم پۆلە -->
+                        <div class="menu-item theme-item-card rounded-lg shadow-lg overflow-hidden flex items-center gap-4 p-4">
+                            <img src="https://i.ibb.co/v4Tz8xb5/ass-324Z.png" alt="قاپ ئایسکرێم" class="item-image theme-item-image-border w-20 h-20 md:w-24 md:h-24 rounded-full object-cover border-4 flex-shrink-0" onerror="this.src='https://placehold.co/100x100/1e3a5f/87ceeb?text=وێنە'">
+                            <div class="item-info flex-1 min-w-0">
+                                <div class="item-header flex flex-col sm:flex-row justify-between items-start sm:items-center gap-1 sm:gap-2">
+                                    <h3 class="item-name theme-item-name text-lg md:text-xl font-semibold truncate">قاپ ئایسکرێم ٣تام</h3>
+                                    <span class="item-price theme-item-price text-base md:text-lg font-bold whitespace-nowrap">1,000 د.ع</span>
+                                </div>
+                                <p class="item-description text-sm text-gray-400 italic mt-2">تامی ئایشکرێمەکان {شیر،ڤانێلا،جوکولێت،قاوە،کرامێڵ،هەنجیر،لیمۆ،قەیسی،کاڵەک،فستق }</p>
+                            </div>
+                        </div>
+                        <div class="menu-item theme-item-card rounded-lg shadow-lg overflow-hidden flex items-center gap-4 p-4">
+                            <img src="https://i.ibb.co/b51G75LD/assm-237-Z.png" alt="ئایسکرێم بەمیوە" class="item-image theme-item-image-border w-20 h-20 md:w-24 md:h-24 rounded-full object-cover border-4 flex-shrink-0" onerror="this.src='https://placehold.co/100x100/1e3a5f/87ceeb?text=وێنە'">
+                            <div class="item-info flex-1 min-w-0">
+                                <div class="item-header flex flex-col sm:flex-row justify-between items-start sm:items-center gap-1 sm:gap-2">
+                                    <h3 class="item-name theme-item-name text-lg md:text-xl font-semibold truncate">ئایسکرێم بەمیوە</h3>
+                                    <span class="item-price theme-item-price text-base md:text-lg font-bold whitespace-nowrap">2,000 د.ع</span>
+                                </div>
+                            </div>
+                        </div>
+                        <div class="menu-item theme-item-card rounded-lg shadow-lg overflow-hidden flex items-center gap-4 p-4">
+                            <img src="https://i.ibb.co/fdktvZxW/asn-419Z.png" alt="ئایسکرێم نۆتێلا" class="item-image theme-item-image-border w-20 h-20 md:w-24 md:h-24 rounded-full object-cover border-4 flex-shrink-0" onerror="this.src='https://placehold.co/100x100/1e3a5f/87ceeb?text=وێنە'">
+                            <div class="item-info flex-1 min-w-0">
+                                <div class="item-header flex flex-col sm:flex-row justify-between items-start sm:items-center gap-1 sm:gap-2">
+                                    <h3 class="item-name theme-item-name text-lg md:text-xl font-semibold truncate">ئایسکرێم نۆتێلا</h3>
+                                    <span class="item-price theme-item-price text-base md:text-lg font-bold whitespace-nowrap">2,000 د.ع</span>
+                                </div>
+                            </div>
+                        </div>
+                        <div class="menu-item theme-item-card rounded-lg shadow-lg overflow-hidden flex items-center gap-4 p-4">
+                            <img src="https://i.ibb.co/tw8Ysjhp/ast-584Z.png" alt="ئایسکرێم تایبەت" class="item-image theme-item-image-border w-20 h-20 md:w-24 md:h-24 rounded-full object-cover border-4 flex-shrink-0" onerror="this.src='https://placehold.co/100x100/1e3a5f/87ceeb?text=وێنە'">
+                            <div class="item-info flex-1 min-w-0">
+                                <div class="item-header flex flex-col sm:flex-row justify-between items-start sm:items-center gap-1 sm:gap-2">
+                                    <h3 class="item-name theme-item-name text-lg md:text-xl font-semibold truncate">ئایسکرێم تایبەت</h3>
+                                    <span class="item-price theme-item-price text-base md:text-lg font-bold whitespace-nowrap">2,500 د.ع</span>
                                 </div>
                             </div>
                         </div>
@@ -1288,162 +809,165 @@
 
             <!-- کریپ نوتێلا -->
             <div class="menu-section" data-category="dessert">
-                <div class="section-header">
-                    <h2 class="section-title">بەشی کریپ نۆتێلا</h2>
-                    <div class="section-divider"></div>
+                <div class="section-header text-center mb-8">
+                    <h2 class="section-title theme-section-title text-3xl md:text-4xl font-bold">بەشی کریپ نۆتێلا</h2>
+                    <div class="section-divider theme-section-divider h-1 w-24 mx-auto mt-4"></div>
                 </div>
-                <div class="items-grid">
-                    <div class="menu-item">
-                        <img src="https://i.ibb.co/60B7cKcq/km1-560Z.png" alt="کریپ نۆتێلای مۆز" class="item-image" onerror="this.src='https://placehold.co/120x120/5d4037/f5f5dc?text=وێنە'; this.onerror=null;">
-                        <div class="item-info">
-                            <div class="item-header">
-                                <h3 class="item-name">کریپ نۆتێلای مۆز</h3>
-                                <span class="item-price">1,000 د.ع</span>
+                <div class="items-grid grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 gap-4 md:gap-6">
+                    <!-- ئایتمەکان لێرە -->
+                    <div class="menu-item theme-item-card rounded-lg shadow-lg overflow-hidden flex items-center gap-4 p-4">
+                        <img src="https://i.ibb.co/60B7cKcq/km1-560Z.png" alt="کریپ نۆتێلای مۆز" class="item-image theme-item-image-border w-20 h-20 md:w-24 md:h-24 rounded-full object-cover border-4 flex-shrink-0" onerror="this.src='https://placehold.co/100x100/3e2723/d4a574?text=وێنە'">
+                        <div class="item-info flex-1 min-w-0">
+                            <div class="item-header flex flex-col sm:flex-row justify-between items-start sm:items-center gap-1 sm:gap-2">
+                                <h3 class="item-name theme-item-name text-lg md:text-xl font-semibold truncate">کریپ نۆتێلای مۆز</h3>
+                                <span class="item-price theme-item-price text-base md:text-lg font-bold whitespace-nowrap">1,000 د.ع</span>
                             </div>
                         </div>
                     </div>
-
-                    <div class="menu-item">
-                        <img src="https://i.ibb.co/FbYJfkK4/km3-718Z.png" alt="کرواسان" class="item-image" onerror="this.src='https://placehold.co/120x120/5d4037/f5f5dc?text=وێنە'; this.onerror=null;">
-                        <div class="item-info">
-                            <div class="item-header">
-                                <h3 class="item-name">کریپ نۆتێلای پسکیت</h3>
-                                <span class="item-price">1,000 د.ع</span>
+                    <div class="menu-item theme-item-card rounded-lg shadow-lg overflow-hidden flex items-center gap-4 p-4">
+                        <img src="https://i.ibb.co/FbYJfkK4/km3-718Z.png" alt="کریپ نۆتێلای پسکیت" class="item-image theme-item-image-border w-20 h-20 md:w-24 md:h-24 rounded-full object-cover border-4 flex-shrink-0" onerror="this.src='https://placehold.co/100x100/3e2723/d4a574?text=وێنە'">
+                        <div class="item-info flex-1 min-w-0">
+                            <div class="item-header flex flex-col sm:flex-row justify-between items-start sm:items-center gap-1 sm:gap-2">
+                                <h3 class="item-name theme-item-name text-lg md:text-xl font-semibold truncate">کریپ نۆتێلای پسکیت</h3>
+                                <span class="item-price theme-item-price text-base md:text-lg font-bold whitespace-nowrap">1,000 د.ع</span>
                             </div>
                         </div>
                     </div>
-
-                    <div class="menu-item">
-                        <img src="https://i.ibb.co/wvVpVk6/km4-243Z.png" alt="چیزکێک" class="item-image" onerror="this.src='https://placehold.co/120x120/5d4037/f5f5dc?text=وێنە'; this.onerror=null;">
-                        <div class="item-info">
-                            <div class="item-header">
-                                <h3 class="item-name">کریپ نۆتێلا سەرقاپ</h3>
-                                <span class="item-price">1,500 د.ع</span>
+                    <div class="menu-item theme-item-card rounded-lg shadow-lg overflow-hidden flex items-center gap-4 p-4">
+                        <img src="https://i.ibb.co/wvVpVk6/km4-243Z.png" alt="کریپ nۆتێلا سەرقاپ" class="item-image theme-item-image-border w-20 h-20 md:w-24 md:h-24 rounded-full object-cover border-4 flex-shrink-0" onerror="this.src='https://placehold.co/100x100/3e2723/d4a574?text=وێنە'">
+                        <div class="item-info flex-1 min-w-0">
+                            <div class="item-header flex flex-col sm:flex-row justify-between items-start sm:items-center gap-1 sm:gap-2">
+                                <h3 class="item-name theme-item-name text-lg md:text-xl font-semibold truncate">کریپ نۆتێلا سەرقاپ</h3>
+                                <span class="item-price theme-item-price text-base md:text-lg font-bold whitespace-nowrap">1,500 د.ع</span>
                             </div>
                         </div>
                     </div>
-
-                    <div class="menu-item">
-                        <img src="https://i.ibb.co/bj275kMw/km5-599Z.png" alt="تایرامیسو" class="item-image" onerror="this.src='https://placehold.co/120x120/5d4037/f5f5dc?text=وێنە'; this.onerror=null;">
-                        <div class="item-info">
-                            <div class="item-header">
-                                <h3 class="item-name">کریپ نۆتێلای مۆزوپسکیت</h3>
-                                <span class="item-price">1,500 د.ع</span>
+                    <div class="menu-item theme-item-card rounded-lg shadow-lg overflow-hidden flex items-center gap-4 p-4">
+                        <img src="https://i.ibb.co/bj275kMw/km5-599Z.png" alt="کریپ نۆتێلای مۆزوپسکیت" class="item-image theme-item-image-border w-20 h-20 md:w-24 md:h-24 rounded-full object-cover border-4 flex-shrink-0" onerror="this.src='https://placehold.co/100x100/3e2723/d4a574?text=وێنە'">
+                        <div class="item-info flex-1 min-w-0">
+                            <div class="item-header flex flex-col sm:flex-row justify-between items-start sm:items-center gap-1 sm:gap-2">
+                                <h3 class="item-name theme-item-name text-lg md:text-xl font-semibold truncate">کریپ نۆتێلای مۆزوپسکیت</h3>
+                                <span class="item-price theme-item-price text-base md:text-lg font-bold whitespace-nowrap">1,500 د.ع</span>
                             </div>
                         </div>
                     </div>
-
-                    <div class="menu-item">
-                        <img src="https://i.ibb.co/0pwtxHW8/km6-356Z.png" alt="مافین" class="item-image" onerror="this.src='https://placehold.co/120x120/5d4037/f5f5dc?text=وێنە'; this.onerror=null;">
-                        <div class="item-info">
-                            <div class="item-header">
-                                <h3 class="item-name">کریپ نۆتێلابەگوێز</h3>
-                                <span class="item-price">2,000 د.ع</span>
+                    <div class="menu-item theme-item-card rounded-lg shadow-lg overflow-hidden flex items-center gap-4 p-4">
+                        <img src="https://i.ibb.co/0pwtxHW8/km6-356Z.png" alt="کریپ نۆتێلابەگوێز" class="item-image theme-item-image-border w-20 h-20 md:w-24 md:h-24 rounded-full object-cover border-4 flex-shrink-0" onerror="this.src='https://placehold.co/100x100/3e2723/d4a574?text=وێنە'">
+                        <div class="item-info flex-1 min-w-0">
+                            <div class="item-header flex flex-col sm:flex-row justify-between items-start sm:items-center gap-1 sm:gap-2">
+                                <h3 class="item-name theme-item-name text-lg md:text-xl font-semibold truncate">کریپ نۆتێلابەگوێز</h3>
+                                <span class="item-price theme-item-price text-base md:text-lg font-bold whitespace-nowrap">2,000 د.ع</span>
                             </div>
                         </div>
                     </div>
-
-                    <div class="menu-item">
-                        <img src="https://i.ibb.co/TqW5FzpD/km7-201Z.png" alt="براونی" class="item-image" onerror="this.src='https://placehold.co/120x120/5d4037/f5f5dc?text=وێنە'; this.onerror=null;">
-                        <div class="item-info">
-                            <div class="item-header">
-                                <h3 class="item-name">کریپ نۆتێلاشلک</h3>
-                                <span class="item-price">2,000 د.ع</span>
+                    <div class="menu-item theme-item-card rounded-lg shadow-lg overflow-hidden flex items-center gap-4 p-4">
+                        <img src="https://i.ibb.co/TqW5FzpD/km7-201Z.png" alt="کریپ نۆتێلاشلک" class="item-image theme-item-image-border w-20 h-20 md:w-24 md:h-24 rounded-full object-cover border-4 flex-shrink-0" onerror="this.src='https://placehold.co/100x100/3e2723/d4a574?text=وێنە'">
+                        <div class="item-info flex-1 min-w-0">
+                            <div class="item-header flex flex-col sm:flex-row justify-between items-start sm:items-center gap-1 sm:gap-2">
+                                <h3 class="item-name theme-item-name text-lg md:text-xl font-semibold truncate">کریپ نۆتێلاشلک</h3>
+                                <span class="item-price theme-item-price text-base md:text-lg font-bold whitespace-nowrap">2,000 د.ع</span>
                             </div>
                         </div>
                     </div>
-                     <div class="menu-item">
-                        <img src="https://i.ibb.co/gZr7wBVs/km8-974Z.png" alt="براونی" class="item-image" onerror="this.src='https://placehold.co/120x120/5d4037/f5f5dc?text=وێنە'; this.onerror=null;">
-                        <div class="item-info">
-                            <div class="item-header">
-                                <h3 class="item-name">کریپ نۆتێلافستق</h3>
-                                <span class="item-price">2,000 د.ع</span>
+                    <div class="menu-item theme-item-card rounded-lg shadow-lg overflow-hidden flex items-center gap-4 p-4">
+                        <img src="https://i.ibb.co/gZr7wBVs/km8-974Z.png" alt="کریپ نۆتێلافستق" class="item-image theme-item-image-border w-20 h-20 md:w-24 md:h-24 rounded-full object-cover border-4 flex-shrink-0" onerror="this.src='https://placehold.co/100x100/3e2723/d4a574?text=وێنە'">
+                        <div class="item-info flex-1 min-w-0">
+                            <div class="item-header flex flex-col sm:flex-row justify-between items-start sm:items-center gap-1 sm:gap-2">
+                                <h3 class="item-name theme-item-name text-lg md:text-xl font-semibold truncate">کریپ نۆتێلافستق</h3>
+                                <span class="item-price theme-item-price text-base md:text-lg font-bold whitespace-nowrap">2,000 د.ع</span>
                             </div>
                         </div>
                     </div>
-                     <div class="menu-item">
-                        <img src="https://i.ibb.co/C4njmhC/km9-903Z.png" alt="براونی" class="item-image" onerror="this.src='https://placehold.co/120x120/5d4037/f5f5dc?text=وێنە'; this.onerror=null;">
-                        <div class="item-info">
-                            <div class="item-header">
-                                <h3 class="item-name">کریپ نۆتێلامۆزوفستق</h3>
-                                <span class="item-price">2,000 د.ع</span>
+                    <div class="menu-item theme-item-card rounded-lg shadow-lg overflow-hidden flex items-center gap-4 p-4">
+                        <img src="https://i.ibb.co/C4njmhC/km9-903Z.png" alt="کریپ نۆتێلامۆزوفستق" class="item-image theme-item-image-border w-20 h-20 md:w-24 md:h-24 rounded-full object-cover border-4 flex-shrink-0" onerror="this.src='https://placehold.co/100x100/3e2723/d4a574?text=وێنە'">
+                        <div class="item-info flex-1 min-w-0">
+                            <div class="item-header flex flex-col sm:flex-row justify-between items-start sm:items-center gap-1 sm:gap-2">
+                                <h3 class="item-name theme-item-name text-lg md:text-xl font-semibold truncate">کریپ نۆتێلامۆزوفستق</h3>
+                                <span class="item-price theme-item-price text-base md:text-lg font-bold whitespace-nowrap">2,000 د.ع</span>
                             </div>
                         </div>
                     </div>
-                     <div class="menu-item">
-                        <img src="https://i.ibb.co/mVwRMrD6/km0-084Z.png" alt="براونی" class="item-image" onerror="this.src='https://placehold.co/120x120/5d4037/f5f5dc?text=وێنە'; this.onerror=null;">
-                        <div class="item-info">
-                            <div class="item-header">
-                                <h3 class="item-name">کریپ نۆتێلامشەکەل</h3>
-                                <span class="item-price">2,500 د.ع</span>
+                    <div class="menu-item theme-item-card rounded-lg shadow-lg overflow-hidden flex items-center gap-4 p-4">
+                        <img src="https://i.ibb.co/mVwRMrD6/km0-084Z.png" alt="کریپ نۆتێلامشەکەل" class="item-image theme-item-image-border w-20 h-20 md:w-24 md:h-24 rounded-full object-cover border-4 flex-shrink-0" onerror="this.src='https://placehold.co/100x100/3e2723/d4a574?text=وێنە'">
+                        <div class="item-info flex-1 min-w-0">
+                            <div class="item-header flex flex-col sm:flex-row justify-between items-start sm:items-center gap-1 sm:gap-2">
+                                <h3 class="item-name theme-item-name text-lg md:text-xl font-semibold truncate">کریپ نۆتێلامشەکەل</h3>
+                                <span class="item-price theme-item-price text-base md:text-lg font-bold whitespace-nowrap">2,500 د.ع</span>
                             </div>
                         </div>
                     </div>
-                     <div class="menu-item">
-                        <img src="https://i.ibb.co/Cf1spz0/km01-594-Z.png" alt="براونی" class="item-image" onerror="this.src='https://placehold.co/120x120/5d4037/f5f5dc?text=وێنە'; this.onerror=null;">
-                        <div class="item-info">
-                            <div class="item-header">
-                                <h3 class="item-name">کریپ نۆتێلاشاومەیی</h3>
-                                <span class="item-price">3,000 د.ع</span>
+                    <div class="menu-item theme-item-card rounded-lg shadow-lg overflow-hidden flex items-center gap-4 p-4">
+                        <img src="https://i.ibb.co/Cf1spz0/km01-594-Z.png" alt="کریپ نۆتێلاشاومەیی" class="item-image theme-item-image-border w-20 h-20 md:w-24 md:h-24 rounded-full object-cover border-4 flex-shrink-0" onerror="this.src='https://placehold.co/100x100/3e2723/d4a574?text=وێنە'">
+                        <div class="item-info flex-1 min-w-0">
+                            <div class="item-header flex flex-col sm:flex-row justify-between items-start sm:items-center gap-1 sm:gap-2">
+                                <h3 class="item-name theme-item-name text-lg md:text-xl font-semibold truncate">کریپ نۆتێلاشاومەیی</h3>
+                                <span class="item-price theme-item-price text-base md:text-lg font-bold whitespace-nowrap">3,000 د.ع</span>
                             </div>
                         </div>
                     </div>
-                     <div class="menu-item">
-                        <img src="https://i.ibb.co/LhYGpWv5/km02-870-Z.png" alt="براونی" class="item-image" onerror="this.src='https://placehold.co/120x120/5d4037/f5f5dc?text=وێنە'; this.onerror=null;">
-                        <div class="item-info">
-                            <div class="item-header">
-                                <h3 class="item-name">کریپ نۆتێلای تایبەت</h3>
-                                <span class="item-price">3,500 د.ع</span>
+                    <div class="menu-item theme-item-card rounded-lg shadow-lg overflow-hidden flex items-center gap-4 p-4">
+                        <img src="https://i.ibb.co/LhYGpWv5/km02-870-Z.png" alt="کریپ نۆتێلای تایبەت" class="item-image theme-item-image-border w-20 h-20 md:w-24 md:h-24 rounded-full object-cover border-4 flex-shrink-0" onerror="this.src='https://placehold.co/100x100/3e2723/d4a574?text=وێنە'">
+                        <div class="item-info flex-1 min-w-0">
+                            <div class="item-header flex flex-col sm:flex-row justify-between items-start sm:items-center gap-1 sm:gap-2">
+                                <h3 class="item-name theme-item-name text-lg md:text-xl font-semibold truncate">کریپ نۆتێلای تایبەت</h3>
+                                <span class="item-price theme-item-price text-base md:text-lg font-bold whitespace-nowrap">3,500 د.ع</span>
                             </div>
                         </div>
                     </div>
-                     <div class="menu-item">
-                        <img src="https://i.ibb.co/TDqsJg4B/km03-812-Z.png" alt="براونی" class="item-image" onerror="this.src='https://placehold.co/120x120/5d4037/f5f5dc?text=وێنە'; this.onerror=null;">
-                        <div class="item-info">
-                            <div class="item-header">
-                                <h3 class="item-name">پانکێک</h3>
-                                <span class="item-price">3,000 د.ع</span>
+                    <div class="menu-item theme-item-card rounded-lg shadow-lg overflow-hidden flex items-center gap-4 p-4">
+                        <img src="https://i.ibb.co/TDqsJg4B/km03-812-Z.png" alt="پانکێک" class="item-image theme-item-image-border w-20 h-20 md:w-24 md:h-24 rounded-full object-cover border-4 flex-shrink-0" onerror="this.src='https://placehold.co/100x100/3e2723/d4a574?text=وێنە'">
+                        <div class="item-info flex-1 min-w-0">
+                            <div class="item-header flex flex-col sm:flex-row justify-between items-start sm:items-center gap-1 sm:gap-2">
+                                <h3 class="item-name theme-item-name text-lg md:text-xl font-semibold truncate">پانکێک</h3>
+                                <span class="item-price theme-item-price text-base md:text-lg font-bold whitespace-nowrap">3,000 د.ع</span>
                             </div>
                         </div>
                     </div>
                 </div>
             </div>
 
-            <!-- بەشی کونافەکان-->
+            <!-- بەشی کونافەکان -->
             <div class="menu-section" data-category="drinks">
-                <div class="section-header">
-                    <h2 class="section-title"> بەشی کونافە</h2>
-                    <div class="section-divider"></div>
+                <div class="section-header text-center mb-8">
+                    <h2 class="section-title theme-section-title text-3xl md:text-4xl font-bold">بەشی کونافە</h2>
+                    <div class="section-divider theme-section-divider h-1 w-24 mx-auto mt-4"></div>
                 </div>
-                <div class="items-grid">
-                    <div class="menu-item">
-                        <img src="https://i.ibb.co/Y4sHpVFV/kw-936Z.png" alt="شێک" class="item-image" onerror="this.src='https://placehold.co/120x120/5d4037/f5f5dc?text=وێنە'; this.onerror=null;">
-                        <div class="item-info">
-                            <div class="item-header">
-                                <h3 class="item-name"> کونافەی پەنیر بەئایسکرێم </h3>
-                                <span class="item-price">2,500 د.ع</span>
+                <div class="items-grid grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 gap-4 md:gap-6">
+                    <!-- ئایتمەکان لێرە -->
+                    <div class="menu-item theme-item-card rounded-lg shadow-lg overflow-hidden flex items-center gap-4 p-4">
+                        <img src="https://i.ibb.co/Y4sHpVFV/kw-936Z.png" alt="کونافەی پەنیر بەئایسکرێم" class="item-image theme-item-image-border w-20 h-20 md:w-24 md:h-24 rounded-full object-cover border-4 flex-shrink-0" onerror="this.src='https://placehold.co/100x100/3e2723/d4a574?text=وێنە'">
+                        <div class="item-info flex-1 min-w-0">
+                            <div class="item-header flex flex-col sm:flex-row justify-between items-start sm:items-center gap-1 sm:gap-2">
+                                <h3 class="item-name theme-item-name text-lg md:text-xl font-semibold truncate">کونافەی پەنیر بەئایسکرێم</h3>
+                                <span class="item-price theme-item-price text-base md:text-lg font-bold whitespace-nowrap">2,500 د.ع</span>
                             </div>
                         </div>
                     </div>
-
-                    <div class="menu-item">
-                        <img src="https://i.ibb.co/6RdXvCHj/kwf-886Z.png" alt="لیمۆناتە" class="item-image" onerror="this.src='https://placehold.co/120x120/5d4037/f5f5dc?text=وێنە'; this.onerror=null;">
-                        <div class="item-info">
-                            <div class="item-header">
-                                <h3 class="item-name"> کونافەی فستق زادەبەئایسکرێم </h3>
-                                <span class="item-price">3,000 د.ع</span>
+                    <div class="menu-item theme-item-card rounded-lg shadow-lg overflow-hidden flex items-center gap-4 p-4">
+                        <img src="https://i.ibb.co/6RdXvCHj/kwf-886Z.png" alt="کونافەی فستق زادەبەئایسکرێم" class="item-image theme-item-image-border w-20 h-20 md:w-24 md:h-24 rounded-full object-cover border-4 flex-shrink-0" onerror="this.src='https://placehold.co/100x100/3e2723/d4a574?text=وێنە'">
+                        <div class="item-info flex-1 min-w-0">
+                            <div class="item-header flex flex-col sm:flex-row justify-between items-start sm:items-center gap-1 sm:gap-2">
+                                <h3 class="item-name theme-item-name text-lg md:text-xl font-semibold truncate">کونافەی فستق زادەبەئایسکرێم</h3>
+                                <span class="item-price theme-item-price text-base md:text-lg font-bold whitespace-nowrap">3,000 د.ع</span>
                             </div>
                         </div>
                     </div>
+                </div>
             </div>
+
         </div>
 
-        <footer>
-            <div class="footer-content">
-                <div class="coffee-beans">☕ ☕ ☕</div>
-                <p class="footer-info">کاتەکانی کارکردن: ٨:٠٠ بەیانی - ١٢:٠٠ شەو</p>
-                <p class="footer-info">هەموو ڕۆژێک</p>
-                <p style="margin-top: 30px; opacity: 0.7; font-size: 0.9em;">  horaz IT <br>ئامادەی بۆ دروست کردنی هەموو جۆرە سیستەمێکو وێب سایتەک <br>07501784002  </p>
+        <!-- فووتەر -->
+        <footer class="theme-footer text-center p-8 md:p-12">
+            <div class="footer-content max-w-3xl mx-auto">
+                <div class="coffee-beans text-3xl mb-6 opacity-50" id="footer-icon">☕ ☕ ☕</div>
+                <p class="footer-info text-lg md:text-xl mb-2">کاتەکانی کارکردن: ٨:٠٠ بەیانی - ١٢:٠٠ شەو</p>
+                <p class="footer-info text-lg md:text-xl">هەموو ڕۆژێک</p>
+                <p class="mt-8 opacity-70 text-sm">
+                    horaz IT <br>
+                    ئامادەی بۆ دروست کردنی هەموو جۆرە سیستەمێکو وێب سایتەک <br>
+                    07501784002
+                </p>
             </div>
         </footer>
     </div>
@@ -1454,11 +978,16 @@
             const menuSections = document.querySelectorAll('.menu-section');
             const coldMenuItems = document.querySelectorAll('.menu-section[data-category="cold"] .menu-item');
             const foodCategories = document.querySelectorAll('.food-category');
-            const body = document.body;
-            const container = document.querySelector('.container');
-            const header = document.querySelector('header');
-            const expiredMessage = document.getElementById('expiredMessage');
+            
+            // گۆڕەوی سەرەکی بۆ کانتێنەر و هیدەر
             const mainContainer = document.getElementById('mainContainer');
+            const header = document.querySelector('header');
+            const body = document.body; // زیادکراو بۆ گۆڕینی پاشبنەمای گشتی
+            const headerIcon = document.getElementById('header-icon');
+            const footerIcon = document.getElementById('footer-icon');
+            
+            const expiredMessage = document.getElementById('expiredMessage');
+            const mainContentContainer = document.getElementById('mainContainer'); // ئەمە جیاوازە لە mainContainer
             
             // سیستەمی بەروار - ڕێکخستنی بەرواری کۆتایی
             const expirationDate = new Date('2025-12-2'); // بەرواری کۆتایی دلخواز
@@ -1467,11 +996,15 @@
             const currentDate = new Date();
             if (currentDate > expirationDate) {
                 expiredMessage.classList.add('active');
-                mainContainer.style.display = 'none';
+                mainContentContainer.style.display = 'none';
+            } else {
+                expiredMessage.style.display = 'none'; // دڵنیابوونەوە لە شاردنەوەی پەیامەکە
             }
             
             // نمایشی بەشی یەکەم بە شێوەیەکی خۆکار
-            showSection('hot');
+            // گۆڕیومە بۆ "هەموو" بۆ ئەوەی گونجاوتر بێت
+            showSection('all');
+            document.querySelector('.category-btn[data-category="all"]').classList.add('active');
             
             // پێدەرگرتن لە هەموو پۆلەکانی خواردن لە سەرەتادا
             hideAllFoodCategories();
@@ -1493,18 +1026,20 @@
                         hideAllFoodCategories();
                     }
                     
-                    // گۆڕینی ڕەنگ بۆ بەشی خواردنەوە ساردەکان
+                    // گۆڕینی ڕەنگ (theme)
                     if (category === 'cold') {
-                        body.classList.add('cold-theme');
-                        container.classList.add('cold-theme');
-                        header.classList.add('cold-theme');
+                        mainContainer.classList.add('cold-theme');
+                        body.classList.add('cold-theme'); // زیادکراو
+                        headerIcon.textContent = '❄️';
+                        footerIcon.textContent = '❄️ ❄️ ❄️';
                     } else {
-                        body.classList.remove('cold-theme');
-                        container.classList.remove('cold-theme');
-                        header.classList.remove('cold-theme');
+                        mainContainer.classList.remove('cold-theme');
+                        body.classList.remove('cold-theme'); // زیادکراو
+                        headerIcon.textContent = '☕';
+                        footerIcon.textContent = '☕ ☕ ☕';
                     }
                     
-                    // چوونە سەرەوەی پەڕە
+                    // چوونە سەرەوەی پەڕە (بۆ مۆبایل گرنگە)
                     window.scrollTo({
                         top: 0,
                         behavior: 'smooth'
@@ -1528,7 +1063,8 @@
                         // چوون بەرەو پۆلی خواردن
                         selectedCategory.scrollIntoView({
                             behavior: 'smooth',
-                            block: 'start'
+                            block: 'start',
+                            inline: 'nearest'
                         });
                     }
                 });
@@ -1537,16 +1073,17 @@
             function showSection(category) {
                 menuSections.forEach(section => {
                     section.classList.remove('active');
-                    if (section.getAttribute('data-category') === category) {
-                        section.classList.add('active');
-                    }
                 });
-                
-                // بۆ "هەموو" هەموو بەشەکان نیشان بدە
+
                 if (category === 'all') {
                     menuSections.forEach(section => {
                         section.classList.add('active');
                     });
+                } else {
+                    const sectionToShow = document.querySelector(`.menu-section[data-category="${category}"]`);
+                    if (sectionToShow) {
+                        sectionToShow.classList.add('active');
+                    }
                 }
             }
             
