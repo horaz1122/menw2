@@ -817,7 +817,7 @@
                                 <img src="https://i.ibb.co/1tfQc3SY/shx-044Z.png" alt="شیر خورما" class="item-image theme-item-image-border w-20 h-20 md:w-24 md:h-24 rounded-full object-cover border-4 flex-shrink-0" onerror="this.src='https://placehold.co/100x100/1e3a5f/87ceeb?text=وێنە'">
                                 <div class="item-info flex-1 min-w-0">
                                     <div class="item-header flex flex-col sm:flex-row justify-between items-start sm:items-center gap-1 sm:gap-2">
-                                        <h3 class_ ="item-name theme-item-name text-lg md:text-xl font-semibold truncate">شیر خورما</h3>
+                                        <h3 class="item-name theme-item-name text-lg md:text-xl font-semibold truncate">شیر خورما</h3>
                                         <span class="item-price theme-item-price text-base md:text-lg font-bold whitespace-nowrap">1,500 د.ع</span>
                                     </div>
                                 </div>
@@ -1160,8 +1160,8 @@
             <div class="bg-gray-800 p-6 rounded-lg shadow-lg border border-blue-400">
                 <h2 class="text-2xl font-semibold text-blue-300 mb-4">داواکارییە نوێیەکان</h2>
                 <div id="ordersContainer" class="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 gap-6">
-                    <!-- نموونەی داواکاری -->
-                    <p class="text-gray-400 text-center col-span-full">هێشتا هیچ داواکارییەکی نوێ نییە...</p>
+                    <!-- گۆڕدرا: پەیامی سەرەتایی گۆڕدرا -->
+                    <p class="text-gray-400 text-center col-span-full" id="noOrdersMessage">هێشتا هیچ داواکارییەکی نوێ نییە...</p>
                     
                 </div>
             </div>
@@ -1232,599 +1232,589 @@
 
 
 
-<script type="module">
-        // ١. پاکێجەکان
-        import { initializeApp } from "https://www.gstatic.com/firebasejs/11.6.1/firebase-app.js";
-        import { getAuth, signInAnonymously, onAuthStateChanged } from "https://www.gstatic.com/firebasejs/11.6.1/firebase-auth.js";
-        import { getFirestore, doc, addDoc, collection, query, where, onSnapshot, serverTimestamp, updateDoc, setLogLevel } from "https://www.gstatic.com/firebasejs/11.6.1/firebase-firestore.js";
-        
-        // ٢. زانیارییەکانی Firebase (ئەمانە هی خۆتن)
-        const firebaseConfig = {
-            apiKey: "AIzaSyDI_i6YdRy-NawQQNTGeYJIm_pFyxcoAKM",
-            authDomain: "cafe-d4bf6.firebaseapp.com",
-            projectId: "cafe-d4bf6",
-            storageBucket: "cafe-d4bf6.firebasestorage.app",
-            messagingSenderId: "295516356363",
-            appId: "1:295516356363:web:d778f9e07444d96532ac0e",
-            measurementId: "G-E1F4D2HDWD"
-        };
+<script>
+    // لۆژیکی سەرەکی پەڕە
+    // تێبینی: هەموو کۆدەکانی Firebase لابراون
+    document.addEventListener('DOMContentLoaded', function() {
+        
+        // --- ناساندنی هەموو گۆڕاوەکانی DOM ---
+        const loginPage = document.getElementById('loginPage');
+        const menuPage = document.getElementById('menuPage');
+        const adminPage = document.getElementById('adminPage');
+        const goToAdminLogin = document.getElementById('goToAdminLogin');
+        const customAlert = document.getElementById('customAlert');
+        const customAlertMessage = document.getElementById('customAlertMessage');
+        const customAlertClose = document.getElementById('customAlertClose');
+        const customPrompt = document.getElementById('customPrompt');
+        const customPromptTitle = document.getElementById('customPromptTitle');
+        const customPromptInput = document.getElementById('customPromptInput');
+        const customPromptCancel = document.getElementById('customPromptCancel');
+        const customPromptSubmit = document.getElementById('customPromptSubmit');
+        const categoryBtns = document.querySelectorAll('.category-btn');
+        const menuSections = document.querySelectorAll('.menu-section');
+        const coldMenuItems = document.querySelectorAll('.menu-section[data-category="cold"] .menu-item');
+        const foodCategories = document.querySelectorAll('.food-category');
+        const mainContainer = document.getElementById('mainContainer');
+        const body = document.body;
+        const headerIcon = document.getElementById('header-icon');
+        const footerIcon = document.getElementById('footer-icon');
+        const expiredMessage = document.getElementById('expiredMessage');
+        const loginButton = document.getElementById('loginButton');
+        const adminPassword = document.getElementById('adminPassword');
+        const goToMenuButton = document.getElementById('goToMenuButton');
+        const logoutButton = document.getElementById('logoutButton');
+        const cartButtonUI = document.getElementById('cartButton');
+        const cartCountUI = document.getElementById('cartCount');
+        const cartModal = document.getElementById('cartModal');
+        const closeCartButton = document.getElementById('closeCartButton');
+        const cartItemsContainer = document.getElementById('cartItemsContainer');
+        const cartTotalUI = document.getElementById('cartTotal');
+        const submitOrderButton = document.getElementById('submitOrderButton');
+        const tableIdInput = document.getElementById('tableIdInput');
+        const generateQrButton = document.getElementById('generateQrButton');
+        const qrcodeContainer = document.getElementById('qrcodeContainer');
+        const qrcodeDiv = document.getElementById('qrcode');
+        const qrText = document.getElementById('qrText');
+        const ordersContainer = document.getElementById('ordersContainer');
+        const receiptToPrint = document.getElementById('receiptToPrint');
+        const receiptTable = document.getElementById('receiptTable');
+        const receiptDate = document.getElementById('receiptDate');
+        const receiptItems = document.getElementById('receiptItems');
+        const receiptTotal = document.getElementById('receiptTotal');
+        
+        // گۆڕاوە یاریدەدەرەکان
+        let cart = []; 
+        let promptCallback = null;
+        let currentTable = null;
+        const urlParams = new URLSearchParams(window.location.search);
 
-        // ٣. پێناسەکردنی گۆڕاوە جیهانییەکان
-        let db, auth, app, userId;
-        let ordersCollection;
-        let unsubscribeOrders = null; 
+        // --- پێناسەکردنی هەموو فەنکشنەکان ---
 
-        // ٤. دەستپێکردنی Firebase
-        try {
-            console.log("دەستپێکردنی Firebase...");
-            app = initializeApp(firebaseConfig);
-            auth = getAuth(app);
-            db = getFirestore(app);
-            setLogLevel('debug'); 
+        function showCustomAlert(message) {
+            customAlertMessage.innerText = message;
+            customAlert.classList.remove('hidden');
+        }
 
-            // ٥. چوونەژوورەوە
-            onAuthStateChanged(auth, async (user) => {
-                if (user) {
-                    userId = user.uid;
-                    console.log("بەکارهێنەر داخڵ بوو:", userId);
-                    // ٦. پێناسەکردنی کۆڵەکشن
-                    ordersCollection = collection(db, "orders");
-                    console.log("Firestore collection path set: 'orders'");
+        function showCustomPrompt(title, callback) {
+            customPromptTitle.innerText = title;
+            customPromptInput.value = '';
+            customPrompt.classList.remove('hidden');
+            promptCallback = callback;
+        }
 
-                } else {
-                    console.log("بەکارهێنەر دەرچوو، هەوڵی چوونەژوورەوە دەدرێت...");
-                    try {
-                        console.log("چوونەژوورەوەی Anonymous...");
-                        await signInAnonymously(auth);
-                    } catch (error) {
-                        console.error(" کێشە لە چوونەژوورەوە:", error);
-                    }
-                }
-            });
-        } catch (e) {
-            console.error("هەڵەی گەورە لە دەستپێکردنی Firebase:", e);
-            console.warn("سیستەمی Firebase (داواکاری) کار ناکات.");
-        }
+        function showPage(pageId) {
+            [loginPage, menuPage, adminPage].forEach(page => {
+                page.classList.remove('active');
+            });
+            document.getElementById(pageId).classList.add('active');
+            window.scrollTo({ top: 0, behavior: 'smooth' });
+        }
 
-        // ٧. لۆژیکی سەرەکی پەڕە
-        document.addEventListener('DOMContentLoaded', function() {
-            
-            // --- ناساندنی هەموو گۆڕاوەکانی DOM ---
-            const loginPage = document.getElementById('loginPage');
-            const menuPage = document.getElementById('menuPage');
-            const adminPage = document.getElementById('adminPage');
-            const goToAdminLogin = document.getElementById('goToAdminLogin');
-            const customAlert = document.getElementById('customAlert');
-            const customAlertMessage = document.getElementById('customAlertMessage');
-            const customAlertClose = document.getElementById('customAlertClose');
-            const customPrompt = document.getElementById('customPrompt');
-            const customPromptTitle = document.getElementById('customPromptTitle');
-            const customPromptInput = document.getElementById('customPromptInput');
-            const customPromptCancel = document.getElementById('customPromptCancel');
-            const customPromptSubmit = document.getElementById('customPromptSubmit');
-            const categoryBtns = document.querySelectorAll('.category-btn');
-            const menuSections = document.querySelectorAll('.menu-section');
-            const coldMenuItems = document.querySelectorAll('.menu-section[data-category="cold"] .menu-item');
-            const foodCategories = document.querySelectorAll('.food-category');
-            const mainContainer = document.getElementById('mainContainer');
-            const body = document.body;
-            const headerIcon = document.getElementById('header-icon');
-            const footerIcon = document.getElementById('footer-icon');
-            const expiredMessage = document.getElementById('expiredMessage');
-            const loginButton = document.getElementById('loginButton');
-            const adminPassword = document.getElementById('adminPassword');
-            const goToMenuButton = document.getElementById('goToMenuButton');
-            const logoutButton = document.getElementById('logoutButton');
-            const cartButtonUI = document.getElementById('cartButton');
-            const cartCountUI = document.getElementById('cartCount');
-            const cartModal = document.getElementById('cartModal');
-            const closeCartButton = document.getElementById('closeCartButton');
-            const cartItemsContainer = document.getElementById('cartItemsContainer');
-            const cartTotalUI = document.getElementById('cartTotal');
-            const submitOrderButton = document.getElementById('submitOrderButton');
-            const tableIdInput = document.getElementById('tableIdInput');
-            const generateQrButton = document.getElementById('generateQrButton');
-            const qrcodeContainer = document.getElementById('qrcodeContainer');
-            const qrcodeDiv = document.getElementById('qrcode');
-            const qrText = document.getElementById('qrText');
-            const ordersContainer = document.getElementById('ordersContainer');
-            const receiptToPrint = document.getElementById('receiptToPrint');
-            const receiptTable = document.getElementById('receiptTable');
-            const receiptDate = document.getElementById('receiptDate');
-            const receiptItems = document.getElementById('receiptItems');
-            const receiptTotal = document.getElementById('receiptTotal');
-            
-            // گۆڕاوە یاریدەدەرەکان
-            let cart = []; 
-            let promptCallback = null;
-            let currentTable = null;
-            const urlParams = new URLSearchParams(window.location.search);
-
-            // --- پێناسەکردنی هەموو فەنکشنەکان ---
-
-            function showCustomAlert(message) {
-                customAlertMessage.innerText = message;
-                customAlert.classList.remove('hidden');
-            }
-
-            function showCustomPrompt(title, callback) {
-                customPromptTitle.innerText = title;
-                customPromptInput.value = '';
-                customPrompt.classList.remove('hidden');
-                promptCallback = callback;
-            }
-
-            function showPage(pageId) {
-                [loginPage, menuPage, adminPage].forEach(page => {
-                    page.classList.remove('active');
-                });
-                document.getElementById(pageId).classList.add('active');
-                window.scrollTo({ top: 0, behavior: 'smooth' });
-            }
-
-            function showSection(category) {
-                menuSections.forEach(section => section.classList.remove('active'));
-                if (category === 'all') {
-                    menuSections.forEach(section => section.classList.add('active'));
-                } else {
-                    const sectionToShow = document.querySelector(`.menu-section[data-category="${category}"]`);
-                    if (sectionToShow) sectionToShow.classList.add('active');
-                }
-            }
-            
-            function hideAllFoodCategories() {
-                foodCategories.forEach(foodCat => foodCat.classList.remove('active'));
-            }
-
-            function addOrderButtonsToItems() {
-                const menuItems = document.querySelectorAll('.menu-item:not(.cold-category-card)');
-                menuItems.forEach(item => {
-                    if (item.querySelector('.add-to-cart-btn')) return;
-                    const itemName = item.querySelector('.item-name')?.innerText;
-                    const itemPriceText = item.querySelector('.item-price')?.innerText;
-                    
-                    if (itemName && itemPriceText) {
-                        const addButton = document.createElement('button');
-                        addButton.innerText = '+';
-                        addButton.className = 'add-to-cart-btn theme-nav-btn !px-3 !py-1 !rounded-full text-lg font-bold ml-2';
-                        addButton.title = `زیادکردنی ${itemName} بۆ سەبەتە`;
-                        const itemInfo = item.querySelector('.item-info');
-                        if (itemInfo) {
-                            itemInfo.classList.add('flex-row', 'items-center');
-                            itemInfo.appendChild(addButton);
-                        }
-                        addButton.addEventListener('click', (e) => {
-                            e.stopPropagation(); 
-                            const price = parseInt(itemPriceText.replace(/[^0-9]/g, ''));
-                            addToCart(itemName, price);
-                        });
-                    }
-                });
-            }
-
-            function addToCart(name, price) {
-                const existingItem = cart.find(item => item.name === name);
-                if (existingItem) {
-                    existingItem.quantity++;
-                } else {
-                    cart.push({ name, price, quantity: 1 });
-                }
-                console.log("سەبەتە نوێکرایەوە:", cart);
-                updateCartUI();
-            }
-
-            function updateCartUI() {
-                if (cart.length === 0) {
-                    cartItemsContainer.innerHTML = '<p class="text-gray-400 text-center py-4">سەبەتەکەت بەتاڵە.</p>';
-                    cartCountUI.classList.add('hidden');
-                    submitOrderButton.disabled = true;
-                } else {
-                    cartItemsContainer.innerHTML = '';
-                    let total = 0;
-                    cart.forEach((item, index) => {
-                        const itemElement = document.createElement('div');
-                        itemElement.className = 'flex justify-between items-center py-3';
-                        itemElement.innerHTML = `
-                            <div>
-                                <p class="theme-item-name text-yellow-400 font-semibold">${item.name}</p>
-                                <p class="theme-item-price text-yellow-200 text-sm">${item.price.toLocaleString()} د.ع</p>
-                            </div>
-                            <div class="flex items-center gap-2">
-                                <button class="cart-qty-btn bg-gray-700 rounded-full w-6 h-6" data-index="${index}" data-action="decrease">-</button>
-                                <span class="font-bold">${item.quantity}</span>
-                                <button class="cart-qty-btn bg-gray-700 rounded-full w-6 h-6" data-index="${index}" data-action="increase">+</button>
-                                <button class="cart-remove-btn text-red-400 hover:text-red-300 ml-2" data-index="${index}">
-                                    <svg xmlns="http://www.w3.org/2000/svg" class="w-5 h-5" viewBox="0 0 20 20" fill="currentColor"><path fill-rule="evenodd" d="M9 2a1 1 0 00-.894.553L7.382 4H4a1 1 0 000 2v10a2 2 0 002 2h8a2 2 0 002-2V6a1 1 0 100-2h-3.382l-.724-1.447A1 1 0 0011 2H9zM7 8a1 1 0 012 0v6a1 1 0 11-2 0V8zm5-1a1 1 0 00-1 1v6a1 1 0 102 0V8a1 1 0 00-1-1z" clip-rule="evenodd" /></svg>
-                                </button>
-                            </div>
-                        `;
-                        cartItemsContainer.appendChild(itemElement);
-                        total += item.price * item.quantity;
-                    });
-                    
-                    cartTotalUI.innerText = `${total.toLocaleString()} د.ع`;
-                    cartCountUI.innerText = cart.reduce((sum, item) => sum + item.quantity, 0);
-                    cartCountUI.classList.remove('hidden');
-                    submitOrderButton.disabled = false;
-                }
-            }
-            
-            async function sendOrder(tableNumber) {
-                submitOrderButton.disabled = true;
-                submitOrderButton.innerText = "تکایە چاوەڕێ بکە...";
-
-                try {
-                    const orderData = {
-                        table: tableNumber,
-                        items: cart, 
-                        total: cart.reduce((sum, item) => sum + (item.price * item.quantity), 0),
-                        status: "pending", 
-                        createdAt: serverTimestamp() 
-                    };
-                    
-                    const docRef = await addDoc(ordersCollection, orderData);
-                    console.log("داواکاری نێردرا:", docRef.id);
-                    showCustomAlert(`داواکارییەکەت بۆ مێزی ${tableNumber} بە سەرکەوتوویی نێردرا.`);
-                    
-                    cart = [];
-                    updateCartUI();
-                    closeCartButton.click(); 
-
-                } catch (e) {
-                    console.error("کێشە لە ناردنی داواکاری:", e);
-                    showCustomAlert("کێشەیەک ڕوویدا لە کاتی ناردنی داواکارییەکەت.");
-                } finally {
-                    submitOrderButton.disabled = false;
-                    submitOrderButton.innerText = "ناردنی داواکاری";
-                }
-            }
-
-            function listenForOrders() {
-                if (!ordersCollection) {
-                    console.error("کۆڵەکشنی داواکارییەکان ئامادە نییە. (Firebase کارناکات)");
-                    ordersContainer.innerHTML = '<p class="text-red-400 text-center col-span-full">کێشە لە پەیوەندی بە بنکەی داتاوە هەیە.</p>';
-                    return;
-                }
-                if (unsubscribeOrders) {
-                    unsubscribeOrders();
-                }
-                console.log("گوێگرتن بۆ داواکارییە نوێیەکان...");
-                
-                const q = query(ordersCollection, where("status", "==", "pending"));
-                
-                unsubscribeOrders = onSnapshot(q, (snapshot) => {
-                    console.log(`داواکاری نوێ وەرگیرا: ${snapshot.docs.length}`);
-                    if (snapshot.empty) {
-                        ordersContainer.innerHTML = '<p class="text-gray-400 text-center col-span-full">هێشتا هیچ داواکارییەکی نوێ نییە...</p>';
-                        return;
-                    }
-                    ordersContainer.innerHTML = ''; 
-                    
-                    const docs = snapshot.docs.sort((a, b) => {
-                        const timeA = a.data().createdAt?.seconds || 0;
-                        const timeB = b.data().createdAt?.seconds || 0;
-                        return timeB - timeA; 
-                    });
-
-                    docs.forEach(docSnap => {
-                        const order = docSnap.data();
-                        const orderId = docSnap.id;
-                        const orderCard = document.createElement('div');
-                        orderCard.className = 'order-card bg-gray-900 p-5 rounded-lg shadow-lg border border-gray-700 animate-pulse-fast';
-                        orderCard.dataset.id = orderId;
-                        
-                        const timestamp = order.createdAt?.toDate ? order.createdAt.toDate().toLocaleTimeString('en-US', { hour: '2-digit', minute: '2-digit' }) : 'N/A';
-                        
-                        let itemsHtml = order.items.map(item => `
-                            <li class="flex justify-between items-center">
-                                <span class="font-medium">${item.name}</span>
-                                <span class="text-gray-400">x ${item.quantity}</span>
-                            </li>
-                        `).join('');
-
-                        orderCard.innerHTML = `
-                            <div class="flex justify-between items-center mb-3">
-                                <h3 class="text-2xl font-bold text-yellow-300">مێزی: ${order.table}</h3>
-                                <span class="text-sm font-semibold text-gray-400">${timestamp}</span>
-                            </div>
-                            <ul class="divide-y divide-gray-800 mb-4">
-                                ${itemsHtml}
-                            </ul>
-                            <div class="border-t border-gray-800 pt-3 flex justify-between items-center mb-4">
-                                <span class="text-lg font-bold text-gray-300">کۆی گشتی:</span>
-                                <span class="text-lg font-bold text-yellow-300">${order.total.toLocaleString()} د.ع</span>
-                            </div>
-                            <div class="flex flex-col gap-2">
-                                <button class="print-receipt-btn w-full bg-blue-500 text-white font-bold py-2 px-4 rounded-lg hover:bg-blue-600 transition-colors">
-                                    چاپکردنی پسوڵە
-                                </button>
-                                <button class="complete-order-btn w-full bg-green-600 text-white font-bold py-2 px-4 rounded-lg hover:bg-green-700 transition-colors">
-                                    تەواوکردنی داواکاری
-                                </button>
-                            </div>
-                        `;
-                        
-                        ordersContainer.appendChild(orderCard);
-                        
-                        setTimeout(() => orderCard.classList.remove('animate-pulse-fast'), 2000);
-                    });
-
-                }, (error) => {
-                    console.error("کێشە لە وەرگرتنی داواکارییەکان:", error);
-                    ordersContainer.innerHTML = '<p class="text-red-400 text-center col-span-full">کێشە لە پەیوەندی ڕوویدا.</p>';
-                });
-            }
-
-            function printReceiptForOrder(orderCard) {
-                const table = orderCard.querySelector('h3').innerText;
-                const totalText = orderCard.querySelector('.text-lg.font-bold.text-yellow-300').innerText;
-                
-                receiptItems.innerHTML = '';
-                
-                receiptTable.innerText = table;
-                receiptDate.innerText = `کات: ${new Date().toLocaleString('en-US', { hour: '2-digit', minute: '2-digit', day: '2-digit', month: '2-digit' })}`;
-                receiptTotal.innerText = `کۆی گشتی: ${totalText}`;
-                
-                const items = orderCard.querySelectorAll('ul li');
-                items.forEach(li => {
-                    const name = li.querySelector('.font-medium').innerText;
-                    const qty = li.querySelector('.text-gray-400').innerText.replace('x ', '');
-                    
-                    const row = document.createElement('tr');
-                    row.innerHTML = `
-                        <td>${name}</td>
-                        <td style="text-align: center;">${qty}</td>
-                        <td style="text-align: left;">...</td> 
-                    `;
-                    receiptItems.appendChild(row);
-                });
-                window.print();
-            }
-
-            // --- لێرەدا هەموو Event Listeners دادەنێین ---
-
-            customAlertClose.addEventListener('click', () => customAlert.classList.add('hidden'));
-
-            customPromptCancel.addEventListener('click', () => {
-                customPrompt.classList.add('hidden');
-                if (promptCallback) promptCallback(null);
-                promptCallback = null;
-            });
-
-            customPromptSubmit.addEventListener('click', () => {
-                const value = customPromptInput.value.trim();
-                customPrompt.classList.add('hidden');
-                if (promptCallback) promptCallback(value);
-                promptCallback = null;
-            });
-
-            // لۆژیکی مینیو
-            categoryBtns.forEach(btn => {
-                btn.addEventListener('click', function() {
-                    const category = this.getAttribute('data-category');
-                    categoryBtns.forEach(b => b.classList.remove('active'));
-                    this.classList.add('active');
-                    showSection(category);
-                    
-                    if (category !== 'cold') {
-                        hideAllFoodCategories();
-                    }
-                    
-                    if (category === 'cold') {
-                        mainContainer.classList.add('cold-theme');
-                        body.classList.add('cold-theme');
-                        cartButtonUI.classList.add('cold-theme');
-                        headerIcon.textContent = '❄️';
-                        footerIcon.textContent = '❄️ ❄️ ❄️';
-                    } else {
-                        mainContainer.classList.remove('cold-theme');
-                        body.classList.remove('cold-theme');
-                        cartButtonUI.classList.remove('cold-theme');
-                        headerIcon.textContent = '☕';
-                        footerIcon.textContent = '☕ ☕ ☕';
-                    }
-                    
-                    window.scrollTo({ top: 0, behavior: 'smooth' });
-                });
-            });
-            
-            coldMenuItems.forEach(item => {
-                item.addEventListener('click', function() {
-                    const category = this.getAttribute('data-category');
-                    hideAllFoodCategories();
-                    const selectedCategory = document.getElementById(`${category}-category`);
-                    if (selectedCategory) {
-                        selectedCategory.classList.add('active');
-                        selectedCategory.scrollIntoView({ behavior: 'smooth', block: 'start' });
-                    }
-                });
-            });
-
-            // لۆژیکی گواستنەوەی پەڕەکان
-            loginButton.addEventListener('click', () => {
-                if (adminPassword.value === 'admin123') {
-                    console.log("چوونەژوورەوەی ئەدمین سەرکەوتوو بوو");
-                    showPage('adminPage');
-                    listenForOrders(); 
-                } else {
-                    showCustomAlert("وشەی نهێنی هەڵەیە!");
-                    console.warn("هەوڵی چوونەژوورەوەی هەڵە درا");
-                }
-                adminPassword.value = '';
-            });
-            goToMenuButton.addEventListener('click', () => {
-                showPage('menuPage');
-                addOrderButtonsToItems();
-            });
-            goToAdminLogin.addEventListener('click', () => showPage('loginPage'));
-            logoutButton.addEventListener('click', () => {
-                if (unsubscribeOrders) {
-                    unsubscribeOrders(); 
-                    unsubscribeOrders = null;
-                    console.log("گوێگرتن لە داواکارییەکان ڕاگیرا.");
-                }
-                showPage('loginPage');
-            });
-
-            // لۆژیکی سەبەتە
-            cartItemsContainer.addEventListener('click', (e) => {
-                const target = e.target.closest('button');
-                if (!target) return;
-                const index = parseInt(target.dataset.index);
-                
-                if (target.classList.contains('cart-qty-btn')) {
-                    const action = target.dataset.action;
-                    if (action === 'increase') {
-                        cart[index].quantity++;
-                    } else if (action === 'decrease') {
-                        cart[index].quantity--;
-                        if (cart[index].quantity === 0) {
-                            cart.splice(index, 1);
-                        }
-                    }
-                } else if (target.classList.contains('cart-remove-btn')) {
-                    cart.splice(index, 1);
-                }
-                updateCartUI();
-            });
-            cartButtonUI.addEventListener('click', () => {
-                cartModal.classList.remove('hidden');
-                setTimeout(() => {
-                    cartModal.style.opacity = 1;
-                    cartModal.style.pointerEvents = 'auto';
-                    cartModal.querySelector('.theme-container').style.transform = 'scale(1)';
-                }, 10);
-            });
-            closeCartButton.addEventListener('click', () => {
-                cartModal.style.opacity = 0;
-                cartModal.style.pointerEvents = 'none';
-                cartModal.querySelector('.theme-container').style.transform = 'scale(0.95)';
-                setTimeout(() => cartModal.classList.add('hidden'), 300);
-            });
-            
-            // ناردنی داواکاری (چاککراو)
-            submitOrderButton.addEventListener('click', () => {
-                if (!ordersCollection) {
-                    showCustomAlert("کێشە لە ناردنی داواکاری. بنکەی داتا ئامادە نییە.");
-                    return;
-                }
-
-                if (currentTable) {
-                    // ئەگەر ناوی مێزەکە لە URLـەوە هاتبوو، ڕاستەوخۆ بینێرە
-                    sendOrder(currentTable);
-                } else {
-                    // ئەگەر نا، داوای ناوی مێز بکە (بۆ کاتی تاقیکردنەوە)
-                    showCustomPrompt("تکایە ژمارە یان ناوی مێزەکەت بنووسە:", (tableNumber) => {
-                        if (!tableNumber) {
-                            showCustomAlert("تکایە ژمارەی مێز بنووسە بۆ ناردنی داواکاری.");
-                            return;
-                        }
-                        sendOrder(tableNumber);
-                    });
-                }
-            });
-
-            // لۆژیکی پەڕەی ئەدمین
-            generateQrButton.addEventListener('click', () => {
-                const table = tableIdInput.value;
-                if (!table) {
-                    showCustomAlert("تکایە ناوێک یان ژمارەیەک بۆ مێزەکە بنووسە.");
-                    return;
-                }
-
-                // *** گرنگ: ناوی پڕۆژەکەی خۆت دابنێ ***
-                const publicURL = "https://cafe-d4bf6.web.app"; 
-                const qrCodeURL = `${publicURL}?table=${encodeURIComponent(table)}`;
-                
-                qrcodeDiv.innerHTML = ''; 
-                try {
-                    new QRCode(qrcodeDiv, {
-                        text: qrCodeURL,
-                        width: 200,
-                        height: 200,
-                        colorDark : "#000000",
-                        colorLight : "#ffffff",
-                        correctLevel : QRCode.CorrectLevel.H
-                    });
-                    qrText.innerText = `بارکۆد بۆ: ${table}`;
-                    qrcodeContainer.style.display = 'flex';
-                    console.log(`بارکۆد دروستکرا: ${qrCodeURL}`);
-                } catch(e) {
-                    console.error("کێشە لە دروستکردنی بارکۆد:", e);
-                    showCustomAlert("کێشەیەک ڕوویدا.");
-                }
-            });
-            ordersContainer.addEventListener('click', async (e) => {
-                const target = e.target;
-                if (!target) return;
-
-                const card = target.closest('.order-card');
-                if (!card) return;
-                
-                const orderId = card.dataset.id;
-                
-                if (target.classList.contains('complete-order-btn')) {
-                    try {
-                        target.disabled = true;
-                        target.innerText = "تەواو کرا...";
-                        const orderRef = doc(ordersCollection, orderId); 
-                        await updateDoc(orderRef, { status: "completed" });
-                        console.log(`داواکاری ${orderId} تەواو کرا.`);
-                    } catch (err) {
-                        console.error("کێشە لە تەواوکردنی داواکاری:", err);
-                        showCustomAlert("کێشەیەک ڕوویدا.");
-                        target.disabled = false;
-                        target.innerText = "تەواوکردنی داواکاری";
-                    }
-                }
-                
-                if (target.classList.contains('print-receipt-btn')) {
-                    console.log(`چاپکردنی پسوڵە بۆ: ${orderId}`);
-                    printReceiptForOrder(card);
-                }
-            });
-
-
-            // --- لۆژیکی سەرەتایی (Expiration & Page Load) ---
-
-            // سیستەمی بەروار
-            const expirationDate = new Date('2025-12-2'); 
-            const currentDate = new Date();
-            
-            if (currentDate > expirationDate) {
-                expiredMessage.style.display = 'flex'; 
-                document.querySelectorAll('.page').forEach(p => p.style.display = 'none');
-                return; // ڕاگرتنی هەموو شتێک
-            } else {
-                expiredMessage.style.display = 'none';
-            }
-
-            // سەتکردنی بەشی یەکەم
-            showSection('all');
-            document.querySelector('.category-btn[data-category="all"]').classList.add('active');
-            hideAllFoodCategories();
-
-            // **گرنگ:** لۆجیکی نیشاندانی پەڕەی یەکەم
-            // ئەمە لە کۆتاییدا جێبەجێ دەکرێت دوای ئەوەی هەموو فەنکشنەکان ئامادەن
-            if (urlParams.has('table')) {
-                currentTable = urlParams.get('table');
-                console.log(`پەڕەکە بۆ مێزی: ${currentTable} کرایەوە`);
-                
-                // شاردنەوەی دوگمەی ئەدمین
-                if(goToAdminLogin) {
-                    goToAdminLogin.style.display = 'none';
-                }
-                
-                // ڕاستەوخۆ نیشاندانی مینیو
-                showPage('menuPage');
-                addOrderButtonsToItems();
+        function showSection(category) {
+            menuSections.forEach(section => section.classList.remove('active'));
+            if (category === 'all') {
+                menuSections.forEach(section => section.classList.add('active'));
             } else {
-                // ئەگەر ناوی مێز لە URL نەبوو، ئەوا پەڕەی لۆگین نیشان بدە
-                showPage('loginPage');
+                const sectionToShow = document.querySelector(`.menu-section[data-category="${category}"]`);
+                if (sectionToShow) sectionToShow.classList.add('active');
+            }
+        }
+        
+        function hideAllFoodCategories() {
+            foodCategories.forEach(foodCat => foodCat.classList.remove('active'));
+        }
+
+        // زیادکراو: فەنکشنی لێدانی زەنگی ئاگادارکردنەوە
+        function playNotificationSound() {
+            try {
+                // دروستکردنی دەنگ بەبێ فایلی دەرەکی
+                const context = new (window.AudioContext || window.webkitAudioContext)();
+                const oscillator = context.createOscillator();
+                const gain = context.createGain();
+                
+                oscillator.type = 'sine'; // جۆری شەپۆلی دەنگ
+                oscillator.frequency.setValueAtTime(880, context.currentTime); // فریکوێنسی (تیژی) دەنگ
+                gain.gain.setValueAtTime(0.5, context.currentTime); // بڵندی دەنگ
+                
+                oscillator.connect(gain);
+                gain.connect(context.destination);
+                
+                oscillator.start();
+                // وەستان دوای 150 میلی چرکە
+                oscillator.stop(context.currentTime + 0.15); 
+                
+                // دەنگێکی دووەم بۆ جوانی
+                const oscillator2 = context.createOscillator();
+                oscillator2.type = 'sine';
+                oscillator2.frequency.setValueAtTime(660, context.currentTime + 0.2);
+                gain.gain.setValueAtTime(0.5, context.currentTime + 0.2);
+                
+                oscillator2.connect(gain);
+                oscillator2.start(context.currentTime + 0.2);
+                oscillator2.stop(context.currentTime + 0.4);
+
+            } catch (e) {
+                console.warn("نەتوانرا دەنگی ئاگادارکردنەوە لێبدرێت:", e);
+            }
+        }
+        
+        // زیادکراو: فەنکشنی نیشاندانی کارتی داواکاری
+        // ئەمە لەناو 'listenForOrders'ـی کۆن دابوو، ئێستا بووە بە فەنکشنێکی سەربەخۆ
+        function renderOrderCard(order) {
+            const orderCard = document.createElement('div');
+            // زیادکردنی 'animate-pulse' بۆ ئەوەی داواکاری نوێ تیشک بخاتە سەر
+            orderCard.className = 'order-card bg-gray-900 p-4 rounded-lg shadow-md border border-yellow-600 animate-pulse';
+            orderCard.dataset.id = order.id;
+
+            const itemsList = order.items.map(item =>
+                `<li class="flex justify-between">
+                    <span class="font-medium">${item.name}</span>
+                    <span class="text-gray-400">x ${item.quantity}</span>
+                </li>`
+            ).join('');
+
+            orderCard.innerHTML = `
+                <h3 class="text-xl font-bold text-yellow-400 mb-2">${order.table}</h3>
+                <p class="text-sm text-gray-400 mb-3">ID: ${order.id}</p>
+                <ul class="space-y-1 mb-4 text-gray-200">${itemsList}</ul>
+                <div class="border-t border-gray-700 pt-3 flex justify-between items-center">
+                    <div>
+                        <p class="text-sm text-gray-400">کۆی گشتی:</p>
+                        <p class="text-lg font-bold text-yellow-300">${order.total.toLocaleString()} د.ع</p>
+                    </div>
+                    <div>
+                        <button class="print-receipt-btn bg-blue-500 text-white px-3 py-1 rounded-md text-sm hover:bg-blue-600 mr-2">چاپ</button>
+                        <button class="complete-order-btn bg-green-500 text-white px-3 py-1 rounded-md text-sm hover:bg-green-600">تەواوکردن</button>
+                    </div>
+                </div>
+            `;
+            
+            // سڕینەوەی پەیامی "هیچ داواکارییەک نییە"
+            const noOrdersMessage = document.getElementById('noOrdersMessage');
+            if (noOrdersMessage) {
+                noOrdersMessage.remove();
             }
 
-        }); // کۆتایی DOMContentLoaded
+            // زیادکردنی کارتی نوێ بۆ سەرەوەی لیستەکە
+            ordersContainer.prepend(orderCard);
 
-    </script>
+            // لابردنی 'animate-pulse' دوای ماوەیەک
+            setTimeout(() => {
+                orderCard.classList.remove('animate-pulse');
+            }, 1000);
+
+            return orderCard;
+        }
+
+        // زیادکراو: فەنکشنێک بۆ وەرگرتنی داواکاری لە مینیوەوە و نیشاندانی لە پانێڵی ئەدمین
+        function displayOrderOnAdminPanel(orderData) {
+            // 1. کارتەکە لە بەشی ئەدمین نیشان بدە
+            renderOrderCard(orderData);
+            
+            // 2. زەنگ لێبدە ئەگەر لەناو پەڕەی ئەدمین بوویت
+            if (adminPage.classList.contains('active')) {
+                playNotificationSound();
+            }
+        }
+
+
+        function addOrderButtonsToItems() {
+            const menuItems = document.querySelectorAll('.menu-item:not(.cold-category-card)');
+            menuItems.forEach(item => {
+                if (item.querySelector('.add-to-cart-btn')) return;
+                const itemName = item.querySelector('.item-name')?.innerText;
+                const itemPriceText = item.querySelector('.item-price')?.innerText;
+                
+                if (itemName && itemPriceText) {
+                    const addButton = document.createElement('button');
+                    addButton.innerText = '+';
+                    addButton.className = 'add-to-cart-btn theme-nav-btn !px-3 !py-1 !rounded-full text-lg font-bold ml-2';
+                    addButton.title = `زیادکردنی ${itemName} بۆ سەبەتە`;
+                    const itemInfo = item.querySelector('.item-info');
+                    if (itemInfo) {
+                        itemInfo.classList.add('flex-row', 'items-center');
+                        itemInfo.appendChild(addButton);
+                    }
+                    addButton.addEventListener('click', (e) => {
+                        e.stopPropagation(); 
+                        const price = parseInt(itemPriceText.replace(/[^0-9]/g, ''));
+                        addToCart(itemName, price);
+                    });
+                }
+            });
+        }
+
+        function addToCart(name, price) {
+            const existingItem = cart.find(item => item.name === name);
+            if (existingItem) {
+                existingItem.quantity++;
+            } else {
+                cart.push({ name, price, quantity: 1 });
+            }
+            console.log("سەبەتە نوێکرایەوە:", cart);
+            updateCartUI();
+        }
+
+        function updateCartUI() {
+            if (cart.length === 0) {
+                cartItemsContainer.innerHTML = '<p class="text-gray-400 text-center py-4">سەبەتەکەت بەتاڵە.</p>';
+                cartCountUI.classList.add('hidden');
+                submitOrderButton.disabled = true;
+            } else {
+                cartItemsContainer.innerHTML = '';
+                let total = 0;
+                cart.forEach((item, index) => {
+                    const itemElement = document.createElement('div');
+                    itemElement.className = 'flex justify-between items-center py-3';
+                    itemElement.innerHTML = `
+                        <div>
+                            <p class="theme-item-name text-yellow-400 font-semibold">${item.name}</p>
+                            <p class="theme-item-price text-yellow-200 text-sm">${item.price.toLocaleString()} د.ع</p>
+                        </div>
+                        <div class="flex items-center gap-2">
+                            <button class="cart-qty-btn bg-gray-700 rounded-full w-6 h-6" data-index="${index}" data-action="decrease">-</button>
+                            <span class="font-bold">${item.quantity}</span>
+                            <button class="cart-qty-btn bg-gray-700 rounded-full w-6 h-6" data-index="${index}" data-action="increase">+</button>
+                            <button class="cart-remove-btn text-red-400 hover:text-red-300 ml-2" data-index="${index}">
+                                <svg xmlns="http://www.w3.org/2000/svg" class="w-5 h-5" viewBox="0 0 20 20" fill="currentColor"><path fill-rule="evenodd" d="M9 2a1 1 0 00-.894.553L7.382 4H4a1 1 0 000 2v10a2 2 0 002 2h8a2 2 0 002-2V6a1 1 0 100-2h-3.382l-.724-1.447A1 1 0 0011 2H9zM7 8a1 1 0 012 0v6a1 1 0 11-2 0V8zm5-1a1 1 0 00-1 1v6a1 1 0 102 0V8a1 1 0 00-1-1z" clip-rule="evenodd" /></svg>
+                            </button>
+                        </div>
+                    `;
+                    cartItemsContainer.appendChild(itemElement);
+                    total += item.price * item.quantity;
+                });
+                
+                cartTotalUI.innerText = `${total.toLocaleString()} د.ع`;
+                cartCountUI.innerText = cart.reduce((sum, item) => sum + item.quantity, 0);
+                cartCountUI.classList.remove('hidden');
+                submitOrderButton.disabled = false;
+            }
+        }
+        
+        // فەنکشنی ناردنی داواکاری - گۆڕاوە بۆ ئەوەی بەبێ فایەربەیس کاربکات
+        function sendOrder(tableNumber) {
+            submitOrderButton.disabled = true;
+            submitOrderButton.innerText = "تکایە چاوەڕێ بکە...";
+
+            // دروستکردنی دواکەوتنێکی کاتی (بۆ نواندنی ناردن)
+            setTimeout(() => {
+                try {
+                    // لێرەدا کۆدی فایەربەیس لابرا
+                    
+                    // دروستکردنی داواکارییەکە وەک ئۆبجێکتێکی ناوخۆیی
+                    const orderData = {
+                        id: `local_${new Date().getTime()}`, // ئایدییەکی کاتی
+                        table: tableNumber,
+                        items: [...cart], // کۆپییەکی پاکی سەبەتەکە
+                        total: cart.reduce((sum, item) => sum + (item.price * item.quantity), 0),
+                        createdAt: new Date().toISOString(), // کاتی ئێستا
+                        status: "pending"
+                    };
+
+                    // زیادکراو: ناردنی داواکارییەکە بۆ بەشی ئەدمین
+                    displayOrderOnAdminPanel(orderData);
+
+                    console.log("داواکاری (ناوخۆیی) نێردرا:", orderData);
+                    showCustomAlert(`داواکارییەکەت بۆ مێزی ${tableNumber} بە سەرکەوتوویی نێردرا.`);
+                    
+                    cart = []; // بەتاڵکردنەوەی سەبەتە
+                    updateCartUI(); // نوێکردنەوەی شاشەی سەبەتە
+                    closeCartButton.click(); // داخستنی مۆداڵی سەبەتە
+
+                } catch (e) {
+                    console.error("کێشە لە ناردنی داواکاری (ناوخۆیی):", e);
+                    showCustomAlert("کێشەیەک ڕوویدا لە کاتی ناردنی داواکارییەکەت.");
+                } finally {
+                    // گەڕاندنەوەی دوگمەکە بۆ دۆخی ئاسایی
+                    submitOrderButton.disabled = cart.length === 0; // چاککراو
+                    submitOrderButton.innerText = "ناردنی داواکاری";
+                }
+            }, 1000); // ١ چرکە دواکەوتن
+        }
+
+        // ئەم فەنکشنە پێویست نییە چونکە فایەربەیس لابراوە
+        // function listenForOrders() { ... }
+
+        function printReceiptForOrder(orderCard) {
+            const table = orderCard.querySelector('h3').innerText;
+            const totalText = orderCard.querySelector('.text-lg.font-bold.text-yellow-300').innerText;
+            
+            receiptItems.innerHTML = '';
+            
+            receiptTable.innerText = table;
+            receiptDate.innerText = `کات: ${new Date().toLocaleString('en-US', { hour: '2-digit', minute: '2-digit', day: '2-digit', month: '2-digit' })}`;
+            receiptTotal.innerText = `کۆی گشتی: ${totalText}`;
+            
+            const items = orderCard.querySelectorAll('ul li');
+            items.forEach(li => {
+                const name = li.querySelector('.font-medium').innerText;
+                const qty = li.querySelector('.text-gray-400').innerText.replace('x ', '');
+                
+                const row = document.createElement('tr');
+                row.innerHTML = `
+                    <td>${name}</td>
+                    <td style="text-align: center;">${qty}</td>
+                    <td style="text-align: left;">...</td> 
+                `;
+                receiptItems.appendChild(row);
+            });
+            window.print();
+        }
+
+        // --- لێرەدا هەموو Event Listeners دادەنێین ---
+
+        customAlertClose.addEventListener('click', () => customAlert.classList.add('hidden'));
+
+        customPromptCancel.addEventListener('click', () => {
+            customPrompt.classList.add('hidden');
+            if (promptCallback) promptCallback(null);
+            promptCallback = null;
+        });
+
+        customPromptSubmit.addEventListener('click', () => {
+            const value = customPromptInput.value.trim();
+            customPrompt.classList.add('hidden');
+            if (promptCallback) promptCallback(value);
+            promptCallback = null;
+        });
+
+        // لۆژیکی مینیو
+        categoryBtns.forEach(btn => {
+            btn.addEventListener('click', function() {
+                const category = this.getAttribute('data-category');
+                categoryBtns.forEach(b => b.classList.remove('active'));
+                this.classList.add('active');
+                showSection(category);
+                
+                if (category !== 'cold') {
+                    hideAllFoodCategories();
+                }
+                
+                if (category === 'cold') {
+                    mainContainer.classList.add('cold-theme');
+                    body.classList.add('cold-theme');
+                    cartButtonUI.classList.add('cold-theme');
+                    headerIcon.textContent = '❄️';
+                    footerIcon.textContent = '❄️ ❄️ ❄️';
+                } else {
+                    mainContainer.classList.remove('cold-theme');
+                    body.classList.remove('cold-theme');
+                    cartButtonUI.classList.remove('cold-theme');
+                    headerIcon.textContent = '☕';
+                    footerIcon.textContent = '☕ ☕ ☕';
+                }
+                
+                window.scrollTo({ top: 0, behavior: 'smooth' });
+            });
+        });
+        
+        coldMenuItems.forEach(item => {
+            item.addEventListener('click', function() {
+                const category = this.getAttribute('data-category');
+                hideAllFoodCategories();
+                const selectedCategory = document.getElementById(`${category}-category`);
+                if (selectedCategory) {
+                    selectedCategory.classList.add('active');
+                    selectedCategory.scrollIntoView({ behavior: 'smooth', block: 'start' });
+                }
+            });
+        });
+
+        // لۆژیکی گواستنەوەی پەڕەکان
+        loginButton.addEventListener('click', () => {
+            if (adminPassword.value === 'admin123') {
+                console.log("چوونەژوورەوەی ئەدمین سەرکەوتوو بوو");
+                showPage('adminPage');
+                // listenForOrders(); // لابرا چونکە فایەربەیس نییە
+            } else {
+                showCustomAlert("وشەی نهێنی هەڵەیە!");
+                console.warn("هەوڵی چوونەژوورەوەی هەڵە درا");
+            }
+            adminPassword.value = '';
+        });
+        goToMenuButton.addEventListener('click', () => {
+            showPage('menuPage');
+            addOrderButtonsToItems();
+        });
+        goToAdminLogin.addEventListener('click', () => showPage('loginPage'));
+        logoutButton.addEventListener('click', () => {
+            // if (unsubscribeOrders) { ... } // لابرا
+            console.log("دەرچوون لە سیستەمی ئەدمین.");
+            showPage('loginPage');
+        });
+
+        // لۆژیکی سەبەتە
+        cartItemsContainer.addEventListener('click', (e) => {
+            const target = e.target.closest('button');
+            if (!target) return;
+            const index = parseInt(target.dataset.index);
+            
+            if (target.classList.contains('cart-qty-btn')) {
+                const action = target.dataset.action;
+                if (action === 'increase') {
+                    cart[index].quantity++;
+                } else if (action === 'decrease') {
+                    cart[index].quantity--;
+                    if (cart[index].quantity === 0) {
+                        cart.splice(index, 1);
+                    }
+                }
+            } else if (target.classList.contains('cart-remove-btn')) {
+                cart.splice(index, 1);
+            }
+            updateCartUI();
+        });
+        cartButtonUI.addEventListener('click', () => {
+            cartModal.classList.remove('hidden');
+            setTimeout(() => {
+                cartModal.style.opacity = 1;
+                cartModal.style.pointerEvents = 'auto';
+                cartModal.querySelector('.theme-container').style.transform = 'scale(1)';
+            }, 10);
+        });
+        closeCartButton.addEventListener('click', () => {
+            cartModal.style.opacity = 0;
+            cartModal.style.pointerEvents = 'none';
+            cartModal.querySelector('.theme-container').style.transform = 'scale(0.95)';
+            setTimeout(() => cartModal.classList.add('hidden'), 300);
+        });
+        
+        // ناردنی داواکاری (چاککراو)
+        submitOrderButton.addEventListener('click', () => {
+            // if (!ordersCollection) { ... } // لابرا
+
+            if (currentTable) {
+                // ئەگەر ناوی مێزەکە لە URLـەوە هاتبوو، ڕاستەوخۆ بینێرە
+                sendOrder(currentTable);
+            } else {
+                // ئەگەر نا، داوای ناوی مێز بکە (بۆ کاتی تاقیکردنەوە)
+                showCustomPrompt("تکایە ژمارە یان ناوی مێزەکەت بنووسە:", (tableNumber) => {
+                    if (!tableNumber) {
+                        showCustomAlert("تکایە ژمارەی مێز بنووسە بۆ ناردنی داواکاری.");
+                        return;
+                    }
+                    sendOrder(tableNumber);
+                });
+            }
+        });
+
+        // لۆژیکی پەڕەی ئەدمین
+        generateQrButton.addEventListener('click', () => {
+            const table = tableIdInput.value;
+            if (!table) {
+                showCustomAlert("تکایە ناوێک یان ژمارەیەک بۆ مێزەکە بنووسە.");
+                return;
+            }
+
+            // *** گرنگ: گۆڕدرا بۆ ئەوەی لینکی پەڕەی خۆت دروست بکات ***
+            const publicURL = window.location.origin + window.location.pathname; 
+            const qrCodeURL = `${publicURL}?table=${encodeURIComponent(table)}`;
+            
+            qrcodeDiv.innerHTML = ''; 
+            try {
+                new QRCode(qrcodeDiv, {
+                    text: qrCodeURL,
+                    width: 200,
+                    height: 200,
+                    colorDark : "#000000",
+                    colorLight : "#ffffff",
+                    correctLevel : QRCode.CorrectLevel.H
+                });
+                qrText.innerText = `بارکۆد بۆ: ${table}`;
+                qrcodeContainer.style.display = 'flex';
+                console.log(`بارکۆد دروستکرا: ${qrCodeURL}`);
+            } catch(e) {
+                console.error("کێشە لە دروستکردنی بارکۆد:", e);
+                showCustomAlert("کێشەیەک ڕوویدا.");
+            }
+        });
+        
+        // چاککراو: لۆژیکی دوگمەکانی تەواوکردن و چاپکردن
+        ordersContainer.addEventListener('click', async (e) => {
+            const target = e.target;
+            if (!target) return;
+
+            const card = target.closest('.order-card');
+            if (!card) return;
+            
+            const orderId = card.dataset.id;
+            
+            if (target.classList.contains('complete-order-btn')) {
+                try {
+                    target.disabled = true;
+                    target.innerText = "تەواو کرا...";
+                    
+                    // لێرەدا کۆدی فایەربەیس لابرا
+                    // بە سادەیی کارتەکە لە شاشەکە لادەبەین
+                    card.style.transition = 'opacity 0.5s ease, transform 0.5s ease';
+                    card.style.opacity = '0';
+                    card.style.transform = 'scale(0.9)';
+                    
+                    setTimeout(() => {
+                        card.remove();
+                        // بپشکنە ئایا هیچ داواکارییەک ماوە
+                        if (ordersContainer.children.length === 0 || (ordersContainer.children.length === 1 && ordersContainer.children[0].id === 'noOrdersMessage')) {
+                             ordersContainer.innerHTML = '<p class="text-gray-400 text-center col-span-full" id="noOrdersMessage">هێشتا هیچ داواکارییەکی نوێ نییە...</p>';
+                        }
+                    }, 500);
+
+                    console.log(`داواکاری ${orderId} (ناوخۆیی) تەواو کرا.`);
+                    
+                } catch (err) {
+                    console.error("کێشە لە تەواوکردنی داواکاری:", err);
+                    showCustomAlert("کێشەیەک ڕوویدا.");
+                    target.disabled = false;
+                    target.innerText = "تەواوکردنی داواکاری";
+                }
+            }
+            
+            if (target.classList.contains('print-receipt-btn')) {
+                console.log(`چاپکردنی پسوڵە بۆ: ${orderId}`);
+                printReceiptForOrder(card);
+            }
+        });
+
+
+        // --- لۆژیکی سەرەتایی (Expiration & Page Load) ---
+
+        // سیستەمی بەروار
+        const expirationDate = new Date('2025-12-2'); 
+        const currentDate = new Date();
+        
+        if (currentDate > expirationDate) {
+            expiredMessage.style.display = 'flex'; 
+            document.querySelectorAll('.page').forEach(p => p.style.display = 'none');
+            return; // ڕاگرتنی هەموو شتێک
+        } else {
+            expiredMessage.style.display = 'none';
+        }
+
+        // سەتکردنی بەشی یەکەم
+        showSection('all');
+        document.querySelector('.category-btn[data-category="all"]').classList.add('active');
+        hideAllFoodCategories();
+
+        // **گرنگ:** لۆجیکی نیشاندانی پەڕەی یەکەم
+        // ئەمە لە کۆتاییدا جێبەجێ دەکرێت دوای ئەوەی هەموو فەنکشنەکان ئامادەن
+        if (urlParams.has('table')) {
+            currentTable = urlParams.get('table');
+            console.log(`پەڕەکە بۆ مێزی: ${currentTable} کرایەوە`);
+            
+            // شاردنەوەی دوگمەی ئەدمین
+            if(goToAdminLogin) {
+                goToAdminLogin.style.display = 'none';
+            }
+            
+            // ڕاستەوخۆ نیشاندانی مینیو
+            showPage('menuPage');
+            addOrderButtonsToItems();
+        } else {
+            // ئەگەر ناوی مێز لە URL نەبوو، ئەوا پەڕەی لۆگین نیشان بدە
+            showPage('loginPage');
+        }
+
+    }); // کۆتایی DOMContentLoaded
+
+</script>
 </body>
 </html>
