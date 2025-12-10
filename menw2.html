@@ -158,6 +158,34 @@
 </head>
 <body class="font-sans flex flex-col h-full">
 
+    <!-- LOGIN OVERLAY (New Feature) -->
+    <div id="login-overlay" class="fixed inset-0 bg-gray-900 bg-opacity-95 z-[100] flex items-center justify-center backdrop-blur-sm transition-opacity duration-500">
+        <div class="bg-white p-8 rounded-2xl shadow-2xl w-full max-w-sm text-center transform scale-100 transition-transform duration-300">
+            <div class="mb-6 w-20 h-20 bg-blue-100 rounded-full flex items-center justify-center mx-auto text-blue-600">
+                <i class="fa-solid fa-lock text-3xl"></i>
+            </div>
+            <h2 class="text-2xl font-bold mb-2 text-gray-800">چوونەژوورەوە</h2>
+            <p class="text-gray-500 mb-6 text-sm">تکایە پاسۆردی سیستەم لێبدە</p>
+            
+            <div class="relative mb-4">
+                <input type="password" id="password-input" 
+                    class="w-full p-3 px-4 bg-gray-50 border border-gray-200 rounded-xl text-center text-lg focus:ring-2 focus:ring-blue-500 outline-none transition-all" 
+                    placeholder="وشەی نهێنی..."
+                    onkeypress="if(event.key === 'Enter') checkPassword()">
+            </div>
+                
+            <p id="login-error" class="text-red-500 text-sm mb-4 hidden bg-red-50 p-2 rounded border border-red-100">
+                <i class="fa-solid fa-circle-exclamation ml-1"></i>
+                وشەی نهێنی هەڵەیە!
+            </p>
+            
+            <button onclick="checkPassword()" 
+                class="w-full bg-blue-600 hover:bg-blue-700 active:scale-95 text-white font-bold py-3 rounded-xl transition-all shadow-lg shadow-blue-200">
+                کردنەوە
+            </button>
+        </div>
+    </div>
+
     <!-- Mobile Header (Top Bar) -->
     <div class="no-print bg-white border-b p-3 flex justify-between items-center shadow-sm lg:hidden z-20">
         <h1 class="font-bold text-gray-800">تاقیکردنەوەکان</h1>
@@ -336,6 +364,29 @@
     </div>
 
     <script>
+        // Login Logic
+        function checkPassword() {
+            const pass = document.getElementById('password-input').value;
+            const overlay = document.getElementById('login-overlay');
+            const errorMsg = document.getElementById('login-error');
+
+            // وشەی نهێنی لێرە دیاری بکە (ئیستا 1234 ـە)
+            if (pass === '1234') { 
+                overlay.style.opacity = '0';
+                setTimeout(() => {
+                    overlay.style.display = 'none';
+                }, 500);
+            } else {
+                errorMsg.classList.remove('hidden');
+                document.getElementById('password-input').classList.add('border-red-500');
+                // Shake animation effect
+                document.getElementById('password-input').parentElement.classList.add('animate-pulse');
+                setTimeout(() => {
+                    document.getElementById('password-input').parentElement.classList.remove('animate-pulse');
+                }, 500);
+            }
+        }
+
         // State
         let questions = [];
 
