@@ -4,8 +4,13 @@
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0, maximum-scale=1.0, user-scalable=no">
     <title>دروستکەری پرسیاری تاقیکردنەوە</title>
+    <!-- Tailwind CSS -->
     <script src="https://cdn.tailwindcss.com"></script>
+    <!-- HTML2PDF Library for Direct Download -->
+    <script src="https://cdnjs.cloudflare.com/ajax/libs/html2pdf.js/0.10.1/html2pdf.bundle.min.js"></script>
+    <!-- Google Fonts -->
     <link href="https://fonts.googleapis.com/css2?family=Nrt+Reg&family=Vazirmatn:wght@300;400;700;900&display=swap" rel="stylesheet">
+    <!-- FontAwesome -->
     <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.4.0/css/all.min.css">
 
     <script>
@@ -43,6 +48,8 @@
             font-family: 'Nrt Reg', 'Vazirmatn', sans-serif;
             color: black;
             box-sizing: border-box;
+            /* Ensure background is white for PDF generation */
+            background-color: #ffffff;
         }
 
         .exam-header {
@@ -86,6 +93,9 @@
             font-size: 14px;
             margin-left: 8px;
             flex-shrink: 0;
+            /* Force background print */
+            -webkit-print-color-adjust: exact; 
+            print-color-adjust: exact;
         }
 
         .q-score {
@@ -102,35 +112,14 @@
             font-size: 16px !important; 
         }
 
-        /* Print Styles */
+        /* Print Styles (Fallback) */
         @media print {
-            @page {
-                size: A4;
-                margin: 0;
-            }
-            body {
-                background: white;
-                height: auto;
-                overflow: visible;
-            }
-            .no-print {
-                display: none !important;
-            }
-            .a4-paper {
-                width: 100%;
-                box-shadow: none;
-                margin: 0;
-                padding: 15mm;
-                min-height: auto;
-            }
-            #preview-panel {
-                overflow: visible !important;
-                height: auto !important;
-                display: block !important;
-            }
-            #editor-panel, #login-overlay, #mobile-add-btn, #mobile-add-modal {
-                display: none !important;
-            }
+            @page { size: A4; margin: 0; }
+            body { background: white; height: auto; overflow: visible; }
+            .no-print { display: none !important; }
+            .a4-paper { width: 100%; box-shadow: none; margin: 0; padding: 15mm; min-height: auto; transform: none !important; }
+            #preview-panel { overflow: visible !important; height: auto !important; display: block !important; padding: 0 !important; }
+            #editor-panel, #login-overlay, #mobile-add-btn, #mobile-add-modal { display: none !important; }
         }
 
         @media (max-width: 768px) {
@@ -187,7 +176,14 @@
         </div>
     </div>
 
-    <!-- MOBILE ADD QUESTION MODAL (New) -->
+    <!-- Loading Overlay for PDF Generation -->
+    <div id="pdf-loading" class="fixed inset-0 bg-black bg-opacity-70 z-[200] hidden flex flex-col items-center justify-center text-white">
+        <div class="animate-spin rounded-full h-12 w-12 border-b-2 border-white mb-4"></div>
+        <p class="font-bold text-lg">جارێ مەیبەستەوە...</p>
+        <p class="text-sm opacity-80">خەریکی دروستکردنی PDFین</p>
+    </div>
+
+    <!-- MOBILE ADD QUESTION MODAL -->
     <div id="mobile-add-modal" class="fixed inset-0 bg-gray-900 bg-opacity-95 z-[60] hidden flex flex-col justify-end lg:hidden">
         <div class="bg-white w-full rounded-t-2xl p-5 shadow-2xl h-[85dvh] overflow-y-auto transform transition-transform duration-300 translate-y-0">
             <div class="flex justify-between items-center mb-4 border-b pb-3">
@@ -226,8 +222,6 @@
                     <i class="fa-solid fa-plus-circle"></i> زیادکردنی پرسیار
                 </button>
             </div>
-            
-            <!-- Safe area spacer -->
             <div class="h-20"></div>
         </div>
     </div>
@@ -235,8 +229,8 @@
     <!-- Top Bar (Mobile) -->
     <div class="no-print bg-white border-b p-3 flex justify-between items-center shadow-sm lg:hidden z-20 sticky top-0">
         <h1 class="font-bold text-gray-800">تاقیکردنەوەکان</h1>
-        <button onclick="window.print()" class="bg-green-600 text-white px-3 py-1 rounded text-sm">
-            <i class="fa-solid fa-print"></i> PDF
+        <button onclick="downloadDirectPDF()" class="bg-green-600 text-white px-3 py-1 rounded text-sm flex items-center gap-2 shadow-sm">
+            <i class="fa-solid fa-download"></i> PDF
         </button>
     </div>
 
@@ -248,9 +242,11 @@
             
             <div class="flex justify-between items-center mb-4">
                 <h2 class="text-xl font-bold text-blue-700 hidden lg:block">زانیارییەکان</h2>
-                <button onclick="window.print()" class="hidden lg:flex bg-green-600 hover:bg-green-700 text-white px-4 py-2 rounded shadow gap-2 items-center">
-                    <i class="fa-solid fa-print"></i> <span>داگرتنی PDF</span>
-                </button>
+                <div class="hidden lg:flex gap-2">
+                    <button onclick="downloadDirectPDF()" class="bg-green-600 hover:bg-green-700 text-white px-4 py-2 rounded shadow gap-2 items-center flex">
+                        <i class="fa-solid fa-file-arrow-down"></i> <span>دابەزاندن (ڕاستەوخۆ)</span>
+                    </button>
+                </div>
             </div>
 
             <!-- Header Info Accordion -->
@@ -276,7 +272,7 @@
                 </div>
             </details>
 
-            <!-- Desktop Add Question (Hidden on Mobile now) -->
+            <!-- Desktop Add Question -->
             <div class="hidden lg:block bg-gray-50 p-4 rounded-lg border border-gray-200 shadow-sm mb-4 sticky top-0 z-10">
                 <h3 class="font-bold text-gray-700 mb-3 text-sm flex items-center gap-2">
                     <i class="fa-solid fa-plus-circle text-blue-600"></i> زیادکردنی پرسیار
@@ -298,7 +294,6 @@
                 </button>
             </div>
 
-            <!-- Mobile Instructions Hint -->
             <div class="lg:hidden text-center p-4 bg-blue-50 rounded-lg border border-blue-100 mb-4 text-blue-800">
                 <p>بۆ زیادکردنی پرسیار، دوگمە شینەکەی خوارەوە (+) دابگرە.</p>
             </div>
@@ -352,7 +347,7 @@
         </div>
     </div>
 
-    <!-- MOBILE FAB (Floating Action Button) -->
+    <!-- MOBILE FAB -->
     <button onclick="openMobileAdd()" id="mobile-add-btn" class="lg:hidden fixed bottom-24 left-6 bg-blue-600 text-white w-14 h-14 rounded-full shadow-2xl flex items-center justify-center text-2xl z-40 hover:scale-105 transition active:scale-95">
         <i class="fa-solid fa-plus"></i>
     </button>
@@ -368,6 +363,52 @@
     </div>
 
     <script>
+        // --- PDF DOWNLOAD LOGIC ---
+        function downloadDirectPDF() {
+            // Show loading
+            document.getElementById('pdf-loading').classList.remove('hidden');
+            document.getElementById('pdf-loading').classList.add('flex');
+
+            const element = document.getElementById('examPaper');
+            
+            // Clone the element to render it properly (especially if scaled on mobile)
+            const clone = element.cloneNode(true);
+            
+            // Setup a temporary container off-screen to hold the clone
+            const container = document.createElement('div');
+            container.style.position = 'absolute';
+            container.style.left = '-9999px';
+            container.style.top = '0';
+            container.style.width = '210mm'; // Fixed A4 width
+            container.appendChild(clone);
+            document.body.appendChild(container);
+
+            // Reset any mobile scaling on the clone
+            clone.style.transform = 'none';
+            clone.style.margin = '0';
+
+            const opt = {
+                margin:       0,
+                filename:     'exam_paper.pdf',
+                image:        { type: 'jpeg', quality: 0.98 },
+                html2canvas:  { scale: 2, useCORS: true, scrollX: 0, scrollY: 0 },
+                jsPDF:        { unit: 'mm', format: 'a4', orientation: 'portrait' }
+            };
+
+            // Generate and save
+            html2pdf().set(opt).from(clone).save().then(() => {
+                // Cleanup
+                document.body.removeChild(container);
+                document.getElementById('pdf-loading').classList.add('hidden');
+                document.getElementById('pdf-loading').classList.remove('flex');
+            }).catch(err => {
+                console.error(err);
+                alert("هەڵەیەک ڕوویدا لە کاتی دروستکردنی PDF. تکایە دووبارە هەوڵ بدەرەوە.");
+                document.getElementById('pdf-loading').classList.add('hidden');
+                document.getElementById('pdf-loading').classList.remove('flex');
+            });
+        }
+
         // --- LOGIN LOGIC ---
         window.onload = function() {
             const savedCode = localStorage.getItem('exam_app_code');
@@ -455,7 +496,6 @@
 
             addQuestionToData(text, score, type, options);
             
-            // Clear and Close
             document.getElementById('mob_q_text').value = '';
             document.getElementById('mob_q_mcq_opts').value = '';
             closeMobileAdd();
@@ -477,7 +517,6 @@
 
             addQuestionToData(text, score, type, options);
             
-            // Clear inputs
             document.getElementById('q_text').value = '';
             document.getElementById('q_mcq_opts').value = '';
             document.getElementById('q_text').focus();
