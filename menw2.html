@@ -27,7 +27,6 @@
     <style>
         body {
             background-color: #f0f2f5;
-            /* Use dynamic viewport height for mobile browsers */
             height: 100dvh; 
             overflow: hidden; 
         }
@@ -46,7 +45,6 @@
             box-sizing: border-box;
         }
 
-        /* Header Grid for Exam Paper */
         .exam-header {
             display: grid;
             grid-template-columns: 1fr 1.5fr 1fr;
@@ -76,7 +74,6 @@
             align-items: flex-end;
         }
 
-        /* Question Styles */
         .q-number {
             background: #000;
             color: white;
@@ -100,7 +97,12 @@
             white-space: nowrap;
         }
 
-        /* Print Styles - CRITICAL */
+        /* Input styling for mobile to prevent zoom */
+        input, textarea, select {
+            font-size: 16px !important; 
+        }
+
+        /* Print Styles */
         @media print {
             @page {
                 size: A4;
@@ -126,21 +128,19 @@
                 height: auto !important;
                 display: block !important;
             }
-            #editor-panel, #login-overlay {
+            #editor-panel, #login-overlay, #mobile-add-btn, #mobile-add-modal {
                 display: none !important;
             }
         }
 
-        /* Mobile Responsive Scaling for Preview */
         @media (max-width: 768px) {
             .a4-paper {
                 transform-origin: top center; 
                 transform: scale(0.65);
                 margin-bottom: -30%;
             }
-            /* Fix input access on mobile */
             #editor-panel {
-                padding-bottom: 150px !important; /* Extra space for bottom nav + keyboard */
+                padding-bottom: 100px !important;
             }
         }
     </style>
@@ -150,32 +150,27 @@
     <!-- LOGIN OVERLAY -->
     <div id="login-overlay" class="fixed inset-0 bg-gray-900 bg-opacity-95 z-[100] flex items-center justify-center backdrop-blur-sm transition-opacity duration-500">
         <div class="bg-white p-6 rounded-2xl shadow-2xl w-full max-w-sm text-center m-4">
-            
             <div class="mb-4 border-b pb-2">
                 <h2 class="text-xl font-bold text-gray-800">چالاککردنی سیستەم</h2>
             </div>
-
             <div class="bg-blue-50 border border-blue-200 rounded-xl p-4 mb-5">
                 <p class="text-sm text-gray-700 mb-2 font-medium">
                     بۆ وەرگرتنی کۆدی چالاککردن، بڕی 
                     <span class="bg-red-100 text-red-600 px-2 py-0.5 rounded border border-red-200 font-bold mx-1">1000 دینار</span>
                     بە <span class="font-bold text-blue-700">FIB</span> بنێرە بۆ:
                 </p>
-                
                 <div class="flex items-center justify-center gap-2 mb-3 bg-white p-2 rounded border border-blue-100 shadow-sm">
                     <span class="font-mono text-xl font-bold text-blue-900 tracking-wider">0750 178 4002</span>
                     <button onclick="navigator.clipboard.writeText('07501784002'); alert('ژمارەکە کۆپی کرا ✓')" class="text-gray-400 hover:text-blue-600 transition p-1">
                         <i class="fa-regular fa-copy"></i>
                     </button>
                 </div>
-                 <!-- QR Code -->
                  <div class="flex justify-center mb-2">
                     <div class="bg-white p-2 rounded-lg shadow-sm border border-gray-200">
                         <img src="https://api.qrserver.com/v1/create-qr-code/?size=100x100&data=07501784002" alt="QR Code" class="w-24 h-24">
                     </div>
                 </div>
             </div>
-            
             <div class="relative mb-3">
                 <input type="number" id="password-input" 
                     class="w-full p-3 px-4 bg-gray-50 border border-gray-300 rounded-xl text-center text-lg focus:ring-2 focus:ring-blue-500 outline-none transition-all placeholder-gray-400" 
@@ -183,21 +178,61 @@
                     inputmode="numeric"
                     onkeypress="if(event.key === 'Enter') checkPassword()">
             </div>
-                
             <p id="login-error" class="text-red-500 text-sm mb-3 hidden bg-red-50 p-1 rounded border border-red-100">
-                <i class="fa-solid fa-circle-exclamation ml-1"></i>
-                کۆدەکە هەڵەیە!
+                <i class="fa-solid fa-circle-exclamation ml-1"></i> کۆدەکە هەڵەیە!
             </p>
-            
-            <button onclick="checkPassword()" 
-                class="w-full bg-blue-600 hover:bg-blue-700 active:scale-95 text-white font-bold py-3 rounded-xl transition-all shadow-lg shadow-blue-200 flex items-center justify-center gap-2">
-                <span>چالاککردن</span>
-                <i class="fa-solid fa-arrow-left"></i>
+            <button onclick="checkPassword()" class="w-full bg-blue-600 hover:bg-blue-700 active:scale-95 text-white font-bold py-3 rounded-xl transition-all shadow-lg shadow-blue-200 flex items-center justify-center gap-2">
+                <span>چالاککردن</span> <i class="fa-solid fa-arrow-left"></i>
             </button>
         </div>
     </div>
 
-    <!-- Mobile Header -->
+    <!-- MOBILE ADD QUESTION MODAL (New) -->
+    <div id="mobile-add-modal" class="fixed inset-0 bg-gray-900 bg-opacity-95 z-[60] hidden flex flex-col justify-end lg:hidden">
+        <div class="bg-white w-full rounded-t-2xl p-5 shadow-2xl h-[85dvh] overflow-y-auto transform transition-transform duration-300 translate-y-0">
+            <div class="flex justify-between items-center mb-4 border-b pb-3">
+                <h3 class="text-lg font-bold text-gray-800">زیادکردنی پرسیار</h3>
+                <button onclick="closeMobileAdd()" class="bg-gray-100 text-gray-600 p-2 rounded-full w-8 h-8 flex items-center justify-center">
+                    <i class="fa-solid fa-xmark"></i>
+                </button>
+            </div>
+
+            <div class="space-y-4">
+                <div>
+                    <label class="block text-sm font-bold text-gray-700 mb-1">دەقی پرسیار:</label>
+                    <textarea id="mob_q_text" rows="3" class="w-full p-3 border-2 border-blue-200 rounded-xl focus:border-blue-500 outline-none text-lg" placeholder="پرسیارەکە لێرە بنووسە..."></textarea>
+                </div>
+                
+                <div class="flex gap-3">
+                    <div class="w-1/3">
+                        <label class="block text-sm font-bold text-gray-700 mb-1">نمرە:</label>
+                        <input type="number" id="mob_q_score" value="10" class="w-full p-3 border-2 border-gray-200 rounded-xl text-center font-bold" inputmode="numeric">
+                    </div>
+                    <div class="w-2/3">
+                        <label class="block text-sm font-bold text-gray-700 mb-1">جۆر:</label>
+                        <select id="mob_q_type" class="w-full p-3 border-2 border-gray-200 rounded-xl bg-white" onchange="toggleMobileMCQ(this.value)">
+                            <option value="text">پرسیاری نووسین</option>
+                            <option value="mcq">هەڵبژاردن (MCQ)</option>
+                        </select>
+                    </div>
+                </div>
+
+                <div id="mob_mcq_options_container" class="hidden bg-gray-50 p-3 rounded-xl border border-gray-200">
+                    <label class="block text-sm font-bold text-gray-600 mb-2">بژاردەکان (هەر دێڕێک دانەیەک):</label>
+                    <textarea id="mob_q_mcq_opts" rows="4" class="w-full p-2 border border-gray-300 rounded-lg outline-none" placeholder="ئەلف) ...&#10;با) ...&#10;ج) ..."></textarea>
+                </div>
+
+                <button onclick="addQuestionMobile()" class="w-full bg-blue-600 hover:bg-blue-700 text-white font-bold py-4 rounded-xl shadow-lg text-lg flex items-center justify-center gap-2 mt-4">
+                    <i class="fa-solid fa-plus-circle"></i> زیادکردنی پرسیار
+                </button>
+            </div>
+            
+            <!-- Safe area spacer -->
+            <div class="h-20"></div>
+        </div>
+    </div>
+
+    <!-- Top Bar (Mobile) -->
     <div class="no-print bg-white border-b p-3 flex justify-between items-center shadow-sm lg:hidden z-20 sticky top-0">
         <h1 class="font-bold text-gray-800">تاقیکردنەوەکان</h1>
         <button onclick="window.print()" class="bg-green-600 text-white px-3 py-1 rounded text-sm">
@@ -208,8 +243,8 @@
     <!-- Main Content -->
     <div class="flex-1 flex flex-col lg:flex-row overflow-hidden relative">
         
-        <!-- EDITOR PANEL -->
-        <div id="editor-panel" class="w-full lg:w-1/3 bg-white border-l border-gray-200 h-full overflow-y-auto p-4 transition-transform absolute lg:relative z-10 lg:translate-x-0">
+        <!-- DESKTOP EDITOR PANEL -->
+        <div id="editor-panel" class="w-full lg:w-1/3 bg-white border-l border-gray-200 h-full overflow-y-auto p-4 transition-transform absolute lg:relative z-10 lg:translate-x-0 pb-32">
             
             <div class="flex justify-between items-center mb-4">
                 <h2 class="text-xl font-bold text-blue-700 hidden lg:block">زانیارییەکان</h2>
@@ -218,7 +253,7 @@
                 </button>
             </div>
 
-            <!-- Header Info -->
+            <!-- Header Info Accordion -->
             <details class="group mb-4 border border-blue-100 rounded-lg">
                 <summary class="flex justify-between items-center font-medium cursor-pointer list-none p-3 bg-blue-50 text-blue-800 rounded-t-lg">
                     <span> زانیاری سەرپەڕە (Header)</span>
@@ -230,7 +265,7 @@
                         <input type="text" id="h_subject" placeholder="بابەت" class="w-full p-2 border rounded text-sm" oninput="updatePaper()">
                         <input type="text" id="h_class" placeholder="پۆل" class="w-full p-2 border rounded text-sm" oninput="updatePaper()">
                     </div>
-                    <!-- Hidden inputs for default values to keep UI clean, can be enabled if needed -->
+                    <!-- Default Hidden Values -->
                     <input type="hidden" id="h_gov" value="حکومەتی هەرێمی کوردستان">
                     <input type="hidden" id="h_min" value="وەزارەتی پەروەردە">
                     <input type="hidden" id="h_dir" value="بەڕێوەبەرایەتی گشتی پەروەردە">
@@ -241,34 +276,35 @@
                 </div>
             </details>
 
-            <!-- Add Question Area -->
-            <div class="bg-gray-50 p-4 rounded-lg border border-gray-200 shadow-sm mb-4 sticky top-0 z-10">
+            <!-- Desktop Add Question (Hidden on Mobile now) -->
+            <div class="hidden lg:block bg-gray-50 p-4 rounded-lg border border-gray-200 shadow-sm mb-4 sticky top-0 z-10">
                 <h3 class="font-bold text-gray-700 mb-3 text-sm flex items-center gap-2">
                     <i class="fa-solid fa-plus-circle text-blue-600"></i> زیادکردنی پرسیار
                 </h3>
-                
                 <textarea id="q_text" rows="3" placeholder="دەقی پرسیارەکە لێرە بنووسە..." class="w-full p-2 border rounded mb-2 focus:ring-2 focus:ring-blue-500 outline-none"></textarea>
-                
                 <div class="flex gap-2 mb-2">
                     <input type="number" id="q_score" placeholder="نمرە" value="10" class="w-20 p-2 border rounded text-center" inputmode="numeric">
-                    <select id="q_type" class="flex-1 p-2 border rounded" onchange="toggleMCQ(this.value)">
+                    <select id="q_type" class="flex-1 p-2 border rounded" onchange="toggleMCQ(this.value, 'desktop')">
                         <option value="text">پرسیاری نووسین</option>
                         <option value="mcq">هەڵبژاردن (MCQ)</option>
                     </select>
                 </div>
-
                 <div id="mcq_options_container" class="hidden bg-white p-2 border rounded mb-2">
                     <p class="text-xs text-gray-500 mb-1">بژاردەکان (هەر دێڕێک دانەیەک):</p>
                     <textarea id="q_mcq_opts" rows="3" placeholder="ئەلف) ...&#10;با) ...&#10;ج) ..." class="w-full p-2 bg-gray-50 text-sm border-none outline-none"></textarea>
                 </div>
-
-                <button onclick="addQuestion()" class="w-full bg-blue-600 active:bg-blue-800 text-white font-bold py-3 rounded text-sm shadow">
+                <button onclick="addQuestionDesktop()" class="w-full bg-blue-600 active:bg-blue-800 text-white font-bold py-3 rounded text-sm shadow">
                     زیادکردن
                 </button>
             </div>
 
+            <!-- Mobile Instructions Hint -->
+            <div class="lg:hidden text-center p-4 bg-blue-50 rounded-lg border border-blue-100 mb-4 text-blue-800">
+                <p>بۆ زیادکردنی پرسیار، دوگمە شینەکەی خوارەوە (+) دابگرە.</p>
+            </div>
+
             <!-- List -->
-            <div class="mt-4 pb-20">
+            <div class="mt-4">
                 <h3 class="text-sm font-bold text-gray-500 mb-2 border-b pb-1">لیستی پرسیارەکان (<span id="q_count">0</span>)</h3>
                 <div id="questions_mini_list" class="space-y-2 text-sm"></div>
                 <button onclick="clearAll()" class="mt-4 w-full text-red-500 text-sm hover:underline">سڕینەوەی هەمووی</button>
@@ -278,7 +314,7 @@
         <!-- PREVIEW PANEL -->
         <div id="preview-panel" class="w-full lg:w-2/3 bg-gray-300 h-full overflow-auto flex justify-center p-4 lg:p-8 relative hidden lg:flex">
             <div id="examPaper" class="a4-paper">
-                <!-- Exam Paper Content (Same as before) -->
+                <!-- Exam Paper Content -->
                 <div class="exam-header">
                     <div class="header-section text-right">
                         <div id="view_gov">حکومەتی هەرێمی کوردستان</div>
@@ -316,6 +352,11 @@
         </div>
     </div>
 
+    <!-- MOBILE FAB (Floating Action Button) -->
+    <button onclick="openMobileAdd()" id="mobile-add-btn" class="lg:hidden fixed bottom-24 left-6 bg-blue-600 text-white w-14 h-14 rounded-full shadow-2xl flex items-center justify-center text-2xl z-40 hover:scale-105 transition active:scale-95">
+        <i class="fa-solid fa-plus"></i>
+    </button>
+
     <!-- Mobile Bottom Navigation -->
     <div class="no-print lg:hidden fixed bottom-0 left-0 w-full bg-white border-t flex z-30 shadow-lg pb-safe">
         <button onclick="switchTab('editor')" id="btn-editor" class="flex-1 py-4 text-center font-bold text-blue-600 border-t-2 border-blue-600 bg-blue-50">
@@ -328,7 +369,6 @@
 
     <script>
         // --- LOGIN LOGIC ---
-        // Check if user is already logged in on this device
         window.onload = function() {
             const savedCode = localStorage.getItem('exam_app_code');
             if (savedCode && parseInt(savedCode) >= 112201) {
@@ -342,30 +382,18 @@
             const overlay = document.getElementById('login-overlay');
             const errorMsg = document.getElementById('login-error');
 
-            // Logic: Accept any number starting from 112201
-            // This allows you to give 112201 to user A, 112202 to user B, etc.
             if (code >= 112201 && code < 999999) { 
-                
-                // Save to this device
                 localStorage.setItem('exam_app_code', code);
-                
-                // Animation & Close
                 input.classList.add('border-green-500', 'text-green-600');
                 setTimeout(() => {
                     overlay.style.opacity = '0';
-                    setTimeout(() => {
-                        overlay.style.display = 'none';
-                    }, 500);
+                    setTimeout(() => { overlay.style.display = 'none'; }, 500);
                 }, 300);
-
             } else {
-                // Error
                 errorMsg.classList.remove('hidden');
                 input.classList.add('border-red-500');
                 input.parentElement.classList.add('animate-pulse');
-                setTimeout(() => {
-                    input.parentElement.classList.remove('animate-pulse');
-                }, 500);
+                setTimeout(() => { input.parentElement.classList.remove('animate-pulse'); }, 500);
             }
         }
 
@@ -377,33 +405,99 @@
             const previewPanel = document.getElementById('preview-panel');
             const btnEditor = document.getElementById('btn-editor');
             const btnPreview = document.getElementById('btn-preview');
+            const fab = document.getElementById('mobile-add-btn');
 
             if (tab === 'editor') {
                 editorPanel.classList.remove('hidden');
                 previewPanel.classList.add('hidden');
+                fab.style.display = 'flex';
                 btnEditor.className = "flex-1 py-4 text-center font-bold text-blue-600 border-t-2 border-blue-600 bg-blue-50";
                 btnPreview.className = "flex-1 py-4 text-center font-bold text-gray-500 hover:bg-gray-50";
             } else {
                 editorPanel.classList.add('hidden');
                 previewPanel.classList.remove('hidden');
                 previewPanel.classList.add('flex');
+                fab.style.display = 'none';
                 btnEditor.className = "flex-1 py-4 text-center font-bold text-gray-500 hover:bg-gray-50";
                 btnPreview.className = "flex-1 py-4 text-center font-bold text-blue-600 border-t-2 border-blue-600 bg-blue-50";
-                
-                // Scroll to top of paper
                 document.getElementById('preview-panel').scrollTop = 0;
             }
+        }
+
+        // Mobile Modal Logic
+        function openMobileAdd() {
+            document.getElementById('mobile-add-modal').classList.remove('hidden');
+            setTimeout(() => document.getElementById('mob_q_text').focus(), 100);
+        }
+
+        function closeMobileAdd() {
+            document.getElementById('mobile-add-modal').classList.add('hidden');
+        }
+
+        function toggleMobileMCQ(val) {
+            const el = document.getElementById('mob_mcq_options_container');
+            if(val === 'mcq') el.classList.remove('hidden');
+            else el.classList.add('hidden');
+        }
+
+        function addQuestionMobile() {
+            const text = document.getElementById('mob_q_text').value.trim();
+            const score = document.getElementById('mob_q_score').value;
+            const type = document.getElementById('mob_q_type').value;
+            let options = [];
+
+            if (!text) return alert("تکایە دەقی پرسیار بنووسە");
+            
+            if (type === 'mcq') {
+                const optsText = document.getElementById('mob_q_mcq_opts').value.trim();
+                if (optsText) options = optsText.split('\n').filter(l => l.trim() !== '');
+            }
+
+            addQuestionToData(text, score, type, options);
+            
+            // Clear and Close
+            document.getElementById('mob_q_text').value = '';
+            document.getElementById('mob_q_mcq_opts').value = '';
+            closeMobileAdd();
+            alert("پرسیارەکە زیادکرا ✓");
+        }
+
+        function addQuestionDesktop() {
+            const text = document.getElementById('q_text').value.trim();
+            const score = document.getElementById('q_score').value;
+            const type = document.getElementById('q_type').value;
+            let options = [];
+
+            if (!text) return alert("تکایە دەقی پرسیار بنووسە");
+
+            if (type === 'mcq') {
+                const optsText = document.getElementById('q_mcq_opts').value.trim();
+                if (optsText) options = optsText.split('\n').filter(l => l.trim() !== '');
+            }
+
+            addQuestionToData(text, score, type, options);
+            
+            // Clear inputs
+            document.getElementById('q_text').value = '';
+            document.getElementById('q_mcq_opts').value = '';
+            document.getElementById('q_text').focus();
+        }
+
+        function addQuestionToData(text, score, type, options) {
+            questions.push({
+                id: Date.now(),
+                text, score, type, options
+            });
+            renderPaper();
+            renderMiniList();
         }
 
         function updatePaper() {
             const ids = ['h_school', 'h_subject', 'h_class', 'h_gov', 'h_min', 'h_dir', 'h_type', 'h_year', 'h_time'];
             ids.forEach(id => {
                 const el = document.getElementById(id);
-                const viewId = id.replace('h_', 'view_');
-                const viewEl = document.getElementById(viewId);
+                const viewEl = document.getElementById(id.replace('h_', 'view_'));
                 if(el && viewEl) viewEl.innerText = el.value;
-                
-                // Special case for subject appearing twice
                 if(id === 'h_subject') {
                     const viewSub2 = document.getElementById('view_subject_2');
                     if(viewSub2) viewSub2.innerText = el.value;
@@ -411,52 +505,10 @@
             });
         }
 
-        function toggleMCQ(type) {
+        function toggleMCQ(type, mode) {
             const el = document.getElementById('mcq_options_container');
             if(type === 'mcq') el.classList.remove('hidden');
             else el.classList.add('hidden');
-        }
-
-        function addQuestion() {
-            const text = document.getElementById('q_text').value.trim();
-            const score = document.getElementById('q_score').value;
-            const type = document.getElementById('q_type').value;
-            
-            if(!text) return alert("تکایە دەقی پرسیار بنووسە");
-
-            const question = {
-                id: Date.now(),
-                text: text,
-                score: score,
-                type: type,
-                options: []
-            };
-
-            if(type === 'mcq') {
-                const optsText = document.getElementById('q_mcq_opts').value.trim();
-                if(optsText) {
-                    question.options = optsText.split('\n').filter(line => line.trim() !== '');
-                }
-            }
-
-            questions.push(question);
-            renderPaper();
-            renderMiniList();
-
-            // Reset inputs and focus
-            document.getElementById('q_text').value = '';
-            document.getElementById('q_mcq_opts').value = '';
-            document.getElementById('q_text').focus();
-            
-            // Show confirmation toast (optional, for mobile feedback)
-            const btn = document.querySelector('button[onclick="addQuestion()"]');
-            const originalText = btn.innerHTML;
-            btn.innerHTML = '<i class="fa-solid fa-check"></i> زیادکرا';
-            btn.classList.add('bg-green-600');
-            setTimeout(() => {
-                btn.innerHTML = originalText;
-                btn.classList.remove('bg-green-600');
-            }, 1000);
         }
 
         function renderPaper() {
@@ -476,26 +528,16 @@
                             <div class="flex justify-between items-baseline mb-2">
                                 <h3 class="font-bold text-lg leading-relaxed text-justify pl-2">${q.text}</h3>
                                 <span class="q-score">(${q.score} نمرە)</span>
-                            </div>
-                `;
-
+                            </div>`;
                 if(q.type === 'mcq' && q.options.length > 0) {
                     html += `<div class="grid grid-cols-2 gap-x-8 gap-y-2 mt-1 pr-4">`;
                     q.options.forEach(opt => {
-                        html += `
-                        <div class="flex items-center gap-2">
-                            <div class="w-4 h-4 border border-black rounded-full"></div>
-                            <span class="text-base">${opt}</span>
-                        </div>`;
+                        html += `<div class="flex items-center gap-2"><div class="w-4 h-4 border border-black rounded-full"></div><span class="text-base">${opt}</span></div>`;
                     });
                     html += `</div>`;
                 } else {
-                    html += `
-                        <div class="w-full h-8 border-b border-gray-300 border-dashed"></div>
-                        <div class="w-full h-8 border-b border-gray-300 border-dashed"></div>
-                    `;
+                    html += `<div class="w-full h-8 border-b border-gray-300 border-dashed"></div><div class="w-full h-8 border-b border-gray-300 border-dashed"></div>`;
                 }
-
                 html += `</div></div></div>`;
             });
             container.innerHTML = html;
@@ -504,13 +546,10 @@
         function renderMiniList() {
             const list = document.getElementById('questions_mini_list');
             document.getElementById('q_count').innerText = questions.length;
-            
             list.innerHTML = questions.map((q, i) => `
                 <div class="flex justify-between items-center bg-gray-50 p-2 rounded border">
                     <span class="truncate w-2/3 text-xs font-bold">${i+1}. ${q.text}</span>
-                    <button onclick="deleteQuestion(${q.id})" class="text-red-500 hover:bg-red-100 p-1 rounded">
-                        <i class="fa-solid fa-trash"></i>
-                    </button>
+                    <button onclick="deleteQuestion(${q.id})" class="text-red-500 hover:bg-red-100 p-1 rounded"><i class="fa-solid fa-trash"></i></button>
                 </div>
             `).join('');
         }
