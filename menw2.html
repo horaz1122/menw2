@@ -570,8 +570,14 @@
                             </div>`;
                 if(q.type === 'mcq' && q.options.length > 0) {
                     html += `<div class="grid grid-cols-2 gap-x-8 gap-y-2 mt-1 pr-4">`;
-                    q.options.forEach(opt => {
-                        html += `<div class="flex items-center gap-2"><div class="w-4 h-4 border border-black rounded-full"></div><span class="text-base">${opt}</span></div>`;
+                    q.options.forEach((opt, optIndex) => {
+                        // Generate A, B, C, D based on index
+                        const letter = String.fromCharCode(65 + optIndex); 
+                        html += `
+                        <div class="flex items-center gap-2">
+                            <div class="w-6 h-6 border border-black rounded-full flex items-center justify-center text-xs font-bold font-sans bg-white shrink-0">${letter}</div>
+                            <span class="text-base">${opt}</span>
+                        </div>`;
                     });
                     html += `</div>`;
                 } else {
