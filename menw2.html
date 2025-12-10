@@ -105,9 +105,8 @@
             white-space: nowrap;
         }
 
-        /* Better input handling for mobile */
         input, textarea, select {
-            font-size: 16px !important; /* Prevents zoom on iOS */
+            font-size: 16px !important; 
             touch-action: manipulation;
         }
 
@@ -117,7 +116,7 @@
             .no-print { display: none !important; }
             .a4-paper { width: 100%; box-shadow: none; margin: 0; padding: 15mm; min-height: auto; transform: none !important; }
             #preview-panel { overflow: visible !important; height: auto !important; display: block !important; padding: 0 !important; }
-            #editor-panel, #login-overlay, #mobile-add-btn, #mobile-add-modal { display: none !important; }
+            #editor-panel, #login-overlay, #mobile-add-btn, #mobile-add-modal, #header-modal { display: none !important; }
         }
 
         @media (max-width: 768px) {
@@ -126,7 +125,6 @@
                 transform: scale(0.65);
                 margin-bottom: -30%;
             }
-            /* Increased padding for editor to ensure scrolling past keyboard */
             #editor-panel {
                 padding-bottom: 250px !important;
             }
@@ -182,6 +180,79 @@
         <p class="text-sm opacity-80">خەریکی دروستکردنی PDFین</p>
     </div>
 
+    <!-- NEW HEADER INFO MODAL -->
+    <div id="header-modal" class="fixed inset-0 bg-gray-900 bg-opacity-95 z-[70] hidden flex items-center justify-center p-4">
+        <div class="bg-white w-full max-w-md rounded-2xl shadow-2xl h-auto max-h-[90vh] overflow-y-auto transform transition-transform duration-300 scale-100">
+            <div class="flex justify-between items-center p-4 border-b bg-gray-50 rounded-t-2xl sticky top-0 z-10">
+                <h3 class="text-lg font-bold text-gray-800 flex items-center gap-2">
+                    <i class="fa-solid fa-pen-to-square text-blue-600"></i>
+                    زانیاری سەرپەڕە
+                </h3>
+                <button onclick="closeHeaderModal()" class="bg-gray-200 text-gray-600 p-2 rounded-full w-8 h-8 flex items-center justify-center hover:bg-gray-300">
+                    <i class="fa-solid fa-xmark"></i>
+                </button>
+            </div>
+
+            <div class="p-5 space-y-4">
+                <!-- Inputs moved here -->
+                <div>
+                    <label class="text-sm font-bold text-gray-700 block mb-1">ناوی قوتابخانە/پەیمانگا</label>
+                    <input type="text" id="h_school" placeholder="نموونە: ئامادەیی سلێمانی" class="w-full p-3 border-2 border-blue-100 rounded-lg text-base font-bold bg-white focus:border-blue-500 focus:ring-2 focus:ring-blue-200 outline-none transition" oninput="updatePaper()">
+                </div>
+                
+                <div class="grid grid-cols-2 gap-3">
+                    <div>
+                        <label class="text-xs font-bold text-gray-600 block mb-1">بەڕێوەبەرایەتی</label>
+                        <input type="text" id="h_dir" value="بەڕێوەبەرایەتی گشتی پەروەردە" class="w-full p-2 border border-gray-300 rounded bg-white focus:border-blue-500 outline-none" oninput="updatePaper()">
+                    </div>
+                    <div>
+                        <label class="text-xs font-bold text-gray-600 block mb-1">پارێزگا/حکومەت</label>
+                        <input type="text" id="h_gov" value="حکومەتی هەرێمی کوردستان" class="w-full p-2 border border-gray-300 rounded bg-white focus:border-blue-500 outline-none" oninput="updatePaper()">
+                    </div>
+                </div>
+
+                <div class="grid grid-cols-2 gap-3">
+                    <div>
+                        <label class="text-xs font-bold text-gray-600 block mb-1">بابەت</label>
+                        <input type="text" id="h_subject" placeholder="کوردی" class="w-full p-2 border border-gray-300 rounded bg-white focus:border-blue-500 outline-none" oninput="updatePaper()">
+                    </div>
+                    <div>
+                        <label class="text-xs font-bold text-gray-600 block mb-1">پۆل</label>
+                        <input type="text" id="h_class" placeholder="١٢ زانستی" class="w-full p-2 border border-gray-300 rounded bg-white focus:border-blue-500 outline-none" oninput="updatePaper()">
+                    </div>
+                </div>
+
+                <div class="grid grid-cols-2 gap-3">
+                     <div>
+                        <label class="text-xs font-bold text-gray-600 block mb-1">بەروار</label>
+                        <input type="text" id="h_date" placeholder="٢٠٢٤/٥/٢٠" class="w-full p-2 border border-gray-300 rounded bg-white focus:border-blue-500 outline-none" oninput="updatePaper()">
+                    </div>
+                     <div>
+                        <label class="text-xs font-bold text-gray-600 block mb-1">کات</label>
+                        <input type="text" id="h_time" value="٢ کاتژمێر" class="w-full p-2 border border-gray-300 rounded bg-white focus:border-blue-500 outline-none" oninput="updatePaper()">
+                    </div>
+                </div>
+
+                <div class="grid grid-cols-2 gap-3">
+                    <div>
+                        <label class="text-xs font-bold text-gray-600 block mb-1">جۆری تاقیکردنەوە</label>
+                        <input type="text" id="h_type" value="خولی یەکەم" class="w-full p-2 border border-gray-300 rounded bg-white focus:border-blue-500 outline-none" oninput="updatePaper()">
+                    </div>
+                    <div>
+                        <label class="text-xs font-bold text-gray-600 block mb-1">ساڵی خوێندن</label>
+                        <input type="text" id="h_year" value="٢٠٢٤ - ٢٠٢٥" class="w-full p-2 border border-gray-300 rounded bg-white focus:border-blue-500 outline-none" oninput="updatePaper()">
+                    </div>
+                </div>
+                
+                <input type="hidden" id="h_min" value="وەزارەتی پەروەردە">
+
+                <button onclick="closeHeaderModal()" class="w-full bg-blue-600 text-white font-bold py-3 rounded-xl shadow mt-2">
+                    تەواو
+                </button>
+            </div>
+        </div>
+    </div>
+
     <!-- MOBILE ADD QUESTION MODAL -->
     <div id="mobile-add-modal" class="fixed inset-0 bg-gray-900 bg-opacity-95 z-[60] hidden flex flex-col justify-end lg:hidden">
         <div class="bg-white w-full rounded-t-2xl p-5 shadow-2xl h-[85dvh] overflow-y-auto transform transition-transform duration-300 translate-y-0">
@@ -225,98 +296,40 @@
         </div>
     </div>
 
-    <!-- Top Bar (Mobile) - PDF Button Always Visible -->
-    <div class="no-print bg-white border-b p-3 flex justify-between items-center shadow-md lg:hidden z-50 sticky top-0 w-full">
+    <!-- Top Bar (Mobile) - PDF & Header Info Buttons -->
+    <div class="no-print bg-white border-b p-3 flex justify-between items-center shadow-md lg:hidden z-50 sticky top-0 w-full gap-2">
         <h1 class="font-bold text-gray-800 text-lg">تاقیکردنەوەکان</h1>
-        <button onclick="downloadDirectPDF()" class="bg-green-600 active:bg-green-800 text-white px-4 py-2 rounded-lg text-sm flex items-center gap-2 shadow-sm font-bold transition">
-            <i class="fa-solid fa-download"></i> PDF
-        </button>
+        <div class="flex gap-2">
+            <button onclick="openHeaderModal()" class="bg-blue-600 active:bg-blue-800 text-white px-3 py-2 rounded-lg text-sm flex items-center gap-2 shadow-sm font-bold transition">
+                <i class="fa-solid fa-pen-to-square"></i> زانیاری
+            </button>
+            <button onclick="downloadDirectPDF()" class="bg-green-600 active:bg-green-800 text-white px-3 py-2 rounded-lg text-sm flex items-center gap-2 shadow-sm font-bold transition">
+                <i class="fa-solid fa-download"></i> PDF
+            </button>
+        </div>
     </div>
 
     <!-- Main Content -->
     <div class="flex-1 flex flex-col lg:flex-row overflow-hidden relative">
         
         <!-- EDITOR PANEL -->
-        <!-- Fixed: Removed absolute positioning for better flow on mobile -->
         <div id="editor-panel" class="w-full lg:w-1/3 bg-white border-l border-gray-200 h-full overflow-y-auto p-4 z-10 pb-40">
             
             <div class="flex justify-between items-center mb-4">
-                <h2 class="text-xl font-bold text-blue-700 hidden lg:block">زانیارییەکان</h2>
-                <div class="hidden lg:flex gap-2">
+                <h2 class="text-xl font-bold text-blue-700 hidden lg:block">کۆنترۆڵ</h2>
+                <div class="hidden lg:flex gap-2 w-full justify-end">
+                    <button onclick="openHeaderModal()" class="bg-blue-600 hover:bg-blue-700 text-white px-4 py-2 rounded shadow gap-2 items-center flex">
+                        <i class="fa-solid fa-pen-to-square"></i> <span>زانیاری سەرپەڕە</span>
+                    </button>
                     <button onclick="downloadDirectPDF()" class="bg-green-600 hover:bg-green-700 text-white px-4 py-2 rounded shadow gap-2 items-center flex">
-                        <i class="fa-solid fa-file-arrow-down"></i> <span>دابەزاندن (ڕاستەوخۆ)</span>
+                        <i class="fa-solid fa-file-arrow-down"></i> <span>دابەزاندن PDF</span>
                     </button>
                 </div>
             </div>
 
-            <!-- Header Info Block (Always Visible, No Accordion) -->
-            <div class="group mb-4 border border-blue-200 rounded-lg bg-blue-50 shadow-sm">
-                <div class="p-3 bg-blue-100 text-blue-900 font-bold rounded-t-lg border-b border-blue-200 flex items-center gap-2">
-                    <i class="fa-solid fa-circle-info"></i>
-                    <span>زانیاری سەرپەڕە (Header)</span>
-                </div>
-                
-                <div class="text-gray-800 p-4 space-y-4">
-                    
-                    <!-- Row 1 -->
-                    <div>
-                        <label class="text-sm font-bold text-gray-700 block mb-1">ناوی قوتابخانە/پەیمانگا</label>
-                        <input type="text" id="h_school" placeholder="نموونە: ئامادەیی سلێمانی" class="w-full p-3 border-2 border-blue-100 rounded-lg text-base font-bold bg-white focus:border-blue-500 focus:ring-2 focus:ring-blue-200 outline-none transition" oninput="updatePaper()">
-                    </div>
-                    
-                    <!-- Row 2 -->
-                    <div class="grid grid-cols-2 gap-3">
-                        <div>
-                            <label class="text-xs font-bold text-gray-600 block mb-1">بەڕێوەبەرایەتی</label>
-                            <input type="text" id="h_dir" value="بەڕێوەبەرایەتی گشتی پەروەردە" class="w-full p-2 border border-gray-300 rounded bg-white focus:border-blue-500 outline-none" oninput="updatePaper()">
-                        </div>
-                        <div>
-                            <label class="text-xs font-bold text-gray-600 block mb-1">پارێزگا/حکومەت</label>
-                            <input type="text" id="h_gov" value="حکومەتی هەرێمی کوردستان" class="w-full p-2 border border-gray-300 rounded bg-white focus:border-blue-500 outline-none" oninput="updatePaper()">
-                        </div>
-                    </div>
+            <!-- Removed Inline Header Info - Moved to Modal -->
 
-                    <!-- Row 3 -->
-                    <div class="grid grid-cols-2 gap-3">
-                        <div>
-                            <label class="text-xs font-bold text-gray-600 block mb-1">بابەت</label>
-                            <input type="text" id="h_subject" placeholder="کوردی" class="w-full p-2 border border-gray-300 rounded bg-white focus:border-blue-500 outline-none" oninput="updatePaper()">
-                        </div>
-                        <div>
-                            <label class="text-xs font-bold text-gray-600 block mb-1">پۆل</label>
-                            <input type="text" id="h_class" placeholder="١٢ زانستی" class="w-full p-2 border border-gray-300 rounded bg-white focus:border-blue-500 outline-none" oninput="updatePaper()">
-                        </div>
-                    </div>
-
-                    <!-- Row 4 -->
-                    <div class="grid grid-cols-2 gap-3">
-                         <div>
-                            <label class="text-xs font-bold text-gray-600 block mb-1">بەروار</label>
-                            <input type="text" id="h_date" placeholder="٢٠٢٤/٥/٢٠" class="w-full p-2 border border-gray-300 rounded bg-white focus:border-blue-500 outline-none" oninput="updatePaper()">
-                        </div>
-                         <div>
-                            <label class="text-xs font-bold text-gray-600 block mb-1">کات</label>
-                            <input type="text" id="h_time" value="٢ کاتژمێر" class="w-full p-2 border border-gray-300 rounded bg-white focus:border-blue-500 outline-none" oninput="updatePaper()">
-                        </div>
-                    </div>
-
-                    <!-- Row 5 -->
-                    <div class="grid grid-cols-2 gap-3">
-                        <div>
-                            <label class="text-xs font-bold text-gray-600 block mb-1">جۆری تاقیکردنەوە</label>
-                            <input type="text" id="h_type" value="خولی یەکەم" class="w-full p-2 border border-gray-300 rounded bg-white focus:border-blue-500 outline-none" oninput="updatePaper()">
-                        </div>
-                        <div>
-                            <label class="text-xs font-bold text-gray-600 block mb-1">ساڵی خوێندن</label>
-                            <input type="text" id="h_year" value="٢٠٢٤ - ٢٠٢٥" class="w-full p-2 border border-gray-300 rounded bg-white focus:border-blue-500 outline-none" oninput="updatePaper()">
-                        </div>
-                    </div>
-                    
-                    <input type="hidden" id="h_min" value="وەزارەتی پەروەردە">
-                </div>
-            </div>
-
-            <!-- Desktop Add Question (Kept for desktop users) -->
+            <!-- Desktop Add Question -->
             <div class="hidden lg:block bg-gray-50 p-4 rounded-lg border border-gray-200 shadow-sm mb-4 sticky top-0 z-10">
                 <h3 class="font-bold text-gray-700 mb-3 text-sm flex items-center gap-2">
                     <i class="fa-solid fa-plus-circle text-blue-600"></i> زیادکردنی پرسیار
@@ -407,6 +420,15 @@
     </div>
 
     <script>
+        // --- HEADER MODAL LOGIC ---
+        function openHeaderModal() {
+            document.getElementById('header-modal').classList.remove('hidden');
+        }
+
+        function closeHeaderModal() {
+            document.getElementById('header-modal').classList.add('hidden');
+        }
+
         // --- PDF DOWNLOAD LOGIC ---
         function downloadDirectPDF() {
             document.getElementById('pdf-loading').classList.remove('hidden');
