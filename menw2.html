@@ -3,7 +3,7 @@
 <head>
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0, maximum-scale=1.0, user-scalable=no">
-    <title>دروستکەری پرسیار - کۆمەڵەی تەواوی بیرکاری</title>
+    <title>دروستکەری پرسیار - وەشانى پەستێنراو (Compact)</title>
     
     <!-- Tailwind CSS -->
     <script src="https://cdn.tailwindcss.com"></script>
@@ -18,7 +18,8 @@
     <script>
         window.MathJax = {
             tex: { inlineMath: [['$', '$'], ['\\(', '\\)']] },
-            svg: { fontCache: 'global' }
+            svg: { fontCache: 'global' },
+            chtml: { displayAlign: 'left' }
         };
     </script>
     <script id="MathJax-script" async src="https://cdn.jsdelivr.net/npm/mathjax@3/es5/tex-mml-chtml.js"></script>
@@ -43,64 +44,92 @@
 
     <style>
         body { background-color: #f0f2f5; height: 100dvh; overflow: hidden; }
+        
+        /* Compact A4 Settings */
         .a4-paper {
-            width: 210mm; min-height: 297mm; background: white; margin: 0 auto; padding: 15mm 15mm;
-            position: relative; box-shadow: 0 4px 15px rgba(0,0,0,0.15);
-            font-family: 'Nrt Reg', 'Vazirmatn', sans-serif; color: black; box-sizing: border-box;
+            width: 210mm; 
+            min-height: 297mm; 
+            background: white; 
+            margin: 0 auto; 
+            padding: 10mm 10mm; /* Reduced padding */
+            position: relative; 
+            box-shadow: 0 4px 15px rgba(0,0,0,0.15);
+            font-family: 'Nrt Reg', 'Vazirmatn', sans-serif; 
+            color: black; 
+            box-sizing: border-box;
         }
-        .exam-header { display: grid; grid-template-columns: 1fr 1.5fr 1fr; gap: 10px; border-bottom: 3px double #000; padding-bottom: 10px; margin-bottom: 20px; align-items: start; }
-        .header-section { display: flex; flex-direction: column; gap: 4px; font-size: 14px; font-weight: bold; line-height: 1.4; }
+
+        /* Compact Header */
+        .exam-header { 
+            display: grid; 
+            grid-template-columns: 1fr 1.5fr 1fr; 
+            gap: 5px; 
+            border-bottom: 2px double #000; 
+            padding-bottom: 5px; 
+            margin-bottom: 10px; /* Reduced margin */
+            align-items: start; 
+        }
+        .header-section { display: flex; flex-direction: column; gap: 2px; font-size: 12px; font-weight: bold; line-height: 1.2; }
         .header-center { text-align: center; align-items: center; }
         .header-left { text-align: left; align-items: flex-end; }
         
         .group-badge {
-            width: 40px; height: 40px; border: 2px solid black; border-radius: 50%; 
+            width: 30px; height: 30px; border: 2px solid black; border-radius: 50%; 
             display: flex; align-items: center; justify-content: center; 
-            font-weight: 900; font-size: 1.2rem; margin-top: 5px;
+            font-weight: 900; font-size: 1rem; margin-top: 2px;
         }
 
-        .q-number { background: #000; color: white; width: 28px; height: 28px; border-radius: 50%; display: inline-flex; align-items: center; justify-content: center; font-size: 14px; margin-left: 8px; flex-shrink: 0; -webkit-print-color-adjust: exact; print-color-adjust: exact; }
-        .q-sub-number { background: #fff; color: black; border: 2px solid black; width: 26px; height: 26px; border-radius: 50%; display: inline-flex; align-items: center; justify-content: center; font-size: 14px; margin-left: 8px; margin-right: 20px; font-weight: bold; flex-shrink: 0; }
-        .q-score { font-size: 12px; border: 1px solid #000; padding: 2px 6px; border-radius: 4px; margin-right: auto; white-space: nowrap; }
+        /* Compact Question Styles */
+        .q-number { 
+            background: #000; color: white; 
+            width: 22px; height: 22px; /* Smaller */
+            border-radius: 50%; display: inline-flex; align-items: center; justify-content: center; 
+            font-size: 12px; margin-left: 6px; flex-shrink: 0; 
+            -webkit-print-color-adjust: exact; print-color-adjust: exact; 
+        }
+        .q-sub-number { 
+            background: #fff; color: black; border: 1.5px solid black; 
+            width: 20px; height: 20px; 
+            border-radius: 50%; display: inline-flex; align-items: center; justify-content: center; 
+            font-size: 12px; margin-left: 6px; margin-right: 15px; font-weight: bold; flex-shrink: 0; 
+        }
+        .q-score { font-size: 10px; border: 1px solid #000; padding: 1px 4px; border-radius: 4px; margin-right: auto; white-space: nowrap; }
         
+        .question-text { font-size: 13px; line-height: 1.4; font-weight: bold; }
+        .option-text { font-size: 12px; }
+
         .section-title {
-            width: 100%; text-align: center; font-weight: 900; font-size: 1.2rem; 
-            margin: 1.5rem 0 1rem 0; padding: 5px; border-top: 2px solid #000; border-bottom: 2px solid #000;
+            width: 100%; text-align: center; font-weight: 900; font-size: 1rem; 
+            margin: 0.5rem 0 0.5rem 0; padding: 2px; border-top: 2px solid #000; border-bottom: 2px solid #000;
             background-color: #f3f4f6; -webkit-print-color-adjust: exact; print-color-adjust: exact;
         }
 
+        /* Tools */
         input, textarea, select { font-size: 16px !important; touch-action: manipulation; }
-        mjx-container { font-size: 110% !important; direction: ltr !important; display: inline-block !important; }
+        mjx-container { font-size: 100% !important; margin: 0 !important; }
         
-        /* SCROLLABLE MATH TOOLBAR */
         .math-toolbar {
-            display: flex; gap: 0.4rem; overflow-x: auto; padding-bottom: 0.5rem; margin-bottom: 0.5rem;
-            -ms-overflow-style: none; scrollbar-width: none; background: #f8fafc; padding: 8px; border-radius: 8px; border: 1px solid #e2e8f0;
+            display: flex; gap: 0.3rem; overflow-x: auto; padding-bottom: 0.5rem; margin-bottom: 0.5rem;
+            -ms-overflow-style: none; scrollbar-width: none; background: #f8fafc; padding: 6px; border-radius: 6px; border: 1px solid #e2e8f0;
         }
         .math-toolbar::-webkit-scrollbar { display: none; }
         .math-btn { 
             background: white; border: 1px solid #cbd5e1; color: #1e293b; 
-            padding: 4px 8px; border-radius: 6px; font-size: 13px; font-family: 'Times New Roman', serif;
-            transition: all 0.2s; white-space: nowrap; display: flex; align-items: center; justify-content: center; min-width: 36px;
-            box-shadow: 0 1px 2px rgba(0,0,0,0.05); font-weight: 500;
+            padding: 2px 6px; border-radius: 4px; font-size: 12px; font-family: 'Times New Roman', serif;
+            transition: all 0.2s; white-space: nowrap; display: flex; align-items: center; justify-content: center; min-width: 32px;
         }
-        .math-btn:hover { background: #e0f2fe; border-color: #3b82f6; color: #1d4ed8; transform: translateY(-1px); }
-        .math-btn:active { transform: translateY(0); background: #bfdbfe; }
+        .math-btn:hover { background: #e0f2fe; border-color: #3b82f6; }
 
-        .mode-switch { display: flex; background: #e5e7eb; border-radius: 8px; padding: 4px; margin-bottom: 10px; }
-        .mode-btn { flex: 1; padding: 8px; text-align: center; border-radius: 6px; font-weight: bold; font-size: 14px; transition: all 0.2s; }
+        .mode-switch { display: flex; background: #e5e7eb; border-radius: 8px; padding: 3px; margin-bottom: 10px; }
+        .mode-btn { flex: 1; padding: 6px; text-align: center; border-radius: 6px; font-weight: bold; font-size: 13px; transition: all 0.2s; }
         .mode-btn.active { background: white; color: #2563eb; box-shadow: 0 1px 2px rgba(0,0,0,0.1); }
         .mode-btn.inactive { color: #6b7280; }
-
-        .sortable-ghost { opacity: 0.4; background-color: #e2e8f0; }
-        .sortable-drag { cursor: grabbing; background-color: white; box-shadow: 0 10px 15px -3px rgba(0, 0, 0, 0.1); }
-        .drag-handle { cursor: grab; padding: 10px; color: #9ca3af; touch-action: none; }
 
         @media print {
             @page { size: A4; margin: 0; }
             body { background: white; height: auto; overflow: visible; }
             .no-print { display: none !important; }
-            .a4-paper { width: 100%; box-shadow: none; margin: 0; padding: 15mm; min-height: auto; transform: none !important; }
+            .a4-paper { width: 100%; box-shadow: none; margin: 0; padding: 10mm; min-height: auto; transform: none !important; }
             #preview-panel { overflow: visible !important; height: auto !important; display: block !important; padding: 0 !important; }
             #editor-panel, #login-overlay, #mobile-add-btn, #mobile-add-modal, #header-modal { display: none !important; }
         }
@@ -145,12 +174,10 @@
             </div>
             <div class="p-5 space-y-4">
                 <input type="text" id="h_school" placeholder="ناوی قوتابخانە" class="w-full p-3 border rounded-lg" oninput="updatePaper()">
-                
                 <div class="bg-yellow-50 p-2 rounded border border-yellow-200">
                     <label class="block text-xs font-bold text-yellow-800 mb-1">گرووپی پرسیار (A, B, C)</label>
                     <input type="text" id="h_group" placeholder="نموونە: A" class="w-full p-2 border rounded text-center font-bold text-lg uppercase" oninput="updatePaper()">
                 </div>
-
                 <div class="grid grid-cols-2 gap-3">
                     <input type="text" id="h_dir" value="بەڕێوەبەرایەتی پەروەردە" class="border p-2 rounded" oninput="updatePaper()">
                     <input type="text" id="h_gov" value="حکومەتی هەرێم" class="border p-2 rounded" oninput="updatePaper()">
@@ -180,39 +207,33 @@
                 <h3 class="font-bold">زیادکردن</h3>
                 <button onclick="closeMobileAdd()" class="w-8 h-8 bg-gray-100 rounded-full"><i class="fa-solid fa-xmark"></i></button>
             </div>
-            
             <div class="mode-switch">
                 <button onclick="switchMode('question', 'mobile')" id="mob-mode-q" class="mode-btn active">پرسیار</button>
                 <button onclick="switchMode('title', 'mobile')" id="mob-mode-t" class="mode-btn inactive">سەردێڕ</button>
             </div>
-
             <div id="mob-input-question">
-                <div id="mob-math-toolbar-q" class="math-toolbar"></div> <!-- JS populates this -->
+                <div id="mob-math-toolbar-q" class="math-toolbar"></div>
                 <textarea id="mob_q_text" rows="3" class="w-full p-3 border-2 border-blue-200 rounded-xl mb-4 text-left font-sans" dir="ltr" placeholder="دەقی پرسیار..."></textarea>
-                
                 <div class="flex items-center gap-2 mb-4 bg-orange-50 p-2 rounded border border-orange-100">
                     <input type="checkbox" id="mob_q_is_sub" class="w-5 h-5 accent-orange-600">
                     <label for="mob_q_is_sub" class="text-sm font-bold text-orange-800">لقی پرسیارە (A, B, C)</label>
                 </div>
-
                 <div class="flex gap-3 mb-4">
-                    <input type="number" id="mob_q_score" value="10" class="w-1/3 p-3 border-2 rounded-xl text-center">
+                    <input type="number" id="mob_q_score" value="5" class="w-1/3 p-3 border-2 rounded-xl text-center">
                     <select id="mob_q_type" class="w-2/3 p-3 border-2 rounded-xl bg-white" onchange="toggleMobileMCQ(this.value)">
-                        <option value="text">پرسیاری نووسین</option>
                         <option value="mcq">هەڵبژاردن (MCQ)</option>
+                        <option value="text">پرسیاری نووسین</option>
                     </select>
                 </div>
-                <div id="mob_mcq_options_container" class="hidden bg-gray-50 p-3 rounded-xl border mb-4">
+                <div id="mob_mcq_options_container" class="bg-gray-50 p-3 rounded-xl border mb-4">
                     <label class="text-xs font-bold mb-1 block">بژاردەکان:</label>
-                    <div id="mob-math-toolbar-opt" class="math-toolbar"></div> <!-- JS populates this -->
+                    <div id="mob-math-toolbar-opt" class="math-toolbar"></div>
                     <textarea id="mob_q_mcq_opts" rows="4" class="w-full p-2 border rounded-lg text-left font-sans" dir="ltr" placeholder="A) ..."></textarea>
                 </div>
             </div>
-
             <div id="mob-input-title" class="hidden">
                 <textarea id="mob_t_text" rows="2" class="w-full p-3 border-2 border-gray-400 rounded-xl font-bold text-center" placeholder="نموونە: پرسیاری دووەم"></textarea>
             </div>
-
             <button onclick="addItemMobile()" class="w-full bg-blue-600 text-white font-bold py-4 rounded-xl mt-4">زیادکردن</button>
             <div class="h-20"></div>
         </div>
@@ -243,36 +264,31 @@
                     <button onclick="switchMode('question', 'desktop')" id="desk-mode-q" class="mode-btn active">پرسیار</button>
                     <button onclick="switchMode('title', 'desktop')" id="desk-mode-t" class="mode-btn inactive">سەردێڕ</button>
                 </div>
-
                 <div id="desk-input-question">
-                    <div id="desk-math-toolbar-q" class="math-toolbar"></div> <!-- JS populates this -->
-                    <textarea id="q_text" rows="3" class="w-full p-2 border rounded mb-2 text-left font-sans" dir="ltr" placeholder="دەقی پرسیار..."></textarea>
-                    
+                    <div id="desk-math-toolbar-q" class="math-toolbar"></div>
+                    <textarea id="q_text" rows="2" class="w-full p-2 border rounded mb-2 text-left font-sans" dir="ltr" placeholder="دەقی پرسیار..."></textarea>
                     <div class="flex items-center gap-2 mb-2 bg-orange-50 p-2 rounded border border-orange-100">
                         <input type="checkbox" id="q_is_sub" class="w-4 h-4 accent-orange-600">
                         <label for="q_is_sub" class="text-sm font-bold text-orange-800 cursor-pointer select-none">لقی پرسیارە (A, B, C)</label>
                     </div>
-
                     <div class="flex gap-2 mb-2">
-                        <input type="number" id="q_score" value="10" class="w-20 p-2 border rounded text-center">
+                        <input type="number" id="q_score" value="5" class="w-20 p-2 border rounded text-center">
                         <select id="q_type" class="flex-1 p-2 border rounded" onchange="toggleMCQ(this.value, 'desktop')">
-                            <option value="text">پرسیاری نووسین</option>
                             <option value="mcq">هەڵبژاردن (MCQ)</option>
+                            <option value="text">پرسیاری نووسین</option>
                         </select>
                     </div>
-                    <div id="mcq_options_container" class="hidden bg-white p-2 border rounded mb-2">
-                        <div id="desk-math-toolbar-opt" class="math-toolbar"></div> <!-- JS populates this -->
+                    <div id="mcq_options_container" class="bg-white p-2 border rounded mb-2">
+                        <div id="desk-math-toolbar-opt" class="math-toolbar"></div>
                         <textarea id="q_mcq_opts" rows="3" class="w-full p-2 border text-sm text-left font-sans" dir="ltr" placeholder="A) ..."></textarea>
                     </div>
                 </div>
-
                 <div id="desk-input-title" class="hidden">
                     <div class="bg-gray-100 p-4 rounded border-2 border-dashed border-gray-300">
                         <label class="block text-sm font-bold text-gray-700 mb-2">دەقی سەردێڕ:</label>
                         <input type="text" id="t_text" class="w-full p-2 border-2 border-gray-400 rounded font-bold text-center" placeholder="نموونە: پرسیاری دووەم">
                     </div>
                 </div>
-
                 <button onclick="addItemDesktop()" class="w-full bg-blue-600 text-white font-bold py-3 rounded text-sm shadow mt-2">زیادکردن</button>
             </div>
 
@@ -284,7 +300,7 @@
                     <h3 class="text-sm font-bold text-gray-500">لیست (Drag & Drop)</h3>
                     <button onclick="clearAll()" class="text-red-500 text-xs">سڕینەوە</button>
                 </div>
-                <div id="questions_mini_list" class="space-y-2 text-sm pb-10"></div>
+                <div id="questions_mini_list" class="space-y-1 text-sm pb-10"></div>
             </div>
         </div>
 
@@ -296,11 +312,11 @@
                         <div id="view_gov">حکومەتی هەرێمی کوردستان</div>
                         <div id="view_min">وەزارەتی پەروەردە</div>
                         <div id="view_dir">بەڕێوەبەرایەتی پەروەردە</div>
-                        <div id="view_school" class="mt-1 font-black text-lg">...</div>
+                        <div id="view_school" class="mt-1 font-black text-sm">...</div>
                     </div>
-                    <div class="header-section header-center pt-2">
-                        <div class="w-16 h-16 border-2 border-gray-300 rounded-full flex items-center justify-center mb-1"><i class="fa-solid fa-landmark text-2xl text-gray-300"></i></div>
-                        <div class="border-b-2 border-black pb-1 mb-1 font-black text-xl">پرسیارەکانی <span id="view_subject">...</span></div>
+                    <div class="header-section header-center pt-1">
+                        <div class="w-12 h-12 border-2 border-gray-300 rounded-full flex items-center justify-center mb-1"><i class="fa-solid fa-landmark text-xl text-gray-300"></i></div>
+                        <div class="border-b-2 border-black pb-1 mb-1 font-black text-lg">پرسیارەکانی <span id="view_subject">...</span></div>
                         <div><span id="view_type">...</span> - <span id="view_year">...</span></div>
                     </div>
                     <div class="header-section header-left">
@@ -308,20 +324,18 @@
                         <div>پۆل: <span id="view_class">...</span></div>
                         <div>کات: <span id="view_time">...</span></div>
                         <div>بەروار: <span id="view_date">...</span></div>
-                        
-                        <!-- Group Badge -->
                         <div id="group_container" class="hidden">
                             <div class="group-badge" id="view_group">A</div>
                         </div>
                     </div>
                 </div>
-                <div id="paper_questions" class="space-y-4">
+                <div id="paper_questions" class="space-y-2"> <!-- Tighter vertical spacing -->
                     <div class="text-center text-gray-400 py-10">پرسیارەکان لێرە دەردەکەون...</div>
                 </div>
-                <div class="mt-20 pt-4 flex justify-between items-end">
-                    <div class="text-center w-32"><p class="font-bold text-sm mb-6">مامۆستا</p><div class="border-b border-black"></div></div>
-                    <div class="text-center"><p class="font-bold italic">هیوای سەرکەوتن</p></div>
-                    <div class="text-center w-32"><p class="font-bold text-sm mb-6">بەڕێوەبەر</p><div class="border-b border-black"></div></div>
+                <div class="mt-10 pt-2 flex justify-between items-end">
+                    <div class="text-center w-24"><p class="font-bold text-xs mb-4">مامۆستا</p><div class="border-b border-black"></div></div>
+                    <div class="text-center"><p class="font-bold italic text-xs">هیوای سەرکەوتن</p></div>
+                    <div class="text-center w-24"><p class="font-bold text-xs mb-4">بەڕێوەبەر</p><div class="border-b border-black"></div></div>
                 </div>
             </div>
         </div>
@@ -335,47 +349,15 @@
     </div>
 
     <script>
-        // --- ALL MATH BUTTONS DEFINITION ---
         const mathButtons = [
-            // Basics
-            { label: '$\\sqrt{x}$', code: 'sqrt' },
-            { label: '$\\frac{a}{b}$', code: 'frac' },
-            { label: '$x^2$', code: 'pow' },
-            { label: '$e^x$', code: 'exp' },
-            { label: '$\\times$', code: 'times' },
-            { label: '$\\div$', code: 'div' },
-            { label: '$\\pm$', code: 'pm' },
-            // Relations
-            { label: '$\\approx$', code: 'approx' },
-            { label: '$\\neq$', code: 'neq' },
-            { label: '$\\le$', code: 'leq' },
-            { label: '$\\ge$', code: 'geq' },
-            // Greek
-            { label: '$\\theta$', code: 'theta' },
-            { label: '$\\pi$', code: 'pi' },
-            { label: '$\\alpha$', code: 'alpha' },
-            { label: '$\\beta$', code: 'beta' },
-            { label: '$\\Delta$', code: 'triangle' },
-            { label: '$\\lambda$', code: 'lambda' },
-            // Calculus / Log
-            { label: '$\\int$', code: 'int' },
-            { label: '$\\sum$', code: 'sum' },
-            { label: '$\\lim$', code: 'lim' },
-            { label: '$\\log$', code: 'log' },
-            { label: '$\\ln$', code: 'ln' },
-            { label: '$\\infty$', code: 'infty' },
-            // Sets / Geometry
-            { label: '$\\in$', code: 'in' },
-            { label: '$\\notin$', code: 'notin' },
-            { label: '$\\cup$', code: 'cup' },
-            { label: '$\\cap$', code: 'cap' },
-            { label: '$\\subset$', code: 'subset' },
-            { label: '$\\emptyset$', code: 'empty' },
-            { label: '$\\angle$', code: 'angle' },
-            { label: '$\\perp$', code: 'perp' },
-            { label: '$\\vec{v}$', code: 'vec' },
-            // Matrix
-            { label: 'Matrix', code: 'matrix' },
+            { label: '$\\sqrt{x}$', code: 'sqrt' }, { label: '$\\frac{a}{b}$', code: 'frac' }, { label: '$x^2$', code: 'pow' }, { label: '$e^x$', code: 'exp' },
+            { label: '$\\times$', code: 'times' }, { label: '$\\div$', code: 'div' }, { label: '$\\pm$', code: 'pm' }, { label: '$\\approx$', code: 'approx' },
+            { label: '$\\neq$', code: 'neq' }, { label: '$\\le$', code: 'leq' }, { label: '$\\ge$', code: 'geq' },
+            { label: '$\\theta$', code: 'theta' }, { label: '$\\pi$', code: 'pi' }, { label: '$\\alpha$', code: 'alpha' }, { label: '$\\beta$', code: 'beta' },
+            { label: '$\\Delta$', code: 'triangle' }, { label: '$\\int$', code: 'int' }, { label: '$\\sum$', code: 'sum' }, { label: '$\\lim$', code: 'lim' },
+            { label: '$\\log$', code: 'log' }, { label: '$\\ln$', code: 'ln' }, { label: '$\\infty$', code: 'infty' },
+            { label: '$\\in$', code: 'in' }, { label: '$\\notin$', code: 'notin' }, { label: '$\\cup$', code: 'cup' }, { label: '$\\cap$', code: 'cap' },
+            { label: '$\\emptyset$', code: 'empty' }, { label: 'Matrix', code: 'matrix' },
         ];
 
         function populateMathToolbars() {
@@ -383,7 +365,6 @@
             ids.forEach(id => {
                 const container = document.getElementById(id);
                 if (!container) return;
-                // Determine target input based on toolbar ID
                 let targetInputId = '';
                 if(id.includes('desk') && id.includes('-q')) targetInputId = 'q_text';
                 else if(id.includes('desk') && id.includes('-opt')) targetInputId = 'q_mcq_opts';
@@ -394,90 +375,52 @@
                     const button = document.createElement('button');
                     button.className = 'math-btn';
                     button.innerHTML = btn.label;
-                    button.onclick = (e) => {
-                        e.preventDefault(); // Prevent focus loss issues sometimes
-                        insertMath(btn.code, targetInputId);
-                    };
+                    button.onclick = (e) => { e.preventDefault(); insertMath(btn.code, targetInputId); };
                     container.appendChild(button);
                 });
             });
             if(window.MathJax) window.MathJax.typesetPromise();
         }
 
-        // --- CORE STATE ---
         let items = []; 
         let currentMode = { desktop: 'question', mobile: 'question' };
 
-        // Initialize
         window.onload = function() {
             loadData();
             if (localStorage.getItem('exam_app_code') >= 112201) document.getElementById('login-overlay').style.display = 'none';
             populateMathToolbars();
-            
             new Sortable(document.getElementById('questions_mini_list'), {
-                animation: 150,
-                handle: '.drag-handle',
-                ghostClass: 'sortable-ghost',
-                dragClass: 'sortable-drag',
+                animation: 150, handle: '.drag-handle', ghostClass: 'sortable-ghost', dragClass: 'sortable-drag',
                 onEnd: function (evt) {
                     const newOrderIds = Array.from(evt.to.children).map(el => parseInt(el.getAttribute('data-id')));
                     const itemMap = new Map(items.map(i => [i.id, i]));
                     items = newOrderIds.map(id => itemMap.get(id));
-                    saveData();
-                    renderPaper();
+                    saveData(); renderPaper();
                 }
             });
         };
 
-        // --- MATH INSERTION LOGIC ---
         function insertMath(type, inputId) {
             const input = document.getElementById(inputId);
             let text = "";
             switch(type) {
-                case 'sqrt': text = "$\\sqrt{x}$"; break;
-                case 'frac': text = "$\\frac{a}{b}$"; break;
-                case 'pow': text = "$x^2$"; break;
-                case 'exp': text = "$e^x$"; break;
-                case 'times': text = "$\\times$"; break;
-                case 'div': text = "$\\div$"; break;
-                case 'pm': text = "$\\pm$"; break;
-                case 'approx': text = "$\\approx$"; break;
-                case 'neq': text = "$\\neq$"; break;
-                case 'leq': text = "$\\le$"; break;
-                case 'geq': text = "$\\ge$"; break;
-                case 'theta': text = "$\\theta$"; break;
-                case 'alpha': text = "$\\alpha$"; break;
-                case 'beta': text = "$\\beta$"; break;
-                case 'lambda': text = "$\\lambda$"; break;
-                case 'pi': text = "$\\pi$"; break;
-                case 'triangle': text = "$\\Delta$"; break;
-                case 'sin': text = "$\\sin(x)$"; break;
-                case 'cos': text = "$\\cos(x)$"; break;
-                case 'tan': text = "$\\tan(x)$"; break;
-                case 'log': text = "$\\log_{a}(b)$"; break;
-                case 'ln': text = "$\\ln(x)$"; break;
-                case 'lim': text = "$\\lim_{x \\to 0}$"; break;
-                case 'int': text = "$\\int_{a}^{b}$"; break;
-                case 'sum': text = "$\\sum_{i=0}^{n}$"; break;
-                case 'infty': text = "$\\infty$"; break;
-                case 'in': text = "$\\in$"; break;
-                case 'notin': text = "$\\notin$"; break;
-                case 'cup': text = "$\\cup$"; break;
-                case 'cap': text = "$\\cap$"; break;
-                case 'subset': text = "$\\subset$"; break;
-                case 'empty': text = "$\\emptyset$"; break;
-                case 'angle': text = "$\\angle$"; break;
-                case 'perp': text = "$\\perp$"; break;
-                case 'vec': text = "$\\vec{v}$"; break;
-                case 'matrix': text = "$\\begin{pmatrix} a & b \\\\ c & d \\end{pmatrix}$"; break;
+                case 'sqrt': text = "$\\sqrt{x}$"; break; case 'frac': text = "$\\frac{a}{b}$"; break; case 'pow': text = "$x^2$"; break;
+                case 'exp': text = "$e^x$"; break; case 'times': text = "$\\times$"; break; case 'div': text = "$\\div$"; break;
+                case 'pm': text = "$\\pm$"; break; case 'approx': text = "$\\approx$"; break; case 'neq': text = "$\\neq$"; break;
+                case 'leq': text = "$\\le$"; break; case 'geq': text = "$\\ge$"; break; case 'theta': text = "$\\theta$"; break;
+                case 'alpha': text = "$\\alpha$"; break; case 'beta': text = "$\\beta$"; break; case 'pi': text = "$\\pi$"; break;
+                case 'triangle': text = "$\\Delta$"; break; case 'sin': text = "$\\sin(x)$"; break; case 'cos': text = "$\\cos(x)$"; break;
+                case 'tan': text = "$\\tan(x)$"; break; case 'log': text = "$\\log_{a}(b)$"; break; case 'ln': text = "$\\ln(x)$"; break;
+                case 'lim': text = "$\\lim_{x \\to 0}$"; break; case 'int': text = "$\\int_{a}^{b}$"; break; case 'sum': text = "$\\sum_{i=0}^{n}$"; break;
+                case 'infty': text = "$\\infty$"; break; case 'in': text = "$\\in$"; break; case 'notin': text = "$\\notin$"; break;
+                case 'cup': text = "$\\cup$"; break; case 'cap': text = "$\\cap$"; break; case 'subset': text = "$\\subset$"; break;
+                case 'empty': text = "$\\emptyset$"; break; case 'matrix': text = "$\\begin{pmatrix} a & b \\\\ c & d \\end{pmatrix}$"; break;
             }
-            const start = input.selectionStart;
-            const end = input.selectionEnd;
+            const start = input.selectionStart; const end = input.selectionEnd;
             input.value = input.value.substring(0, start) + text + input.value.substring(end);
             input.focus();
         }
 
-        // --- UI & DATA ---
         function switchMode(mode, view) {
             currentMode[view] = mode;
             const isQ = mode === 'question';
@@ -488,12 +431,7 @@
             document.getElementById(pfx+'-input-title').classList.toggle('hidden', isQ);
         }
 
-        function addItem(data) {
-            items.push({ id: Date.now(), ...data });
-            saveData();
-            renderPaper();
-            renderMiniList();
-        }
+        function addItem(data) { items.push({ id: Date.now(), ...data }); saveData(); renderPaper(); renderMiniList(); }
 
         function addItemDesktop() {
             if (currentMode.desktop === 'question') {
@@ -502,20 +440,18 @@
                 const type = document.getElementById('q_type').value;
                 const isSub = document.getElementById('q_is_sub').checked;
                 let options = [];
-                if(!text) return alert("تکایە پرسیار بنووسە");
+                if(!text) return alert("پرسیار بنووسە");
                 if (type === 'mcq') {
                     const optText = document.getElementById('q_mcq_opts').value.trim();
                     if(optText) options = optText.split('\n').filter(l=>l.trim());
                 }
                 addItem({ type: type === 'mcq' ? 'mcq' : 'text', text, score, options, isSub });
-                document.getElementById('q_text').value = '';
-                document.getElementById('q_mcq_opts').value = '';
+                document.getElementById('q_text').value = ''; document.getElementById('q_mcq_opts').value = '';
                 document.getElementById('q_is_sub').checked = false;
             } else {
                 const text = document.getElementById('t_text').value.trim();
-                if(!text) return alert("تکایە سەردێڕ بنووسە");
-                addItem({ type: 'title', text });
-                document.getElementById('t_text').value = '';
+                if(!text) return alert("سەردێڕ بنووسە");
+                addItem({ type: 'title', text }); document.getElementById('t_text').value = '';
             }
         }
 
@@ -526,62 +462,48 @@
                 const type = document.getElementById('mob_q_type').value;
                 const isSub = document.getElementById('mob_q_is_sub').checked;
                 let options = [];
-                if(!text) return alert("تکایە پرسیار بنووسە");
+                if(!text) return alert("پرسیار بنووسە");
                 if (type === 'mcq') {
                     const optText = document.getElementById('mob_q_mcq_opts').value.trim();
                     if(optText) options = optText.split('\n').filter(l=>l.trim());
                 }
                 addItem({ type: type === 'mcq' ? 'mcq' : 'text', text, score, options, isSub });
-                document.getElementById('mob_q_text').value = '';
-                document.getElementById('mob_q_mcq_opts').value = '';
+                document.getElementById('mob_q_text').value = ''; document.getElementById('mob_q_mcq_opts').value = '';
                 document.getElementById('mob_q_is_sub').checked = false;
             } else {
                 const text = document.getElementById('mob_t_text').value.trim();
-                if(!text) return alert("تکایە سەردێڕ بنووسە");
-                addItem({ type: 'title', text });
-                document.getElementById('mob_t_text').value = '';
+                if(!text) return alert("سەردێڕ بنووسە");
+                addItem({ type: 'title', text }); document.getElementById('mob_t_text').value = '';
             }
             closeMobileAdd();
         }
 
         function renderPaper() {
             const container = document.getElementById('paper_questions');
-            if(items.length === 0) {
-                container.innerHTML = '<div class="text-center text-gray-400 py-10">پرسیارەکان لێرە دەردەکەون...</div>';
-                return;
-            }
-            let html = '';
-            let qCount = 0;
-            let subChar = 65; 
-
+            if(items.length === 0) { container.innerHTML = '<div class="text-center text-gray-400 py-10">پرسیارەکان لێرە دەردەکەون...</div>'; return; }
+            let html = ''; let qCount = 0; let subChar = 65; 
             items.forEach((item) => {
                 if (item.type === 'title') {
                     html += `<div class="section-title break-inside-avoid">${item.text}</div>`;
                 } else {
-                    let numberHtml = '';
-                    let marginLeft = '0px';
-                    if (item.isSub) {
-                        numberHtml = `<div class="q-sub-number">${String.fromCharCode(subChar++)}</div>`;
-                        marginLeft = '20px';
-                    } else {
-                        qCount++;
-                        subChar = 65; 
-                        numberHtml = `<div class="q-number">${qCount}</div>`;
-                    }
-                    html += `<div class="mb-4 break-inside-avoid" style="margin-right: ${marginLeft}"><div class="flex items-start gap-2">
+                    let numberHtml = ''; let marginLeft = '0px';
+                    if (item.isSub) { numberHtml = `<div class="q-sub-number">${String.fromCharCode(subChar++)}</div>`; marginLeft = '15px'; }
+                    else { qCount++; subChar = 65; numberHtml = `<div class="q-number">${qCount}</div>`; }
+                    
+                    html += `<div class="mb-2 break-inside-avoid" style="margin-right: ${marginLeft}"><div class="flex items-start gap-1">
                         ${numberHtml}
-                        <div class="flex-1"><div class="flex justify-between items-baseline mb-2">
-                            <h3 class="font-bold text-lg leading-relaxed text-justify pl-2" style="font-family: 'Times New Roman', serif;">${item.text}</h3>
+                        <div class="flex-1"><div class="flex justify-between items-baseline mb-1">
+                            <h3 class="question-text text-justify pl-2 font-sans" dir="ltr">${item.text}</h3>
                             ${item.isSub ? '' : `<span class="q-score">(${item.score} نمرە)</span>`}
                         </div>`;
                     if(item.type === 'mcq') {
-                        html += `<div class="grid grid-cols-2 gap-x-8 gap-y-2 mt-1 pr-4">`;
+                        html += `<div class="grid grid-cols-2 gap-x-2 gap-y-1 mt-1 pr-3">`;
                         item.options.forEach((opt, idx) => {
-                            html += `<div class="flex items-center gap-2"><div class="w-6 h-6 border border-black rounded-full flex items-center justify-center text-xs font-bold bg-white shrink-0">${String.fromCharCode(65+idx)}</div><span class="text-base" style="font-family: 'Times New Roman', serif;">${opt}</span></div>`;
+                            html += `<div class="flex items-center gap-1"><div class="w-5 h-5 border border-black rounded-full flex items-center justify-center text-[10px] font-bold bg-white shrink-0">${String.fromCharCode(65+idx)}</div><span class="option-text font-sans" dir="ltr">${opt}</span></div>`;
                         });
                         html += `</div>`;
                     } else {
-                        html += `<div class="w-full h-8 border-b border-gray-300 border-dashed"></div><div class="w-full h-8 border-b border-gray-300 border-dashed"></div>`;
+                        html += `<div class="w-full h-6 border-b border-gray-300 border-dashed"></div>`;
                     }
                     html += `</div></div></div>`;
                 }
@@ -593,74 +515,44 @@
         function renderMiniList() {
             const list = document.getElementById('questions_mini_list');
             list.innerHTML = items.map((item) => {
-                let label = '';
-                let style = 'bg-gray-50 border-gray-200';
-                if (item.type === 'title') {
-                    label = `<span class="bg-black text-white text-xs px-1 rounded ml-1">سەردێڕ</span> ${item.text}`;
-                    style = 'bg-gray-200 border-gray-400';
-                } else {
-                    if (item.isSub) {
-                        label = `<span class="bg-orange-100 text-orange-800 text-xs px-1 rounded ml-1 border border-orange-200">A/B</span> ${item.text}`;
-                        style = 'bg-white border-l-4 border-l-orange-400'; 
-                    } else {
-                        label = `<span class="bg-blue-100 text-blue-800 text-xs px-1 rounded ml-1">پرسیار</span> ${item.text}`;
-                    }
-                }
+                let label = item.type === 'title' ? `<span class="bg-black text-white text-xs px-1 rounded ml-1">سەردێڕ</span>` : `<span class="bg-blue-100 text-blue-800 text-xs px-1 rounded ml-1">پرسیار</span>`;
                 return `
-                <div class="flex justify-between items-center ${style} p-3 rounded border mb-1 group" data-id="${item.id}">
+                <div class="flex justify-between items-center bg-gray-50 p-2 rounded border mb-1 group" data-id="${item.id}">
                     <div class="flex items-center gap-2 overflow-hidden">
-                        <i class="fa-solid fa-bars drag-handle text-lg"></i>
-                        <span class="truncate text-xs font-bold font-sans" dir="ltr">${label}</span>
+                        <i class="fa-solid fa-bars drag-handle text-gray-400"></i>
+                        <span class="truncate text-xs font-bold font-sans" dir="ltr">${label} ${item.text.substring(0,20)}...</span>
                     </div>
-                    <button onclick="deleteItem(${item.id})" class="text-red-500 hover:bg-red-100 p-2 rounded"><i class="fa-solid fa-trash"></i></button>
+                    <button onclick="deleteItem(${item.id})" class="text-red-500 hover:bg-red-100 p-1 rounded"><i class="fa-solid fa-trash"></i></button>
                 </div>`;
             }).join('');
         }
 
-        function deleteItem(id) {
-            items = items.filter(i => i.id !== id);
-            saveData();
-            renderPaper();
-            renderMiniList();
-        }
-
+        function deleteItem(id) { items = items.filter(i => i.id !== id); saveData(); renderPaper(); renderMiniList(); }
         function saveData() {
             const data = {
                 items: items,
                 header: {
-                    school: document.getElementById('h_school').value,
-                    group: document.getElementById('h_group').value,
-                    dir: document.getElementById('h_dir').value,
-                    gov: document.getElementById('h_gov').value,
-                    subject: document.getElementById('h_subject').value,
-                    class: document.getElementById('h_class').value,
-                    date: document.getElementById('h_date').value,
-                    time: document.getElementById('h_time').value,
-                    type: document.getElementById('h_type').value,
-                    year: document.getElementById('h_year').value
+                    school: document.getElementById('h_school').value, group: document.getElementById('h_group').value,
+                    dir: document.getElementById('h_dir').value, gov: document.getElementById('h_gov').value,
+                    subject: document.getElementById('h_subject').value, class: document.getElementById('h_class').value,
+                    date: document.getElementById('h_date').value, time: document.getElementById('h_time').value,
+                    type: document.getElementById('h_type').value, year: document.getElementById('h_year').value
                 }
             };
-            localStorage.setItem('exam_data_v8', JSON.stringify(data));
+            localStorage.setItem('exam_data_v9', JSON.stringify(data));
         }
-
         function loadData() {
-            const saved = localStorage.getItem('exam_data_v8');
+            const saved = localStorage.getItem('exam_data_v9');
             if(saved) {
-                const data = JSON.parse(saved);
-                items = data.items || [];
+                const data = JSON.parse(saved); items = data.items || [];
                 if(data.header) {
-                    const ids = ['school','group','dir','gov','subject','class','date','time','type','year'];
-                    ids.forEach(k => {
-                        const el = document.getElementById('h_'+k);
-                        if(el) el.value = data.header[k] || '';
+                    ['school','group','dir','gov','subject','class','date','time','type','year'].forEach(k => {
+                        const el = document.getElementById('h_'+k); if(el) el.value = data.header[k] || '';
                     });
                 }
-                updatePaper();
-                renderPaper();
-                renderMiniList();
+                updatePaper(); renderPaper(); renderMiniList();
             }
         }
-
         function switchTab(tab) {
             document.getElementById('editor-panel').classList.toggle('hidden', tab!=='editor');
             document.getElementById('preview-panel').classList.toggle('hidden', tab!=='preview');
@@ -676,22 +568,14 @@
         function toggleMobileMCQ(v) { document.getElementById('mob_mcq_options_container').classList.toggle('hidden', v!=='mcq'); }
         function toggleMCQ(v) { document.getElementById('mcq_options_container').classList.toggle('hidden', v!=='mcq'); }
         function updatePaper() {
-            const ids = ['school','dir','gov','subject','class','date','time','type','year'];
-            ids.forEach(k => {
-                const el = document.getElementById('h_'+k);
-                const view = document.getElementById('view_'+k);
-                if(el && view) view.innerText = el.value;
-                if(k==='subject') document.getElementById('view_subject_2').innerText = el.value;
+            ['school','dir','gov','subject','class','date','time','type','year'].forEach(k => {
+                const el = document.getElementById('h_'+k); const view = document.getElementById('view_'+k);
+                if(el && view) view.innerText = el.value; if(k==='subject') document.getElementById('view_subject_2').innerText = el.value;
             });
             const grp = document.getElementById('h_group').value;
-            const grpView = document.getElementById('view_group');
             const grpCont = document.getElementById('group_container');
-            if(grp) {
-                grpView.innerText = grp.toUpperCase();
-                grpCont.classList.remove('hidden');
-            } else {
-                grpCont.classList.add('hidden');
-            }
+            if(grp) { document.getElementById('view_group').innerText = grp.toUpperCase(); grpCont.classList.remove('hidden'); } 
+            else { grpCont.classList.add('hidden'); }
             saveData();
         }
         function downloadDirectPDF() {
@@ -708,7 +592,6 @@
             setTimeout(() => { html2pdf().set(opt).from(clone).save().then(() => { document.body.removeChild(container); document.getElementById('pdf-loading').classList.add('hidden'); document.getElementById('pdf-loading').classList.remove('flex'); }); }, 500);
         }
         function clearAll() { if(confirm('دڵنیایت؟')) { items=[]; saveData(); renderPaper(); renderMiniList(); } }
-        
         function checkPassword() {
             const c = parseInt(document.getElementById('password-input').value);
             if(c>=112201 && c<999999) { localStorage.setItem('exam_app_code', c); document.getElementById('login-overlay').style.display='none'; } 
