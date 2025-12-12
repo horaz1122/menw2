@@ -24,25 +24,27 @@
         window.firebaseApp = {};
 
         // Config check
-        const firebaseConfigStr = typeof __firebase_config !== 'undefined' ? __firebase_config : null;
-        
-        if (firebaseConfigStr) {
-            const firebaseConfig = JSON.parse(firebaseConfigStr);
-            const app = initializeApp(firebaseConfig);
-            const auth = getAuth(app);
-            const db = getFirestore(app);
-            const appId = typeof __app_id !== 'undefined' ? __app_id : 'default-app-id';
+       // Import the functions you need from the SDKs you need
+import { initializeApp } from "firebase/app";
+import { getAnalytics } from "firebase/analytics";
+// TODO: Add SDKs for Firebase products that you want to use
+// https://firebase.google.com/docs/web/setup#available-libraries
 
-            window.firebaseApp = { auth, db, appId, signInAnonymously, doc, getDoc, setDoc, collection };
+// Your web app's Firebase configuration
+// For Firebase JS SDK v7.20.0 and later, measurementId is optional
+const firebaseConfig = {
+  apiKey: "AIzaSyBHxuOA6uuX1EZGse5_JOHc3WMjvPywLD4",
+  authDomain: "prsyar-c93dd.firebaseapp.com",
+  projectId: "prsyar-c93dd",
+  storageBucket: "prsyar-c93dd.firebasestorage.app",
+  messagingSenderId: "623772510800",
+  appId: "1:623772510800:web:cc49fc9bbd9ed9c170ff55",
+  measurementId: "G-7KLKMNVFHC"
+};
 
-            // Start Auth
-            signInAnonymously(auth).catch((error) => {
-                console.error("Auth Error:", error);
-            });
-        } else {
-            console.warn("Firebase config not found. Code locking will rely on local storage only (not secure across devices).");
-        }
-    </script>
+// Initialize Firebase
+const app = initializeApp(firebaseConfig);
+const analytics = getAnalytics(app);
     
     <!-- MathJax -->
     <script>
@@ -759,4 +761,3 @@
     </script>
 </body>
 </html>
-
