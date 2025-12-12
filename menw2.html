@@ -3,13 +3,30 @@
 <head>
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0, maximum-scale=1.0, user-scalable=no">
-    <title>دروستکەری پرسیاری تاقیکردنەوە</title>
+    <title>دروستکەری پرسیاری تاقیکردنەوە + بیرکاری</title>
+    
     <!-- Tailwind CSS -->
     <script src="https://cdn.tailwindcss.com"></script>
-    <!-- HTML2PDF Library for Direct Download -->
+    
+    <!-- HTML2PDF Library -->
     <script src="https://cdnjs.cloudflare.com/ajax/libs/html2pdf.js/0.10.1/html2pdf.bundle.min.js"></script>
+    
+    <!-- MathJax for Math Formulas -->
+    <script>
+        window.MathJax = {
+            tex: {
+                inlineMath: [['$', '$'], ['\\(', '\\)']]
+            },
+            svg: {
+                fontCache: 'global'
+            }
+        };
+    </script>
+    <script id="MathJax-script" async src="https://cdn.jsdelivr.net/npm/mathjax@3/es5/tex-mml-chtml.js"></script>
+
     <!-- Google Fonts -->
     <link href="https://fonts.googleapis.com/css2?family=Nrt+Reg&family=Vazirmatn:wght@300;400;700;900&display=swap" rel="stylesheet">
+    
     <!-- FontAwesome -->
     <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.4.0/css/all.min.css">
 
@@ -110,6 +127,11 @@
             touch-action: manipulation;
         }
 
+        /* Fix for MathJax in PDF */
+        mjx-container {
+            font-size: 110% !important;
+        }
+
         @media print {
             @page { size: A4; margin: 0; }
             body { background: white; height: auto; overflow: visible; }
@@ -180,7 +202,7 @@
         <p class="text-sm opacity-80">خەریکی دروستکردنی PDFین</p>
     </div>
 
-    <!-- NEW HEADER INFO MODAL -->
+    <!-- HEADER INFO MODAL -->
     <div id="header-modal" class="fixed inset-0 bg-gray-900 bg-opacity-95 z-[70] hidden flex items-center justify-center p-4">
         <div class="bg-white w-full max-w-md rounded-2xl shadow-2xl h-auto max-h-[90vh] overflow-y-auto transform transition-transform duration-300 scale-100">
             <div class="flex justify-between items-center p-4 border-b bg-gray-50 rounded-t-2xl sticky top-0 z-10">
@@ -194,7 +216,6 @@
             </div>
 
             <div class="p-5 space-y-4">
-                <!-- Inputs moved here -->
                 <div>
                     <label class="text-sm font-bold text-gray-700 block mb-1">ناوی قوتابخانە/پەیمانگا</label>
                     <input type="text" id="h_school" placeholder="نموونە: ئامادەیی سلێمانی" class="w-full p-3 border-2 border-blue-100 rounded-lg text-base font-bold bg-white focus:border-blue-500 focus:ring-2 focus:ring-blue-200 outline-none transition" oninput="updatePaper()">
@@ -247,7 +268,7 @@
                 <input type="hidden" id="h_min" value="وەزارەتی پەروەردە">
 
                 <button onclick="closeHeaderModal()" class="w-full bg-blue-600 text-white font-bold py-3 rounded-xl shadow mt-2">
-                    تەواو
+                    تەواو (پاشەکەوت دەکرێت)
                 </button>
             </div>
         </div>
@@ -261,6 +282,11 @@
                 <button onclick="closeMobileAdd()" class="bg-gray-100 text-gray-600 p-2 rounded-full w-8 h-8 flex items-center justify-center">
                     <i class="fa-solid fa-xmark"></i>
                 </button>
+            </div>
+
+            <div class="bg-yellow-50 text-yellow-800 p-2 text-xs rounded mb-3 border border-yellow-200">
+                <i class="fa-solid fa-calculator"></i> بۆ بیرکاری: هاوکێشەکان بخەرە نێوان <b>$</b> ... <b>$</b> 
+                (نموونە: $x^2 + y^2 = 5$)
             </div>
 
             <div class="space-y-4">
@@ -296,7 +322,7 @@
         </div>
     </div>
 
-    <!-- Top Bar (Mobile) - PDF & Header Info Buttons -->
+    <!-- Top Bar (Mobile) -->
     <div class="no-print bg-white border-b p-3 flex justify-between items-center shadow-md lg:hidden z-50 sticky top-0 w-full gap-2">
         <h1 class="font-bold text-gray-800 text-lg">تاقیکردنەوەکان</h1>
         <div class="flex gap-2">
@@ -326,8 +352,11 @@
                     </button>
                 </div>
             </div>
-
-            <!-- Removed Inline Header Info - Moved to Modal -->
+            
+            <div class="hidden lg:block bg-yellow-50 text-yellow-800 p-2 text-xs rounded mb-3 border border-yellow-200">
+                <i class="fa-solid fa-calculator"></i> بۆ بیرکاری: هاوکێشەکان بخەرە نێوان <b>$</b> ... <b>$</b> 
+                (نموونە: $x^2 + y^2 = 5$)
+            </div>
 
             <!-- Desktop Add Question -->
             <div class="hidden lg:block bg-gray-50 p-4 rounded-lg border border-gray-200 shadow-sm mb-4 sticky top-0 z-10">
@@ -357,9 +386,11 @@
 
             <!-- List -->
             <div class="mt-4">
-                <h3 class="text-sm font-bold text-gray-500 mb-2 border-b pb-1">لیستی پرسیارەکان (<span id="q_count">0</span>)</h3>
+                <div class="flex justify-between items-center border-b pb-1 mb-2">
+                    <h3 class="text-sm font-bold text-gray-500">لیستی پرسیارەکان (<span id="q_count">0</span>)</h3>
+                    <button onclick="clearAll()" class="text-red-500 text-xs hover:underline">سڕینەوەی هەمووی</button>
+                </div>
                 <div id="questions_mini_list" class="space-y-2 text-sm"></div>
-                <button onclick="clearAll()" class="mt-4 w-full text-red-500 text-sm hover:underline">سڕینەوەی هەمووی</button>
             </div>
         </div>
 
@@ -420,6 +451,48 @@
     </div>
 
     <script>
+        // --- STORAGE LOGIC ---
+        function saveData() {
+            const data = {
+                questions: questions,
+                header: {
+                    school: document.getElementById('h_school').value,
+                    dir: document.getElementById('h_dir').value,
+                    gov: document.getElementById('h_gov').value,
+                    subject: document.getElementById('h_subject').value,
+                    class: document.getElementById('h_class').value,
+                    date: document.getElementById('h_date').value,
+                    time: document.getElementById('h_time').value,
+                    type: document.getElementById('h_type').value,
+                    year: document.getElementById('h_year').value
+                }
+            };
+            localStorage.setItem('exam_app_data_v1', JSON.stringify(data));
+        }
+
+        function loadData() {
+            const saved = localStorage.getItem('exam_app_data_v1');
+            if(saved) {
+                const data = JSON.parse(saved);
+                questions = data.questions || [];
+                
+                if(data.header) {
+                    document.getElementById('h_school').value = data.header.school || '';
+                    document.getElementById('h_dir').value = data.header.dir || '';
+                    document.getElementById('h_gov').value = data.header.gov || '';
+                    document.getElementById('h_subject').value = data.header.subject || '';
+                    document.getElementById('h_class').value = data.header.class || '';
+                    document.getElementById('h_date').value = data.header.date || '';
+                    document.getElementById('h_time').value = data.header.time || '';
+                    document.getElementById('h_type').value = data.header.type || '';
+                    document.getElementById('h_year').value = data.header.year || '';
+                }
+                updatePaper();
+                renderPaper();
+                renderMiniList();
+            }
+        }
+
         // --- HEADER MODAL LOGIC ---
         function openHeaderModal() {
             document.getElementById('header-modal').classList.remove('hidden');
@@ -427,6 +500,7 @@
 
         function closeHeaderModal() {
             document.getElementById('header-modal').classList.add('hidden');
+            saveData(); // Save when closing modal
         }
 
         // --- PDF DOWNLOAD LOGIC ---
@@ -456,20 +530,26 @@
                 jsPDF:        { unit: 'mm', format: 'a4', orientation: 'portrait' }
             };
 
-            html2pdf().set(opt).from(clone).save().then(() => {
-                document.body.removeChild(container);
-                document.getElementById('pdf-loading').classList.add('hidden');
-                document.getElementById('pdf-loading').classList.remove('flex');
-            }).catch(err => {
-                console.error(err);
-                alert("هەڵەیەک ڕوویدا لە کاتی دروستکردنی PDF.");
-                document.getElementById('pdf-loading').classList.add('hidden');
-                document.getElementById('pdf-loading').classList.remove('flex');
-            });
+            // Force wait for mathjax rendering in clone (rough handling)
+            setTimeout(() => {
+                html2pdf().set(opt).from(clone).save().then(() => {
+                    document.body.removeChild(container);
+                    document.getElementById('pdf-loading').classList.add('hidden');
+                    document.getElementById('pdf-loading').classList.remove('flex');
+                }).catch(err => {
+                    console.error(err);
+                    alert("هەڵە: " + err);
+                    document.getElementById('pdf-loading').classList.add('hidden');
+                    document.getElementById('pdf-loading').classList.remove('flex');
+                });
+            }, 500);
         }
 
-        // --- LOGIN LOGIC ---
+        // --- INIT & LOGIN LOGIC ---
         window.onload = function() {
+            // Load saved data immediately
+            loadData();
+            
             const savedCode = localStorage.getItem('exam_app_code');
             if (savedCode && parseInt(savedCode) >= 112201) {
                 document.getElementById('login-overlay').style.display = 'none';
@@ -585,6 +665,7 @@
                 id: Date.now(),
                 text, score, type, options
             });
+            saveData();
             renderPaper();
             renderMiniList();
         }
@@ -600,6 +681,7 @@
                     if(viewSub2) viewSub2.innerText = el.value;
                 }
             });
+            saveData(); // Save on every header update
         }
 
         function toggleMCQ(type, mode) {
@@ -643,6 +725,11 @@
                 html += `</div></div></div>`;
             });
             container.innerHTML = html;
+            
+            // Trigger MathJax re-render
+            if (window.MathJax) {
+                window.MathJax.typesetPromise();
+            }
         }
 
         function renderMiniList() {
@@ -658,13 +745,15 @@
 
         function deleteQuestion(id) {
             questions = questions.filter(q => q.id !== id);
+            saveData();
             renderPaper();
             renderMiniList();
         }
 
         function clearAll() {
-            if(confirm("دڵنیایت؟")) {
+            if(confirm("دڵنیایت؟ هەموو پرسیارەکان دەسڕدرێنەوە!")) {
                 questions = [];
+                saveData();
                 renderPaper();
                 renderMiniList();
             }
@@ -672,3 +761,4 @@
     </script>
 </body>
 </html>
+
