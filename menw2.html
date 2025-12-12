@@ -3,7 +3,7 @@
 <head>
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0, maximum-scale=1.0, user-scalable=no">
-    <title>دروستکەری پرسیار - گرووپ + DragDrop</title>
+    <title>دروستکەری پرسیار - کۆمەڵەی تەواوی بیرکاری</title>
     
     <!-- Tailwind CSS -->
     <script src="https://cdn.tailwindcss.com"></script>
@@ -53,7 +53,6 @@
         .header-center { text-align: center; align-items: center; }
         .header-left { text-align: left; align-items: flex-end; }
         
-        /* Group Badge Style */
         .group-badge {
             width: 40px; height: 40px; border: 2px solid black; border-radius: 50%; 
             display: flex; align-items: center; justify-content: center; 
@@ -73,16 +72,20 @@
         input, textarea, select { font-size: 16px !important; touch-action: manipulation; }
         mjx-container { font-size: 110% !important; direction: ltr !important; display: inline-block !important; }
         
+        /* SCROLLABLE MATH TOOLBAR */
         .math-toolbar {
-            display: flex; gap: 0.5rem; overflow-x: auto; padding-bottom: 0.5rem; margin-bottom: 0.5rem;
-            -ms-overflow-style: none; scrollbar-width: none;
+            display: flex; gap: 0.4rem; overflow-x: auto; padding-bottom: 0.5rem; margin-bottom: 0.5rem;
+            -ms-overflow-style: none; scrollbar-width: none; background: #f8fafc; padding: 8px; border-radius: 8px; border: 1px solid #e2e8f0;
         }
         .math-toolbar::-webkit-scrollbar { display: none; }
         .math-btn { 
-            background: #eef2ff; border: 1px solid #c7d2fe; color: #3730a3; 
-            padding: 6px 10px; border-radius: 6px; font-size: 14px; font-family: 'Times New Roman', serif;
-            transition: all 0.2s; white-space: nowrap; display: flex; align-items: center; justify-content: center; min-width: 40px;
+            background: white; border: 1px solid #cbd5e1; color: #1e293b; 
+            padding: 4px 8px; border-radius: 6px; font-size: 13px; font-family: 'Times New Roman', serif;
+            transition: all 0.2s; white-space: nowrap; display: flex; align-items: center; justify-content: center; min-width: 36px;
+            box-shadow: 0 1px 2px rgba(0,0,0,0.05); font-weight: 500;
         }
+        .math-btn:hover { background: #e0f2fe; border-color: #3b82f6; color: #1d4ed8; transform: translateY(-1px); }
+        .math-btn:active { transform: translateY(0); background: #bfdbfe; }
 
         .mode-switch { display: flex; background: #e5e7eb; border-radius: 8px; padding: 4px; margin-bottom: 10px; }
         .mode-btn { flex: 1; padding: 8px; text-align: center; border-radius: 6px; font-weight: bold; font-size: 14px; transition: all 0.2s; }
@@ -133,7 +136,7 @@
         <p>خەریکی دروستکردنی PDFین...</p>
     </div>
 
-    <!-- Header Modal (Updated with Group Input) -->
+    <!-- Header Modal -->
     <div id="header-modal" class="fixed inset-0 bg-gray-900 bg-opacity-95 z-[70] hidden flex items-center justify-center p-4">
         <div class="bg-white w-full max-w-md rounded-2xl shadow-2xl h-auto max-h-[90vh] overflow-y-auto">
             <div class="flex justify-between items-center p-4 border-b bg-gray-50 sticky top-0 z-10">
@@ -143,7 +146,6 @@
             <div class="p-5 space-y-4">
                 <input type="text" id="h_school" placeholder="ناوی قوتابخانە" class="w-full p-3 border rounded-lg" oninput="updatePaper()">
                 
-                <!-- Group Input (NEW) -->
                 <div class="bg-yellow-50 p-2 rounded border border-yellow-200">
                     <label class="block text-xs font-bold text-yellow-800 mb-1">گرووپی پرسیار (A, B, C)</label>
                     <input type="text" id="h_group" placeholder="نموونە: A" class="w-full p-2 border rounded text-center font-bold text-lg uppercase" oninput="updatePaper()">
@@ -178,23 +180,21 @@
                 <h3 class="font-bold">زیادکردن</h3>
                 <button onclick="closeMobileAdd()" class="w-8 h-8 bg-gray-100 rounded-full"><i class="fa-solid fa-xmark"></i></button>
             </div>
+            
             <div class="mode-switch">
                 <button onclick="switchMode('question', 'mobile')" id="mob-mode-q" class="mode-btn active">پرسیار</button>
                 <button onclick="switchMode('title', 'mobile')" id="mob-mode-t" class="mode-btn inactive">سەردێڕ</button>
             </div>
+
             <div id="mob-input-question">
-                <div class="math-toolbar">
-                    <button onclick="insertMath('sqrt', 'mob_q_text')" class="math-btn">$\sqrt{x}$</button>
-                    <button onclick="insertMath('frac', 'mob_q_text')" class="math-btn">$\frac{a}{b}$</button>
-                    <button onclick="insertMath('pow', 'mob_q_text')" class="math-btn">$x^2$</button>
-                    <button onclick="insertMath('exp', 'mob_q_text')" class="math-btn">$e^x$</button>
-                    <button onclick="insertMath('matrix', 'mob_q_text')" class="math-btn">$[\begin{smallmatrix}..\end{smallmatrix}]$</button>
-                </div>
+                <div id="mob-math-toolbar-q" class="math-toolbar"></div> <!-- JS populates this -->
                 <textarea id="mob_q_text" rows="3" class="w-full p-3 border-2 border-blue-200 rounded-xl mb-4 text-left font-sans" dir="ltr" placeholder="دەقی پرسیار..."></textarea>
+                
                 <div class="flex items-center gap-2 mb-4 bg-orange-50 p-2 rounded border border-orange-100">
                     <input type="checkbox" id="mob_q_is_sub" class="w-5 h-5 accent-orange-600">
                     <label for="mob_q_is_sub" class="text-sm font-bold text-orange-800">لقی پرسیارە (A, B, C)</label>
                 </div>
+
                 <div class="flex gap-3 mb-4">
                     <input type="number" id="mob_q_score" value="10" class="w-1/3 p-3 border-2 rounded-xl text-center">
                     <select id="mob_q_type" class="w-2/3 p-3 border-2 rounded-xl bg-white" onchange="toggleMobileMCQ(this.value)">
@@ -203,12 +203,16 @@
                     </select>
                 </div>
                 <div id="mob_mcq_options_container" class="hidden bg-gray-50 p-3 rounded-xl border mb-4">
+                    <label class="text-xs font-bold mb-1 block">بژاردەکان:</label>
+                    <div id="mob-math-toolbar-opt" class="math-toolbar"></div> <!-- JS populates this -->
                     <textarea id="mob_q_mcq_opts" rows="4" class="w-full p-2 border rounded-lg text-left font-sans" dir="ltr" placeholder="A) ..."></textarea>
                 </div>
             </div>
+
             <div id="mob-input-title" class="hidden">
                 <textarea id="mob_t_text" rows="2" class="w-full p-3 border-2 border-gray-400 rounded-xl font-bold text-center" placeholder="نموونە: پرسیاری دووەم"></textarea>
             </div>
+
             <button onclick="addItemMobile()" class="w-full bg-blue-600 text-white font-bold py-4 rounded-xl mt-4">زیادکردن</button>
             <div class="h-20"></div>
         </div>
@@ -239,25 +243,16 @@
                     <button onclick="switchMode('question', 'desktop')" id="desk-mode-q" class="mode-btn active">پرسیار</button>
                     <button onclick="switchMode('title', 'desktop')" id="desk-mode-t" class="mode-btn inactive">سەردێڕ</button>
                 </div>
+
                 <div id="desk-input-question">
-                    <div class="math-toolbar">
-                        <button onclick="insertMath('sqrt', 'q_text')" class="math-btn" title="ڕەگ">$\sqrt{x}$</button>
-                        <button onclick="insertMath('frac', 'q_text')" class="math-btn" title="کەرت">$\frac{a}{b}$</button>
-                        <button onclick="insertMath('pow', 'q_text')" class="math-btn" title="توان">$x^2$</button>
-                        <button onclick="insertMath('exp', 'q_text')" class="math-btn" title="e^x">$e^x$</button>
-                        <button onclick="insertMath('times', 'q_text')" class="math-btn" title="لێکدان">$\times$</button>
-                        <button onclick="insertMath('div', 'q_text')" class="math-btn" title="دابەش">$\div$</button>
-                        <button onclick="insertMath('theta', 'q_text')" class="math-btn">$\theta$</button>
-                        <button onclick="insertMath('pi', 'q_text')" class="math-btn">$\pi$</button>
-                        <button onclick="insertMath('int', 'q_text')" class="math-btn">$\int$</button>
-                        <button onclick="insertMath('sum', 'q_text')" class="math-btn">$\sum$</button>
-                        <button onclick="insertMath('matrix', 'q_text')" class="math-btn">$[\begin{smallmatrix}..\end{smallmatrix}]$</button>
-                    </div>
+                    <div id="desk-math-toolbar-q" class="math-toolbar"></div> <!-- JS populates this -->
                     <textarea id="q_text" rows="3" class="w-full p-2 border rounded mb-2 text-left font-sans" dir="ltr" placeholder="دەقی پرسیار..."></textarea>
+                    
                     <div class="flex items-center gap-2 mb-2 bg-orange-50 p-2 rounded border border-orange-100">
                         <input type="checkbox" id="q_is_sub" class="w-4 h-4 accent-orange-600">
                         <label for="q_is_sub" class="text-sm font-bold text-orange-800 cursor-pointer select-none">لقی پرسیارە (A, B, C)</label>
                     </div>
+
                     <div class="flex gap-2 mb-2">
                         <input type="number" id="q_score" value="10" class="w-20 p-2 border rounded text-center">
                         <select id="q_type" class="flex-1 p-2 border rounded" onchange="toggleMCQ(this.value, 'desktop')">
@@ -266,20 +261,24 @@
                         </select>
                     </div>
                     <div id="mcq_options_container" class="hidden bg-white p-2 border rounded mb-2">
+                        <div id="desk-math-toolbar-opt" class="math-toolbar"></div> <!-- JS populates this -->
                         <textarea id="q_mcq_opts" rows="3" class="w-full p-2 border text-sm text-left font-sans" dir="ltr" placeholder="A) ..."></textarea>
                     </div>
                 </div>
+
                 <div id="desk-input-title" class="hidden">
                     <div class="bg-gray-100 p-4 rounded border-2 border-dashed border-gray-300">
                         <label class="block text-sm font-bold text-gray-700 mb-2">دەقی سەردێڕ:</label>
                         <input type="text" id="t_text" class="w-full p-2 border-2 border-gray-400 rounded font-bold text-center" placeholder="نموونە: پرسیاری دووەم">
                     </div>
                 </div>
+
                 <button onclick="addItemDesktop()" class="w-full bg-blue-600 text-white font-bold py-3 rounded text-sm shadow mt-2">زیادکردن</button>
             </div>
 
             <div class="lg:hidden text-center p-4 bg-blue-50 rounded mb-4 text-blue-800 font-bold">بۆ پرسیار، دوگمە شینەکە (+) دابگرە.</div>
 
+            <!-- DRAG DROP LIST -->
             <div class="mt-4">
                 <div class="flex justify-between border-b pb-1 mb-2">
                     <h3 class="text-sm font-bold text-gray-500">لیست (Drag & Drop)</h3>
@@ -310,7 +309,7 @@
                         <div>کات: <span id="view_time">...</span></div>
                         <div>بەروار: <span id="view_date">...</span></div>
                         
-                        <!-- Group Badge Display -->
+                        <!-- Group Badge -->
                         <div id="group_container" class="hidden">
                             <div class="group-badge" id="view_group">A</div>
                         </div>
@@ -336,23 +335,101 @@
     </div>
 
     <script>
+        // --- ALL MATH BUTTONS DEFINITION ---
+        const mathButtons = [
+            // Basics
+            { label: '$\\sqrt{x}$', code: 'sqrt' },
+            { label: '$\\frac{a}{b}$', code: 'frac' },
+            { label: '$x^2$', code: 'pow' },
+            { label: '$e^x$', code: 'exp' },
+            { label: '$\\times$', code: 'times' },
+            { label: '$\\div$', code: 'div' },
+            { label: '$\\pm$', code: 'pm' },
+            // Relations
+            { label: '$\\approx$', code: 'approx' },
+            { label: '$\\neq$', code: 'neq' },
+            { label: '$\\le$', code: 'leq' },
+            { label: '$\\ge$', code: 'geq' },
+            // Greek
+            { label: '$\\theta$', code: 'theta' },
+            { label: '$\\pi$', code: 'pi' },
+            { label: '$\\alpha$', code: 'alpha' },
+            { label: '$\\beta$', code: 'beta' },
+            { label: '$\\Delta$', code: 'triangle' },
+            { label: '$\\lambda$', code: 'lambda' },
+            // Calculus / Log
+            { label: '$\\int$', code: 'int' },
+            { label: '$\\sum$', code: 'sum' },
+            { label: '$\\lim$', code: 'lim' },
+            { label: '$\\log$', code: 'log' },
+            { label: '$\\ln$', code: 'ln' },
+            { label: '$\\infty$', code: 'infty' },
+            // Sets / Geometry
+            { label: '$\\in$', code: 'in' },
+            { label: '$\\notin$', code: 'notin' },
+            { label: '$\\cup$', code: 'cup' },
+            { label: '$\\cap$', code: 'cap' },
+            { label: '$\\subset$', code: 'subset' },
+            { label: '$\\emptyset$', code: 'empty' },
+            { label: '$\\angle$', code: 'angle' },
+            { label: '$\\perp$', code: 'perp' },
+            { label: '$\\vec{v}$', code: 'vec' },
+            // Matrix
+            { label: 'Matrix', code: 'matrix' },
+        ];
+
+        function populateMathToolbars() {
+            const ids = ['desk-math-toolbar-q', 'desk-math-toolbar-opt', 'mob-math-toolbar-q', 'mob-math-toolbar-opt'];
+            ids.forEach(id => {
+                const container = document.getElementById(id);
+                if (!container) return;
+                // Determine target input based on toolbar ID
+                let targetInputId = '';
+                if(id.includes('desk') && id.includes('-q')) targetInputId = 'q_text';
+                else if(id.includes('desk') && id.includes('-opt')) targetInputId = 'q_mcq_opts';
+                else if(id.includes('mob') && id.includes('-q')) targetInputId = 'mob_q_text';
+                else if(id.includes('mob') && id.includes('-opt')) targetInputId = 'mob_q_mcq_opts';
+
+                mathButtons.forEach(btn => {
+                    const button = document.createElement('button');
+                    button.className = 'math-btn';
+                    button.innerHTML = btn.label;
+                    button.onclick = (e) => {
+                        e.preventDefault(); // Prevent focus loss issues sometimes
+                        insertMath(btn.code, targetInputId);
+                    };
+                    container.appendChild(button);
+                });
+            });
+            if(window.MathJax) window.MathJax.typesetPromise();
+        }
+
+        // --- CORE STATE ---
         let items = []; 
         let currentMode = { desktop: 'question', mobile: 'question' };
 
-        new Sortable(document.getElementById('questions_mini_list'), {
-            animation: 150,
-            handle: '.drag-handle',
-            ghostClass: 'sortable-ghost',
-            dragClass: 'sortable-drag',
-            onEnd: function (evt) {
-                const newOrderIds = Array.from(evt.to.children).map(el => parseInt(el.getAttribute('data-id')));
-                const itemMap = new Map(items.map(i => [i.id, i]));
-                items = newOrderIds.map(id => itemMap.get(id));
-                saveData();
-                renderPaper();
-            }
-        });
+        // Initialize
+        window.onload = function() {
+            loadData();
+            if (localStorage.getItem('exam_app_code') >= 112201) document.getElementById('login-overlay').style.display = 'none';
+            populateMathToolbars();
+            
+            new Sortable(document.getElementById('questions_mini_list'), {
+                animation: 150,
+                handle: '.drag-handle',
+                ghostClass: 'sortable-ghost',
+                dragClass: 'sortable-drag',
+                onEnd: function (evt) {
+                    const newOrderIds = Array.from(evt.to.children).map(el => parseInt(el.getAttribute('data-id')));
+                    const itemMap = new Map(items.map(i => [i.id, i]));
+                    items = newOrderIds.map(id => itemMap.get(id));
+                    saveData();
+                    renderPaper();
+                }
+            });
+        };
 
+        // --- MATH INSERTION LOGIC ---
         function insertMath(type, inputId) {
             const input = document.getElementById(inputId);
             let text = "";
@@ -361,6 +438,37 @@
                 case 'frac': text = "$\\frac{a}{b}$"; break;
                 case 'pow': text = "$x^2$"; break;
                 case 'exp': text = "$e^x$"; break;
+                case 'times': text = "$\\times$"; break;
+                case 'div': text = "$\\div$"; break;
+                case 'pm': text = "$\\pm$"; break;
+                case 'approx': text = "$\\approx$"; break;
+                case 'neq': text = "$\\neq$"; break;
+                case 'leq': text = "$\\le$"; break;
+                case 'geq': text = "$\\ge$"; break;
+                case 'theta': text = "$\\theta$"; break;
+                case 'alpha': text = "$\\alpha$"; break;
+                case 'beta': text = "$\\beta$"; break;
+                case 'lambda': text = "$\\lambda$"; break;
+                case 'pi': text = "$\\pi$"; break;
+                case 'triangle': text = "$\\Delta$"; break;
+                case 'sin': text = "$\\sin(x)$"; break;
+                case 'cos': text = "$\\cos(x)$"; break;
+                case 'tan': text = "$\\tan(x)$"; break;
+                case 'log': text = "$\\log_{a}(b)$"; break;
+                case 'ln': text = "$\\ln(x)$"; break;
+                case 'lim': text = "$\\lim_{x \\to 0}$"; break;
+                case 'int': text = "$\\int_{a}^{b}$"; break;
+                case 'sum': text = "$\\sum_{i=0}^{n}$"; break;
+                case 'infty': text = "$\\infty$"; break;
+                case 'in': text = "$\\in$"; break;
+                case 'notin': text = "$\\notin$"; break;
+                case 'cup': text = "$\\cup$"; break;
+                case 'cap': text = "$\\cap$"; break;
+                case 'subset': text = "$\\subset$"; break;
+                case 'empty': text = "$\\emptyset$"; break;
+                case 'angle': text = "$\\angle$"; break;
+                case 'perp': text = "$\\perp$"; break;
+                case 'vec': text = "$\\vec{v}$"; break;
                 case 'matrix': text = "$\\begin{pmatrix} a & b \\\\ c & d \\end{pmatrix}$"; break;
             }
             const start = input.selectionStart;
@@ -369,6 +477,7 @@
             input.focus();
         }
 
+        // --- UI & DATA ---
         function switchMode(mode, view) {
             currentMode[view] = mode;
             const isQ = mode === 'question';
@@ -531,11 +640,11 @@
                     year: document.getElementById('h_year').value
                 }
             };
-            localStorage.setItem('exam_data_v5', JSON.stringify(data));
+            localStorage.setItem('exam_data_v8', JSON.stringify(data));
         }
 
         function loadData() {
-            const saved = localStorage.getItem('exam_data_v5');
+            const saved = localStorage.getItem('exam_data_v8');
             if(saved) {
                 const data = JSON.parse(saved);
                 items = data.items || [];
@@ -574,7 +683,6 @@
                 if(el && view) view.innerText = el.value;
                 if(k==='subject') document.getElementById('view_subject_2').innerText = el.value;
             });
-            // Update Group
             const grp = document.getElementById('h_group').value;
             const grpView = document.getElementById('view_group');
             const grpCont = document.getElementById('group_container');
@@ -601,10 +709,6 @@
         }
         function clearAll() { if(confirm('دڵنیایت؟')) { items=[]; saveData(); renderPaper(); renderMiniList(); } }
         
-        window.onload = function() {
-            loadData();
-            if (localStorage.getItem('exam_app_code') >= 112201) document.getElementById('login-overlay').style.display = 'none';
-        };
         function checkPassword() {
             const c = parseInt(document.getElementById('password-input').value);
             if(c>=112201 && c<999999) { localStorage.setItem('exam_app_code', c); document.getElementById('login-overlay').style.display='none'; } 
