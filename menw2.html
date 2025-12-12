@@ -3,7 +3,7 @@
 <head>
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0, maximum-scale=1.0, user-scalable=no">
-    <title>دروستکەری پرسیار - وێنە + بۆشایی</title>
+    <title>دروستکەری پرسیار - پارێزراو</title>
     
     <!-- Tailwind CSS -->
     <script src="https://cdn.tailwindcss.com"></script>
@@ -14,6 +14,36 @@
     <!-- SortableJS -->
     <script src="https://cdnjs.cloudflare.com/ajax/libs/Sortable/1.15.0/Sortable.min.js"></script>
     
+    <!-- Firebase SDKs -->
+    <script type="module">
+        import { initializeApp } from "https://www.gstatic.com/firebasejs/11.6.1/firebase-app.js";
+        import { getAuth, signInAnonymously, onAuthStateChanged } from "https://www.gstatic.com/firebasejs/11.6.1/firebase-auth.js";
+        import { getFirestore, doc, getDoc, setDoc, collection } from "https://www.gstatic.com/firebasejs/11.6.1/firebase-firestore.js";
+
+        // Global variable to hold Firebase instances
+        window.firebaseApp = {};
+
+        // Config check
+        const firebaseConfigStr = typeof __firebase_config !== 'undefined' ? __firebase_config : null;
+        
+        if (firebaseConfigStr) {
+            const firebaseConfig = JSON.parse(firebaseConfigStr);
+            const app = initializeApp(firebaseConfig);
+            const auth = getAuth(app);
+            const db = getFirestore(app);
+            const appId = typeof __app_id !== 'undefined' ? __app_id : 'default-app-id';
+
+            window.firebaseApp = { auth, db, appId, signInAnonymously, doc, getDoc, setDoc, collection };
+
+            // Start Auth
+            signInAnonymously(auth).catch((error) => {
+                console.error("Auth Error:", error);
+            });
+        } else {
+            console.warn("Firebase config not found. Code locking will rely on local storage only (not secure across devices).");
+        }
+    </script>
+    
     <!-- MathJax -->
     <script>
         window.MathJax = {
@@ -23,7 +53,7 @@
     </script>
     <script id="MathJax-script" async src="https://cdn.jsdelivr.net/npm/mathjax@3/es5/tex-mml-chtml.js"></script>
 
-    <!-- FontAwesome & Fonts -->
+    <!-- Google Fonts -->
     <link href="https://fonts.googleapis.com/css2?family=Nrt+Reg&family=Vazirmatn:wght@300;400;700;900&display=swap" rel="stylesheet">
     <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.4.0/css/all.min.css">
 
@@ -100,7 +130,6 @@
         .sortable-drag { cursor: grabbing; background-color: white; box-shadow: 0 10px 15px -3px rgba(0, 0, 0, 0.1); }
         .drag-handle { cursor: grab; padding: 10px; color: #9ca3af; touch-action: none; }
 
-        /* Range Slider Styling */
         input[type=range] { -webkit-appearance: none; width: 100%; height: 6px; background: #d1d5db; border-radius: 5px; outline: none; }
         input[type=range]::-webkit-slider-thumb { -webkit-appearance: none; appearance: none; width: 18px; height: 18px; border-radius: 50%; background: #2563eb; cursor: pointer; border: 2px solid white; box-shadow: 0 1px 3px rgba(0,0,0,0.3); }
 
@@ -122,7 +151,11 @@
 
     <!-- LOGIN -->
     <div id="login-overlay" class="fixed inset-0 bg-gray-900 bg-opacity-95 z-[100] flex items-center justify-center backdrop-blur-sm">
-        <div class="bg-white p-6 rounded-2xl shadow-2xl w-full max-w-sm text-center m-4">
+        <div class="bg-white p-6 rounded-2xl shadow-2xl w-full max-w-sm text-center m-4 relative">
+            <div id="auth-loading" class="absolute inset-0 bg-white bg-opacity-80 flex items-center justify-center z-10 hidden rounded-2xl">
+                <div class="animate-spin rounded-full h-8 w-8 border-b-2 border-blue-600"></div>
+            </div>
+
             <h2 class="text-xl font-bold mb-4 border-b pb-2">چالاککردنی سیستەم</h2>
             <div class="bg-blue-50 border border-blue-200 rounded-xl p-4 mb-5">
                 <p class="text-sm mb-2 font-medium">بۆ وەرگرتنی کۆد، <span class="text-red-600 font-bold">1000 دینار</span> بە FIB بنێرە:</p>
@@ -133,7 +166,7 @@
                 <img src="https://api.qrserver.com/v1/create-qr-code/?size=100x100&data=07501784002" class="w-20 h-20 mx-auto rounded border">
             </div>
             <input type="number" id="password-input" class="w-full p-3 border rounded-xl text-center text-lg mb-3" placeholder="کۆد (نموونە: 112201)" onkeypress="if(event.key==='Enter') checkPassword()">
-            <p id="login-error" class="text-red-500 text-sm mb-3 hidden">کۆدەکە هەڵەیە!</p>
+            <p id="login-error" class="text-red-500 text-sm mb-3 hidden bg-red-50 p-2 rounded"></p>
             <button onclick="checkPassword()" class="w-full bg-blue-600 text-white font-bold py-3 rounded-xl">چالاککردن</button>
         </div>
     </div>
@@ -153,17 +186,14 @@
             </div>
             <div class="p-5 space-y-4">
                 <input type="text" id="h_school" placeholder="ناوی قوتابخانە" class="w-full p-3 border rounded-lg" oninput="updatePaper()">
-                
                 <div class="bg-yellow-50 p-2 rounded border border-yellow-200">
                     <label class="block text-xs font-bold text-yellow-800 mb-1">گرووپی پرسیار (A, B, C)</label>
                     <input type="text" id="h_group" placeholder="نموونە: A" class="w-full p-2 border rounded text-center font-bold text-lg uppercase" oninput="updatePaper()">
                 </div>
-
                 <div class="grid grid-cols-2 gap-3">
                     <input type="text" id="h_dir" value="بەڕێوەبەرایەتی پەروەردە" class="border p-2 rounded" oninput="updatePaper()">
                     <input type="text" id="h_gov" value="حکومەتی هەرێم" class="border p-2 rounded" oninput="updatePaper()">
                 </div>
-                <!-- Other Inputs (Subject, Class, etc.) -->
                 <div class="grid grid-cols-2 gap-3">
                     <input type="text" id="h_subject" placeholder="بابەت" class="border p-2 rounded" oninput="updatePaper()">
                     <input type="text" id="h_class" placeholder="پۆل" class="border p-2 rounded" oninput="updatePaper()">
@@ -202,7 +232,7 @@
                 <!-- NEW: Image Upload Mobile -->
                 <div class="mb-4 bg-gray-50 p-2 rounded border border-gray-200">
                     <label class="block text-xs font-bold text-gray-600 mb-1"><i class="fa-regular fa-image"></i> وێنە (ئەگەر هەبێت):</label>
-                    <input type="file" id="mob_q_image" accept="image/*" class="block w-full text-sm text-gray-500 file:mr-4 file:py-2 file:px-4 file:rounded-full file:border-0 file:text-sm file:font-semibold file:bg-blue-50 file:text-blue-700 hover:file:bg-blue-100">
+                    <input type="file" id="mob_q_image" accept="image/*" class="block w-full text-sm text-gray-500">
                 </div>
 
                 <!-- NEW: Spacing Mobile -->
@@ -274,7 +304,7 @@
                     <!-- NEW: Image Upload Desktop -->
                     <div class="mb-2 bg-white p-2 rounded border border-gray-200">
                         <label class="block text-xs font-bold text-gray-600 mb-1"><i class="fa-regular fa-image"></i> وێنە (ئەگەر هەبێت):</label>
-                        <input type="file" id="q_image" accept="image/*" class="block w-full text-xs text-gray-500 file:mr-2 file:py-1 file:px-2 file:rounded-full file:border-0 file:text-xs file:font-semibold file:bg-blue-50 file:text-blue-700 hover:file:bg-blue-100">
+                        <input type="file" id="q_image" accept="image/*" class="block w-full text-xs text-gray-500">
                     </div>
 
                     <!-- NEW: Spacing Desktop -->
@@ -373,6 +403,69 @@
     </div>
 
     <script>
+        // --- SECURE DEVICE LOGIC ---
+        let currentDeviceId = localStorage.getItem('app_device_id');
+        if (!currentDeviceId) {
+            currentDeviceId = crypto.randomUUID();
+            localStorage.setItem('app_device_id', currentDeviceId);
+        }
+
+        async function checkPassword() {
+            const inputCode = document.getElementById('password-input').value.trim();
+            const errorMsg = document.getElementById('login-error');
+            const loading = document.getElementById('auth-loading');
+            
+            // Basic format check
+            if (!inputCode || inputCode.length < 6 || parseInt(inputCode) < 112201) {
+                errorMsg.innerText = "کۆدەکە هەڵەیە!";
+                errorMsg.classList.remove('hidden');
+                return;
+            }
+
+            // Check if Firebase is available
+            if (!window.firebaseApp || !window.firebaseApp.db) {
+                // Fallback for local usage without backend
+                localStorage.setItem('exam_app_code', inputCode);
+                document.getElementById('login-overlay').style.display='none';
+                return;
+            }
+
+            loading.classList.remove('hidden');
+            const { db, doc, getDoc, setDoc, collection } = window.firebaseApp;
+            const codeRef = doc(collection(db, 'artifacts', window.firebaseApp.appId, 'public', 'data', 'used_codes'), inputCode);
+
+            try {
+                const docSnap = await getDoc(codeRef);
+                
+                if (docSnap.exists()) {
+                    const data = docSnap.data();
+                    if (data.deviceId === currentDeviceId) {
+                        // Success: Same device re-login
+                        localStorage.setItem('exam_app_code', inputCode);
+                        document.getElementById('login-overlay').style.display='none';
+                    } else {
+                        // Fail: Code used by another device
+                        errorMsg.innerText = "ئەم کۆدە لەسەر ئامێرێکی تر بەکارهاتووە!";
+                        errorMsg.classList.remove('hidden');
+                    }
+                } else {
+                    // Success: New code, claim it
+                    await setDoc(codeRef, { 
+                        deviceId: currentDeviceId,
+                        usedAt: new Date().toISOString()
+                    });
+                    localStorage.setItem('exam_app_code', inputCode);
+                    document.getElementById('login-overlay').style.display='none';
+                }
+            } catch (err) {
+                console.error("Verification failed:", err);
+                errorMsg.innerText = "کێشە لە پەیوەندیکردن بە سێرڤەر";
+                errorMsg.classList.remove('hidden');
+            } finally {
+                loading.classList.add('hidden');
+            }
+        }
+
         // --- MATH BUTTONS ---
         const mathButtons = [
             { label: '$\\sqrt{x}$', code: 'sqrt' }, { label: '$\\frac{a}{b}$', code: 'frac' }, { label: '$x^2$', code: 'pow' }, { label: '$e^x$', code: 'exp' },
@@ -382,8 +475,7 @@
             { label: '$\\Delta$', code: 'triangle' }, { label: '$\\int$', code: 'int' }, { label: '$\\sum$', code: 'sum' }, { label: '$\\lim$', code: 'lim' },
             { label: '$\\log$', code: 'log' }, { label: '$\\ln$', code: 'ln' }, { label: '$\\infty$', code: 'infty' },
             { label: '$\\in$', code: 'in' }, { label: '$\\notin$', code: 'notin' }, { label: '$\\cup$', code: 'cup' }, { label: '$\\cap$', code: 'cap' },
-            { label: '$\\subset$', code: 'subset' }, { label: '$\\emptyset$', code: 'empty' },
-            { label: 'Matrix', code: 'matrix' },
+            { label: '$\\subset$', code: 'subset' }, { label: '$\\emptyset$', code: 'empty' }, { label: 'Matrix', code: 'matrix' },
         ];
 
         function populateMathToolbars() {
@@ -411,9 +503,7 @@
         let currentMode = { desktop: 'question', mobile: 'question' };
 
         window.onload = function() {
-            loadData();
-            if (localStorage.getItem('exam_app_code') >= 112201) document.getElementById('login-overlay').style.display = 'none';
-            populateMathToolbars();
+            // Setup sorting
             new Sortable(document.getElementById('questions_mini_list'), {
                 animation: 150, handle: '.drag-handle', ghostClass: 'sortable-ghost', dragClass: 'sortable-drag',
                 onEnd: function (evt) {
@@ -423,6 +513,17 @@
                     saveData(); renderPaper();
                 }
             });
+            populateMathToolbars();
+            
+            // Check login status logic (replaces simple localStorage check)
+            // If already logged in locally, we still respect that for offline UX, 
+            // but ideally we should re-verify. For simplicity in this "One File" app, we trust local storage if present.
+            if (localStorage.getItem('exam_app_code')) {
+                document.getElementById('login-overlay').style.display = 'none';
+                loadData();
+            } else {
+                loadData(); // Load data but keep overlay
+            }
         };
 
         function insertMath(type, inputId) {
@@ -433,13 +534,14 @@
                 case 'exp': text = "$e^x$"; break; case 'times': text = "$\\times$"; break; case 'div': text = "$\\div$"; break;
                 case 'pm': text = "$\\pm$"; break; case 'approx': text = "$\\approx$"; break; case 'neq': text = "$\\neq$"; break;
                 case 'leq': text = "$\\le$"; break; case 'geq': text = "$\\ge$"; break; case 'theta': text = "$\\theta$"; break;
-                case 'alpha': text = "$\\alpha$"; break; case 'beta': text = "$\\beta$"; break; case 'pi': text = "$\\pi$"; break;
-                case 'triangle': text = "$\\Delta$"; break; case 'sin': text = "$\\sin(x)$"; break; case 'cos': text = "$\\cos(x)$"; break;
-                case 'tan': text = "$\\tan(x)$"; break; case 'log': text = "$\\log_{a}(b)$"; break; case 'ln': text = "$\\ln(x)$"; break;
-                case 'lim': text = "$\\lim_{x \\to 0}$"; break; case 'int': text = "$\\int_{a}^{b}$"; break; case 'sum': text = "$\\sum_{i=0}^{n}$"; break;
-                case 'infty': text = "$\\infty$"; break; case 'in': text = "$\\in$"; break; case 'notin': text = "$\\notin$"; break;
-                case 'cup': text = "$\\cup$"; break; case 'cap': text = "$\\cap$"; break; case 'subset': text = "$\\subset$"; break;
-                case 'empty': text = "$\\emptyset$"; break; case 'matrix': text = "$\\begin{pmatrix} a & b \\\\ c & d \\end{pmatrix}$"; break;
+                case 'alpha': text = "$\\alpha$"; break; case 'beta': text = "$\\beta$"; break; case 'lambda': text = "$\\lambda$"; break;
+                case 'pi': text = "$\\pi$"; break; case 'triangle': text = "$\\Delta$"; break; case 'sin': text = "$\\sin(x)$"; break;
+                case 'cos': text = "$\\cos(x)$"; break; case 'tan': text = "$\\tan(x)$"; break; case 'log': text = "$\\log_{a}(b)$"; break;
+                case 'ln': text = "$\\ln(x)$"; break; case 'lim': text = "$\\lim_{x \\to 0}$"; break; case 'int': text = "$\\int_{a}^{b}$"; break;
+                case 'sum': text = "$\\sum_{i=0}^{n}$"; break; case 'infty': text = "$\\infty$"; break; case 'in': text = "$\\in$"; break;
+                case 'notin': text = "$\\notin$"; break; case 'cup': text = "$\\cup$"; break; case 'cap': text = "$\\cap$"; break;
+                case 'subset': text = "$\\subset$"; break; case 'empty': text = "$\\emptyset$"; break; case 'angle': text = "$\\angle$"; break;
+                case 'perp': text = "$\\perp$"; break; case 'vec': text = "$\\vec{v}$"; break; case 'matrix': text = "$\\begin{pmatrix} a & b \\\\ c & d \\end{pmatrix}$"; break;
             }
             const start = input.selectionStart; const end = input.selectionEnd;
             input.value = input.value.substring(0, start) + text + input.value.substring(end);
@@ -480,26 +582,18 @@
                 let imageData = null;
 
                 if(!text) return alert("تکایە پرسیار بنووسە");
-                
                 if (fileInput.files.length > 0) {
-                    try { imageData = await toBase64(fileInput.files[0]); } 
-                    catch(e) { alert("هەڵە لە خوێندنەوەی وێنە"); return; }
+                    try { imageData = await toBase64(fileInput.files[0]); } catch(e) { alert("هەڵە لە خوێندنەوەی وێنە"); return; }
                 }
-
                 if (type === 'mcq') {
                     const optText = document.getElementById('q_mcq_opts').value.trim();
                     if(optText) options = optText.split('\n').filter(l=>l.trim());
                 }
-                
                 addItem({ type: type === 'mcq' ? 'mcq' : 'text', text, score, options, isSub, image: imageData, spacing: spacing });
                 
-                // Clear
-                document.getElementById('q_text').value = ''; 
-                document.getElementById('q_mcq_opts').value = '';
-                document.getElementById('q_is_sub').checked = false;
-                document.getElementById('q_image').value = '';
-                document.getElementById('q_spacing').value = 0;
-                document.getElementById('desk-spacing-val').innerText = '0mm';
+                document.getElementById('q_text').value = ''; document.getElementById('q_mcq_opts').value = '';
+                document.getElementById('q_is_sub').checked = false; document.getElementById('q_image').value = '';
+                document.getElementById('q_spacing').value = 0; document.getElementById('desk-spacing-val').innerText = '0mm';
             } else {
                 const text = document.getElementById('t_text').value.trim();
                 if(!text) return alert("سەردێڕ بنووسە");
@@ -519,25 +613,18 @@
                 let imageData = null;
 
                 if(!text) return alert("پرسیار بنووسە");
-
                 if (fileInput.files.length > 0) {
-                    try { imageData = await toBase64(fileInput.files[0]); } 
-                    catch(e) { alert("هەڵە لە خوێندنەوەی وێنە"); return; }
+                    try { imageData = await toBase64(fileInput.files[0]); } catch(e) { alert("هەڵە لە خوێندنەوەی وێنە"); return; }
                 }
-
                 if (type === 'mcq') {
                     const optText = document.getElementById('mob_q_mcq_opts').value.trim();
                     if(optText) options = optText.split('\n').filter(l=>l.trim());
                 }
                 addItem({ type: type === 'mcq' ? 'mcq' : 'text', text, score, options, isSub, image: imageData, spacing: spacing });
                 
-                // Clear
-                document.getElementById('mob_q_text').value = ''; 
-                document.getElementById('mob_q_mcq_opts').value = '';
-                document.getElementById('mob_q_is_sub').checked = false;
-                document.getElementById('mob_q_image').value = '';
-                document.getElementById('mob_q_spacing').value = 0;
-                document.getElementById('mob-spacing-val').innerText = '0mm';
+                document.getElementById('mob_q_text').value = ''; document.getElementById('mob_q_mcq_opts').value = '';
+                document.getElementById('mob_q_is_sub').checked = false; document.getElementById('mob_q_image').value = '';
+                document.getElementById('mob_q_spacing').value = 0; document.getElementById('mob-spacing-val').innerText = '0mm';
             } else {
                 const text = document.getElementById('mob_t_text').value.trim();
                 if(!text) return alert("سەردێڕ بنووسە");
@@ -559,10 +646,7 @@
                     if (item.isSub) { numberHtml = `<div class="q-sub-number">${String.fromCharCode(subChar++)}</div>`; marginLeft = '20px'; }
                     else { qCount++; subChar = 65; numberHtml = `<div class="q-number">${qCount}</div>`; }
                     
-                    // Spacing styling
                     const spacingStyle = item.spacing ? `padding-bottom: ${item.spacing}mm;` : '';
-                    
-                    // Image HTML
                     const imgHtml = item.image ? `<img src="${item.image}" class="q-image">` : '';
 
                     html += `<div class="mb-4 break-inside-avoid" style="margin-right: ${marginLeft}; ${spacingStyle}">
@@ -619,8 +703,7 @@
                     type: document.getElementById('h_type').value, year: document.getElementById('h_year').value
                 }
             };
-            try { localStorage.setItem('exam_data_v11', JSON.stringify(data)); }
-            catch(e) { alert("هۆشداری: قەبارەی وێنەکان زۆرە، ڕەنگە هەمووی پاشەکەوت نەبێت."); }
+            try { localStorage.setItem('exam_data_v11', JSON.stringify(data)); } catch(e) {}
         }
         function loadData() {
             const saved = localStorage.getItem('exam_data_v11');
@@ -673,11 +756,6 @@
             setTimeout(() => { html2pdf().set(opt).from(clone).save().then(() => { document.body.removeChild(container); document.getElementById('pdf-loading').classList.add('hidden'); document.getElementById('pdf-loading').classList.remove('flex'); }); }, 500);
         }
         function clearAll() { if(confirm('دڵنیایت؟')) { items=[]; saveData(); renderPaper(); renderMiniList(); } }
-        function checkPassword() {
-            const c = parseInt(document.getElementById('password-input').value);
-            if(c>=112201 && c<999999) { localStorage.setItem('exam_app_code', c); document.getElementById('login-overlay').style.display='none'; } 
-            else { document.getElementById('login-error').classList.remove('hidden'); }
-        }
     </script>
 </body>
 </html>
