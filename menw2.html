@@ -3,7 +3,7 @@
 <head>
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0, maximum-scale=1.0, user-scalable=no">
-    <title>دروستکەری پرسیار - بژاردەی زیرەک (Flex)</title>
+    <title>دروستکەری پرسیار - وێنە + بۆشایی</title>
     
     <!-- Tailwind CSS -->
     <script src="https://cdn.tailwindcss.com"></script>
@@ -23,7 +23,7 @@
     </script>
     <script id="MathJax-script" async src="https://cdn.jsdelivr.net/npm/mathjax@3/es5/tex-mml-chtml.js"></script>
 
-    <!-- Google Fonts -->
+    <!-- FontAwesome & Fonts -->
     <link href="https://fonts.googleapis.com/css2?family=Nrt+Reg&family=Vazirmatn:wght@300;400;700;900&display=swap" rel="stylesheet">
     <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.4.0/css/all.min.css">
 
@@ -69,10 +69,14 @@
             background-color: #f3f4f6; -webkit-print-color-adjust: exact; print-color-adjust: exact;
         }
 
+        /* Question Image */
+        .q-image {
+            max-width: 100%; max-height: 200px; display: block; margin: 10px auto; border: 1px dashed #ccc; padding: 2px;
+        }
+
         input, textarea, select { font-size: 16px !important; touch-action: manipulation; }
         mjx-container { font-size: 110% !important; direction: ltr !important; display: inline-block !important; }
         
-        /* SCROLLABLE MATH TOOLBAR */
         .math-toolbar {
             display: flex; gap: 0.4rem; overflow-x: auto; padding-bottom: 0.5rem; margin-bottom: 0.5rem;
             -ms-overflow-style: none; scrollbar-width: none; background: #f8fafc; padding: 8px; border-radius: 8px; border: 1px solid #e2e8f0;
@@ -95,6 +99,10 @@
         .sortable-ghost { opacity: 0.4; background-color: #e2e8f0; }
         .sortable-drag { cursor: grabbing; background-color: white; box-shadow: 0 10px 15px -3px rgba(0, 0, 0, 0.1); }
         .drag-handle { cursor: grab; padding: 10px; color: #9ca3af; touch-action: none; }
+
+        /* Range Slider Styling */
+        input[type=range] { -webkit-appearance: none; width: 100%; height: 6px; background: #d1d5db; border-radius: 5px; outline: none; }
+        input[type=range]::-webkit-slider-thumb { -webkit-appearance: none; appearance: none; width: 18px; height: 18px; border-radius: 50%; background: #2563eb; cursor: pointer; border: 2px solid white; box-shadow: 0 1px 3px rgba(0,0,0,0.3); }
 
         @media print {
             @page { size: A4; margin: 0; }
@@ -155,6 +163,7 @@
                     <input type="text" id="h_dir" value="بەڕێوەبەرایەتی پەروەردە" class="border p-2 rounded" oninput="updatePaper()">
                     <input type="text" id="h_gov" value="حکومەتی هەرێم" class="border p-2 rounded" oninput="updatePaper()">
                 </div>
+                <!-- Other Inputs (Subject, Class, etc.) -->
                 <div class="grid grid-cols-2 gap-3">
                     <input type="text" id="h_subject" placeholder="بابەت" class="border p-2 rounded" oninput="updatePaper()">
                     <input type="text" id="h_class" placeholder="پۆل" class="border p-2 rounded" oninput="updatePaper()">
@@ -190,6 +199,21 @@
                 <div id="mob-math-toolbar-q" class="math-toolbar"></div>
                 <textarea id="mob_q_text" rows="3" class="w-full p-3 border-2 border-blue-200 rounded-xl mb-4 text-left font-sans" dir="ltr" placeholder="دەقی پرسیار..."></textarea>
                 
+                <!-- NEW: Image Upload Mobile -->
+                <div class="mb-4 bg-gray-50 p-2 rounded border border-gray-200">
+                    <label class="block text-xs font-bold text-gray-600 mb-1"><i class="fa-regular fa-image"></i> وێنە (ئەگەر هەبێت):</label>
+                    <input type="file" id="mob_q_image" accept="image/*" class="block w-full text-sm text-gray-500 file:mr-4 file:py-2 file:px-4 file:rounded-full file:border-0 file:text-sm file:font-semibold file:bg-blue-50 file:text-blue-700 hover:file:bg-blue-100">
+                </div>
+
+                <!-- NEW: Spacing Mobile -->
+                <div class="mb-4 bg-gray-50 p-2 rounded border border-gray-200">
+                    <label class="block text-xs font-bold text-gray-600 mb-1 flex justify-between">
+                        <span>بۆشایی خوارەوە</span>
+                        <span id="mob-spacing-val" class="text-blue-600">0mm</span>
+                    </label>
+                    <input type="range" id="mob_q_spacing" min="0" max="100" value="0" oninput="document.getElementById('mob-spacing-val').innerText = this.value + 'mm'">
+                </div>
+
                 <div class="flex items-center gap-2 mb-4 bg-orange-50 p-2 rounded border border-orange-100">
                     <input type="checkbox" id="mob_q_is_sub" class="w-5 h-5 accent-orange-600">
                     <label for="mob_q_is_sub" class="text-sm font-bold text-orange-800">لقی پرسیارە (A, B, C)</label>
@@ -203,7 +227,6 @@
                     </select>
                 </div>
                 <div id="mob_mcq_options_container" class="hidden bg-gray-50 p-3 rounded-xl border mb-4">
-                    <label class="text-xs font-bold mb-1 block">بژاردەکان:</label>
                     <div id="mob-math-toolbar-opt" class="math-toolbar"></div>
                     <textarea id="mob_q_mcq_opts" rows="4" class="w-full p-2 border rounded-lg text-left font-sans" dir="ltr" placeholder="A) ..."></textarea>
                 </div>
@@ -248,6 +271,21 @@
                     <div id="desk-math-toolbar-q" class="math-toolbar"></div>
                     <textarea id="q_text" rows="3" class="w-full p-2 border rounded mb-2 text-left font-sans" dir="ltr" placeholder="دەقی پرسیار..."></textarea>
                     
+                    <!-- NEW: Image Upload Desktop -->
+                    <div class="mb-2 bg-white p-2 rounded border border-gray-200">
+                        <label class="block text-xs font-bold text-gray-600 mb-1"><i class="fa-regular fa-image"></i> وێنە (ئەگەر هەبێت):</label>
+                        <input type="file" id="q_image" accept="image/*" class="block w-full text-xs text-gray-500 file:mr-2 file:py-1 file:px-2 file:rounded-full file:border-0 file:text-xs file:font-semibold file:bg-blue-50 file:text-blue-700 hover:file:bg-blue-100">
+                    </div>
+
+                    <!-- NEW: Spacing Desktop -->
+                    <div class="mb-2 bg-white p-2 rounded border border-gray-200">
+                        <label class="block text-xs font-bold text-gray-600 mb-1 flex justify-between">
+                            <span>بۆشایی خوارەوە (Spacing)</span>
+                            <span id="desk-spacing-val" class="text-blue-600">0mm</span>
+                        </label>
+                        <input type="range" id="q_spacing" min="0" max="100" value="0" oninput="document.getElementById('desk-spacing-val').innerText = this.value + 'mm'">
+                    </div>
+
                     <div class="flex items-center gap-2 mb-2 bg-orange-50 p-2 rounded border border-orange-100">
                         <input type="checkbox" id="q_is_sub" class="w-4 h-4 accent-orange-600">
                         <label for="q_is_sub" class="text-sm font-bold text-orange-800 cursor-pointer select-none">لقی پرسیارە (A, B, C)</label>
@@ -315,7 +353,7 @@
                         </div>
                     </div>
                 </div>
-                <div id="paper_questions" class="space-y-4">
+                <div id="paper_questions" class="space-y-2">
                     <div class="text-center text-gray-400 py-10">پرسیارەکان لێرە دەردەکەون...</div>
                 </div>
                 <div class="mt-20 pt-4 flex justify-between items-end">
@@ -335,45 +373,16 @@
     </div>
 
     <script>
-        // --- ALL MATH BUTTONS DEFINITION ---
+        // --- MATH BUTTONS ---
         const mathButtons = [
-            { label: '$\\sqrt{x}$', code: 'sqrt' },
-            { label: '$\\frac{a}{b}$', code: 'frac' },
-            { label: '$x^2$', code: 'pow' },
-            { label: '$e^x$', code: 'exp' },
-            { label: '$\\times$', code: 'times' },
-            { label: '$\\div$', code: 'div' },
-            { label: '$\\pm$', code: 'pm' },
-            // Relations
-            { label: '$\\approx$', code: 'approx' },
-            { label: '$\\neq$', code: 'neq' },
-            { label: '$\\le$', code: 'leq' },
-            { label: '$\\ge$', code: 'geq' },
-            // Greek
-            { label: '$\\theta$', code: 'theta' },
-            { label: '$\\pi$', code: 'pi' },
-            { label: '$\\alpha$', code: 'alpha' },
-            { label: '$\\beta$', code: 'beta' },
-            { label: '$\\Delta$', code: 'triangle' },
-            { label: '$\\lambda$', code: 'lambda' },
-            // Calculus / Log
-            { label: '$\\int$', code: 'int' },
-            { label: '$\\sum$', code: 'sum' },
-            { label: '$\\lim$', code: 'lim' },
-            { label: '$\\log$', code: 'log' },
-            { label: '$\\ln$', code: 'ln' },
-            { label: '$\\infty$', code: 'infty' },
-            // Sets / Geometry
-            { label: '$\\in$', code: 'in' },
-            { label: '$\\notin$', code: 'notin' },
-            { label: '$\\cup$', code: 'cup' },
-            { label: '$\\cap$', code: 'cap' },
-            { label: '$\\subset$', code: 'subset' },
-            { label: '$\\emptyset$', code: 'empty' },
-            { label: '$\\angle$', code: 'angle' },
-            { label: '$\\perp$', code: 'perp' },
-            { label: '$\\vec{v}$', code: 'vec' },
-            // Matrix
+            { label: '$\\sqrt{x}$', code: 'sqrt' }, { label: '$\\frac{a}{b}$', code: 'frac' }, { label: '$x^2$', code: 'pow' }, { label: '$e^x$', code: 'exp' },
+            { label: '$\\times$', code: 'times' }, { label: '$\\div$', code: 'div' }, { label: '$\\pm$', code: 'pm' },
+            { label: '$\\approx$', code: 'approx' }, { label: '$\\neq$', code: 'neq' }, { label: '$\\le$', code: 'leq' }, { label: '$\\ge$', code: 'geq' },
+            { label: '$\\theta$', code: 'theta' }, { label: '$\\pi$', code: 'pi' }, { label: '$\\alpha$', code: 'alpha' }, { label: '$\\beta$', code: 'beta' },
+            { label: '$\\Delta$', code: 'triangle' }, { label: '$\\int$', code: 'int' }, { label: '$\\sum$', code: 'sum' }, { label: '$\\lim$', code: 'lim' },
+            { label: '$\\log$', code: 'log' }, { label: '$\\ln$', code: 'ln' }, { label: '$\\infty$', code: 'infty' },
+            { label: '$\\in$', code: 'in' }, { label: '$\\notin$', code: 'notin' }, { label: '$\\cup$', code: 'cup' }, { label: '$\\cap$', code: 'cap' },
+            { label: '$\\subset$', code: 'subset' }, { label: '$\\emptyset$', code: 'empty' },
             { label: 'Matrix', code: 'matrix' },
         ];
 
@@ -390,12 +399,8 @@
 
                 mathButtons.forEach(btn => {
                     const button = document.createElement('button');
-                    button.className = 'math-btn';
-                    button.innerHTML = btn.label;
-                    button.onclick = (e) => {
-                        e.preventDefault(); 
-                        insertMath(btn.code, targetInputId);
-                    };
+                    button.className = 'math-btn'; button.innerHTML = btn.label;
+                    button.onclick = (e) => { e.preventDefault(); insertMath(btn.code, targetInputId); };
                     container.appendChild(button);
                 });
             });
@@ -409,18 +414,13 @@
             loadData();
             if (localStorage.getItem('exam_app_code') >= 112201) document.getElementById('login-overlay').style.display = 'none';
             populateMathToolbars();
-            
             new Sortable(document.getElementById('questions_mini_list'), {
-                animation: 150,
-                handle: '.drag-handle',
-                ghostClass: 'sortable-ghost',
-                dragClass: 'sortable-drag',
+                animation: 150, handle: '.drag-handle', ghostClass: 'sortable-ghost', dragClass: 'sortable-drag',
                 onEnd: function (evt) {
                     const newOrderIds = Array.from(evt.to.children).map(el => parseInt(el.getAttribute('data-id')));
                     const itemMap = new Map(items.map(i => [i.id, i]));
                     items = newOrderIds.map(id => itemMap.get(id));
-                    saveData();
-                    renderPaper();
+                    saveData(); renderPaper();
                 }
             });
         };
@@ -429,47 +429,31 @@
             const input = document.getElementById(inputId);
             let text = "";
             switch(type) {
-                case 'sqrt': text = "$\\sqrt{x}$"; break;
-                case 'frac': text = "$\\frac{a}{b}$"; break;
-                case 'pow': text = "$x^2$"; break;
-                case 'exp': text = "$e^x$"; break;
-                case 'times': text = "$\\times$"; break;
-                case 'div': text = "$\\div$"; break;
-                case 'pm': text = "$\\pm$"; break;
-                case 'approx': text = "$\\approx$"; break;
-                case 'neq': text = "$\\neq$"; break;
-                case 'leq': text = "$\\le$"; break;
-                case 'geq': text = "$\\ge$"; break;
-                case 'theta': text = "$\\theta$"; break;
-                case 'alpha': text = "$\\alpha$"; break;
-                case 'beta': text = "$\\beta$"; break;
-                case 'lambda': text = "$\\lambda$"; break;
-                case 'pi': text = "$\\pi$"; break;
-                case 'triangle': text = "$\\Delta$"; break;
-                case 'sin': text = "$\\sin(x)$"; break;
-                case 'cos': text = "$\\cos(x)$"; break;
-                case 'tan': text = "$\\tan(x)$"; break;
-                case 'log': text = "$\\log_{a}(b)$"; break;
-                case 'ln': text = "$\\ln(x)$"; break;
-                case 'lim': text = "$\\lim_{x \\to 0}$"; break;
-                case 'int': text = "$\\int_{a}^{b}$"; break;
-                case 'sum': text = "$\\sum_{i=0}^{n}$"; break;
-                case 'infty': text = "$\\infty$"; break;
-                case 'in': text = "$\\in$"; break;
-                case 'notin': text = "$\\notin$"; break;
-                case 'cup': text = "$\\cup$"; break;
-                case 'cap': text = "$\\cap$"; break;
-                case 'subset': text = "$\\subset$"; break;
-                case 'empty': text = "$\\emptyset$"; break;
-                case 'angle': text = "$\\angle$"; break;
-                case 'perp': text = "$\\perp$"; break;
-                case 'vec': text = "$\\vec{v}$"; break;
-                case 'matrix': text = "$\\begin{pmatrix} a & b \\\\ c & d \\end{pmatrix}$"; break;
+                case 'sqrt': text = "$\\sqrt{x}$"; break; case 'frac': text = "$\\frac{a}{b}$"; break; case 'pow': text = "$x^2$"; break;
+                case 'exp': text = "$e^x$"; break; case 'times': text = "$\\times$"; break; case 'div': text = "$\\div$"; break;
+                case 'pm': text = "$\\pm$"; break; case 'approx': text = "$\\approx$"; break; case 'neq': text = "$\\neq$"; break;
+                case 'leq': text = "$\\le$"; break; case 'geq': text = "$\\ge$"; break; case 'theta': text = "$\\theta$"; break;
+                case 'alpha': text = "$\\alpha$"; break; case 'beta': text = "$\\beta$"; break; case 'pi': text = "$\\pi$"; break;
+                case 'triangle': text = "$\\Delta$"; break; case 'sin': text = "$\\sin(x)$"; break; case 'cos': text = "$\\cos(x)$"; break;
+                case 'tan': text = "$\\tan(x)$"; break; case 'log': text = "$\\log_{a}(b)$"; break; case 'ln': text = "$\\ln(x)$"; break;
+                case 'lim': text = "$\\lim_{x \\to 0}$"; break; case 'int': text = "$\\int_{a}^{b}$"; break; case 'sum': text = "$\\sum_{i=0}^{n}$"; break;
+                case 'infty': text = "$\\infty$"; break; case 'in': text = "$\\in$"; break; case 'notin': text = "$\\notin$"; break;
+                case 'cup': text = "$\\cup$"; break; case 'cap': text = "$\\cap$"; break; case 'subset': text = "$\\subset$"; break;
+                case 'empty': text = "$\\emptyset$"; break; case 'matrix': text = "$\\begin{pmatrix} a & b \\\\ c & d \\end{pmatrix}$"; break;
             }
-            const start = input.selectionStart;
-            const end = input.selectionEnd;
+            const start = input.selectionStart; const end = input.selectionEnd;
             input.value = input.value.substring(0, start) + text + input.value.substring(end);
             input.focus();
+        }
+
+        // --- IMAGE HANDLING ---
+        function toBase64(file) {
+            return new Promise((resolve, reject) => {
+                const reader = new FileReader();
+                reader.readAsDataURL(file);
+                reader.onload = () => resolve(reader.result);
+                reader.onerror = error => reject(error);
+            });
         }
 
         function switchMode(mode, view) {
@@ -484,46 +468,79 @@
 
         function addItem(data) { items.push({ id: Date.now(), ...data }); saveData(); renderPaper(); renderMiniList(); }
 
-        function addItemDesktop() {
+        async function addItemDesktop() {
             if (currentMode.desktop === 'question') {
                 const text = document.getElementById('q_text').value.trim();
                 const score = document.getElementById('q_score').value;
                 const type = document.getElementById('q_type').value;
                 const isSub = document.getElementById('q_is_sub').checked;
+                const spacing = document.getElementById('q_spacing').value;
+                const fileInput = document.getElementById('q_image');
                 let options = [];
+                let imageData = null;
+
                 if(!text) return alert("تکایە پرسیار بنووسە");
+                
+                if (fileInput.files.length > 0) {
+                    try { imageData = await toBase64(fileInput.files[0]); } 
+                    catch(e) { alert("هەڵە لە خوێندنەوەی وێنە"); return; }
+                }
+
                 if (type === 'mcq') {
                     const optText = document.getElementById('q_mcq_opts').value.trim();
                     if(optText) options = optText.split('\n').filter(l=>l.trim());
                 }
-                addItem({ type: type === 'mcq' ? 'mcq' : 'text', text, score, options, isSub });
-                document.getElementById('q_text').value = ''; document.getElementById('q_mcq_opts').value = '';
+                
+                addItem({ type: type === 'mcq' ? 'mcq' : 'text', text, score, options, isSub, image: imageData, spacing: spacing });
+                
+                // Clear
+                document.getElementById('q_text').value = ''; 
+                document.getElementById('q_mcq_opts').value = '';
                 document.getElementById('q_is_sub').checked = false;
+                document.getElementById('q_image').value = '';
+                document.getElementById('q_spacing').value = 0;
+                document.getElementById('desk-spacing-val').innerText = '0mm';
             } else {
                 const text = document.getElementById('t_text').value.trim();
-                if(!text) return alert("تکایە سەردێڕ بنووسە");
+                if(!text) return alert("سەردێڕ بنووسە");
                 addItem({ type: 'title', text }); document.getElementById('t_text').value = '';
             }
         }
 
-        function addItemMobile() {
+        async function addItemMobile() {
             if (currentMode.mobile === 'question') {
                 const text = document.getElementById('mob_q_text').value.trim();
                 const score = document.getElementById('mob_q_score').value;
                 const type = document.getElementById('mob_q_type').value;
                 const isSub = document.getElementById('mob_q_is_sub').checked;
+                const spacing = document.getElementById('mob_q_spacing').value;
+                const fileInput = document.getElementById('mob_q_image');
                 let options = [];
-                if(!text) return alert("تکایە پرسیار بنووسە");
+                let imageData = null;
+
+                if(!text) return alert("پرسیار بنووسە");
+
+                if (fileInput.files.length > 0) {
+                    try { imageData = await toBase64(fileInput.files[0]); } 
+                    catch(e) { alert("هەڵە لە خوێندنەوەی وێنە"); return; }
+                }
+
                 if (type === 'mcq') {
                     const optText = document.getElementById('mob_q_mcq_opts').value.trim();
                     if(optText) options = optText.split('\n').filter(l=>l.trim());
                 }
-                addItem({ type: type === 'mcq' ? 'mcq' : 'text', text, score, options, isSub });
-                document.getElementById('mob_q_text').value = ''; document.getElementById('mob_q_mcq_opts').value = '';
+                addItem({ type: type === 'mcq' ? 'mcq' : 'text', text, score, options, isSub, image: imageData, spacing: spacing });
+                
+                // Clear
+                document.getElementById('mob_q_text').value = ''; 
+                document.getElementById('mob_q_mcq_opts').value = '';
                 document.getElementById('mob_q_is_sub').checked = false;
+                document.getElementById('mob_q_image').value = '';
+                document.getElementById('mob_q_spacing').value = 0;
+                document.getElementById('mob-spacing-val').innerText = '0mm';
             } else {
                 const text = document.getElementById('mob_t_text').value.trim();
-                if(!text) return alert("تکایە سەردێڕ بنووسە");
+                if(!text) return alert("سەردێڕ بنووسە");
                 addItem({ type: 'title', text }); document.getElementById('mob_t_text').value = '';
             }
             closeMobileAdd();
@@ -531,36 +548,34 @@
 
         function renderPaper() {
             const container = document.getElementById('paper_questions');
-            if(items.length === 0) {
-                container.innerHTML = '<div class="text-center text-gray-400 py-10">پرسیارەکان لێرە دەردەکەون...</div>';
-                return;
-            }
-            let html = '';
-            let qCount = 0;
-            let subChar = 65; 
-
+            if(items.length === 0) { container.innerHTML = '<div class="text-center text-gray-400 py-10">پرسیارەکان لێرە دەردەکەون...</div>'; return; }
+            let html = ''; let qCount = 0; let subChar = 65; 
+            
             items.forEach((item) => {
                 if (item.type === 'title') {
                     html += `<div class="section-title break-inside-avoid">${item.text}</div>`;
                 } else {
-                    let numberHtml = '';
-                    let marginLeft = '0px';
-                    if (item.isSub) {
-                        numberHtml = `<div class="q-sub-number">${String.fromCharCode(subChar++)}</div>`;
-                        marginLeft = '20px';
-                    } else {
-                        qCount++;
-                        subChar = 65; 
-                        numberHtml = `<div class="q-number">${qCount}</div>`;
-                    }
-                    html += `<div class="mb-4 break-inside-avoid" style="margin-right: ${marginLeft}"><div class="flex items-start gap-2">
-                        ${numberHtml}
-                        <div class="flex-1"><div class="flex justify-between items-baseline mb-2">
-                            <h3 class="font-bold text-lg leading-relaxed text-justify pl-2" style="font-family: 'Times New Roman', serif;">${item.text}</h3>
-                            ${item.isSub ? '' : `<span class="q-score">(${item.score} نمرە)</span>`}
-                        </div>`;
+                    let numberHtml = ''; let marginLeft = '0px';
+                    if (item.isSub) { numberHtml = `<div class="q-sub-number">${String.fromCharCode(subChar++)}</div>`; marginLeft = '20px'; }
+                    else { qCount++; subChar = 65; numberHtml = `<div class="q-number">${qCount}</div>`; }
+                    
+                    // Spacing styling
+                    const spacingStyle = item.spacing ? `padding-bottom: ${item.spacing}mm;` : '';
+                    
+                    // Image HTML
+                    const imgHtml = item.image ? `<img src="${item.image}" class="q-image">` : '';
+
+                    html += `<div class="mb-4 break-inside-avoid" style="margin-right: ${marginLeft}; ${spacingStyle}">
+                        <div class="flex items-start gap-2">
+                            ${numberHtml}
+                            <div class="flex-1">
+                                <div class="flex justify-between items-baseline mb-2">
+                                    <h3 class="font-bold text-lg leading-relaxed text-justify pl-2" style="font-family: 'Times New Roman', serif;">${item.text}</h3>
+                                    ${item.isSub ? '' : `<span class="q-score">(${item.score} نمرە)</span>`}
+                                </div>
+                                ${imgHtml}
+                                `;
                     if(item.type === 'mcq') {
-                        // Use Flex Wrap for responsive options line
                         html += `<div class="flex flex-wrap gap-x-8 gap-y-2 mt-1 pr-4">`;
                         item.options.forEach((opt, idx) => {
                             html += `<div class="flex items-center gap-2 min-w-fit"><div class="w-6 h-6 border border-black rounded-full flex items-center justify-center text-xs font-bold bg-white shrink-0">${String.fromCharCode(65+idx)}</div><span class="text-base" style="font-family: 'Times New Roman', serif;">${opt}</span></div>`;
@@ -579,26 +594,15 @@
         function renderMiniList() {
             const list = document.getElementById('questions_mini_list');
             list.innerHTML = items.map((item) => {
-                let label = '';
-                let style = 'bg-gray-50 border-gray-200';
-                if (item.type === 'title') {
-                    label = `<span class="bg-black text-white text-xs px-1 rounded ml-1">سەردێڕ</span> ${item.text}`;
-                    style = 'bg-gray-200 border-gray-400';
-                } else {
-                    if (item.isSub) {
-                        label = `<span class="bg-orange-100 text-orange-800 text-xs px-1 rounded ml-1 border border-orange-200">A/B</span> ${item.text}`;
-                        style = 'bg-white border-l-4 border-l-orange-400'; 
-                    } else {
-                        label = `<span class="bg-blue-100 text-blue-800 text-xs px-1 rounded ml-1">پرسیار</span> ${item.text}`;
-                    }
-                }
+                let label = item.type === 'title' ? `<span class="bg-black text-white text-xs px-1 rounded ml-1">سەردێڕ</span>` : `<span class="bg-blue-100 text-blue-800 text-xs px-1 rounded ml-1">پرسیار</span>`;
+                let imgIcon = item.image ? `<i class="fa-regular fa-image text-gray-500 mx-1"></i>` : '';
                 return `
-                <div class="flex justify-between items-center ${style} p-3 rounded border mb-1 group" data-id="${item.id}">
+                <div class="flex justify-between items-center bg-gray-50 p-2 rounded border mb-1 group" data-id="${item.id}">
                     <div class="flex items-center gap-2 overflow-hidden">
-                        <i class="fa-solid fa-bars drag-handle text-lg"></i>
-                        <span class="truncate text-xs font-bold font-sans" dir="ltr">${label}</span>
+                        <i class="fa-solid fa-bars drag-handle text-gray-400"></i>
+                        <span class="truncate text-xs font-bold font-sans" dir="ltr">${label}${imgIcon} ${item.text.substring(0,20)}...</span>
                     </div>
-                    <button onclick="deleteItem(${item.id})" class="text-red-500 hover:bg-red-100 p-2 rounded"><i class="fa-solid fa-trash"></i></button>
+                    <button onclick="deleteItem(${item.id})" class="text-red-500 hover:bg-red-100 p-1 rounded"><i class="fa-solid fa-trash"></i></button>
                 </div>`;
             }).join('');
         }
@@ -615,10 +619,11 @@
                     type: document.getElementById('h_type').value, year: document.getElementById('h_year').value
                 }
             };
-            localStorage.setItem('exam_data_v10', JSON.stringify(data));
+            try { localStorage.setItem('exam_data_v11', JSON.stringify(data)); }
+            catch(e) { alert("هۆشداری: قەبارەی وێنەکان زۆرە، ڕەنگە هەمووی پاشەکەوت نەبێت."); }
         }
         function loadData() {
-            const saved = localStorage.getItem('exam_data_v10');
+            const saved = localStorage.getItem('exam_data_v11');
             if(saved) {
                 const data = JSON.parse(saved); items = data.items || [];
                 if(data.header) {
