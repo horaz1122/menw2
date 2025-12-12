@@ -3,7 +3,7 @@
 <head>
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0, maximum-scale=1.0, user-scalable=no">
-    <title>دروستکەری پرسیاری تاقیکردنەوە + بیرکاری پێشکەوتوو</title>
+    <title>دروستکەری پرسیار - گرووپ + DragDrop</title>
     
     <!-- Tailwind CSS -->
     <script src="https://cdn.tailwindcss.com"></script>
@@ -11,15 +11,14 @@
     <!-- HTML2PDF -->
     <script src="https://cdnjs.cloudflare.com/ajax/libs/html2pdf.js/0.10.1/html2pdf.bundle.min.js"></script>
     
+    <!-- SortableJS -->
+    <script src="https://cdnjs.cloudflare.com/ajax/libs/Sortable/1.15.0/Sortable.min.js"></script>
+    
     <!-- MathJax -->
     <script>
         window.MathJax = {
-            tex: {
-                inlineMath: [['$', '$'], ['\\(', '\\)']]
-            },
-            svg: {
-                fontCache: 'global'
-            }
+            tex: { inlineMath: [['$', '$'], ['\\(', '\\)']] },
+            svg: { fontCache: 'global' }
         };
     </script>
     <script id="MathJax-script" async src="https://cdn.jsdelivr.net/npm/mathjax@3/es5/tex-mml-chtml.js"></script>
@@ -36,9 +35,7 @@
                         sans: ['Vazirmatn', 'Arial', 'sans-serif'],
                         nrt: ['Nrt Reg', 'Arial', 'sans-serif'],
                     },
-                    screens: {
-                        'print': {'raw': 'print'},
-                    }
+                    screens: { 'print': {'raw': 'print'} }
                 }
             }
         }
@@ -55,27 +52,46 @@
         .header-section { display: flex; flex-direction: column; gap: 4px; font-size: 14px; font-weight: bold; line-height: 1.4; }
         .header-center { text-align: center; align-items: center; }
         .header-left { text-align: left; align-items: flex-end; }
+        
+        /* Group Badge Style */
+        .group-badge {
+            width: 40px; height: 40px; border: 2px solid black; border-radius: 50%; 
+            display: flex; align-items: center; justify-content: center; 
+            font-weight: 900; font-size: 1.2rem; margin-top: 5px;
+        }
+
         .q-number { background: #000; color: white; width: 28px; height: 28px; border-radius: 50%; display: inline-flex; align-items: center; justify-content: center; font-size: 14px; margin-left: 8px; flex-shrink: 0; -webkit-print-color-adjust: exact; print-color-adjust: exact; }
+        .q-sub-number { background: #fff; color: black; border: 2px solid black; width: 26px; height: 26px; border-radius: 50%; display: inline-flex; align-items: center; justify-content: center; font-size: 14px; margin-left: 8px; margin-right: 20px; font-weight: bold; flex-shrink: 0; }
         .q-score { font-size: 12px; border: 1px solid #000; padding: 2px 6px; border-radius: 4px; margin-right: auto; white-space: nowrap; }
+        
+        .section-title {
+            width: 100%; text-align: center; font-weight: 900; font-size: 1.2rem; 
+            margin: 1.5rem 0 1rem 0; padding: 5px; border-top: 2px solid #000; border-bottom: 2px solid #000;
+            background-color: #f3f4f6; -webkit-print-color-adjust: exact; print-color-adjust: exact;
+        }
+
         input, textarea, select { font-size: 16px !important; touch-action: manipulation; }
         mjx-container { font-size: 110% !important; direction: ltr !important; display: inline-block !important; }
         
-        /* Math Toolbar Styles */
         .math-toolbar {
             display: flex; gap: 0.5rem; overflow-x: auto; padding-bottom: 0.5rem; margin-bottom: 0.5rem;
-            -ms-overflow-style: none;  /* IE and Edge */
-            scrollbar-width: none;  /* Firefox */
+            -ms-overflow-style: none; scrollbar-width: none;
         }
         .math-toolbar::-webkit-scrollbar { display: none; }
-
         .math-btn { 
             background: #eef2ff; border: 1px solid #c7d2fe; color: #3730a3; 
             padding: 6px 10px; border-radius: 6px; font-size: 14px; font-family: 'Times New Roman', serif;
-            transition: all 0.2s; white-space: nowrap; display: flex; align-items: center; justify-content: center;
-            min-width: 40px;
+            transition: all 0.2s; white-space: nowrap; display: flex; align-items: center; justify-content: center; min-width: 40px;
         }
-        .math-btn:hover { background: #e0e7ff; transform: translateY(-1px); border-color: #818cf8; }
-        .math-btn:active { transform: translateY(0); background: #c7d2fe; }
+
+        .mode-switch { display: flex; background: #e5e7eb; border-radius: 8px; padding: 4px; margin-bottom: 10px; }
+        .mode-btn { flex: 1; padding: 8px; text-align: center; border-radius: 6px; font-weight: bold; font-size: 14px; transition: all 0.2s; }
+        .mode-btn.active { background: white; color: #2563eb; box-shadow: 0 1px 2px rgba(0,0,0,0.1); }
+        .mode-btn.inactive { color: #6b7280; }
+
+        .sortable-ghost { opacity: 0.4; background-color: #e2e8f0; }
+        .sortable-drag { cursor: grabbing; background-color: white; box-shadow: 0 10px 15px -3px rgba(0, 0, 0, 0.1); }
+        .drag-handle { cursor: grab; padding: 10px; color: #9ca3af; touch-action: none; }
 
         @media print {
             @page { size: A4; margin: 0; }
@@ -117,7 +133,7 @@
         <p>خەریکی دروستکردنی PDFین...</p>
     </div>
 
-    <!-- Header Modal -->
+    <!-- Header Modal (Updated with Group Input) -->
     <div id="header-modal" class="fixed inset-0 bg-gray-900 bg-opacity-95 z-[70] hidden flex items-center justify-center p-4">
         <div class="bg-white w-full max-w-md rounded-2xl shadow-2xl h-auto max-h-[90vh] overflow-y-auto">
             <div class="flex justify-between items-center p-4 border-b bg-gray-50 sticky top-0 z-10">
@@ -126,6 +142,13 @@
             </div>
             <div class="p-5 space-y-4">
                 <input type="text" id="h_school" placeholder="ناوی قوتابخانە" class="w-full p-3 border rounded-lg" oninput="updatePaper()">
+                
+                <!-- Group Input (NEW) -->
+                <div class="bg-yellow-50 p-2 rounded border border-yellow-200">
+                    <label class="block text-xs font-bold text-yellow-800 mb-1">گرووپی پرسیار (A, B, C)</label>
+                    <input type="text" id="h_group" placeholder="نموونە: A" class="w-full p-2 border rounded text-center font-bold text-lg uppercase" oninput="updatePaper()">
+                </div>
+
                 <div class="grid grid-cols-2 gap-3">
                     <input type="text" id="h_dir" value="بەڕێوەبەرایەتی پەروەردە" class="border p-2 rounded" oninput="updatePaper()">
                     <input type="text" id="h_gov" value="حکومەتی هەرێم" class="border p-2 rounded" oninput="updatePaper()">
@@ -148,99 +171,45 @@
         </div>
     </div>
 
-    <!-- Mobile Add Question -->
+    <!-- Mobile Add Modal -->
     <div id="mobile-add-modal" class="fixed inset-0 bg-gray-900 bg-opacity-95 z-[60] hidden flex flex-col justify-end lg:hidden">
         <div class="bg-white w-full rounded-t-2xl p-5 h-[90dvh] overflow-y-auto">
             <div class="flex justify-between items-center mb-4 border-b pb-3">
-                <h3 class="font-bold">زیادکردنی پرسیار</h3>
+                <h3 class="font-bold">زیادکردن</h3>
                 <button onclick="closeMobileAdd()" class="w-8 h-8 bg-gray-100 rounded-full"><i class="fa-solid fa-xmark"></i></button>
             </div>
-            
-            <!-- Math Toolbar Mobile -->
-            <div class="math-toolbar">
-                <button onclick="insertMath('sqrt', 'mob_q_text')" class="math-btn">$\sqrt{x}$</button>
-                <button onclick="insertMath('frac', 'mob_q_text')" class="math-btn">$\frac{a}{b}$</button>
-                <button onclick="insertMath('pow', 'mob_q_text')" class="math-btn">$x^2$</button>
-                <button onclick="insertMath('exp', 'mob_q_text')" class="math-btn">$e^x$</button>
-                <button onclick="insertMath('times', 'mob_q_text')" class="math-btn">$\times$</button>
-                <button onclick="insertMath('div', 'mob_q_text')" class="math-btn">$\div$</button>
-                <button onclick="insertMath('pm', 'mob_q_text')" class="math-btn">$\pm$</button>
-                <button onclick="insertMath('approx', 'mob_q_text')" class="math-btn">$\approx$</button>
-                <button onclick="insertMath('neq', 'mob_q_text')" class="math-btn">$\neq$</button>
-                <button onclick="insertMath('leq', 'mob_q_text')" class="math-btn">$\le$</button>
-                <button onclick="insertMath('geq', 'mob_q_text')" class="math-btn">$\ge$</button>
-                <button onclick="insertMath('theta', 'mob_q_text')" class="math-btn">$\theta$</button>
-                <button onclick="insertMath('alpha', 'mob_q_text')" class="math-btn">$\alpha$</button>
-                <button onclick="insertMath('beta', 'mob_q_text')" class="math-btn">$\beta$</button>
-                <button onclick="insertMath('pi', 'mob_q_text')" class="math-btn">$\pi$</button>
-                <button onclick="insertMath('triangle', 'mob_q_text')" class="math-btn">$\Delta$</button>
-                <button onclick="insertMath('sin', 'mob_q_text')" class="math-btn">$\sin$</button>
-                <button onclick="insertMath('cos', 'mob_q_text')" class="math-btn">$\cos$</button>
-                <button onclick="insertMath('tan', 'mob_q_text')" class="math-btn">$\tan$</button>
-                <button onclick="insertMath('log', 'mob_q_text')" class="math-btn">$\log$</button>
-                <button onclick="insertMath('ln', 'mob_q_text')" class="math-btn">$\ln$</button>
-                <button onclick="insertMath('lim', 'mob_q_text')" class="math-btn">$\lim$</button>
-                <button onclick="insertMath('int', 'mob_q_text')" class="math-btn">$\int_a^b$</button>
-                <button onclick="insertMath('sum', 'mob_q_text')" class="math-btn">$\sum$</button>
-                <button onclick="insertMath('infty', 'mob_q_text')" class="math-btn">$\infty$</button>
-                <button onclick="insertMath('in', 'mob_q_text')" class="math-btn">$\in$</button>
-                <button onclick="insertMath('notin', 'mob_q_text')" class="math-btn">$\notin$</button>
-                <button onclick="insertMath('cup', 'mob_q_text')" class="math-btn">$\cup$</button>
-                <button onclick="insertMath('cap', 'mob_q_text')" class="math-btn">$\cap$</button>
-                <button onclick="insertMath('subset', 'mob_q_text')" class="math-btn">$\subset$</button>
-                <button onclick="insertMath('empty', 'mob_q_text')" class="math-btn">$\emptyset$</button>
-                <button onclick="insertMath('matrix', 'mob_q_text')" class="math-btn">$[\begin{smallmatrix}..\end{smallmatrix}]$</button>
+            <div class="mode-switch">
+                <button onclick="switchMode('question', 'mobile')" id="mob-mode-q" class="mode-btn active">پرسیار</button>
+                <button onclick="switchMode('title', 'mobile')" id="mob-mode-t" class="mode-btn inactive">سەردێڕ</button>
             </div>
-
-            <textarea id="mob_q_text" rows="3" class="w-full p-3 border-2 border-blue-200 rounded-xl mb-4 text-left font-sans" dir="ltr" placeholder="Write question here..."></textarea>
-            
-            <div class="flex gap-3 mb-4">
-                <input type="number" id="mob_q_score" value="10" class="w-1/3 p-3 border-2 rounded-xl text-center">
-                <select id="mob_q_type" class="w-2/3 p-3 border-2 rounded-xl bg-white" onchange="toggleMobileMCQ(this.value)">
-                    <option value="text">پرسیاری نووسین</option>
-                    <option value="mcq">هەڵبژاردن (MCQ)</option>
-                </select>
-            </div>
-            <div id="mob_mcq_options_container" class="hidden bg-gray-50 p-3 rounded-xl border mb-4">
-                <label class="text-xs font-bold mb-1 block">بژاردەکان:</label>
-                <!-- Math Toolbar for Options Mobile -->
+            <div id="mob-input-question">
                 <div class="math-toolbar">
-                    <button onclick="insertMath('sqrt', 'mob_q_mcq_opts')" class="math-btn text-xs">$\sqrt{}$</button>
-                    <button onclick="insertMath('frac', 'mob_q_mcq_opts')" class="math-btn text-xs">$\frac{}{}$</button>
-                    <button onclick="insertMath('pow', 'mob_q_mcq_opts')" class="math-btn text-xs">$x^y$</button>
-                    <button onclick="insertMath('exp', 'mob_q_mcq_opts')" class="math-btn">$e^x$</button>
-                    <button onclick="insertMath('times', 'mob_q_mcq_opts')" class="math-btn text-xs">$\times$</button>
-                    <button onclick="insertMath('div', 'mob_q_mcq_opts')" class="math-btn text-xs">$\div$</button>
-                    <button onclick="insertMath('pm', 'mob_q_mcq_opts')" class="math-btn text-xs">$\pm$</button>
-                    <button onclick="insertMath('approx', 'mob_q_mcq_opts')" class="math-btn text-xs">$\approx$</button>
-                    <button onclick="insertMath('neq', 'mob_q_mcq_opts')" class="math-btn text-xs">$\neq$</button>
-                    <button onclick="insertMath('leq', 'mob_q_mcq_opts')" class="math-btn text-xs">$\le$</button>
-                    <button onclick="insertMath('geq', 'mob_q_mcq_opts')" class="math-btn text-xs">$\ge$</button>
-                    <button onclick="insertMath('theta', 'mob_q_mcq_opts')" class="math-btn text-xs">$\theta$</button>
-                    <button onclick="insertMath('alpha', 'mob_q_mcq_opts')" class="math-btn text-xs">$\alpha$</button>
-                    <button onclick="insertMath('beta', 'mob_q_mcq_opts')" class="math-btn text-xs">$\beta$</button>
-                    <button onclick="insertMath('pi', 'mob_q_mcq_opts')" class="math-btn text-xs">$\pi$</button>
-                    <button onclick="insertMath('triangle', 'mob_q_mcq_opts')" class="math-btn text-xs">$\Delta$</button>
-                    <button onclick="insertMath('sin', 'mob_q_mcq_opts')" class="math-btn text-xs">$\sin$</button>
-                    <button onclick="insertMath('cos', 'mob_q_mcq_opts')" class="math-btn text-xs">$\cos$</button>
-                    <button onclick="insertMath('tan', 'mob_q_mcq_opts')" class="math-btn text-xs">$\tan$</button>
-                    <button onclick="insertMath('log', 'mob_q_mcq_opts')" class="math-btn text-xs">$\log$</button>
-                    <button onclick="insertMath('ln', 'mob_q_mcq_opts')" class="math-btn text-xs">$\ln$</button>
-                    <button onclick="insertMath('lim', 'mob_q_mcq_opts')" class="math-btn text-xs">$\lim$</button>
-                    <button onclick="insertMath('int', 'mob_q_mcq_opts')" class="math-btn text-xs">$\int$</button>
-                    <button onclick="insertMath('sum', 'mob_q_mcq_opts')" class="math-btn text-xs">$\sum$</button>
-                    <button onclick="insertMath('infty', 'mob_q_mcq_opts')" class="math-btn text-xs">$\infty$</button>
-                    <button onclick="insertMath('in', 'mob_q_mcq_opts')" class="math-btn text-xs">$\in$</button>
-                    <button onclick="insertMath('notin', 'mob_q_mcq_opts')" class="math-btn text-xs">$\notin$</button>
-                    <button onclick="insertMath('cup', 'mob_q_mcq_opts')" class="math-btn text-xs">$\cup$</button>
-                    <button onclick="insertMath('cap', 'mob_q_mcq_opts')" class="math-btn text-xs">$\cap$</button>
-                    <button onclick="insertMath('subset', 'mob_q_mcq_opts')" class="math-btn text-xs">$\subset$</button>
-                    <button onclick="insertMath('empty', 'mob_q_mcq_opts')" class="math-btn text-xs">$\emptyset$</button>
-                    <button onclick="insertMath('matrix', 'mob_q_mcq_opts')" class="math-btn text-xs">$[\begin{smallmatrix}..\end{smallmatrix}]$</button>
+                    <button onclick="insertMath('sqrt', 'mob_q_text')" class="math-btn">$\sqrt{x}$</button>
+                    <button onclick="insertMath('frac', 'mob_q_text')" class="math-btn">$\frac{a}{b}$</button>
+                    <button onclick="insertMath('pow', 'mob_q_text')" class="math-btn">$x^2$</button>
+                    <button onclick="insertMath('exp', 'mob_q_text')" class="math-btn">$e^x$</button>
+                    <button onclick="insertMath('matrix', 'mob_q_text')" class="math-btn">$[\begin{smallmatrix}..\end{smallmatrix}]$</button>
                 </div>
-                <textarea id="mob_q_mcq_opts" rows="4" class="w-full p-2 border rounded-lg text-left font-sans" dir="ltr" placeholder="A) ..."></textarea>
+                <textarea id="mob_q_text" rows="3" class="w-full p-3 border-2 border-blue-200 rounded-xl mb-4 text-left font-sans" dir="ltr" placeholder="دەقی پرسیار..."></textarea>
+                <div class="flex items-center gap-2 mb-4 bg-orange-50 p-2 rounded border border-orange-100">
+                    <input type="checkbox" id="mob_q_is_sub" class="w-5 h-5 accent-orange-600">
+                    <label for="mob_q_is_sub" class="text-sm font-bold text-orange-800">لقی پرسیارە (A, B, C)</label>
+                </div>
+                <div class="flex gap-3 mb-4">
+                    <input type="number" id="mob_q_score" value="10" class="w-1/3 p-3 border-2 rounded-xl text-center">
+                    <select id="mob_q_type" class="w-2/3 p-3 border-2 rounded-xl bg-white" onchange="toggleMobileMCQ(this.value)">
+                        <option value="text">پرسیاری نووسین</option>
+                        <option value="mcq">هەڵبژاردن (MCQ)</option>
+                    </select>
+                </div>
+                <div id="mob_mcq_options_container" class="hidden bg-gray-50 p-3 rounded-xl border mb-4">
+                    <textarea id="mob_q_mcq_opts" rows="4" class="w-full p-2 border rounded-lg text-left font-sans" dir="ltr" placeholder="A) ..."></textarea>
+                </div>
             </div>
-            <button onclick="addQuestionMobile()" class="w-full bg-blue-600 text-white font-bold py-4 rounded-xl">زیادکردن</button>
+            <div id="mob-input-title" class="hidden">
+                <textarea id="mob_t_text" rows="2" class="w-full p-3 border-2 border-gray-400 rounded-xl font-bold text-center" placeholder="نموونە: پرسیاری دووەم"></textarea>
+            </div>
+            <button onclick="addItemMobile()" class="w-full bg-blue-600 text-white font-bold py-4 rounded-xl mt-4">زیادکردن</button>
             <div class="h-20"></div>
         </div>
     </div>
@@ -265,103 +234,58 @@
                 </div>
             </div>
 
-            <!-- Desktop Add Question -->
             <div class="hidden lg:block bg-gray-50 p-4 rounded-lg border shadow-sm mb-4 sticky top-0 z-10">
-                <h3 class="font-bold text-gray-700 mb-2 text-sm">زیادکردنی پرسیار</h3>
-                
-                <!-- Math Toolbar Desktop -->
-                <div class="math-toolbar">
-                    <button onclick="insertMath('sqrt', 'q_text')" class="math-btn" title="ڕەگ">$\sqrt{x}$</button>
-                    <button onclick="insertMath('frac', 'q_text')" class="math-btn" title="کەرت">$\frac{a}{b}$</button>
-                    <button onclick="insertMath('pow', 'q_text')" class="math-btn" title="توان">$x^2$</button>
-                    <button onclick="insertMath('exp', 'q_text')" class="math-btn" title="e^x">$e^x$</button>
-                    <button onclick="insertMath('times', 'q_text')" class="math-btn" title="لێکدان">$\times$</button>
-                    <button onclick="insertMath('div', 'q_text')" class="math-btn" title="دابەش">$\div$</button>
-                    <button onclick="insertMath('pm', 'q_text')" class="math-btn">$\pm$</button>
-                    <button onclick="insertMath('approx', 'q_text')" class="math-btn">$\approx$</button>
-                    <button onclick="insertMath('neq', 'q_text')" class="math-btn">$\neq$</button>
-                    <button onclick="insertMath('leq', 'q_text')" class="math-btn">$\le$</button>
-                    <button onclick="insertMath('geq', 'q_text')" class="math-btn">$\ge$</button>
-                    <button onclick="insertMath('theta', 'q_text')" class="math-btn">$\theta$</button>
-                    <button onclick="insertMath('alpha', 'q_text')" class="math-btn">$\alpha$</button>
-                    <button onclick="insertMath('beta', 'q_text')" class="math-btn">$\beta$</button>
-                    <button onclick="insertMath('pi', 'q_text')" class="math-btn">$\pi$</button>
-                    <button onclick="insertMath('triangle', 'q_text')" class="math-btn">$\Delta$</button>
-                    <button onclick="insertMath('sin', 'q_text')" class="math-btn">$\sin$</button>
-                    <button onclick="insertMath('cos', 'q_text')" class="math-btn">$\cos$</button>
-                    <button onclick="insertMath('tan', 'q_text')" class="math-btn">$\tan$</button>
-                    <button onclick="insertMath('log', 'q_text')" class="math-btn">$\log$</button>
-                    <button onclick="insertMath('ln', 'q_text')" class="math-btn">$\ln$</button>
-                    <button onclick="insertMath('lim', 'q_text')" class="math-btn">$\lim$</button>
-                    <button onclick="insertMath('int', 'q_text')" class="math-btn">$\int$</button>
-                    <button onclick="insertMath('sum', 'q_text')" class="math-btn">$\sum$</button>
-                    <button onclick="insertMath('infty', 'q_text')" class="math-btn">$\infty$</button>
-                    <button onclick="insertMath('in', 'q_text')" class="math-btn">$\in$</button>
-                    <button onclick="insertMath('notin', 'q_text')" class="math-btn">$\notin$</button>
-                    <button onclick="insertMath('cup', 'q_text')" class="math-btn">$\cup$</button>
-                    <button onclick="insertMath('cap', 'q_text')" class="math-btn">$\cap$</button>
-                    <button onclick="insertMath('subset', 'q_text')" class="math-btn">$\subset$</button>
-                    <button onclick="insertMath('empty', 'q_text')" class="math-btn">$\emptyset$</button>
-                    <button onclick="insertMath('matrix', 'q_text')" class="math-btn">$[\begin{smallmatrix}..\end{smallmatrix}]$</button>
+                <div class="mode-switch">
+                    <button onclick="switchMode('question', 'desktop')" id="desk-mode-q" class="mode-btn active">پرسیار</button>
+                    <button onclick="switchMode('title', 'desktop')" id="desk-mode-t" class="mode-btn inactive">سەردێڕ</button>
                 </div>
-
-                <textarea id="q_text" rows="3" class="w-full p-2 border rounded mb-2 text-left font-sans" dir="ltr" placeholder="Write question here..."></textarea>
-                <div class="flex gap-2 mb-2">
-                    <input type="number" id="q_score" value="10" class="w-20 p-2 border rounded text-center">
-                    <select id="q_type" class="flex-1 p-2 border rounded" onchange="toggleMCQ(this.value, 'desktop')">
-                        <option value="text">پرسیاری نووسین</option>
-                        <option value="mcq">هەڵبژاردن (MCQ)</option>
-                    </select>
-                </div>
-                <div id="mcq_options_container" class="hidden bg-white p-2 border rounded mb-2">
-                     <!-- Math Toolbar for Options Desktop -->
+                <div id="desk-input-question">
                     <div class="math-toolbar">
-                        <button onclick="insertMath('sqrt', 'q_mcq_opts')" class="math-btn text-xs">$\sqrt{}$</button>
-                        <button onclick="insertMath('frac', 'q_mcq_opts')" class="math-btn text-xs">$\frac{}{}$</button>
-                        <button onclick="insertMath('pow', 'q_mcq_opts')" class="math-btn text-xs">$x^y$</button>
-                        <button onclick="insertMath('exp', 'q_mcq_opts')" class="math-btn">$e^x$</button>
-                        <button onclick="insertMath('times', 'q_mcq_opts')" class="math-btn text-xs">$\times$</button>
-                        <button onclick="insertMath('div', 'q_mcq_opts')" class="math-btn text-xs">$\div$</button>
-                        <button onclick="insertMath('pm', 'q_mcq_opts')" class="math-btn text-xs">$\pm$</button>
-                        <button onclick="insertMath('approx', 'q_mcq_opts')" class="math-btn text-xs">$\approx$</button>
-                        <button onclick="insertMath('neq', 'q_mcq_opts')" class="math-btn text-xs">$\neq$</button>
-                        <button onclick="insertMath('leq', 'q_mcq_opts')" class="math-btn text-xs">$\le$</button>
-                        <button onclick="insertMath('geq', 'q_mcq_opts')" class="math-btn text-xs">$\ge$</button>
-                        <button onclick="insertMath('theta', 'q_mcq_opts')" class="math-btn text-xs">$\theta$</button>
-                        <button onclick="insertMath('alpha', 'q_mcq_opts')" class="math-btn text-xs">$\alpha$</button>
-                        <button onclick="insertMath('beta', 'q_mcq_opts')" class="math-btn text-xs">$\beta$</button>
-                        <button onclick="insertMath('pi', 'q_mcq_opts')" class="math-btn text-xs">$\pi$</button>
-                        <button onclick="insertMath('triangle', 'q_mcq_opts')" class="math-btn text-xs">$\Delta$</button>
-                        <button onclick="insertMath('sin', 'q_mcq_opts')" class="math-btn text-xs">$\sin$</button>
-                        <button onclick="insertMath('cos', 'q_mcq_opts')" class="math-btn text-xs">$\cos$</button>
-                        <button onclick="insertMath('tan', 'q_mcq_opts')" class="math-btn text-xs">$\tan$</button>
-                        <button onclick="insertMath('log', 'q_mcq_opts')" class="math-btn text-xs">$\log$</button>
-                        <button onclick="insertMath('ln', 'q_mcq_opts')" class="math-btn text-xs">$\ln$</button>
-                        <button onclick="insertMath('lim', 'q_mcq_opts')" class="math-btn text-xs">$\lim$</button>
-                        <button onclick="insertMath('int', 'q_mcq_opts')" class="math-btn text-xs">$\int$</button>
-                        <button onclick="insertMath('sum', 'q_mcq_opts')" class="math-btn text-xs">$\sum$</button>
-                        <button onclick="insertMath('infty', 'q_mcq_opts')" class="math-btn text-xs">$\infty$</button>
-                        <button onclick="insertMath('in', 'q_mcq_opts')" class="math-btn text-xs">$\in$</button>
-                        <button onclick="insertMath('notin', 'q_mcq_opts')" class="math-btn text-xs">$\notin$</button>
-                        <button onclick="insertMath('cup', 'q_mcq_opts')" class="math-btn text-xs">$\cup$</button>
-                        <button onclick="insertMath('cap', 'q_mcq_opts')" class="math-btn text-xs">$\cap$</button>
-                        <button onclick="insertMath('subset', 'q_mcq_opts')" class="math-btn text-xs">$\subset$</button>
-                        <button onclick="insertMath('empty', 'q_mcq_opts')" class="math-btn text-xs">$\emptyset$</button>
-                        <button onclick="insertMath('matrix', 'q_mcq_opts')" class="math-btn text-xs">$[\begin{smallmatrix}..\end{smallmatrix}]$</button>
+                        <button onclick="insertMath('sqrt', 'q_text')" class="math-btn" title="ڕەگ">$\sqrt{x}$</button>
+                        <button onclick="insertMath('frac', 'q_text')" class="math-btn" title="کەرت">$\frac{a}{b}$</button>
+                        <button onclick="insertMath('pow', 'q_text')" class="math-btn" title="توان">$x^2$</button>
+                        <button onclick="insertMath('exp', 'q_text')" class="math-btn" title="e^x">$e^x$</button>
+                        <button onclick="insertMath('times', 'q_text')" class="math-btn" title="لێکدان">$\times$</button>
+                        <button onclick="insertMath('div', 'q_text')" class="math-btn" title="دابەش">$\div$</button>
+                        <button onclick="insertMath('theta', 'q_text')" class="math-btn">$\theta$</button>
+                        <button onclick="insertMath('pi', 'q_text')" class="math-btn">$\pi$</button>
+                        <button onclick="insertMath('int', 'q_text')" class="math-btn">$\int$</button>
+                        <button onclick="insertMath('sum', 'q_text')" class="math-btn">$\sum$</button>
+                        <button onclick="insertMath('matrix', 'q_text')" class="math-btn">$[\begin{smallmatrix}..\end{smallmatrix}]$</button>
                     </div>
-                    <textarea id="q_mcq_opts" rows="3" class="w-full p-2 border text-sm text-left font-sans" dir="ltr" placeholder="A) ..."></textarea>
+                    <textarea id="q_text" rows="3" class="w-full p-2 border rounded mb-2 text-left font-sans" dir="ltr" placeholder="دەقی پرسیار..."></textarea>
+                    <div class="flex items-center gap-2 mb-2 bg-orange-50 p-2 rounded border border-orange-100">
+                        <input type="checkbox" id="q_is_sub" class="w-4 h-4 accent-orange-600">
+                        <label for="q_is_sub" class="text-sm font-bold text-orange-800 cursor-pointer select-none">لقی پرسیارە (A, B, C)</label>
+                    </div>
+                    <div class="flex gap-2 mb-2">
+                        <input type="number" id="q_score" value="10" class="w-20 p-2 border rounded text-center">
+                        <select id="q_type" class="flex-1 p-2 border rounded" onchange="toggleMCQ(this.value, 'desktop')">
+                            <option value="text">پرسیاری نووسین</option>
+                            <option value="mcq">هەڵبژاردن (MCQ)</option>
+                        </select>
+                    </div>
+                    <div id="mcq_options_container" class="hidden bg-white p-2 border rounded mb-2">
+                        <textarea id="q_mcq_opts" rows="3" class="w-full p-2 border text-sm text-left font-sans" dir="ltr" placeholder="A) ..."></textarea>
+                    </div>
                 </div>
-                <button onclick="addQuestionDesktop()" class="w-full bg-blue-600 text-white font-bold py-3 rounded text-sm shadow">زیادکردن</button>
+                <div id="desk-input-title" class="hidden">
+                    <div class="bg-gray-100 p-4 rounded border-2 border-dashed border-gray-300">
+                        <label class="block text-sm font-bold text-gray-700 mb-2">دەقی سەردێڕ:</label>
+                        <input type="text" id="t_text" class="w-full p-2 border-2 border-gray-400 rounded font-bold text-center" placeholder="نموونە: پرسیاری دووەم">
+                    </div>
+                </div>
+                <button onclick="addItemDesktop()" class="w-full bg-blue-600 text-white font-bold py-3 rounded text-sm shadow mt-2">زیادکردن</button>
             </div>
 
             <div class="lg:hidden text-center p-4 bg-blue-50 rounded mb-4 text-blue-800 font-bold">بۆ پرسیار، دوگمە شینەکە (+) دابگرە.</div>
 
             <div class="mt-4">
                 <div class="flex justify-between border-b pb-1 mb-2">
-                    <h3 class="text-sm font-bold text-gray-500">لیست (<span id="q_count">0</span>)</h3>
+                    <h3 class="text-sm font-bold text-gray-500">لیست (Drag & Drop)</h3>
                     <button onclick="clearAll()" class="text-red-500 text-xs">سڕینەوە</button>
                 </div>
-                <div id="questions_mini_list" class="space-y-2 text-sm"></div>
+                <div id="questions_mini_list" class="space-y-2 text-sm pb-10"></div>
             </div>
         </div>
 
@@ -385,9 +309,14 @@
                         <div>پۆل: <span id="view_class">...</span></div>
                         <div>کات: <span id="view_time">...</span></div>
                         <div>بەروار: <span id="view_date">...</span></div>
+                        
+                        <!-- Group Badge Display -->
+                        <div id="group_container" class="hidden">
+                            <div class="group-badge" id="view_group">A</div>
+                        </div>
                     </div>
                 </div>
-                <div id="paper_questions" class="space-y-6">
+                <div id="paper_questions" class="space-y-4">
                     <div class="text-center text-gray-400 py-10">پرسیارەکان لێرە دەردەکەون...</div>
                 </div>
                 <div class="mt-20 pt-4 flex justify-between items-end">
@@ -407,80 +336,191 @@
     </div>
 
     <script>
-        // --- MATH INSERTION LOGIC ---
+        let items = []; 
+        let currentMode = { desktop: 'question', mobile: 'question' };
+
+        new Sortable(document.getElementById('questions_mini_list'), {
+            animation: 150,
+            handle: '.drag-handle',
+            ghostClass: 'sortable-ghost',
+            dragClass: 'sortable-drag',
+            onEnd: function (evt) {
+                const newOrderIds = Array.from(evt.to.children).map(el => parseInt(el.getAttribute('data-id')));
+                const itemMap = new Map(items.map(i => [i.id, i]));
+                items = newOrderIds.map(id => itemMap.get(id));
+                saveData();
+                renderPaper();
+            }
+        });
+
         function insertMath(type, inputId) {
             const input = document.getElementById(inputId);
-            let textToInsert = "";
-            let cursorPosOffset = 0;
-
+            let text = "";
             switch(type) {
-                // Basic
-                case 'sqrt': textToInsert = "$\\sqrt{x}$"; cursorPosOffset = 2; break;
-                case 'frac': textToInsert = "$\\frac{a}{b}$"; cursorPosOffset = 4; break;
-                case 'pow': textToInsert = "$x^2$"; cursorPosOffset = 0; break;
-                case 'exp': textToInsert = "$e^x$"; break;
-                case 'times': textToInsert = "$\\times$"; break;
-                case 'div': textToInsert = "$\\div$"; break;
-                case 'pm': textToInsert = "$\\pm$"; break;
-                
-                // Algebra/Inequalities
-                case 'approx': textToInsert = "$\\approx$"; break;
-                case 'neq': textToInsert = "$\\neq$"; break;
-                case 'leq': textToInsert = "$\\le$"; break;
-                case 'geq': textToInsert = "$\\ge$"; break;
-                
-                // Greek
-                case 'theta': textToInsert = "$\\theta$"; break;
-                case 'alpha': textToInsert = "$\\alpha$"; break;
-                case 'beta': textToInsert = "$\\beta$"; break;
-                case 'pi': textToInsert = "$\\pi$"; break;
-                case 'triangle': textToInsert = "$\\Delta$"; break;
-                
-                // Trig
-                case 'sin': textToInsert = "$\\sin(x)$"; break;
-                case 'cos': textToInsert = "$\\cos(x)$"; break;
-                case 'tan': textToInsert = "$\\tan(x)$"; break;
-                
-                // Logs
-                case 'log': textToInsert = "$\\log_{a}(b)$"; break;
-                case 'ln': textToInsert = "$\\ln(x)$"; break;
-                
-                // Calculus
-                case 'lim': textToInsert = "$\\lim_{x \\to 0}$"; break;
-                case 'int': textToInsert = "$\\int_{a}^{b}$"; break;
-                case 'sum': textToInsert = "$\\sum_{i=0}^{n}$"; break;
-                case 'infty': textToInsert = "$\\infty$"; break;
-                
-                // Sets
-                case 'in': textToInsert = "$\\in$"; break;
-                case 'notin': textToInsert = "$\\notin$"; break;
-                case 'cup': textToInsert = "$\\cup$"; break;
-                case 'cap': textToInsert = "$\\cap$"; break;
-                case 'subset': textToInsert = "$\\subset$"; break;
-                case 'empty': textToInsert = "$\\emptyset$"; break;
-                
-                // Matrix
-                case 'matrix': textToInsert = "$\\begin{pmatrix} a & b \\\\ c & d \\end{pmatrix}$"; break;
+                case 'sqrt': text = "$\\sqrt{x}$"; break;
+                case 'frac': text = "$\\frac{a}{b}$"; break;
+                case 'pow': text = "$x^2$"; break;
+                case 'exp': text = "$e^x$"; break;
+                case 'matrix': text = "$\\begin{pmatrix} a & b \\\\ c & d \\end{pmatrix}$"; break;
             }
-
             const start = input.selectionStart;
             const end = input.selectionEnd;
-            const text = input.value;
-            const before = text.substring(0, start);
-            const after = text.substring(end, text.length);
-            
-            input.value = before + textToInsert + after;
-            // Attempt to place cursor smartly
-            input.selectionStart = input.selectionEnd = start + textToInsert.length;
+            input.value = input.value.substring(0, start) + text + input.value.substring(end);
             input.focus();
         }
 
-        // --- STORAGE ---
+        function switchMode(mode, view) {
+            currentMode[view] = mode;
+            const isQ = mode === 'question';
+            const pfx = view === 'desktop' ? 'desk' : 'mob';
+            document.getElementById(pfx+'-mode-q').className = `mode-btn ${isQ ? 'active' : 'inactive'}`;
+            document.getElementById(pfx+'-mode-t').className = `mode-btn ${!isQ ? 'active' : 'inactive'}`;
+            document.getElementById(pfx+'-input-question').classList.toggle('hidden', !isQ);
+            document.getElementById(pfx+'-input-title').classList.toggle('hidden', isQ);
+        }
+
+        function addItem(data) {
+            items.push({ id: Date.now(), ...data });
+            saveData();
+            renderPaper();
+            renderMiniList();
+        }
+
+        function addItemDesktop() {
+            if (currentMode.desktop === 'question') {
+                const text = document.getElementById('q_text').value.trim();
+                const score = document.getElementById('q_score').value;
+                const type = document.getElementById('q_type').value;
+                const isSub = document.getElementById('q_is_sub').checked;
+                let options = [];
+                if(!text) return alert("تکایە پرسیار بنووسە");
+                if (type === 'mcq') {
+                    const optText = document.getElementById('q_mcq_opts').value.trim();
+                    if(optText) options = optText.split('\n').filter(l=>l.trim());
+                }
+                addItem({ type: type === 'mcq' ? 'mcq' : 'text', text, score, options, isSub });
+                document.getElementById('q_text').value = '';
+                document.getElementById('q_mcq_opts').value = '';
+                document.getElementById('q_is_sub').checked = false;
+            } else {
+                const text = document.getElementById('t_text').value.trim();
+                if(!text) return alert("تکایە سەردێڕ بنووسە");
+                addItem({ type: 'title', text });
+                document.getElementById('t_text').value = '';
+            }
+        }
+
+        function addItemMobile() {
+            if (currentMode.mobile === 'question') {
+                const text = document.getElementById('mob_q_text').value.trim();
+                const score = document.getElementById('mob_q_score').value;
+                const type = document.getElementById('mob_q_type').value;
+                const isSub = document.getElementById('mob_q_is_sub').checked;
+                let options = [];
+                if(!text) return alert("تکایە پرسیار بنووسە");
+                if (type === 'mcq') {
+                    const optText = document.getElementById('mob_q_mcq_opts').value.trim();
+                    if(optText) options = optText.split('\n').filter(l=>l.trim());
+                }
+                addItem({ type: type === 'mcq' ? 'mcq' : 'text', text, score, options, isSub });
+                document.getElementById('mob_q_text').value = '';
+                document.getElementById('mob_q_mcq_opts').value = '';
+                document.getElementById('mob_q_is_sub').checked = false;
+            } else {
+                const text = document.getElementById('mob_t_text').value.trim();
+                if(!text) return alert("تکایە سەردێڕ بنووسە");
+                addItem({ type: 'title', text });
+                document.getElementById('mob_t_text').value = '';
+            }
+            closeMobileAdd();
+        }
+
+        function renderPaper() {
+            const container = document.getElementById('paper_questions');
+            if(items.length === 0) {
+                container.innerHTML = '<div class="text-center text-gray-400 py-10">پرسیارەکان لێرە دەردەکەون...</div>';
+                return;
+            }
+            let html = '';
+            let qCount = 0;
+            let subChar = 65; 
+
+            items.forEach((item) => {
+                if (item.type === 'title') {
+                    html += `<div class="section-title break-inside-avoid">${item.text}</div>`;
+                } else {
+                    let numberHtml = '';
+                    let marginLeft = '0px';
+                    if (item.isSub) {
+                        numberHtml = `<div class="q-sub-number">${String.fromCharCode(subChar++)}</div>`;
+                        marginLeft = '20px';
+                    } else {
+                        qCount++;
+                        subChar = 65; 
+                        numberHtml = `<div class="q-number">${qCount}</div>`;
+                    }
+                    html += `<div class="mb-4 break-inside-avoid" style="margin-right: ${marginLeft}"><div class="flex items-start gap-2">
+                        ${numberHtml}
+                        <div class="flex-1"><div class="flex justify-between items-baseline mb-2">
+                            <h3 class="font-bold text-lg leading-relaxed text-justify pl-2" style="font-family: 'Times New Roman', serif;">${item.text}</h3>
+                            ${item.isSub ? '' : `<span class="q-score">(${item.score} نمرە)</span>`}
+                        </div>`;
+                    if(item.type === 'mcq') {
+                        html += `<div class="grid grid-cols-2 gap-x-8 gap-y-2 mt-1 pr-4">`;
+                        item.options.forEach((opt, idx) => {
+                            html += `<div class="flex items-center gap-2"><div class="w-6 h-6 border border-black rounded-full flex items-center justify-center text-xs font-bold bg-white shrink-0">${String.fromCharCode(65+idx)}</div><span class="text-base" style="font-family: 'Times New Roman', serif;">${opt}</span></div>`;
+                        });
+                        html += `</div>`;
+                    } else {
+                        html += `<div class="w-full h-8 border-b border-gray-300 border-dashed"></div><div class="w-full h-8 border-b border-gray-300 border-dashed"></div>`;
+                    }
+                    html += `</div></div></div>`;
+                }
+            });
+            container.innerHTML = html;
+            if(window.MathJax) window.MathJax.typesetPromise();
+        }
+
+        function renderMiniList() {
+            const list = document.getElementById('questions_mini_list');
+            list.innerHTML = items.map((item) => {
+                let label = '';
+                let style = 'bg-gray-50 border-gray-200';
+                if (item.type === 'title') {
+                    label = `<span class="bg-black text-white text-xs px-1 rounded ml-1">سەردێڕ</span> ${item.text}`;
+                    style = 'bg-gray-200 border-gray-400';
+                } else {
+                    if (item.isSub) {
+                        label = `<span class="bg-orange-100 text-orange-800 text-xs px-1 rounded ml-1 border border-orange-200">A/B</span> ${item.text}`;
+                        style = 'bg-white border-l-4 border-l-orange-400'; 
+                    } else {
+                        label = `<span class="bg-blue-100 text-blue-800 text-xs px-1 rounded ml-1">پرسیار</span> ${item.text}`;
+                    }
+                }
+                return `
+                <div class="flex justify-between items-center ${style} p-3 rounded border mb-1 group" data-id="${item.id}">
+                    <div class="flex items-center gap-2 overflow-hidden">
+                        <i class="fa-solid fa-bars drag-handle text-lg"></i>
+                        <span class="truncate text-xs font-bold font-sans" dir="ltr">${label}</span>
+                    </div>
+                    <button onclick="deleteItem(${item.id})" class="text-red-500 hover:bg-red-100 p-2 rounded"><i class="fa-solid fa-trash"></i></button>
+                </div>`;
+            }).join('');
+        }
+
+        function deleteItem(id) {
+            items = items.filter(i => i.id !== id);
+            saveData();
+            renderPaper();
+            renderMiniList();
+        }
+
         function saveData() {
             const data = {
-                questions: questions,
+                items: items,
                 header: {
                     school: document.getElementById('h_school').value,
+                    group: document.getElementById('h_group').value,
                     dir: document.getElementById('h_dir').value,
                     gov: document.getElementById('h_gov').value,
                     subject: document.getElementById('h_subject').value,
@@ -491,16 +531,16 @@
                     year: document.getElementById('h_year').value
                 }
             };
-            localStorage.setItem('exam_data_v2', JSON.stringify(data));
+            localStorage.setItem('exam_data_v5', JSON.stringify(data));
         }
 
         function loadData() {
-            const saved = localStorage.getItem('exam_data_v2');
+            const saved = localStorage.getItem('exam_data_v5');
             if(saved) {
                 const data = JSON.parse(saved);
-                questions = data.questions || [];
+                items = data.items || [];
                 if(data.header) {
-                    const ids = ['school','dir','gov','subject','class','date','time','type','year'];
+                    const ids = ['school','group','dir','gov','subject','class','date','time','type','year'];
                     ids.forEach(k => {
                         const el = document.getElementById('h_'+k);
                         if(el) el.value = data.header[k] || '';
@@ -512,97 +552,6 @@
             }
         }
 
-        // --- CORE FUNCTIONS ---
-        let questions = [];
-
-        function addQuestionData(text, score, type, options) {
-            questions.push({ id: Date.now(), text, score, type, options });
-            saveData();
-            renderPaper();
-            renderMiniList();
-        }
-
-        function addQuestionMobile() {
-            const text = document.getElementById('mob_q_text').value.trim();
-            const score = document.getElementById('mob_q_score').value;
-            const type = document.getElementById('mob_q_type').value;
-            let options = [];
-            if(!text) return alert("پرسیار بنووسە");
-            if(type === 'mcq') {
-                const optText = document.getElementById('mob_q_mcq_opts').value.trim();
-                if(optText) options = optText.split('\n').filter(l=>l.trim());
-            }
-            addQuestionData(text, score, type, options);
-            document.getElementById('mob_q_text').value = '';
-            document.getElementById('mob_q_mcq_opts').value = '';
-            closeMobileAdd();
-        }
-
-        function addQuestionDesktop() {
-            const text = document.getElementById('q_text').value.trim();
-            const score = document.getElementById('q_score').value;
-            const type = document.getElementById('q_type').value;
-            let options = [];
-            if(!text) return alert("پرسیار بنووسە");
-            if(type === 'mcq') {
-                const optText = document.getElementById('q_mcq_opts').value.trim();
-                if(optText) options = optText.split('\n').filter(l=>l.trim());
-            }
-            addQuestionData(text, score, type, options);
-            document.getElementById('q_text').value = '';
-            document.getElementById('q_mcq_opts').value = '';
-        }
-
-        function renderPaper() {
-            const container = document.getElementById('paper_questions');
-            if(questions.length === 0) {
-                container.innerHTML = '<div class="text-center text-gray-400 py-10">پرسیارەکان لێرە دەردەکەون...</div>';
-                return;
-            }
-            let html = '';
-            questions.forEach((q, i) => {
-                html += `<div class="mb-4 break-inside-avoid"><div class="flex items-start gap-2">
-                    <div class="q-number">${i+1}</div>
-                    <div class="flex-1"><div class="flex justify-between items-baseline mb-2">
-                        <h3 class="font-bold text-lg leading-relaxed text-justify pl-2" style="font-family: 'Times New Roman', serif;">${q.text}</h3>
-                        <span class="q-score">(${q.score} نمرە)</span></div>`;
-                if(q.type === 'mcq') {
-                    html += `<div class="grid grid-cols-2 gap-x-8 gap-y-2 mt-1 pr-4">`;
-                    q.options.forEach((opt, idx) => {
-                        html += `<div class="flex items-center gap-2"><div class="w-6 h-6 border border-black rounded-full flex items-center justify-center text-xs font-bold bg-white shrink-0">${String.fromCharCode(65+idx)}</div><span class="text-base" style="font-family: 'Times New Roman', serif;">${opt}</span></div>`;
-                    });
-                    html += `</div>`;
-                } else {
-                    html += `<div class="w-full h-8 border-b border-gray-300 border-dashed"></div><div class="w-full h-8 border-b border-gray-300 border-dashed"></div>`;
-                }
-                html += `</div></div></div>`;
-            });
-            container.innerHTML = html;
-            if(window.MathJax) window.MathJax.typesetPromise();
-        }
-
-        function renderMiniList() {
-            const list = document.getElementById('questions_mini_list');
-            document.getElementById('q_count').innerText = questions.length;
-            list.innerHTML = questions.map((q,i) => `
-                <div class="flex justify-between items-center bg-gray-50 p-2 rounded border">
-                    <span class="truncate w-2/3 text-xs font-bold font-sans" dir="ltr">${i+1}. ${q.text}</span>
-                    <button onclick="deleteQuestion(${q.id})" class="text-red-500 hover:bg-red-100 p-1 rounded"><i class="fa-solid fa-trash"></i></button>
-                </div>`).join('');
-        }
-
-        function deleteQuestion(id) {
-            questions = questions.filter(q=>q.id!==id);
-            saveData();
-            renderPaper();
-            renderMiniList();
-        }
-        
-        function clearAll() {
-            if(confirm('دڵنیایت؟')) { questions=[]; saveData(); renderPaper(); renderMiniList(); }
-        }
-
-        // --- UI TOGGLES ---
         function switchTab(tab) {
             document.getElementById('editor-panel').classList.toggle('hidden', tab!=='editor');
             document.getElementById('preview-panel').classList.toggle('hidden', tab!=='preview');
@@ -625,10 +574,18 @@
                 if(el && view) view.innerText = el.value;
                 if(k==='subject') document.getElementById('view_subject_2').innerText = el.value;
             });
+            // Update Group
+            const grp = document.getElementById('h_group').value;
+            const grpView = document.getElementById('view_group');
+            const grpCont = document.getElementById('group_container');
+            if(grp) {
+                grpView.innerText = grp.toUpperCase();
+                grpCont.classList.remove('hidden');
+            } else {
+                grpCont.classList.add('hidden');
+            }
             saveData();
         }
-
-        // --- PDF ---
         function downloadDirectPDF() {
             document.getElementById('pdf-loading').classList.remove('hidden');
             document.getElementById('pdf-loading').classList.add('flex');
@@ -639,35 +596,19 @@
             container.appendChild(clone);
             document.body.appendChild(container);
             clone.style.transform = 'none'; clone.style.margin = '0';
-            
-            const opt = {
-                margin: 0, filename: 'exam_paper.pdf', image: { type: 'jpeg', quality: 0.98 },
-                html2canvas: { scale: 2, useCORS: true },
-                jsPDF: { unit: 'mm', format: 'a4', orientation: 'portrait' }
-            };
-
-            setTimeout(() => {
-                 html2pdf().set(opt).from(clone).save().then(() => {
-                    document.body.removeChild(container);
-                    document.getElementById('pdf-loading').classList.add('hidden');
-                    document.getElementById('pdf-loading').classList.remove('flex');
-                });
-            }, 500);
+            const opt = { margin: 0, filename: 'exam_paper.pdf', image: { type: 'jpeg', quality: 0.98 }, html2canvas: { scale: 2, useCORS: true }, jsPDF: { unit: 'mm', format: 'a4', orientation: 'portrait' } };
+            setTimeout(() => { html2pdf().set(opt).from(clone).save().then(() => { document.body.removeChild(container); document.getElementById('pdf-loading').classList.add('hidden'); document.getElementById('pdf-loading').classList.remove('flex'); }); }, 500);
         }
-
-        // --- LOGIN ---
+        function clearAll() { if(confirm('دڵنیایت؟')) { items=[]; saveData(); renderPaper(); renderMiniList(); } }
+        
         window.onload = function() {
             loadData();
             if (localStorage.getItem('exam_app_code') >= 112201) document.getElementById('login-overlay').style.display = 'none';
         };
         function checkPassword() {
             const c = parseInt(document.getElementById('password-input').value);
-            if(c>=112201 && c<999999) {
-                localStorage.setItem('exam_app_code', c);
-                document.getElementById('login-overlay').style.display='none';
-            } else {
-                document.getElementById('login-error').classList.remove('hidden');
-            }
+            if(c>=112201 && c<999999) { localStorage.setItem('exam_app_code', c); document.getElementById('login-overlay').style.display='none'; } 
+            else { document.getElementById('login-error').classList.remove('hidden'); }
         }
     </script>
 </body>
