@@ -3,12 +3,12 @@
 <head>
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0, maximum-scale=1.0, user-scalable=no">
-    <title>ئەدمین پەنێڵ - مۆبایل</title>
+    <title>ئەدمین پەنێڵ - واتسئەپ</title>
     
     <!-- Tailwind CSS -->
     <script src="https://cdn.tailwindcss.com"></script>
     
-    <!-- HTML2Canvas (Wêne) -->
+    <!-- HTML2Canvas -->
     <script src="https://cdnjs.cloudflare.com/ajax/libs/html2canvas/1.4.1/html2canvas.min.js"></script>
     
     <!-- Fonts & Icons -->
@@ -18,8 +18,9 @@
     <!-- Firebase -->
     <script type="module">
         import { initializeApp } from "https://www.gstatic.com/firebasejs/11.6.1/firebase-app.js";
-        import { getFirestore, doc, setDoc, getDoc, collection } from "https://www.gstatic.com/firebasejs/11.6.1/firebase-firestore.js";
+        import { getFirestore, doc, setDoc, getDoc } from "https://www.gstatic.com/firebasejs/11.6.1/firebase-firestore.js";
 
+        // زانیارییەکانی فایەربەیسەکەت
         const firebaseConfig = {
             apiKey: "AIzaSyBHxuOA6uuX1EZGse5_JOHc3WMjvPywLD4",
             authDomain: "prsyar-c93dd.firebaseapp.com",
@@ -39,19 +40,15 @@
         window.doc = doc;
         window.setDoc = setDoc;
         window.getDoc = getDoc;
-        window.collection = collection;
     </script>
 
     <style>
         body { font-family: 'Nrt Reg', 'Vazirmatn', sans-serif; background-color: #f8fafc; }
         
-        /* Mobile Input Fixes */
-        input, button { font-size: 16px !important; touch-action: manipulation; }
-        
-        /* The Card Design */
+        /* Card Design */
         .gift-card {
             width: 340px;
-            height: 520px; /* Story size ratio */
+            height: 520px;
             background: linear-gradient(135deg, #1e40af 0%, #3b82f6 100%);
             position: relative;
             border-radius: 20px;
@@ -91,19 +88,15 @@
             <i class="fa-solid fa-user-shield text-4xl text-blue-600"></i>
         </div>
         <h1 class="text-2xl font-bold text-gray-800 mb-2">بەخێربێیت ئەدمین</h1>
-        <p class="text-gray-500 mb-8 text-sm">تکایە وشەی نهێنی تایبەت بنووسە</p>
         
-        <input type="password" id="admin-pass" class="w-full max-w-xs p-4 bg-gray-50 border-2 border-gray-200 rounded-xl text-center text-xl outline-none focus:border-blue-500 focus:bg-white transition mb-4" placeholder="••••••••">
+        <input type="password" id="admin-pass" class="w-full max-w-xs p-4 bg-gray-50 border-2 border-gray-200 rounded-xl text-center text-xl outline-none focus:border-blue-500 mb-4" placeholder="وشەی نهێنی">
         
-        <button onclick="login()" class="w-full max-w-xs bg-blue-600 text-white font-bold py-4 rounded-xl shadow-lg active:scale-95 transition">
-            چوونەژوورەوە
-        </button>
+        <button onclick="login()" class="w-full max-w-xs bg-blue-600 text-white font-bold py-4 rounded-xl shadow-lg">چوونەژوورەوە</button>
     </div>
 
     <!-- MAIN DASHBOARD -->
     <div id="dashboard" class="hidden flex-1 p-5 max-w-md mx-auto w-full">
         
-        <!-- Header -->
         <div class="flex justify-between items-center mb-8 pt-2">
             <div>
                 <h1 class="text-xl font-bold text-gray-800">کۆنتڕۆڵی کۆدەکان</h1>
@@ -114,12 +107,11 @@
             </div>
         </div>
 
-        <!-- Create Form -->
         <div class="bg-white p-6 rounded-2xl shadow-sm border border-gray-100 mb-6">
             <label class="block text-xs font-bold text-gray-500 mb-2 uppercase">کۆدی نوێ (٦ ژمارە)</label>
             <div class="flex gap-3 mb-4">
                 <input type="number" id="new-code" class="flex-1 p-4 bg-gray-50 border-2 border-gray-200 rounded-xl text-center text-2xl font-bold tracking-widest outline-none focus:border-blue-500" placeholder="000000">
-                <button onclick="generateRandom()" class="bg-blue-50 text-blue-600 p-4 rounded-xl hover:bg-blue-100 active:scale-95 transition">
+                <button onclick="generateRandom()" class="bg-blue-50 text-blue-600 p-4 rounded-xl hover:bg-blue-100">
                     <i class="fa-solid fa-shuffle text-xl"></i>
                 </button>
             </div>
@@ -130,30 +122,24 @@
                 <input type="text" id="code-note" class="w-full p-3 pr-10 border-2 border-gray-200 rounded-xl outline-none focus:border-blue-500" placeholder="ناوی مامۆستا...">
             </div>
 
-            <button onclick="createCode()" id="create-btn" class="w-full bg-blue-600 text-white font-bold py-4 rounded-xl shadow-lg shadow-blue-200 active:scale-95 transition flex items-center justify-center gap-2">
+            <button onclick="createCode()" id="create-btn" class="w-full bg-blue-600 text-white font-bold py-4 rounded-xl shadow-lg flex items-center justify-center gap-2">
                 <i class="fa-solid fa-plus-circle"></i>
-                تۆمارکردن و وێنە
+                تۆمارکردن
             </button>
         </div>
-
-        <!-- Status Message -->
-        <div id="status-msg" class="hidden p-4 rounded-xl mb-4 text-center text-sm font-bold"></div>
-
     </div>
 
-    <!-- HIDDEN CAPTURE AREA (The Card Design) -->
-    <div id="capture-container" class="fixed top-0 left-0 w-full h-full bg-gray-900 z-[60] hidden flex flex-col items-center justify-center p-4">
+    <!-- CAPTURE AREA / SUCCESS SCREEN -->
+    <div id="capture-container" class="fixed top-0 left-0 w-full h-full bg-gray-900 z-[60] hidden flex flex-col items-center justify-center p-4 overflow-y-auto">
         
-        <div class="text-white font-bold mb-4 flex items-center gap-2">
+        <div class="text-white font-bold mb-4 flex items-center gap-2 mt-4">
             <i class="fa-solid fa-check-circle text-green-400"></i>
             کۆدەکە دروستکرا
         </div>
 
-        <!-- The Visual Card -->
+        <!-- The Card -->
         <div id="code-card" class="gift-card transform scale-90 sm:scale-100 transition-transform">
             <div class="card-pattern"></div>
-            
-            <!-- Top -->
             <div class="z-10 text-center w-full">
                 <div class="bg-white/20 backdrop-blur-sm p-3 rounded-full w-20 h-20 mx-auto flex items-center justify-center mb-4 border border-white/30">
                     <i class="fa-solid fa-graduation-cap text-4xl text-white"></i>
@@ -161,57 +147,57 @@
                 <h2 class="text-2xl font-bold mb-1">کۆدی چالاککردن</h2>
                 <p class="text-blue-100 text-sm opacity-80">سیستەمی دروستکەری پرسیار</p>
             </div>
-
-            <!-- Middle (Code & QR) -->
             <div class="z-10 bg-white text-gray-900 p-5 rounded-2xl w-full text-center shadow-2xl">
                 <p class="text-xs text-gray-400 font-bold mb-2 uppercase">Activation Code</p>
                 <p class="text-4xl font-black tracking-[0.2em] text-blue-600 mb-4" id="card-code-display">---</p>
-                
                 <div class="border-t border-dashed border-gray-300 my-4"></div>
-                
                 <div class="flex justify-center">
                     <img id="card-qr" src="" class="w-32 h-32 border-4 border-white shadow-inner rounded-xl">
                 </div>
             </div>
-
-            <!-- Bottom -->
             <div class="z-10 w-full text-center">
                 <p class="text-sm font-bold text-white mb-1" id="card-note-display">...</p>
                 <p class="text-xs text-blue-200" id="card-date-display">Date</p>
             </div>
         </div>
 
-        <!-- Actions -->
-        <div class="mt-6 flex gap-3 w-full max-w-xs">
-            <button onclick="downloadCard()" class="flex-1 bg-green-500 hover:bg-green-600 text-white py-3 rounded-xl font-bold shadow-lg">
-                <i class="fa-solid fa-download"></i> دابەزاندن
+        <!-- Action Buttons -->
+        <div class="mt-6 flex flex-col gap-3 w-full max-w-xs mb-6">
+            
+            <!-- WhatsApp Button -->
+            <button onclick="sendViaWhatsapp()" class="w-full bg-green-500 hover:bg-green-600 text-white py-3.5 rounded-xl font-bold shadow-lg flex items-center justify-center gap-2 transform active:scale-95 transition">
+                <i class="fa-brands fa-whatsapp text-2xl"></i>
+                ناردن بە واتسئەپ
             </button>
-            <button onclick="closeCapture()" class="flex-1 bg-white/20 hover:bg-white/30 text-white py-3 rounded-xl font-bold backdrop-blur-md">
-                داخستن
-            </button>
+
+            <div class="flex gap-3">
+                <button onclick="downloadCard()" class="flex-1 bg-blue-600 hover:bg-blue-700 text-white py-3 rounded-xl font-bold shadow-lg flex items-center justify-center gap-2">
+                    <i class="fa-solid fa-download"></i> دابەزاندن
+                </button>
+                <button onclick="closeCapture()" class="flex-1 bg-white/20 hover:bg-white/30 text-white py-3 rounded-xl font-bold backdrop-blur-md">
+                    داخستن
+                </button>
+            </div>
         </div>
     </div>
 
     <script>
-        // 1. LOGIN LOGIC
+        // 1. LOGIN
         function login() {
             const pass = document.getElementById('admin-pass').value;
             if(pass === 'horazit1122') {
                 document.getElementById('login-screen').classList.add('hidden');
                 document.getElementById('dashboard').classList.remove('hidden');
-            } else {
-                alert('پاسۆرد هەڵەیە!');
-                document.getElementById('admin-pass').value = '';
-            }
+            } else { alert('پاسۆرد هەڵەیە!'); document.getElementById('admin-pass').value = ''; }
         }
 
-        // 2. GENERATE RANDOM
+        // 2. GENERATE
         function generateRandom() {
             const random = Math.floor(100000 + Math.random() * 900000);
             document.getElementById('new-code').value = random;
         }
 
-        // 3. CREATE CODE
+        // 3. CREATE & SAVE
         async function createCode() {
             const code = document.getElementById('new-code').value;
             const note = document.getElementById('code-note').value;
@@ -219,12 +205,11 @@
             
             if(!code || code.length < 6) return alert('کۆد دەبێت ٦ ژمارە بێت');
 
-            // UI Loading
             btn.disabled = true;
             btn.innerHTML = `<div class="loader mx-auto border-white border-t-transparent w-6 h-6"></div>`;
 
             try {
-                // Check if exists
+                // Check exist
                 const docRef = window.doc(window.db, 'artifacts', window.appId, 'public', 'data', 'access_codes', code.toString());
                 const docSnap = await window.getDoc(docRef);
 
@@ -234,7 +219,7 @@
                     return;
                 }
 
-                // Save to Firebase
+                // Save
                 await window.setDoc(docRef, {
                     code: code,
                     note: note,
@@ -257,10 +242,10 @@
         function resetBtn() {
             const btn = document.getElementById('create-btn');
             btn.disabled = false;
-            btn.innerHTML = `<i class="fa-solid fa-plus-circle"></i> تۆمارکردن و وێنە`;
+            btn.innerHTML = `<i class="fa-solid fa-plus-circle"></i> تۆمارکردن`;
         }
 
-        // 4. SHOW & DOWNLOAD CARD
+        // 4. DISPLAY
         function showCard(code, note) {
             document.getElementById('card-code-display').innerText = code;
             document.getElementById('card-note-display').innerText = note || 'مامۆستا';
@@ -271,17 +256,27 @@
             document.getElementById('capture-container').classList.add('flex');
         }
 
+        // 5. SEND VIA WHATSAPP (NEW)
+        function sendViaWhatsapp() {
+            const code = document.getElementById('card-code-display').innerText;
+            const note = document.getElementById('card-note-display').innerText;
+            
+            // The Message
+            const message = `سڵاو ${note !== 'مامۆستا' ? note : 'مامۆستا'}،\n\nئەمە کۆدی چالاککردنی سیستەمەکەیە:\n\n🔐 کۆد: *${code}*\n\nتکایە کۆدەکە لە بەرنامەکە لێبدە.`;
+            
+            // Open WhatsApp
+            const url = `https://wa.me/?text=${encodeURIComponent(message)}`;
+            window.open(url, '_blank');
+        }
+
+        // 6. DOWNLOAD IMAGE
         function downloadCard() {
             const card = document.getElementById('code-card');
             const code = document.getElementById('card-code-display').innerText;
             
-            html2canvas(card, {
-                scale: 2, // High quality
-                backgroundColor: null,
-                useCORS: true
-            }).then(canvas => {
+            html2canvas(card, { scale: 2, backgroundColor: null, useCORS: true }).then(canvas => {
                 const link = document.createElement('a');
-                link.download = `Exam_Code_${code}.png`;
+                link.download = `Code_${code}.png`;
                 link.href = canvas.toDataURL();
                 link.click();
             });
@@ -290,7 +285,6 @@
         function closeCapture() {
             document.getElementById('capture-container').classList.add('hidden');
             document.getElementById('capture-container').classList.remove('flex');
-            // Reset fields
             document.getElementById('new-code').value = '';
             document.getElementById('code-note').value = '';
         }
