@@ -3,7 +3,7 @@
 <head>
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0, maximum-scale=1.0, user-scalable=no">
-    <title>دروستکەری پرسیار - لۆگۆ و فایەربەیس</title>
+    <title>دروستکەری پرسیار - چاککراو</title>
     
     <!-- Tailwind CSS -->
     <script src="https://cdn.tailwindcss.com"></script>
@@ -14,15 +14,12 @@
     <!-- SortableJS -->
     <script src="https://cdnjs.cloudflare.com/ajax/libs/Sortable/1.15.0/Sortable.min.js"></script>
     
-    <!-- Firebase Configuration -->
+    <!-- Firebase (Fixed Import & Init) -->
     <script type="module">
         import { initializeApp } from "https://www.gstatic.com/firebasejs/11.6.1/firebase-app.js";
-        import { getAuth, signInAnonymously } from "https://www.gstatic.com/firebasejs/11.6.1/firebase-auth.js";
+        import { getAuth, signInAnonymously, onAuthStateChanged } from "https://www.gstatic.com/firebasejs/11.6.1/firebase-auth.js";
         import { getFirestore, doc, getDoc, setDoc, collection } from "https://www.gstatic.com/firebasejs/11.6.1/firebase-firestore.js";
 
-        // ==========================================
-        //  کۆدی فایەربەیسەکەی خۆت
-        // ==========================================
         const firebaseConfig = {
             apiKey: "AIzaSyBHxuOA6uuX1EZGse5_JOHc3WMjvPywLD4",
             authDomain: "prsyar-c93dd.firebaseapp.com",
@@ -32,24 +29,34 @@
             appId: "1:623772510800:web:cc49fc9bbd9ed9c170ff55",
             measurementId: "G-7KLKMNVFHC"
         };
-        // ==========================================
 
-        // Initialize Firebase
+        let dbInstance, authInstance;
+        const appIdentifier = 'exam-system-v1';
+
         try {
             const app = initializeApp(firebaseConfig);
-            const auth = getAuth(app);
-            const db = getFirestore(app);
-            const appId = 'exam-system-v1'; 
-
-            window.firebaseApp = { auth, db, appId, signInAnonymously, doc, getDoc, setDoc, collection };
-
-            signInAnonymously(auth).then(() => {
-                console.log("Firebase Connected Successfully");
-            }).catch((error) => {
-                console.error("Firebase Auth Error:", error);
+            authInstance = getAuth(app);
+            dbInstance = getFirestore(app);
+            
+            // Listen for auth state
+            onAuthStateChanged(authInstance, (user) => {
+                if (user) {
+                    console.log("Firebase Connected as:", user.uid);
+                    window.isFirebaseAuthReady = true;
+                    window.currentFirebaseUser = user;
+                }
             });
+
+            // Trigger login
+            signInAnonymously(authInstance).catch((error) => {
+                console.warn("Offline Mode: Auth failed", error);
+            });
+
+            // Expose to window for the logic below
+            window.firebaseServices = { db: dbInstance, auth: authInstance, doc, getDoc, setDoc, collection, appId: appIdentifier };
+
         } catch (e) {
-            console.error("Firebase Init Error:", e);
+            console.error("Firebase Init Failed (Running Offline):", e);
         }
     </script>
     
@@ -87,56 +94,31 @@
             position: relative; box-shadow: 0 4px 15px rgba(0,0,0,0.15);
             font-family: 'Nrt Reg', 'Vazirmatn', sans-serif; color: black; box-sizing: border-box;
         }
-        /* Adjusted Header Grid */
         .exam-header { display: grid; grid-template-columns: 1fr 1.2fr 1fr; gap: 5px; border-bottom: 2px double #000; padding-bottom: 5px; margin-bottom: 10px; align-items: center; }
         .header-section { display: flex; flex-direction: column; gap: 4px; font-size: 13px; font-weight: bold; line-height: 1.3; }
         .header-center { text-align: center; align-items: center; display: flex; flex-direction: column; justify-content: center; }
         .header-left { text-align: left; align-items: flex-end; }
-        
         .header-logo { width: 80px; height: auto; margin-bottom: 5px; }
-
-        .group-badge {
-            width: 30px; height: 30px; border: 2px solid black; border-radius: 50%; 
-            display: flex; align-items: center; justify-content: center; 
-            font-weight: 900; font-size: 1rem; margin-top: 5px;
-        }
-
+        .group-badge { width: 30px; height: 30px; border: 2px solid black; border-radius: 50%; display: flex; align-items: center; justify-content: center; font-weight: 900; font-size: 1rem; margin-top: 2px; }
         .q-number { background: #000; color: white; width: 24px; height: 24px; border-radius: 50%; display: inline-flex; align-items: center; justify-content: center; font-size: 12px; margin-left: 6px; flex-shrink: 0; -webkit-print-color-adjust: exact; print-color-adjust: exact; }
         .q-sub-number { background: #fff; color: black; border: 1.5px solid black; width: 22px; height: 22px; border-radius: 50%; display: inline-flex; align-items: center; justify-content: center; font-size: 12px; margin-left: 6px; margin-right: 15px; font-weight: bold; flex-shrink: 0; }
         .q-score { font-size: 11px; border: 1px solid #000; padding: 1px 5px; border-radius: 4px; margin-right: auto; white-space: nowrap; }
-        
-        .section-title {
-            width: 100%; text-align: center; font-weight: 900; font-size: 1rem; 
-            margin: 0.5rem 0 0.5rem 0; padding: 2px; border-top: 2px solid #000; border-bottom: 2px solid #000;
-            background-color: #f3f4f6; -webkit-print-color-adjust: exact; print-color-adjust: exact;
-        }
-
+        .section-title { width: 100%; text-align: center; font-weight: 900; font-size: 1rem; margin: 0.5rem 0 0.5rem 0; padding: 2px; border-top: 2px solid #000; border-bottom: 2px solid #000; background-color: #f3f4f6; -webkit-print-color-adjust: exact; print-color-adjust: exact; }
         .q-image { max-width: 100%; max-height: 150px; display: block; margin: 5px auto; border: 1px dashed #ccc; padding: 2px; }
-
         input, textarea, select { font-size: 16px !important; touch-action: manipulation; }
         mjx-container { font-size: 100% !important; margin: 0 !important; }
         
-        .math-toolbar {
-            display: flex; gap: 0.3rem; overflow-x: auto; padding-bottom: 0.5rem; margin-bottom: 0.5rem;
-            -ms-overflow-style: none; scrollbar-width: none; background: #f8fafc; padding: 6px; border-radius: 6px; border: 1px solid #e2e8f0;
-        }
+        .math-toolbar { display: flex; gap: 0.3rem; overflow-x: auto; padding-bottom: 0.5rem; margin-bottom: 0.5rem; background: #f8fafc; padding: 6px; border-radius: 6px; border: 1px solid #e2e8f0; }
         .math-toolbar::-webkit-scrollbar { display: none; }
-        .math-btn { 
-            background: white; border: 1px solid #cbd5e1; color: #1e293b; 
-            padding: 2px 6px; border-radius: 4px; font-size: 12px; font-family: 'Times New Roman', serif;
-            transition: all 0.2s; white-space: nowrap; display: flex; align-items: center; justify-content: center; min-width: 32px;
-        }
+        .math-btn { background: white; border: 1px solid #cbd5e1; color: #1e293b; padding: 2px 6px; border-radius: 4px; font-size: 12px; font-family: 'Times New Roman', serif; transition: all 0.2s; white-space: nowrap; display: flex; align-items: center; justify-content: center; min-width: 32px; }
         .math-btn:hover { background: #e0f2fe; border-color: #3b82f6; }
-
         .mode-switch { display: flex; background: #e5e7eb; border-radius: 8px; padding: 3px; margin-bottom: 10px; }
         .mode-btn { flex: 1; padding: 6px; text-align: center; border-radius: 6px; font-weight: bold; font-size: 13px; transition: all 0.2s; }
         .mode-btn.active { background: white; color: #2563eb; box-shadow: 0 1px 2px rgba(0,0,0,0.1); }
         .mode-btn.inactive { color: #6b7280; }
-
         .sortable-ghost { opacity: 0.4; background-color: #e2e8f0; }
         .sortable-drag { cursor: grabbing; background-color: white; box-shadow: 0 10px 15px -3px rgba(0, 0, 0, 0.1); }
         .drag-handle { cursor: grab; padding: 10px; color: #9ca3af; touch-action: none; }
-
         input[type=range] { -webkit-appearance: none; width: 100%; height: 6px; background: #d1d5db; border-radius: 5px; outline: none; }
         input[type=range]::-webkit-slider-thumb { -webkit-appearance: none; appearance: none; width: 18px; height: 18px; border-radius: 50%; background: #2563eb; cursor: pointer; border: 2px solid white; box-shadow: 0 1px 3px rgba(0,0,0,0.3); }
 
@@ -159,8 +141,10 @@
     <!-- LOGIN -->
     <div id="login-overlay" class="fixed inset-0 bg-gray-900 bg-opacity-95 z-[100] flex items-center justify-center backdrop-blur-sm">
         <div class="bg-white p-6 rounded-2xl shadow-2xl w-full max-w-sm text-center m-4 relative">
-            <div id="auth-loading" class="absolute inset-0 bg-white bg-opacity-80 flex items-center justify-center z-10 hidden rounded-2xl">
-                <div class="animate-spin rounded-full h-8 w-8 border-b-2 border-blue-600"></div>
+            <!-- Loading Spinner -->
+            <div id="auth-loading" class="absolute inset-0 bg-white bg-opacity-80 flex flex-col items-center justify-center z-10 hidden rounded-2xl">
+                <div class="animate-spin rounded-full h-8 w-8 border-b-2 border-blue-600 mb-2"></div>
+                <p class="text-xs text-gray-500">جارێكی تر هەوڵ دەداتەوە...</p>
             </div>
 
             <h2 class="text-xl font-bold mb-4 border-b pb-2">چالاککردنی سیستەم</h2>
@@ -173,8 +157,10 @@
                 <img src="https://api.qrserver.com/v1/create-qr-code/?size=100x100&data=07501784002" class="w-20 h-20 mx-auto rounded border">
             </div>
             <input type="number" id="password-input" class="w-full p-3 border rounded-xl text-center text-lg mb-3" placeholder="کۆد (نموونە: 112201)" onkeypress="if(event.key==='Enter') checkPassword()">
-            <p id="login-error" class="text-red-500 text-sm mb-3 hidden bg-red-50 p-2 rounded"></p>
-            <button onclick="checkPassword()" class="w-full bg-blue-600 text-white font-bold py-3 rounded-xl">چالاککردن</button>
+            
+            <p id="login-error" class="text-red-600 bg-red-50 text-sm mb-3 hidden p-2 rounded border border-red-200"></p>
+            
+            <button onclick="checkPassword()" class="w-full bg-blue-600 hover:bg-blue-700 text-white font-bold py-3 rounded-xl transition">چالاککردن</button>
         </div>
     </div>
 
@@ -192,14 +178,10 @@
                 <button onclick="closeHeaderModal()" class="w-8 h-8 bg-gray-200 rounded-full"><i class="fa-solid fa-xmark"></i></button>
             </div>
             <div class="p-5 space-y-4">
-                
-                <!-- Logo Upload -->
                 <div class="bg-blue-50 p-3 rounded border border-blue-200">
                     <label class="block text-xs font-bold text-blue-800 mb-2">لۆگۆی سەرپەڕە:</label>
-                    <input type="file" id="h_logo_input" accept="image/*" class="block w-full text-xs text-gray-500 file:mr-2 file:py-1 file:px-2 file:rounded-full file:border-0 file:text-xs file:font-semibold file:bg-blue-100 file:text-blue-700 hover:file:bg-blue-200">
-                    <p class="text-[10px] text-gray-500 mt-1">* بەتاڵی جێبهێڵە بۆ بەکارهێنانی لۆگۆی حکومەت</p>
+                    <input type="file" id="h_logo_input" accept="image/*" class="block w-full text-xs text-gray-500 file:mr-2 file:py-1 file:px-2 file:rounded-full file:border-0 file:text-xs file:font-semibold file:bg-blue-100 file:text-blue-700">
                 </div>
-
                 <input type="text" id="h_school" placeholder="ناوی قوتابخانە" class="w-full p-3 border rounded-lg" oninput="updatePaper()">
                 <div class="bg-yellow-50 p-2 rounded border border-yellow-200">
                     <label class="block text-xs font-bold text-yellow-800 mb-1">گرووپی پرسیار (A, B, C)</label>
@@ -234,34 +216,25 @@
                 <h3 class="font-bold">زیادکردن</h3>
                 <button onclick="closeMobileAdd()" class="w-8 h-8 bg-gray-100 rounded-full"><i class="fa-solid fa-xmark"></i></button>
             </div>
-            
             <div class="mode-switch">
                 <button onclick="switchMode('question', 'mobile')" id="mob-mode-q" class="mode-btn active">پرسیار</button>
                 <button onclick="switchMode('title', 'mobile')" id="mob-mode-t" class="mode-btn inactive">سەردێڕ</button>
             </div>
-
             <div id="mob-input-question">
                 <div id="mob-math-toolbar-q" class="math-toolbar"></div>
                 <textarea id="mob_q_text" rows="3" class="w-full p-3 border-2 border-blue-200 rounded-xl mb-4 text-left font-sans" dir="ltr" placeholder="دەقی پرسیار..."></textarea>
-                
                 <div class="mb-4 bg-gray-50 p-2 rounded border border-gray-200">
                     <label class="block text-xs font-bold text-gray-600 mb-1"><i class="fa-regular fa-image"></i> وێنە:</label>
                     <input type="file" id="mob_q_image" accept="image/*" class="block w-full text-sm text-gray-500">
                 </div>
-
                 <div class="mb-4 bg-gray-50 p-2 rounded border border-gray-200">
-                    <label class="block text-xs font-bold text-gray-600 mb-1 flex justify-between">
-                        <span>بۆشایی خوارەوە</span>
-                        <span id="mob-spacing-val" class="text-blue-600">0mm</span>
-                    </label>
+                    <label class="block text-xs font-bold text-gray-600 mb-1 flex justify-between"><span>بۆشایی خوارەوە</span><span id="mob-spacing-val" class="text-blue-600">0mm</span></label>
                     <input type="range" id="mob_q_spacing" min="0" max="100" value="0" oninput="document.getElementById('mob-spacing-val').innerText = this.value + 'mm'">
                 </div>
-
                 <div class="flex items-center gap-2 mb-4 bg-orange-50 p-2 rounded border border-orange-100">
                     <input type="checkbox" id="mob_q_is_sub" class="w-5 h-5 accent-orange-600">
                     <label for="mob_q_is_sub" class="text-sm font-bold text-orange-800">لقی پرسیارە (A, B, C)</label>
                 </div>
-
                 <div class="flex gap-3 mb-4">
                     <input type="number" id="mob_q_score" value="10" class="w-1/3 p-3 border-2 rounded-xl text-center">
                     <select id="mob_q_type" class="w-2/3 p-3 border-2 rounded-xl bg-white" onchange="toggleMobileMCQ(this.value)">
@@ -274,11 +247,9 @@
                     <textarea id="mob_q_mcq_opts" rows="4" class="w-full p-2 border rounded-lg text-left font-sans" dir="ltr" placeholder="A) ..."></textarea>
                 </div>
             </div>
-
             <div id="mob-input-title" class="hidden">
                 <textarea id="mob_t_text" rows="2" class="w-full p-3 border-2 border-gray-400 rounded-xl font-bold text-center" placeholder="نموونە: پرسیاری دووەم"></textarea>
             </div>
-
             <button onclick="addItemMobile()" class="w-full bg-blue-600 text-white font-bold py-4 rounded-xl mt-4">زیادکردن</button>
             <div class="h-20"></div>
         </div>
@@ -309,29 +280,21 @@
                     <button onclick="switchMode('question', 'desktop')" id="desk-mode-q" class="mode-btn active">پرسیار</button>
                     <button onclick="switchMode('title', 'desktop')" id="desk-mode-t" class="mode-btn inactive">سەردێڕ</button>
                 </div>
-
                 <div id="desk-input-question">
                     <div id="desk-math-toolbar-q" class="math-toolbar"></div>
                     <textarea id="q_text" rows="3" class="w-full p-2 border rounded mb-2 text-left font-sans" dir="ltr" placeholder="دەقی پرسیار..."></textarea>
-                    
                     <div class="mb-2 bg-white p-2 rounded border border-gray-200">
                         <label class="block text-xs font-bold text-gray-600 mb-1"><i class="fa-regular fa-image"></i> وێنە:</label>
                         <input type="file" id="q_image" accept="image/*" class="block w-full text-xs text-gray-500">
                     </div>
-
                     <div class="mb-2 bg-white p-2 rounded border border-gray-200">
-                        <label class="block text-xs font-bold text-gray-600 mb-1 flex justify-between">
-                            <span>بۆشایی خوارەوە</span>
-                            <span id="desk-spacing-val" class="text-blue-600">0mm</span>
-                        </label>
+                        <label class="block text-xs font-bold text-gray-600 mb-1 flex justify-between"><span>بۆشایی خوارەوە (Spacing)</span><span id="desk-spacing-val" class="text-blue-600">0mm</span></label>
                         <input type="range" id="q_spacing" min="0" max="100" value="0" oninput="document.getElementById('desk-spacing-val').innerText = this.value + 'mm'">
                     </div>
-
                     <div class="flex items-center gap-2 mb-2 bg-orange-50 p-2 rounded border border-orange-100">
                         <input type="checkbox" id="q_is_sub" class="w-4 h-4 accent-orange-600">
                         <label for="q_is_sub" class="text-sm font-bold text-orange-800 cursor-pointer select-none">لقی پرسیارە (A, B, C)</label>
                     </div>
-
                     <div class="flex gap-2 mb-2">
                         <input type="number" id="q_score" value="10" class="w-20 p-2 border rounded text-center">
                         <select id="q_type" class="flex-1 p-2 border rounded" onchange="toggleMCQ(this.value, 'desktop')">
@@ -344,14 +307,12 @@
                         <textarea id="q_mcq_opts" rows="3" class="w-full p-2 border text-sm text-left font-sans" dir="ltr" placeholder="A) ..."></textarea>
                     </div>
                 </div>
-
                 <div id="desk-input-title" class="hidden">
                     <div class="bg-gray-100 p-4 rounded border-2 border-dashed border-gray-300">
                         <label class="block text-sm font-bold text-gray-700 mb-2">دەقی سەردێڕ:</label>
                         <input type="text" id="t_text" class="w-full p-2 border-2 border-gray-400 rounded font-bold text-center" placeholder="نموونە: پرسیاری دووەم">
                     </div>
                 </div>
-
                 <button onclick="addItemDesktop()" class="w-full bg-blue-600 text-white font-bold py-3 rounded text-sm shadow mt-2">زیادکردن</button>
             </div>
 
@@ -412,7 +373,7 @@
     </div>
 
     <script>
-        // --- SECURE DEVICE LOGIC ---
+        // --- SECURE DEVICE LOGIC (Fail-safe) ---
         let currentDeviceId = localStorage.getItem('app_device_id');
         if (!currentDeviceId) { currentDeviceId = crypto.randomUUID(); localStorage.setItem('app_device_id', currentDeviceId); }
 
@@ -421,25 +382,67 @@
             const errorMsg = document.getElementById('login-error');
             const loading = document.getElementById('auth-loading');
             
-            if (!inputCode || inputCode.length < 6 || parseInt(inputCode) < 112201) { errorMsg.innerText = "کۆدەکە هەڵەیە!"; errorMsg.classList.remove('hidden'); return; }
-            if (!window.firebaseApp || !window.firebaseApp.db) { localStorage.setItem('exam_app_code', inputCode); document.getElementById('login-overlay').style.display='none'; return; }
+            errorMsg.classList.add('hidden');
+
+            if (!inputCode || inputCode.length < 6 || parseInt(inputCode) < 112201) { 
+                errorMsg.innerText = "کۆدەکە هەڵەیە! دەبێت لە 6 ژمارە زیاتر بێت."; 
+                errorMsg.classList.remove('hidden'); 
+                return; 
+            }
+
+            // Fallback Logic: If Firebase didn't load or Auth isn't ready, verify locally
+            if (!window.firebaseServices || !window.firebaseServices.auth) {
+                console.warn("Firebase not ready, using Local Verification.");
+                // Accept valid code pattern locally
+                localStorage.setItem('exam_app_code', inputCode);
+                document.getElementById('login-overlay').style.display='none';
+                loadData();
+                return;
+            }
 
             loading.classList.remove('hidden');
-            const { db, doc, getDoc, setDoc, collection } = window.firebaseApp;
-            const codeRef = doc(collection(db, 'artifacts', window.firebaseApp.appId, 'public', 'data', 'used_codes'), inputCode);
+            const { db, doc, getDoc, setDoc, collection, appId } = window.firebaseServices;
+            
+            // Reference the specific code document
+            const codeRef = doc(collection(db, 'artifacts', appId, 'public', 'data', 'used_codes'), inputCode);
 
             try {
                 const docSnap = await getDoc(codeRef);
+                
                 if (docSnap.exists()) {
                     const data = docSnap.data();
-                    if (data.deviceId === currentDeviceId) { localStorage.setItem('exam_app_code', inputCode); document.getElementById('login-overlay').style.display='none'; } 
-                    else { errorMsg.innerText = "ئەم کۆدە لەسەر ئامێرێکی تر بەکارهاتووە!"; errorMsg.classList.remove('hidden'); }
+                    if (data.deviceId === currentDeviceId) { 
+                        // Allowed: Same device
+                        localStorage.setItem('exam_app_code', inputCode); 
+                        document.getElementById('login-overlay').style.display='none';
+                        loadData();
+                    } else { 
+                        // Blocked: Different device
+                        errorMsg.innerText = "ئەم کۆدە پێشتر لەسەر مۆبایلێکی تر بەکارهاتووە و ناتوانرێت لێرە بەکاربێت."; 
+                        errorMsg.classList.remove('hidden'); 
+                    }
                 } else {
+                    // New Code: Claim it
                     await setDoc(codeRef, { deviceId: currentDeviceId, usedAt: new Date().toISOString() });
-                    localStorage.setItem('exam_app_code', inputCode); document.getElementById('login-overlay').style.display='none';
+                    localStorage.setItem('exam_app_code', inputCode); 
+                    document.getElementById('login-overlay').style.display='none';
+                    loadData();
                 }
-            } catch (err) { errorMsg.innerText = "کێشە لە پەیوەندیکردن بە سێرڤەر"; errorMsg.classList.remove('hidden'); } 
-            finally { loading.classList.add('hidden'); }
+            } catch (err) {
+                console.error("Verification Error:", err);
+                // Fail-safe: If network error, allow local access but warn
+                if (err.code === 'unavailable' || err.code === 'permission-denied') {
+                    alert("ئاگاداری: بەهۆی کێشەی ئینتەرنێتەوە، بە شێوازی ئۆفلاین چوویتە ژوورەوە.");
+                    localStorage.setItem('exam_app_code', inputCode);
+                    document.getElementById('login-overlay').style.display='none';
+                    loadData();
+                } else {
+                    errorMsg.innerText = "هەڵە: " + (err.message || "کێشەیەک ڕوویدا");
+                    errorMsg.classList.remove('hidden');
+                }
+            } finally { 
+                loading.classList.add('hidden'); 
+            }
         }
 
         // --- MATH BUTTONS ---
@@ -490,13 +493,17 @@
                 }
             });
             populateMathToolbars();
-            if (localStorage.getItem('exam_app_code')) { document.getElementById('login-overlay').style.display = 'none'; loadData(); } else { loadData(); }
             
-            // Header Logo Listener
+            // Check Local Storage Login FIRST
+            if (localStorage.getItem('exam_app_code')) { 
+                document.getElementById('login-overlay').style.display = 'none'; 
+                loadData(); 
+            } else {
+                // Keep overlay, wait for input
+            }
+            
             document.getElementById('h_logo_input').addEventListener('change', async function(e) {
-                if (e.target.files.length > 0) {
-                    try { customLogo = await toBase64(e.target.files[0]); updatePaper(); } catch(e) {}
-                }
+                if (e.target.files.length > 0) { try { customLogo = await toBase64(e.target.files[0]); updatePaper(); } catch(e) {} }
             });
         };
 
@@ -662,13 +669,13 @@
                     subject: document.getElementById('h_subject').value, class: document.getElementById('h_class').value,
                     date: document.getElementById('h_date').value, time: document.getElementById('h_time').value,
                     type: document.getElementById('h_type').value, year: document.getElementById('h_year').value,
-                    logo: customLogo // Save custom logo
+                    logo: customLogo
                 }
             };
-            try { localStorage.setItem('exam_data_v22', JSON.stringify(data)); } catch(e) {}
+            try { localStorage.setItem('exam_data_v23', JSON.stringify(data)); } catch(e) {}
         }
         function loadData() {
-            const saved = localStorage.getItem('exam_data_v22');
+            const saved = localStorage.getItem('exam_data_v23');
             if(saved) {
                 const data = JSON.parse(saved); items = data.items || [];
                 if(data.header) {
@@ -727,36 +734,6 @@
             setTimeout(() => { html2pdf().set(opt).from(clone).save().then(() => { document.body.removeChild(container); document.getElementById('pdf-loading').classList.add('hidden'); document.getElementById('pdf-loading').classList.remove('flex'); }); }, 500);
         }
         function clearAll() { if(confirm('دڵنیایت؟')) { items=[]; saveData(); renderPaper(); renderMiniList(); } }
-        
-        // --- SECURE DEVICE LOGIC ---
-        let currentDeviceId = localStorage.getItem('app_device_id');
-        if (!currentDeviceId) { currentDeviceId = crypto.randomUUID(); localStorage.setItem('app_device_id', currentDeviceId); }
-
-        async function checkPassword() {
-            const inputCode = document.getElementById('password-input').value.trim();
-            const errorMsg = document.getElementById('login-error');
-            const loading = document.getElementById('auth-loading');
-            
-            if (!inputCode || inputCode.length < 6 || parseInt(inputCode) < 112201) { errorMsg.innerText = "کۆدەکە هەڵەیە!"; errorMsg.classList.remove('hidden'); return; }
-            if (!window.firebaseApp || !window.firebaseApp.db) { localStorage.setItem('exam_app_code', inputCode); document.getElementById('login-overlay').style.display='none'; return; }
-
-            loading.classList.remove('hidden');
-            const { db, doc, getDoc, setDoc, collection } = window.firebaseApp;
-            const codeRef = doc(collection(db, 'artifacts', window.firebaseApp.appId, 'public', 'data', 'used_codes'), inputCode);
-
-            try {
-                const docSnap = await getDoc(codeRef);
-                if (docSnap.exists()) {
-                    const data = docSnap.data();
-                    if (data.deviceId === currentDeviceId) { localStorage.setItem('exam_app_code', inputCode); document.getElementById('login-overlay').style.display='none'; } 
-                    else { errorMsg.innerText = "ئەم کۆدە لەسەر ئامێرێکی تر بەکارهاتووە!"; errorMsg.classList.remove('hidden'); }
-                } else {
-                    await setDoc(codeRef, { deviceId: currentDeviceId, usedAt: new Date().toISOString() });
-                    localStorage.setItem('exam_app_code', inputCode); document.getElementById('login-overlay').style.display='none';
-                }
-            } catch (err) { errorMsg.innerText = "کێشە لە پەیوەندیکردن بە سێرڤەر"; errorMsg.classList.remove('hidden'); } 
-            finally { loading.classList.add('hidden'); }
-        }
     </script>
 </body>
 </html>
