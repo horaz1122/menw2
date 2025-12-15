@@ -3,7 +3,7 @@
 <head>
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0, maximum-scale=1.0, user-scalable=no">
-    <title>دروستکەری پرسیار - زیرەک و ڕێکخراو</title>
+    <title>دروستکەری پرسیار - کۆتایی و پارێزراو</title>
     
     <!-- Tailwind CSS -->
     <script src="https://cdn.tailwindcss.com"></script>
@@ -71,7 +71,6 @@
     <style>
         body { background-color: #f0f2f5; height: 100dvh; overflow: hidden; }
         
-        /* A4 Paper Styling - Standard Size */
         .a4-paper { 
             width: 210mm; 
             min-height: 297mm; 
@@ -83,7 +82,7 @@
             font-family: 'Nrt Reg', 'Vazirmatn', sans-serif; 
             color: black; 
             box-sizing: border-box;
-            transform-origin: top center; /* Critical for scaling */
+            transform-origin: top center; 
         }
 
         .exam-header { display: grid; grid-template-columns: 1fr 1.2fr 1fr; gap: 5px; border-bottom: 2px double #000; padding-bottom: 5px; margin-bottom: 10px; align-items: center; }
@@ -93,15 +92,13 @@
         .header-logo { width: 80px; height: 80px; object-fit: contain; margin-bottom: 5px; }
         .group-badge { width: 30px; height: 30px; border: 2px solid black; border-radius: 50%; display: flex; align-items: center; justify-content: center; font-weight: 900; font-size: 1rem; margin-top: 2px; }
         
-        /* Numbering */
         .q-number { background: #000; color: white; width: 22px; height: 22px; border-radius: 50%; display: inline-flex; align-items: center; justify-content: center; font-size: 12px; margin-left: 6px; flex-shrink: 0; -webkit-print-color-adjust: exact; print-color-adjust: exact; }
         .q-sub-number { background: #fff; color: black; border: 1.5px solid black; width: 20px; height: 20px; border-radius: 50%; display: inline-flex; align-items: center; justify-content: center; font-size: 12px; margin-left: 6px; margin-right: 15px; font-weight: bold; flex-shrink: 0; }
         .q-spacer { width: 22px; height: 22px; margin-left: 6px; flex-shrink: 0; } 
-        
         .q-score { font-size: 10px; border: 1px solid #000; padding: 1px 4px; border-radius: 4px; margin-right: auto; white-space: nowrap; }
+        
         .section-title { width: 100%; text-align: center; font-weight: 900; font-size: 1rem; margin: 0.5rem 0 0.5rem 0; padding: 2px; border-top: 2px solid #000; border-bottom: 2px solid #000; background-color: #f3f4f6; -webkit-print-color-adjust: exact; print-color-adjust: exact; }
         .q-image { max-width: 100%; max-height: 150px; display: block; margin: 5px auto; border: 1px dashed #ccc; padding: 2px; }
-        
         input, textarea, select { font-size: 16px !important; touch-action: manipulation; }
         mjx-container { font-size: 100% !important; margin: 0 !important; }
         
@@ -127,10 +124,7 @@
             scrollbar-width: thin; scrollbar-color: #cbd5e1 transparent;
             max-height: calc(100vh - 300px);
         }
-        #questions_mini_list::-webkit-scrollbar { width: 6px; }
-        #questions_mini_list::-webkit-scrollbar-thumb { background-color: #cbd5e1; border-radius: 3px; }
 
-        /* Preview Panel Auto-Scroll on Mobile */
         #preview-panel {
             overflow-y: auto;
             overflow-x: hidden;
@@ -147,7 +141,6 @@
         }
         @media (max-width: 768px) { 
             #editor-panel { padding-bottom: 250px !important; } 
-            /* Paper scaling handled by JS now for perfect fit */
         }
     </style>
 </head>
@@ -251,7 +244,7 @@
                 <div class="mb-4 bg-gray-50 p-2 rounded border border-gray-200"><label class="block text-xs font-bold text-gray-600 mb-1"><i class="fa-regular fa-image"></i> وێنە:</label><input type="file" id="mob_q_image" accept="image/*" class="block w-full text-sm text-gray-500"></div>
                 <div class="mb-4 bg-gray-50 p-2 rounded border border-gray-200"><label class="block text-xs font-bold text-gray-600 mb-1 flex justify-between"><span>بۆشایی خوارەوە</span><span id="mob-spacing-val" class="text-blue-600">0mm</span></label><input type="range" id="mob_q_spacing" min="0" max="100" value="0" oninput="document.getElementById('mob-spacing-val').innerText = this.value + 'mm'"></div>
                 <div class="flex items-center gap-2 mb-4 bg-orange-50 p-2 rounded border border-orange-100"><input type="checkbox" id="mob_q_is_sub" class="w-5 h-5 accent-orange-600"><label for="mob_q_is_sub" class="text-sm font-bold text-orange-800">لقی پرسیارە (A, B, C)</label></div>
-                <div class="flex gap-3 mb-4"><input type="number" id="mob_q_score" value="10" class="w-1/3 p-3 border-2 rounded-xl text-center"><select id="mob_q_type" class="w-2/3 p-3 border-2 rounded-xl bg-white" onchange="toggleMobileMCQ(this.value)"><option value="mcq">هەڵبژاردن</option><option value="text">نووسین</option><option value="tf">ڕاست/هەڵە</option><option value="fill">بۆشایی</option></select></div>
+                <div class="flex gap-3 mb-4"><input type="number" id="mob_q_score" value="10" class="w-1/3 p-3 border-2 rounded-xl text-center"><select id="mob_q_type" class="w-2/3 p-3 border-2 rounded-xl bg-white" onchange="toggleMobileMCQ(this.value)"><option value="mcq">هەڵبژاردن</option><option value="text">نووسین (تەقلیدی)</option><option value="tf">ڕاست/هەڵە</option><option value="fill">بۆشایی</option></select></div>
                 <div id="mob_mcq_options_container" class="hidden bg-gray-50 p-3 rounded-xl border mb-4"><div id="mob-math-toolbar-opt" class="math-toolbar"></div><textarea id="mob_q_mcq_opts" rows="4" class="w-full p-2 border rounded-lg text-left font-sans" dir="ltr" placeholder="A) ..."></textarea></div>
             </div>
             <div id="mob-input-title" class="hidden"><textarea id="mob_t_text" rows="2" class="w-full p-3 border-2 border-gray-400 rounded-xl font-bold text-center" placeholder="نموونە: پرسیاری دووەم"></textarea></div>
@@ -271,7 +264,7 @@
     <div class="flex-1 flex flex-col lg:flex-row overflow-hidden relative">
         <!-- Editor Panel -->
         <div id="editor-panel" class="w-full lg:w-1/3 bg-white border-l h-full overflow-y-auto p-4 z-10 flex flex-col">
-            <div class="flex justify-between items-center mb-4"><h2 class="text-xl font-bold text-blue-700">کۆنترۆڵ</h2><div class="flex gap-2"><a href="lk.jpg" download class="bg-orange-500 hover:bg-orange-600 text-white px-3 py-1 rounded shadow text-sm font-bold flex items-center gap-2"><i class="fa-solid fa-image"></i> داگرتنی لۆگۆ</a><button onclick="openHeaderModal()" class="bg-blue-600 text-white px-3 py-1 rounded shadow text-sm">زانیاری</button><button onclick="viewDirectPDF()" class="bg-green-600 text-white px-3 py-1 rounded shadow text-sm flex items-center gap-1"><i class="fa-solid fa-eye"></i> بینینی PDF</button><button onclick="downloadDirectPDF()" class="bg-gray-600 text-white px-3 py-1 rounded shadow text-sm"><i class="fa-solid fa-download"></i></button></div></div>
+            <div class="flex justify-between items-center mb-4"><h2 class="text-xl font-bold text-blue-700">کۆنترۆڵ</h2><div class="flex gap-2"><a href="lk.jpeg" download class="bg-orange-500 hover:bg-orange-600 text-white px-3 py-1 rounded shadow text-sm font-bold flex items-center gap-2"><i class="fa-solid fa-image"></i> lk.jpeg</a><button onclick="openHeaderModal()" class="bg-blue-600 text-white px-3 py-1 rounded shadow text-sm">زانیاری</button><button onclick="viewDirectPDF()" class="bg-green-600 text-white px-3 py-1 rounded shadow text-sm flex items-center gap-1"><i class="fa-solid fa-eye"></i> بینینی PDF</button><button onclick="downloadDirectPDF()" class="bg-gray-600 text-white px-3 py-1 rounded shadow text-sm"><i class="fa-solid fa-download"></i></button></div></div>
             <div class="hidden lg:block bg-gray-50 p-4 rounded-lg border shadow-sm mb-4">
                 <div class="mode-switch"><button onclick="switchMode('question', 'desktop')" id="desk-mode-q" class="mode-btn active">پرسیار</button><button onclick="switchMode('title', 'desktop')" id="desk-mode-t" class="mode-btn inactive">سەردێڕ</button></div>
                 <div id="desk-input-question">
@@ -279,7 +272,7 @@
                     <div class="mb-2 bg-white p-2 rounded border border-gray-200"><label class="block text-xs font-bold text-gray-600 mb-1"><i class="fa-regular fa-image"></i> وێنە:</label><input type="file" id="q_image" accept="image/*" class="block w-full text-xs text-gray-500"></div>
                     <div class="mb-2 bg-white p-2 rounded border border-gray-200"><label class="block text-xs font-bold text-gray-600 mb-1 flex justify-between"><span>بۆشایی</span><span id="desk-spacing-val" class="text-blue-600">0mm</span></label><input type="range" id="q_spacing" min="0" max="100" value="0" oninput="document.getElementById('desk-spacing-val').innerText = this.value + 'mm'"></div>
                     <div class="flex items-center gap-2 mb-2 bg-orange-50 p-2 rounded border border-orange-100"><input type="checkbox" id="q_is_sub" class="w-4 h-4 accent-orange-600"><label for="q_is_sub" class="text-sm font-bold text-orange-800 cursor-pointer select-none">لقی پرسیارە (A, B, C)</label></div>
-                    <div class="flex gap-2 mb-2"><input type="number" id="q_score" value="10" class="w-20 p-2 border rounded text-center"><select id="q_type" class="flex-1 p-2 border rounded" onchange="toggleMCQ(this.value, 'desktop')"><option value="mcq">هەڵبژاردن</option><option value="text">نووسین</option><option value="tf">ڕاست و هەڵە</option><option value="fill">بۆشایی</option></select></div>
+                    <div class="flex gap-2 mb-2"><input type="number" id="q_score" value="10" class="w-20 p-2 border rounded text-center"><select id="q_type" class="flex-1 p-2 border rounded" onchange="toggleMCQ(this.value, 'desktop')"><option value="mcq">هەڵبژاردن</option><option value="text">نووسین (تەقلیدی)</option><option value="tf">ڕاست و هەڵە</option><option value="fill">بۆشایی</option></select></div>
                     <div id="mcq_options_container" class="hidden bg-white p-2 border rounded mb-2"><div id="desk-math-toolbar-opt" class="math-toolbar"></div><textarea id="q_mcq_opts" rows="3" class="w-full p-2 border text-sm text-left font-sans" dir="ltr" placeholder="A) ..."></textarea></div>
                 </div>
                 <div id="desk-input-title" class="hidden"><div class="bg-gray-100 p-4 rounded border-2 border-dashed border-gray-300"><label class="block text-sm font-bold text-gray-700 mb-2">دەقی سەردێڕ:</label><input type="text" id="t_text" class="w-full p-2 border-2 border-gray-400 rounded font-bold text-center" placeholder="نموونە: پرسیاری دووەم"></div></div>
@@ -342,7 +335,6 @@
     </div>
 
     <script>
-        // --- SECURE DEVICE LOGIC ---
         let currentDeviceId = localStorage.getItem('app_device_id');
         if (!currentDeviceId) { currentDeviceId = crypto.randomUUID(); localStorage.setItem('app_device_id', currentDeviceId); }
 
@@ -387,14 +379,13 @@
                 }
             } catch (err) {
                 console.error("Firebase Error:", err);
-                if (err.code === 'unavailable' || err.code === 'permission-denied') {
-                    errorMsg.innerText = "کێشەی ئینتەرنێت هەیە"; 
-                } else { errorMsg.innerText = "هەڵە ڕوویدا"; }
-                errorMsg.classList.remove('hidden');
+                if (err.code === 'unavailable' || err.code === 'permission-denied' || err.message.includes('offline')) {
+                    errorMsg.innerText = "کێشەی ئینتەرنێت هەیە (پێویستە)."; 
+                    errorMsg.classList.remove('hidden'); 
+                } else { errorMsg.innerText = "هەڵە ڕوویدا"; errorMsg.classList.remove('hidden'); }
             } finally { loading.classList.add('hidden'); }
         }
 
-        // --- MATH BUTTONS ---
         const mathButtons = [
             { label: '$\\sqrt{x}$', code: 'sqrt' }, { label: '$\\frac{a}{b}$', code: 'frac' }, { label: '$x^2$', code: 'pow' }, { label: '$e^x$', code: 'exp' },
             { label: '$\\times$', code: 'times' }, { label: '$\\div$', code: 'div' }, { label: '$\\pm$', code: 'pm' },
@@ -432,17 +423,15 @@
         let customLogo = null;
         let editingId = null;
 
-        // Auto Scaling Function
         function resizePaper() {
             const paper = document.getElementById('examPaper');
             if (!paper) return;
             const containerWidth = document.getElementById('preview-panel').offsetWidth;
-            const paperWidth = 794; // approx 210mm in pixels
-            // Only scale if container is smaller than paper (mobile)
+            const paperWidth = 794; 
             if (containerWidth < paperWidth + 40) {
                  const scale = (containerWidth - 20) / paperWidth;
                  paper.style.transform = `scale(${scale})`;
-                 paper.style.marginBottom = `-${(1 - scale) * 1123}px`; // adjust height space
+                 paper.style.marginBottom = `-${(1 - scale) * 1123}px`;
             } else {
                  paper.style.transform = 'none';
                  paper.style.marginBottom = '0';
@@ -498,7 +487,6 @@
 
         function switchMode(mode, view) {
             currentMode[view] = mode;
-            // FIX for title bug: Update global state correctly for addItem functions
             if(view === 'desktop') currentMode.desktop = mode;
             else currentMode.mobile = mode;
 
@@ -550,7 +538,6 @@
                 document.getElementById('q_is_sub').checked = false; document.getElementById('q_image').value = '';
                 document.getElementById('q_spacing').value = 0; document.getElementById('desk-spacing-val').innerText = '0mm';
             } else {
-                // TITLE MODE
                 const text = document.getElementById('t_text').value.trim();
                 if(!text) return alert("سەردێڕ بنووسە");
                 addItem({ type: 'title', text }); document.getElementById('t_text').value = '';
@@ -584,7 +571,6 @@
                 document.getElementById('mob_q_is_sub').checked = false; document.getElementById('mob_q_image').value = '';
                 document.getElementById('mob_q_spacing').value = 0; document.getElementById('mob-spacing-val').innerText = '0mm';
             } else {
-                // TITLE MODE
                 const text = document.getElementById('mob_t_text').value.trim();
                 if(!text) return alert("سەردێڕ");
                 addItem({ type: 'title', text }); document.getElementById('mob_t_text').value = '';
@@ -714,29 +700,16 @@
             else { grpCont.classList.add('hidden'); }
             
             const logoImg = document.getElementById('header_logo_img');
-            const dlLink = document.getElementById('download-logo-link');
             
             if (customLogo) { 
                 logoImg.src = customLogo; 
-                dlLink.href = customLogo;
-                dlLink.classList.remove('hidden');
             } else { 
                 logoImg.src = "https://upload.wikimedia.org/wikipedia/commons/d/d3/Kurdistan_Regional_Government_emblem.svg";
-                dlLink.classList.add('hidden');
             }
             saveData();
         }
         
         window.toBase64 = (file) => new Promise((resolve, reject) => { const r = new FileReader(); r.readAsDataURL(file); r.onload = () => resolve(r.result); r.onerror = reject; });
-        window.switchMode = (m,v) => { 
-            const pfx = v==='desktop'?'desk':'mob'; 
-            document.getElementById(pfx+'-mode-q').className = `mode-btn ${m==='question'?'active':'inactive'}`;
-            document.getElementById(pfx+'-mode-t').className = `mode-btn ${m!=='question'?'active':'inactive'}`;
-            document.getElementById(pfx+'-input-question').classList.toggle('hidden', m!=='question');
-            document.getElementById(pfx+'-input-title').classList.toggle('hidden', m==='question');
-            // IMPORTANT: Update global mode
-            if(v==='desktop') currentMode.desktop=m; else currentMode.mobile=m;
-        };
         window.toggleMCQ = (v) => document.getElementById('mcq_options_container').classList.toggle('hidden', v!=='mcq');
         window.toggleMobileMCQ = (v) => document.getElementById('mob_mcq_options_container').classList.toggle('hidden', v!=='mcq');
         window.openHeaderModal = () => document.getElementById('header-modal').classList.remove('hidden');
@@ -750,64 +723,6 @@
         };
         window.downloadDirectPDF = () => { const el=document.getElementById('examPaper'); html2pdf().set({margin:0,filename:'exam.pdf',image:{type:'jpeg',quality:0.98},html2canvas:{scale:2,useCORS:true},jsPDF:{unit:'mm',format:'a4'}}).from(el).save(); };
         window.clearAll = () => { if(confirm('دڵنیایت؟')) { items=[]; saveData(); renderPaper(); renderMiniList(); } };
-        window.checkPassword = () => { 
-            const inputVal = document.getElementById('password-input').value;
-            if(!inputVal) return;
-            if(inputVal === '23819933') {
-                localStorage.setItem('exam_app_code', inputVal); 
-                document.getElementById('login-overlay').style.display='none'; 
-                loadData();
-                resizePaper();
-                return;
-            }
-            const errorMsg = document.getElementById('login-error');
-            const loading = document.getElementById('auth-loading');
-            errorMsg.classList.add('hidden');
-            
-            if (!window.firebaseApp || !window.firebaseApp.db) { 
-                errorMsg.innerText = "پەیوەندی بە سێرڤەر نییە. ئینتەرنێت بپشکنە.";
-                errorMsg.classList.remove('hidden');
-                return; 
-            }
-
-            loading.classList.remove('hidden');
-            const { db, doc, getDoc, setDoc, collection, appId } = window.firebaseApp;
-            const codeRef = doc(collection(db, 'artifacts', appId, 'public', 'data', 'access_codes'), String(inputVal));
-            
-            let currentDeviceId = localStorage.getItem('app_device_id');
-            if (!currentDeviceId) { currentDeviceId = crypto.randomUUID(); localStorage.setItem('app_device_id', currentDeviceId); }
-
-            getDoc(codeRef).then(docSnap => {
-                if (docSnap.exists()) {
-                    const data = docSnap.data();
-                    if (data.deviceId === currentDeviceId) { 
-                         localStorage.setItem('exam_app_code', inputVal); 
-                         document.getElementById('login-overlay').style.display='none'; 
-                         loadData(); 
-                         resizePaper();
-                    } else if (!data.deviceId) {
-                        setDoc(codeRef, { deviceId: currentDeviceId, usedAt: new Date().toISOString() }, { merge: true }).then(() => {
-                            localStorage.setItem('exam_app_code', inputVal); 
-                            document.getElementById('login-overlay').style.display='none'; 
-                            loadData();
-                            resizePaper();
-                        });
-                    } else { 
-                        errorMsg.innerText = "ئەم کۆدە لەسەر ئامێرێکی تر بەکارهاتووە."; 
-                        errorMsg.classList.remove('hidden'); 
-                    }
-                } else {
-                     errorMsg.innerText = "ئەم کۆدە بوونی نییە (تەنها لای ئەدمین).";
-                     errorMsg.classList.remove('hidden');
-                }
-            }).catch(err => {
-                console.error(err);
-                errorMsg.innerText = "کێشەی ئینتەرنێت هەیە";
-                errorMsg.classList.remove('hidden');
-            }).finally(() => {
-                loading.classList.add('hidden');
-            });
-        };
     </script>
 </body>
 </html>
