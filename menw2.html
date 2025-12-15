@@ -3,7 +3,7 @@
 <head>
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0, maximum-scale=1.0, user-scalable=no">
-    <title>دروستکەری پرسیار - کۆتایی و پارێزراو</title>
+    <title>دروستکەری پرسیار - چاککراوی ٤٣</title>
     
     <!-- Tailwind CSS -->
     <script src="https://cdn.tailwindcss.com"></script>
@@ -70,21 +70,12 @@
 
     <style>
         body { background-color: #f0f2f5; height: 100dvh; overflow: hidden; }
-        
         .a4-paper { 
-            width: 210mm; 
-            min-height: 297mm; 
-            background: white; 
-            margin: 0 auto; 
-            padding: 10mm; 
-            position: relative; 
-            box-shadow: 0 4px 15px rgba(0,0,0,0.15); 
-            font-family: 'Nrt Reg', 'Vazirmatn', sans-serif; 
-            color: black; 
-            box-sizing: border-box;
-            transform-origin: top center; 
+            width: 210mm; min-height: 297mm; background: white; margin: 0 auto; padding: 10mm 10mm; 
+            position: relative; box-shadow: 0 4px 15px rgba(0,0,0,0.15); 
+            font-family: 'Nrt Reg', 'Vazirmatn', sans-serif; color: black; box-sizing: border-box; 
+            transform-origin: top center; transition: transform 0.3s;
         }
-
         .exam-header { display: grid; grid-template-columns: 1fr 1.2fr 1fr; gap: 5px; border-bottom: 2px double #000; padding-bottom: 5px; margin-bottom: 10px; align-items: center; }
         .header-section { display: flex; flex-direction: column; gap: 2px; font-size: 12px; font-weight: bold; line-height: 1.2; }
         .header-center { text-align: center; align-items: center; display: flex; flex-direction: column; justify-content: center; }
@@ -96,17 +87,15 @@
         .q-sub-number { background: #fff; color: black; border: 1.5px solid black; width: 20px; height: 20px; border-radius: 50%; display: inline-flex; align-items: center; justify-content: center; font-size: 12px; margin-left: 6px; margin-right: 15px; font-weight: bold; flex-shrink: 0; }
         .q-spacer { width: 22px; height: 22px; margin-left: 6px; flex-shrink: 0; } 
         .q-score { font-size: 10px; border: 1px solid #000; padding: 1px 4px; border-radius: 4px; margin-right: auto; white-space: nowrap; }
-        
         .section-title { width: 100%; text-align: center; font-weight: 900; font-size: 1rem; margin: 0.5rem 0 0.5rem 0; padding: 2px; border-top: 2px solid #000; border-bottom: 2px solid #000; background-color: #f3f4f6; -webkit-print-color-adjust: exact; print-color-adjust: exact; }
         .q-image { max-width: 100%; max-height: 150px; display: block; margin: 5px auto; border: 1px dashed #ccc; padding: 2px; }
+        
         input, textarea, select { font-size: 16px !important; touch-action: manipulation; }
         mjx-container { font-size: 100% !important; margin: 0 !important; }
         
         .math-toolbar { display: flex; gap: 0.3rem; overflow-x: auto; padding-bottom: 0.5rem; margin-bottom: 0.5rem; background: #f8fafc; padding: 6px; border-radius: 6px; border: 1px solid #e2e8f0; }
         .math-toolbar::-webkit-scrollbar { display: none; }
         .math-btn { background: white; border: 1px solid #cbd5e1; color: #1e293b; padding: 2px 6px; border-radius: 4px; font-size: 12px; font-family: 'Times New Roman', serif; transition: all 0.2s; white-space: nowrap; display: flex; align-items: center; justify-content: center; min-width: 32px; }
-        .math-btn:hover { background: #e0f2fe; border-color: #3b82f6; }
-        
         .mode-switch { display: flex; background: #e5e7eb; border-radius: 8px; padding: 3px; margin-bottom: 10px; }
         .mode-btn { flex: 1; padding: 6px; text-align: center; border-radius: 6px; font-weight: bold; font-size: 13px; transition: all 0.2s; }
         .mode-btn.active { background: white; color: #2563eb; box-shadow: 0 1px 2px rgba(0,0,0,0.1); }
@@ -129,6 +118,7 @@
             overflow-y: auto;
             overflow-x: hidden;
             -webkit-overflow-scrolling: touch;
+            padding-bottom: 100px; /* Space for bottom nav */
         }
 
         @media print { 
@@ -345,11 +335,12 @@
             
             errorMsg.classList.add('hidden');
 
-            // 1. MASTER CODE CHECK
+            // Master Code Check
             if (inputVal === '23819933') {
                 localStorage.setItem('exam_app_code', inputVal);
                 document.getElementById('login-overlay').style.display = 'none';
                 loadData();
+                resizePaper();
                 return;
             }
 
@@ -363,27 +354,38 @@
             loading.classList.remove('hidden');
             const { db, doc, getDoc, setDoc, collection, appId } = window.firebaseApp;
             const codeRef = doc(collection(db, 'artifacts', appId, 'public', 'data', 'access_codes'), String(inputVal));
-
+            
             try {
                 const docSnap = await getDoc(codeRef);
                 if (docSnap.exists()) {
                     const data = docSnap.data();
-                    if (data.deviceId === currentDeviceId) { localStorage.setItem('exam_app_code', inputVal); document.getElementById('login-overlay').style.display='none'; loadData(); } 
-                    else if (!data.deviceId) {
-                        await setDoc(codeRef, { deviceId: currentDeviceId, usedAt: new Date().toISOString() }, { merge: true });
-                        localStorage.setItem('exam_app_code', inputVal); document.getElementById('login-overlay').style.display='none'; loadData();
-                    } else { errorMsg.innerText = "ئەم کۆدە لەسەر ئامێرێکی تر بەکارهاتووە."; errorMsg.classList.remove('hidden'); }
+                    if (data.deviceId === currentDeviceId) { 
+                         localStorage.setItem('exam_app_code', inputVal); 
+                         document.getElementById('login-overlay').style.display='none'; 
+                         loadData(); 
+                         resizePaper();
+                    } else if (!data.deviceId) {
+                        setDoc(codeRef, { deviceId: currentDeviceId, usedAt: new Date().toISOString() }, { merge: true }).then(() => {
+                            localStorage.setItem('exam_app_code', inputVal); 
+                            document.getElementById('login-overlay').style.display='none'; 
+                            loadData();
+                            resizePaper();
+                        });
+                    } else { 
+                        errorMsg.innerText = "ئەم کۆدە لەسەر ئامێرێکی تر بەکارهاتووە."; 
+                        errorMsg.classList.remove('hidden'); 
+                    }
                 } else {
-                    errorMsg.innerText = "ئەم کۆدە بوونی نییە (تەنها لای ئەدمین).";
-                    errorMsg.classList.remove('hidden');
+                     errorMsg.innerText = "ئەم کۆدە بوونی نییە (تەنها لای ئەدمین).";
+                     errorMsg.classList.remove('hidden');
                 }
             } catch (err) {
-                console.error("Firebase Error:", err);
-                if (err.code === 'unavailable' || err.code === 'permission-denied' || err.message.includes('offline')) {
-                    errorMsg.innerText = "کێشەی ئینتەرنێت هەیە (پێویستە)."; 
-                    errorMsg.classList.remove('hidden'); 
-                } else { errorMsg.innerText = "هەڵە ڕوویدا"; errorMsg.classList.remove('hidden'); }
-            } finally { loading.classList.add('hidden'); }
+                console.error(err);
+                errorMsg.innerText = "کێشەی ئینتەرنێت هەیە";
+                errorMsg.classList.remove('hidden');
+            } finally {
+                loading.classList.add('hidden');
+            }
         }
 
         const mathButtons = [
@@ -428,7 +430,7 @@
             if (!paper) return;
             const containerWidth = document.getElementById('preview-panel').offsetWidth;
             const paperWidth = 794; 
-            if (containerWidth < paperWidth + 40) {
+            if (containerWidth < paperWidth + 40 && containerWidth > 0) {
                  const scale = (containerWidth - 20) / paperWidth;
                  paper.style.transform = `scale(${scale})`;
                  paper.style.marginBottom = `-${(1 - scale) * 1123}px`;
@@ -450,11 +452,10 @@
                 }
             });
             populateMathToolbars();
-            if (localStorage.getItem('exam_app_code')) { document.getElementById('login-overlay').style.display = 'none'; loadData(); }
+            if (localStorage.getItem('exam_app_code')) { document.getElementById('login-overlay').style.display = 'none'; loadData(); resizePaper(); }
             document.getElementById('h_logo_input').addEventListener('change', async function(e) {
                 if (e.target.files.length > 0) { try { customLogo = await toBase64(e.target.files[0]); updatePaper(); } catch(e) {} }
             });
-            resizePaper();
         };
 
         function insertMath(type, inputId) {
@@ -487,6 +488,7 @@
 
         function switchMode(mode, view) {
             currentMode[view] = mode;
+            // UPDATE global mode correctly
             if(view === 'desktop') currentMode.desktop = mode;
             else currentMode.mobile = mode;
 
@@ -686,8 +688,8 @@
         }
 
         function deleteItem(id) { if(confirm("دڵنیایت؟")) { items = items.filter(i => i.id !== id); saveData(); renderPaper(); renderMiniList(); } }
-        function saveData() { localStorage.setItem('exam_data_v39', JSON.stringify({items, customLogo})); }
-        function loadData() { const d = JSON.parse(localStorage.getItem('exam_data_v39')); if(d) { items = d.items||[]; customLogo = d.customLogo; updatePaper(); renderPaper(); renderMiniList(); } }
+        function saveData() { localStorage.setItem('exam_data_v43', JSON.stringify({items, customLogo})); }
+        function loadData() { const d = JSON.parse(localStorage.getItem('exam_data_v43')); if(d) { items = d.items||[]; customLogo = d.customLogo; updatePaper(); renderPaper(); renderMiniList(); } }
         
         function updatePaper() {
             ['school','dir','gov','subject','class','date','time','type','year'].forEach(k => {
@@ -700,11 +702,15 @@
             else { grpCont.classList.add('hidden'); }
             
             const logoImg = document.getElementById('header_logo_img');
+            const dlLink = document.getElementById('download-logo-link');
             
             if (customLogo) { 
                 logoImg.src = customLogo; 
+                dlLink.href = customLogo;
+                dlLink.classList.remove('hidden');
             } else { 
                 logoImg.src = "https://upload.wikimedia.org/wikipedia/commons/d/d3/Kurdistan_Regional_Government_emblem.svg";
+                dlLink.classList.add('hidden');
             }
             saveData();
         }
@@ -723,6 +729,24 @@
         };
         window.downloadDirectPDF = () => { const el=document.getElementById('examPaper'); html2pdf().set({margin:0,filename:'exam.pdf',image:{type:'jpeg',quality:0.98},html2canvas:{scale:2,useCORS:true},jsPDF:{unit:'mm',format:'a4'}}).from(el).save(); };
         window.clearAll = () => { if(confirm('دڵنیایت؟')) { items=[]; saveData(); renderPaper(); renderMiniList(); } };
+        
+        function switchTab(tab) {
+            document.getElementById('editor-panel').classList.toggle('hidden', tab!=='editor');
+            document.getElementById('preview-panel').classList.toggle('hidden', tab!=='preview');
+            document.getElementById('preview-panel').classList.toggle('flex', tab==='preview');
+            document.getElementById('mobile-add-btn').style.display = tab==='editor' ? 'flex' : 'none';
+            document.getElementById('btn-editor').className = tab==='editor' ? "flex-1 py-4 text-center font-bold text-blue-600 border-t-2 border-blue-600 bg-blue-50" : "flex-1 py-4 text-center font-bold text-gray-500";
+            document.getElementById('btn-preview').className = tab==='preview' ? "flex-1 py-4 text-center font-bold text-blue-600 border-t-2 border-blue-600 bg-blue-50" : "flex-1 py-4 text-center font-bold text-gray-500";
+            
+            // KEY FIX: When switching to preview on mobile, ensure it's visible and scaled
+            if (tab === 'preview') {
+                setTimeout(() => {
+                    resizePaper();
+                    document.getElementById('preview-panel').scrollTop = 0;
+                }, 100);
+            }
+        }
+
     </script>
 </body>
 </html>
