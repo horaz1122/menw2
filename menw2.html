@@ -3,7 +3,7 @@
 <head>
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0, maximum-scale=1.0, user-scalable=no">
-    <title>دروستکەری پرسیار - کۆتایی</title>
+    <title>دروستکەری پرسیار - بینینی PDF</title>
     
     <!-- Tailwind CSS -->
     <script src="https://cdn.tailwindcss.com"></script>
@@ -86,7 +86,6 @@
         .q-image { max-width: 100%; max-height: 150px; display: block; margin: 5px auto; border: 1px dashed #ccc; padding: 2px; }
         input, textarea, select { font-size: 16px !important; touch-action: manipulation; }
         mjx-container { font-size: 100% !important; margin: 0 !important; }
-        
         .math-toolbar { display: flex; gap: 0.3rem; overflow-x: auto; padding-bottom: 0.5rem; margin-bottom: 0.5rem; background: #f8fafc; padding: 6px; border-radius: 6px; border: 1px solid #e2e8f0; }
         .math-toolbar::-webkit-scrollbar { display: none; }
         .math-btn { background: white; border: 1px solid #cbd5e1; color: #1e293b; padding: 2px 6px; border-radius: 4px; font-size: 12px; font-family: 'Times New Roman', serif; transition: all 0.2s; white-space: nowrap; display: flex; align-items: center; justify-content: center; min-width: 32px; }
@@ -105,7 +104,7 @@
         #questions_mini_list {
             flex: 1; overflow-y: auto; overflow-x: hidden; padding-right: 5px;
             scrollbar-width: thin; scrollbar-color: #cbd5e1 transparent;
-            max-height: calc(100vh - 300px); /* Adjust based on other elements */
+            max-height: calc(100vh - 300px);
         }
         #questions_mini_list::-webkit-scrollbar { width: 6px; }
         #questions_mini_list::-webkit-scrollbar-thumb { background-color: #cbd5e1; border-radius: 3px; }
@@ -146,7 +145,7 @@
             <div class="border-t pt-4">
                 <label class="block text-right text-xs font-bold text-gray-500 mb-1 mr-1">کۆدی چالاککردن:</label>
                 <div class="relative mb-3">
-                    <input type="number" inputmode="numeric" pattern="[0-9]*" id="password-input" class="w-full p-3 border-2 border-gray-300 rounded-xl text-center text-xl tracking-widest font-bold focus:border-blue-500 focus:ring-4 focus:ring-blue-100 outline-none transition" placeholder="تەنها ژمارە" onkeypress="if(event.key==='Enter') checkPassword()">
+                    <input type="number" inputmode="numeric" pattern="[0-9]*" id="password-input" class="w-full p-3 border-2 border-gray-300 rounded-xl text-center text-xl tracking-widest font-bold focus:border-blue-500 focus:ring-4 focus:ring-blue-100 outline-none transition uppercase" placeholder="کۆد لێرە بنووسە" onkeypress="if(event.key==='Enter') checkPassword()">
                 </div>
                 <p id="login-error" class="text-red-600 bg-red-50 text-xs mb-3 hidden p-2 rounded border border-red-200 font-bold"></p>
                 <button onclick="checkPassword()" class="w-full bg-blue-600 hover:bg-blue-700 text-white font-bold py-3.5 rounded-xl transition shadow-lg flex items-center justify-center gap-2">
@@ -214,7 +213,7 @@
                 <div class="mb-4 bg-gray-50 p-2 rounded border border-gray-200"><label class="block text-xs font-bold text-gray-600 mb-1"><i class="fa-regular fa-image"></i> وێنە:</label><input type="file" id="mob_q_image" accept="image/*" class="block w-full text-sm text-gray-500"></div>
                 <div class="mb-4 bg-gray-50 p-2 rounded border border-gray-200"><label class="block text-xs font-bold text-gray-600 mb-1 flex justify-between"><span>بۆشایی خوارەوە</span><span id="mob-spacing-val" class="text-blue-600">0mm</span></label><input type="range" id="mob_q_spacing" min="0" max="100" value="0" oninput="document.getElementById('mob-spacing-val').innerText = this.value + 'mm'"></div>
                 <div class="flex items-center gap-2 mb-4 bg-orange-50 p-2 rounded border border-orange-100"><input type="checkbox" id="mob_q_is_sub" class="w-5 h-5 accent-orange-600"><label for="mob_q_is_sub" class="text-sm font-bold text-orange-800">لقی پرسیارە (A, B, C)</label></div>
-                <div class="flex gap-3 mb-4"><input type="number" id="mob_q_score" value="10" class="w-1/3 p-3 border-2 rounded-xl text-center"><select id="mob_q_type" class="w-2/3 p-3 border-2 rounded-xl bg-white" onchange="toggleMobileMCQ(this.value)"><option value="mcq">هەڵبژاردن</option><option value="text">نووسین (تەقلیدی)</option><option value="tf">ڕاست/هەڵە</option><option value="fill">بۆشایی</option></select></div>
+                <div class="flex gap-3 mb-4"><input type="number" id="mob_q_score" value="10" class="w-1/3 p-3 border-2 rounded-xl text-center"><select id="mob_q_type" class="w-2/3 p-3 border-2 rounded-xl bg-white" onchange="toggleMobileMCQ(this.value)"><option value="mcq">هەڵبژاردن</option><option value="text">نووسین (تەقلیدی)</option><option value="tf">ڕاست و هەڵە</option><option value="fill">بۆشایی</option></select></div>
                 <div id="mob_mcq_options_container" class="hidden bg-gray-50 p-3 rounded-xl border mb-4"><div id="mob-math-toolbar-opt" class="math-toolbar"></div><textarea id="mob_q_mcq_opts" rows="4" class="w-full p-2 border rounded-lg text-left font-sans" dir="ltr" placeholder="A) ..."></textarea></div>
             </div>
             <div id="mob-input-title" class="hidden"><textarea id="mob_t_text" rows="2" class="w-full p-3 border-2 border-gray-400 rounded-xl font-bold text-center" placeholder="نموونە: پرسیاری دووەم"></textarea></div>
@@ -227,37 +226,35 @@
         <h1 class="font-bold text-gray-800">تاقیکردنەوەکان</h1>
         <div class="flex gap-2">
             <button onclick="openHeaderModal()" class="bg-blue-600 text-white px-3 py-2 rounded-lg text-sm font-bold"><i class="fa-solid fa-pen-to-square"></i></button>
-            <button onclick="downloadDirectPDF()" class="bg-green-600 text-white px-3 py-2 rounded-lg text-sm font-bold">PDF</button>
+            <button onclick="viewDirectPDF()" class="bg-green-600 text-white px-3 py-2 rounded-lg text-sm font-bold flex items-center gap-1"><i class="fa-solid fa-eye"></i> PDF</button>
         </div>
     </div>
 
     <div class="flex-1 flex flex-col lg:flex-row overflow-hidden relative">
         <!-- Editor Panel -->
         <div id="editor-panel" class="w-full lg:w-1/3 bg-white border-l h-full overflow-y-auto p-4 z-10 flex flex-col">
-            <div class="flex-none">
-                <div class="flex justify-between items-center mb-4"><h2 class="text-xl font-bold text-blue-700">کۆنترۆڵ</h2><div class="flex gap-2"><a href="lk.jpg" download class="bg-orange-500 hover:bg-orange-600 text-white px-3 py-1 rounded shadow text-sm font-bold flex items-center gap-2"><i class="fa-solid fa-image"></i> داگرتنی لۆگۆی وەزارەت</a><button onclick="openHeaderModal()" class="bg-blue-600 text-white px-3 py-1 rounded shadow text-sm">زانیاری</button><button onclick="downloadDirectPDF()" class="bg-green-600 text-white px-3 py-1 rounded shadow text-sm">PDF</button></div></div>
-                <div class="hidden lg:block bg-gray-50 p-4 rounded-lg border shadow-sm mb-4">
-                    <div class="mode-switch"><button onclick="switchMode('question', 'desktop')" id="desk-mode-q" class="mode-btn active">پرسیار</button><button onclick="switchMode('title', 'desktop')" id="desk-mode-t" class="mode-btn inactive">سەردێڕ</button></div>
-                    <div id="desk-input-question">
-                        <div id="desk-math-toolbar-q" class="math-toolbar"></div><textarea id="q_text" rows="3" class="w-full p-2 border rounded mb-2 text-left font-sans" dir="ltr" placeholder="دەقی پرسیار..."></textarea>
-                        <div class="mb-2 bg-white p-2 rounded border border-gray-200"><label class="block text-xs font-bold text-gray-600 mb-1"><i class="fa-regular fa-image"></i> وێنە:</label><input type="file" id="q_image" accept="image/*" class="block w-full text-xs text-gray-500"></div>
-                        <div class="mb-2 bg-white p-2 rounded border border-gray-200"><label class="block text-xs font-bold text-gray-600 mb-1 flex justify-between"><span>بۆشایی</span><span id="desk-spacing-val" class="text-blue-600">0mm</span></label><input type="range" id="q_spacing" min="0" max="100" value="0" oninput="document.getElementById('desk-spacing-val').innerText = this.value + 'mm'"></div>
-                        <div class="flex items-center gap-2 mb-2 bg-orange-50 p-2 rounded border border-orange-100"><input type="checkbox" id="q_is_sub" class="w-4 h-4 accent-orange-600"><label for="q_is_sub" class="text-sm font-bold text-orange-800 cursor-pointer select-none">لقی پرسیارە (A, B, C)</label></div>
-                        <div class="flex gap-2 mb-2"><input type="number" id="q_score" value="10" class="w-20 p-2 border rounded text-center"><select id="q_type" class="flex-1 p-2 border rounded" onchange="toggleMCQ(this.value, 'desktop')"><option value="mcq">هەڵبژاردن</option><option value="text">نووسین (تەقلیدی)</option><option value="tf">ڕاست و هەڵە</option><option value="fill">بۆشایی</option></select></div>
-                        <div id="mcq_options_container" class="hidden bg-white p-2 border rounded mb-2"><div id="desk-math-toolbar-opt" class="math-toolbar"></div><textarea id="q_mcq_opts" rows="3" class="w-full p-2 border text-sm text-left font-sans" dir="ltr" placeholder="A) ..."></textarea></div>
-                    </div>
-                    <div id="desk-input-title" class="hidden"><div class="bg-gray-100 p-4 rounded border-2 border-dashed border-gray-300"><label class="block text-sm font-bold text-gray-700 mb-2">دەقی سەردێڕ:</label><input type="text" id="t_text" class="w-full p-2 border-2 border-gray-400 rounded font-bold text-center" placeholder="نموونە: پرسیاری دووەم"></div></div>
-                    <button onclick="addItemDesktop()" id="desk-add-btn" class="w-full bg-blue-600 text-white font-bold py-3 rounded text-sm shadow mt-2">زیادکردن</button>
+            <div class="flex justify-between items-center mb-4"><h2 class="text-xl font-bold text-blue-700">کۆنترۆڵ</h2><div class="flex gap-2"><a href="lk.jpeg" download class="bg-orange-500 hover:bg-orange-600 text-white px-3 py-1 rounded shadow text-sm font-bold flex items-center gap-2"><i class="fa-solid fa-image"></i> lk.jpeg</a><button onclick="openHeaderModal()" class="bg-blue-600 text-white px-3 py-1 rounded shadow text-sm">زانیاری</button><button onclick="viewDirectPDF()" class="bg-green-600 text-white px-3 py-1 rounded shadow text-sm flex items-center gap-1"><i class="fa-solid fa-eye"></i> بینینی PDF</button><button onclick="downloadDirectPDF()" class="bg-gray-600 text-white px-3 py-1 rounded shadow text-sm"><i class="fa-solid fa-download"></i></button></div></div>
+            <div class="hidden lg:block bg-gray-50 p-4 rounded-lg border shadow-sm mb-4">
+                <div class="mode-switch"><button onclick="switchMode('question', 'desktop')" id="desk-mode-q" class="mode-btn active">پرسیار</button><button onclick="switchMode('title', 'desktop')" id="desk-mode-t" class="mode-btn inactive">سەردێڕ</button></div>
+                <div id="desk-input-question">
+                    <div id="desk-math-toolbar-q" class="math-toolbar"></div><textarea id="q_text" rows="3" class="w-full p-2 border rounded mb-2 text-left font-sans" dir="ltr" placeholder="دەقی پرسیار..."></textarea>
+                    <div class="mb-2 bg-white p-2 rounded border border-gray-200"><label class="block text-xs font-bold text-gray-600 mb-1"><i class="fa-regular fa-image"></i> وێنە:</label><input type="file" id="q_image" accept="image/*" class="block w-full text-xs text-gray-500"></div>
+                    <div class="mb-2 bg-white p-2 rounded border border-gray-200"><label class="block text-xs font-bold text-gray-600 mb-1 flex justify-between"><span>بۆشایی</span><span id="desk-spacing-val" class="text-blue-600">0mm</span></label><input type="range" id="q_spacing" min="0" max="100" value="0" oninput="document.getElementById('desk-spacing-val').innerText = this.value + 'mm'"></div>
+                    <div class="flex items-center gap-2 mb-2 bg-orange-50 p-2 rounded border border-orange-100"><input type="checkbox" id="q_is_sub" class="w-4 h-4 accent-orange-600"><label for="q_is_sub" class="text-sm font-bold text-orange-800 cursor-pointer select-none">لقی پرسیارە (A, B, C)</label></div>
+                    <div class="flex gap-2 mb-2"><input type="number" id="q_score" value="10" class="w-20 p-2 border rounded text-center"><select id="q_type" class="flex-1 p-2 border rounded" onchange="toggleMCQ(this.value, 'desktop')"><option value="mcq">هەڵبژاردن</option><option value="text">نووسین (تەقلیدی)</option><option value="tf">ڕاست و هەڵە</option><option value="fill">بۆشایی</option></select></div>
+                    <div id="mcq_options_container" class="hidden bg-white p-2 border rounded mb-2"><div id="desk-math-toolbar-opt" class="math-toolbar"></div><textarea id="q_mcq_opts" rows="3" class="w-full p-2 border text-sm text-left font-sans" dir="ltr" placeholder="A) ..."></textarea></div>
                 </div>
+                <div id="desk-input-title" class="hidden"><div class="bg-gray-100 p-4 rounded border-2 border-dashed border-gray-300"><label class="block text-sm font-bold text-gray-700 mb-2">دەقی سەردێڕ:</label><input type="text" id="t_text" class="w-full p-2 border-2 border-gray-400 rounded font-bold text-center" placeholder="نموونە: پرسیاری دووەم"></div></div>
+                <button onclick="addItemDesktop()" id="desk-add-btn" class="w-full bg-blue-600 text-white font-bold py-3 rounded text-sm shadow mt-2">زیادکردن</button>
             </div>
 
-            <!-- SCROLLABLE LIST -->
-            <div class="flex-1 overflow-y-auto px-4 pb-20">
-                <div class="flex justify-between border-b pb-1 mb-2 sticky top-0 bg-white z-10 pt-2">
+            <!-- SCROLLABLE LIST CONTAINER -->
+            <div class="flex-1 overflow-hidden px-4 pb-4">
+                 <div class="flex justify-between border-b pb-1 mb-2 sticky top-0 bg-white z-10">
                     <h3 class="text-sm font-bold text-gray-500">لیست (Drag & Drop)</h3>
                     <button onclick="clearAll()" class="text-red-500 text-xs">سڕینەوە</button>
                 </div>
-                <div id="questions_mini_list" class="space-y-2 text-sm"></div>
+                <div id="questions_mini_list" class="space-y-2 text-sm h-full"></div>
             </div>
         </div>
         
@@ -316,6 +313,7 @@
             
             errorMsg.classList.add('hidden');
 
+            // 1. MASTER CODE CHECK
             if (inputCode === '23819933') {
                 localStorage.setItem('exam_app_code', inputCode);
                 document.getElementById('login-overlay').style.display = 'none';
@@ -324,10 +322,9 @@
             }
 
             if (!inputCode || inputCode.length < 6) { errorMsg.innerText = "کۆدەکە هەڵەیە!"; errorMsg.classList.remove('hidden'); return; }
-            
             if (!window.firebaseApp || !window.firebaseApp.db) { 
-                errorMsg.innerText = "تکایە دڵنیابەرەوە لە بوونی ئینتەرنێت"; 
-                errorMsg.classList.remove('hidden'); 
+                errorMsg.innerText = "پەیوەندی بە سێرڤەر نییە. ئینتەرنێت بپشکنە.";
+                errorMsg.classList.remove('hidden');
                 return; 
             }
 
@@ -345,12 +342,12 @@
                         localStorage.setItem('exam_app_code', inputCode); document.getElementById('login-overlay').style.display='none'; loadData();
                     } else { errorMsg.innerText = "ئەم کۆدە لەسەر ئامێرێکی تر بەکارهاتووە."; errorMsg.classList.remove('hidden'); }
                 } else {
-                    errorMsg.innerText = "ئەم کۆدە بوونی نییە.";
+                    errorMsg.innerText = "ئەم کۆدە بوونی نییە (تەنها لای ئەدمین).";
                     errorMsg.classList.remove('hidden');
                 }
             } catch (err) {
                 console.error(err);
-                errorMsg.innerText = "کێشە لە پەیوەستبوون بە سێرڤەر";
+                errorMsg.innerText = "کێشەی ئینتەرنێت هەیە";
                 errorMsg.classList.remove('hidden');
             } finally { loading.classList.add('hidden'); }
         }
@@ -636,8 +633,8 @@
         }
 
         function deleteItem(id) { if(confirm("دڵنیایت؟")) { items = items.filter(i => i.id !== id); saveData(); renderPaper(); renderMiniList(); } }
-        function saveData() { localStorage.setItem('exam_data_v33', JSON.stringify({items, customLogo})); }
-        function loadData() { const d = JSON.parse(localStorage.getItem('exam_data_v33')); if(d) { items = d.items||[]; customLogo = d.customLogo; updatePaper(); renderPaper(); renderMiniList(); } }
+        function saveData() { localStorage.setItem('exam_data_v40', JSON.stringify({items, customLogo})); }
+        function loadData() { const d = JSON.parse(localStorage.getItem('exam_data_v40')); if(d) { items = d.items||[]; customLogo = d.customLogo; updatePaper(); renderPaper(); renderMiniList(); } }
         
         function updatePaper() {
             ['school','dir','gov','subject','class','date','time','type','year'].forEach(k => {
@@ -663,7 +660,6 @@
             saveData();
         }
         
-        // Helper funcs
         window.toBase64 = (file) => new Promise((resolve, reject) => { const r = new FileReader(); r.readAsDataURL(file); r.onload = () => resolve(r.result); r.onerror = reject; });
         window.switchMode = (m,v) => { 
             const pfx = v==='desktop'?'desk':'mob'; 
@@ -671,7 +667,6 @@
             document.getElementById(pfx+'-mode-t').className = `mode-btn ${m!=='question'?'active':'inactive'}`;
             document.getElementById(pfx+'-input-question').classList.toggle('hidden', m!=='question');
             document.getElementById(pfx+'-input-title').classList.toggle('hidden', m==='question');
-            // FIX: Ensure currentMode is updated so addItemDesktop knows which mode we are in
             if (v === 'desktop') currentMode.desktop = m;
             else currentMode.mobile = m;
         };
@@ -681,23 +676,23 @@
         window.closeHeaderModal = () => { document.getElementById('header-modal').classList.add('hidden'); saveData(); };
         window.openMobileAdd = () => document.getElementById('mobile-add-modal').classList.remove('hidden');
         window.closeMobileAdd = () => { document.getElementById('mobile-add-modal').classList.add('hidden'); editingId=null; document.getElementById('mob-add-btn').innerText="زیادکردن"; };
+        window.viewDirectPDF = () => {
+             const el = document.getElementById('examPaper');
+             // html2pdf().set(...).output('bloburl')
+             const opt = { margin: 0, filename: 'exam.pdf', image: { type: 'jpeg', quality: 0.98 }, html2canvas: { scale: 2, useCORS: true }, jsPDF: { unit: 'mm', format: 'a4', orientation: 'portrait' } };
+             html2pdf().set(opt).from(el).output('bloburl').then((url) => { window.open(url, '_blank'); });
+        };
         window.downloadDirectPDF = () => { const el=document.getElementById('examPaper'); html2pdf().set({margin:0,filename:'exam.pdf',image:{type:'jpeg',quality:0.98},html2canvas:{scale:2,useCORS:true},jsPDF:{unit:'mm',format:'a4'}}).from(el).save(); };
         window.clearAll = () => { if(confirm('دڵنیایت؟')) { items=[]; saveData(); renderPaper(); renderMiniList(); } };
         window.checkPassword = () => { 
             const inputVal = document.getElementById('password-input').value;
             if(!inputVal) return;
-            // Check for master code
             if(inputVal === '23819933') {
-                localStorage.setItem('exam_app_code', inputCode); 
+                localStorage.setItem('exam_app_code', inputVal); 
                 document.getElementById('login-overlay').style.display='none'; 
                 loadData();
                 return;
             }
-            // Strict online check
-            // ... (Re-using strict logic from v38 but adapted to be inside this file structure if needed, or stick to the user's v34 base if preferred. 
-            // The prompt asked for "fix title adding" and "strict security". I will inject the STRICT security from v38 here.)
-            
-            // Injecting Strict Security Logic
             const errorMsg = document.getElementById('login-error');
             const loading = document.getElementById('auth-loading');
             errorMsg.classList.add('hidden');
@@ -712,7 +707,6 @@
             const { db, doc, getDoc, setDoc, collection, appId } = window.firebaseApp;
             const codeRef = doc(collection(db, 'artifacts', appId, 'public', 'data', 'access_codes'), String(inputVal));
             
-            // Helper to handle device ID
             let currentDeviceId = localStorage.getItem('app_device_id');
             if (!currentDeviceId) { currentDeviceId = crypto.randomUUID(); localStorage.setItem('app_device_id', currentDeviceId); }
 
@@ -724,7 +718,6 @@
                          document.getElementById('login-overlay').style.display='none'; 
                          loadData(); 
                     } else if (!data.deviceId) {
-                        // First use
                         setDoc(codeRef, { deviceId: currentDeviceId, usedAt: new Date().toISOString() }, { merge: true }).then(() => {
                             localStorage.setItem('exam_app_code', inputVal); 
                             document.getElementById('login-overlay').style.display='none'; 
