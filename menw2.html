@@ -233,7 +233,19 @@
                 <div class="mb-4 bg-gray-50 p-2 rounded border border-gray-200"><label class="block text-xs font-bold text-gray-600 mb-1"><i class="fa-regular fa-image"></i> وێنە:</label><input type="file" id="mob_q_image" accept="image/*" class="block w-full text-sm text-gray-500"></div>
                 <div class="mb-4 bg-gray-50 p-2 rounded border border-gray-200"><label class="block text-xs font-bold text-gray-600 mb-1 flex justify-between"><span>بۆشایی خوارەوە</span><span id="mob-spacing-val" class="text-blue-600">0mm</span></label><input type="range" id="mob_q_spacing" min="0" max="100" value="0" oninput="document.getElementById('mob-spacing-val').innerText = this.value + 'mm'"></div>
                 <div class="flex items-center gap-2 mb-4 bg-orange-50 p-2 rounded border border-orange-100"><input type="checkbox" id="mob_q_is_sub" class="w-5 h-5 accent-orange-600"><label for="mob_q_is_sub" class="text-sm font-bold text-orange-800">لقی پرسیارە (A, B, C)</label></div>
-                <div class="flex gap-3 mb-4"><input type="number" id="mob_q_score" value="10" class="w-1/3 p-3 border-2 rounded-xl text-center"><select id="mob_q_type" class="w-2/3 p-3 border-2 rounded-xl bg-white" onchange="toggleMobileMCQ(this.value)"><option value="mcq">هەڵبژاردن</option><option value="text">نووسین (تەقلیدی)</option><option value="tf">ڕاست و هەڵە</option><option value="fill">بۆشایی</option></select></div>
+                
+                <!-- Updated Mobile Score and Type -->
+                <div class="flex gap-3 mb-4">
+                    <input type="number" id="mob_q_score" value="2" class="w-1/3 p-3 border-2 rounded-xl text-center">
+                    <select id="mob_q_type" class="w-2/3 p-3 border-2 rounded-xl bg-white" onchange="toggleMobileMCQ(this.value)">
+                        <option value="" disabled selected>جۆری پرسیار هەڵ بژێرە</option>
+                        <option value="mcq">هەڵبژاردن</option>
+                        <option value="text">نووسین (تەقلیدی)</option>
+                        <option value="tf">ڕاست و هەڵە</option>
+                        <option value="fill">بۆشایی</option>
+                    </select>
+                </div>
+                
                 <div id="mob_mcq_options_container" class="hidden bg-gray-50 p-3 rounded-xl border mb-4"><div id="mob-math-toolbar-opt" class="math-toolbar"></div><textarea id="mob_q_mcq_opts" rows="4" class="w-full p-2 border rounded-lg text-left font-sans" dir="ltr" placeholder="A) ..."></textarea></div>
             </div>
             <div id="mob-input-title" class="hidden"><textarea id="mob_t_text" rows="2" class="w-full p-3 border-2 border-gray-400 rounded-xl font-bold text-center" placeholder="نموونە: پرسیاری دووەم"></textarea></div>
@@ -253,7 +265,7 @@
     <div class="flex-1 flex flex-col lg:flex-row overflow-hidden relative">
         <!-- Editor Panel -->
         <div id="editor-panel" class="w-full lg:w-1/3 bg-white border-l h-full overflow-y-auto p-4 z-10 flex flex-col">
-            <div class="flex justify-between items-center mb-4"><h2 class="text-xl font-bold text-blue-700">کۆنترۆڵ</h2><div class="flex gap-2"><a href="lk.jpeg" download class="bg-orange-500 hover:bg-orange-600 text-white px-3 py-1 rounded shadow text-sm font-bold flex items-center gap-2"><i class="fa-solid fa-image"></i> lk.jpeg</a><button onclick="openHeaderModal()" class="bg-blue-600 text-white px-3 py-1 rounded shadow text-sm">زانیاری</button><button onclick="downloadDirectPDF()" class="bg-green-600 text-white px-3 py-1 rounded shadow text-sm">PDF</button></div></div>
+            <div class="flex justify-between items-center mb-4"><h2 class="text-xl font-bold text-blue-700">کۆنترۆڵ</h2><div class="flex gap-2"><a href="lk.jpg" download class="bg-orange-500 hover:bg-orange-600 text-white px-3 py-1 rounded shadow text-sm font-bold flex items-center gap-2"><i class="fa-solid fa-image"></i> لۆگۆی وەزارەت</a><button onclick="openHeaderModal()" class="bg-blue-600 text-white px-3 py-1 rounded shadow text-sm">زانیاری</button><button onclick="downloadDirectPDF()" class="bg-green-600 text-white px-3 py-1 rounded shadow text-sm">PDF</button></div></div>
             <div class="hidden lg:block bg-gray-50 p-4 rounded-lg border shadow-sm mb-4">
                 <div class="mode-switch"><button onclick="switchMode('question', 'desktop')" id="desk-mode-q" class="mode-btn active">پرسیار</button><button onclick="switchMode('title', 'desktop')" id="desk-mode-t" class="mode-btn inactive">سەردێڕ</button></div>
                 <div id="desk-input-question">
@@ -261,7 +273,19 @@
                     <div class="mb-2 bg-white p-2 rounded border border-gray-200"><label class="block text-xs font-bold text-gray-600 mb-1"><i class="fa-regular fa-image"></i> وێنە:</label><input type="file" id="q_image" accept="image/*" class="block w-full text-xs text-gray-500"></div>
                     <div class="mb-2 bg-white p-2 rounded border border-gray-200"><label class="block text-xs font-bold text-gray-600 mb-1 flex justify-between"><span>بۆشایی</span><span id="desk-spacing-val" class="text-blue-600">0mm</span></label><input type="range" id="q_spacing" min="0" max="100" value="0" oninput="document.getElementById('desk-spacing-val').innerText = this.value + 'mm'"></div>
                     <div class="flex items-center gap-2 mb-2 bg-orange-50 p-2 rounded border border-orange-100"><input type="checkbox" id="q_is_sub" class="w-4 h-4 accent-orange-600"><label for="q_is_sub" class="text-sm font-bold text-orange-800 cursor-pointer select-none">لقی پرسیارە (A, B, C)</label></div>
-                    <div class="flex gap-2 mb-2"><input type="number" id="q_score" value="10" class="w-20 p-2 border rounded text-center"><select id="q_type" class="flex-1 p-2 border rounded" onchange="toggleMCQ(this.value, 'desktop')"><option value="mcq">هەڵبژاردن</option><option value="text">نووسین (تەقلیدی)</option><option value="tf">ڕاست و هەڵە</option><option value="fill">بۆشایی</option></select></div>
+                    
+                    <!-- Updated Desktop Score and Type -->
+                    <div class="flex gap-2 mb-2">
+                        <input type="number" id="q_score" value="2" class="w-20 p-2 border rounded text-center">
+                        <select id="q_type" class="flex-1 p-2 border rounded" onchange="toggleMCQ(this.value, 'desktop')">
+                            <option value="" disabled selected>جۆری پرسیار هەڵ بژێرە</option>
+                            <option value="mcq">هەڵبژاردن</option>
+                            <option value="text">نووسین (تەقلیدی)</option>
+                            <option value="tf">ڕاست و هەڵە</option>
+                            <option value="fill">بۆشایی</option>
+                        </select>
+                    </div>
+
                     <div id="mcq_options_container" class="hidden bg-white p-2 border rounded mb-2"><div id="desk-math-toolbar-opt" class="math-toolbar"></div><textarea id="q_mcq_opts" rows="3" class="w-full p-2 border text-sm text-left font-sans" dir="ltr" placeholder="A) ..."></textarea></div>
                 </div>
                 <div id="desk-input-title" class="hidden"><div class="bg-gray-100 p-4 rounded border-2 border-dashed border-gray-300"><label class="block text-sm font-bold text-gray-700 mb-2">دەقی سەردێڕ:</label><input type="text" id="t_text" class="w-full p-2 border-2 border-gray-400 rounded font-bold text-center" placeholder="نموونە: پرسیاری دووەم"></div></div>
@@ -456,8 +480,15 @@
             });
             populateMathToolbars();
             if (localStorage.getItem('exam_app_code')) { document.getElementById('login-overlay').style.display = 'none'; loadData(); resizePaper(); }
+            
+            // Updated Logo Logic for "Anytime" changing
             document.getElementById('h_logo_input').addEventListener('change', async function(e) {
-                if (e.target.files.length > 0) { try { customLogo = await toBase64(e.target.files[0]); updatePaper(); } catch(e) {} }
+                if (e.target.files.length > 0) { 
+                    try { 
+                        customLogo = await toBase64(e.target.files[0]); 
+                        updatePaper(); 
+                    } catch(e) {} 
+                }
             });
             resizePaper();
         };
@@ -528,6 +559,7 @@
                 let imageData = null;
 
                 if(!text) return alert("تکایە پرسیار بنووسە");
+                if(!type || type === "") return alert("تکایە جۆری پرسیار هەڵبژێرە"); // Validation for default type
                 
                 if (editingId && fileInput.files.length === 0) {
                      const existingItem = items.find(i => i.id === editingId);
@@ -542,6 +574,8 @@
                 document.getElementById('q_text').value = ''; document.getElementById('q_mcq_opts').value = '';
                 document.getElementById('q_is_sub').checked = false; document.getElementById('q_image').value = '';
                 document.getElementById('q_spacing').value = 0; document.getElementById('desk-spacing-val').innerText = '0mm';
+                document.getElementById('q_type').value = ""; // Reset to default "select type"
+                document.getElementById('mcq_options_container').classList.add('hidden'); // Hide options
             } else {
                 // TITLE MODE
                 const text = document.getElementById('t_text').value.trim();
@@ -562,6 +596,7 @@
                 let imageData = null;
                 
                 if(!text) return alert("پرسیار بنووسە");
+                if(!type || type === "") return alert("تکایە جۆری پرسیار هەڵبژێرە"); // Validation
 
                 if (editingId && fileInput.files.length === 0) {
                      const existingItem = items.find(i => i.id === editingId);
@@ -576,6 +611,8 @@
                 document.getElementById('mob_q_text').value = ''; document.getElementById('mob_q_mcq_opts').value = '';
                 document.getElementById('mob_q_is_sub').checked = false; document.getElementById('mob_q_image').value = '';
                 document.getElementById('mob_q_spacing').value = 0; document.getElementById('mob-spacing-val').innerText = '0mm';
+                document.getElementById('mob_q_type').value = ""; // Reset to default
+                document.getElementById('mob_mcq_options_container').classList.add('hidden'); // Hide options
             } else {
                 // TITLE MODE
                 const text = document.getElementById('mob_t_text').value.trim();
@@ -603,7 +640,7 @@
                 document.getElementById('q_text').value = item.text;
                 document.getElementById('q_score').value = item.score;
                 document.getElementById('q_type').value = item.type;
-                toggleMCQ(item.type);
+                toggleMCQ(item.type, 'desktop'); // Ensure options shown if needed
                 if (item.options) document.getElementById('q_mcq_opts').value = item.options.join('\n');
                 document.getElementById('q_is_sub').checked = item.isSub || false;
                 document.getElementById('q_spacing').value = item.spacing || 0;
@@ -707,15 +744,11 @@
             else { grpCont.classList.add('hidden'); }
             
             const logoImg = document.getElementById('header_logo_img');
-            const dlLink = document.getElementById('download-logo-link');
             
             if (customLogo) { 
                 logoImg.src = customLogo; 
-                dlLink.href = customLogo;
-                dlLink.classList.remove('hidden');
             } else { 
                 logoImg.src = "https://upload.wikimedia.org/wikipedia/commons/d/d3/Kurdistan_Regional_Government_emblem.svg";
-                dlLink.classList.add('hidden');
             }
             saveData();
         }
@@ -730,7 +763,10 @@
             // IMPORTANT: Update global mode
             if(v==='desktop') currentMode.desktop=m; else currentMode.mobile=m;
         };
-        window.toggleMCQ = (v) => document.getElementById('mcq_options_container').classList.toggle('hidden', v!=='mcq');
+        window.toggleMCQ = (v, mode) => {
+            const container = document.getElementById(mode === 'desktop' ? 'mcq_options_container' : 'mob_mcq_options_container');
+            if(container) container.classList.toggle('hidden', v !== 'mcq');
+        };
         window.toggleMobileMCQ = (v) => document.getElementById('mob_mcq_options_container').classList.toggle('hidden', v!=='mcq');
         window.openHeaderModal = () => document.getElementById('header-modal').classList.remove('hidden');
         window.closeHeaderModal = () => { document.getElementById('header-modal').classList.add('hidden'); saveData(); };
