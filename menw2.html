@@ -114,9 +114,11 @@
         }
 
         #preview-panel {
-            overflow: auto;
+            overflow-y: auto;
+            overflow-x: auto;
             -webkit-overflow-scrolling: touch;
             padding-bottom: 100px;
+            scroll-behavior: smooth;
         }
 
         @media print { 
@@ -682,12 +684,19 @@
                         labelHTML = `<span class="q-number">${mainQCounter}</span>`;
                     }
 
+                    // --- TRUE/FALSE ADDITION ---
+                    let tfHTML = '';
+                    if (item.qType === 'tf') {
+                        tfHTML = `<div class="w-full text-left mt-1 pl-2 font-bold font-nrt text-sm text-gray-800" dir="ltr">( ڕاست &nbsp;/&nbsp; هەڵە )</div>`;
+                    }
+
                     let contentHTML = `<div class="flex items-start w-full">
                         ${labelHTML}
                         <div class="flex-1">
                             ${item.text ? `<div class="font-bold text-right text-lg leading-relaxed mb-1" dir="auto">${item.text}</div>` : ''}
                             ${item.img ? `<img src="${item.img}" class="q-image" alt="Question Image">` : ''}
                             ${renderMCQOptions(item)}
+                            ${tfHTML}
                         </div>
                         ${item.isSub ? '' : `<span class="q-score">${item.score} نمرە</span>`}
                     </div>`;
