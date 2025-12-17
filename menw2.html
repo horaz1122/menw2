@@ -717,9 +717,12 @@
             if (options.some(o => o.length > 30)) gridClass = 'grid-cols-1';
             else if (options.every(o => o.length < 10)) gridClass = 'grid-cols-4';
 
-            let html = `<div class="grid ${gridClass} gap-2 mt-2 w-full pr-4">`;
-            options.forEach(opt => {
-                html += `<div class="text-right" dir="auto">${opt}</div>`;
+            let html = `<div class="grid ${gridClass} gap-y-2 gap-x-8 mt-2 w-full pr-4">`;
+            const labels = ['A', 'B', 'C', 'D', 'E', 'F'];
+            options.forEach((opt, index) => {
+                const label = labels[index] || (index + 1);
+                // Simple logic: Prepend label automatically with bold style
+                html += `<div class="text-right flex items-baseline gap-2" dir="auto"><span class="font-bold font-sans">${label})</span> <span>${opt}</span></div>`;
             });
             html += '</div>';
             return html;
