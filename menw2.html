@@ -114,8 +114,7 @@
         }
 
         #preview-panel {
-            overflow-y: auto;
-            overflow-x: hidden;
+            overflow: auto;
             -webkit-overflow-scrolling: touch;
             padding-bottom: 100px;
         }
@@ -319,7 +318,7 @@
         </div>
         
         <div id="preview-panel" class="w-full lg:w-2/3 bg-gray-300 h-full overflow-auto flex justify-center p-4 lg:p-8 hidden lg:flex">
-            <div id="paper-container" class="flex justify-center items-start w-full h-full">
+            <div id="paper-container" class="flex justify-center items-start w-full min-h-full">
                 <div id="examPaper" class="a4-paper">
                     <div class="exam-header">
                         <div class="header-section text-right">
