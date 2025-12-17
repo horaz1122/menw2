@@ -117,7 +117,7 @@
             overflow-y: auto;
             overflow-x: auto;
             -webkit-overflow-scrolling: touch;
-            padding-bottom: 100px;
+            padding-bottom: 150px; /* Increased bottom padding for better scrolling */
             scroll-behavior: smooth;
         }
 
@@ -684,19 +684,19 @@
                         labelHTML = `<span class="q-number">${mainQCounter}</span>`;
                     }
 
-                    // --- TRUE/FALSE ADDITION ---
-                    let tfHTML = '';
+                    // --- TRUE/FALSE ADDITION (FLOATING) ---
+                    let tfLabel = '';
                     if (item.qType === 'tf') {
-                        tfHTML = `<div class="w-full text-left mt-1 pl-2 font-bold font-nrt text-sm text-gray-800" dir="ltr">( ڕاست &nbsp;/&nbsp; هەڵە )</div>`;
+                        // Float left puts it at the END of the line in RTL context
+                        tfLabel = `<span class="float-left text-sm font-bold text-gray-700 bg-gray-50 px-2 rounded-md border border-gray-200 ml-2 mt-1" dir="ltr">( ڕاست / هەڵە )</span>`;
                     }
 
                     let contentHTML = `<div class="flex items-start w-full">
                         ${labelHTML}
                         <div class="flex-1">
-                            ${item.text ? `<div class="font-bold text-right text-lg leading-relaxed mb-1" dir="auto">${item.text}</div>` : ''}
+                            ${item.text ? `<div class="font-bold text-right text-lg leading-relaxed mb-1" dir="auto">${tfLabel}${item.text}</div>` : ''}
                             ${item.img ? `<img src="${item.img}" class="q-image" alt="Question Image">` : ''}
                             ${renderMCQOptions(item)}
-                            ${tfHTML}
                         </div>
                         ${item.isSub ? '' : `<span class="q-score">${item.score} نمرە</span>`}
                     </div>`;
