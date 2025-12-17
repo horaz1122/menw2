@@ -121,16 +121,20 @@
             scroll-behavior: smooth;
         }
 
-        @media print { 
-            @page { size: A4; margin: 0; } 
-            body { background: white; height: auto; overflow: visible; } 
-            .no-print { display: none !important; } 
-            .a4-paper { width: 100%; box-shadow: none; margin: 0; padding: 10mm; min-height: auto; transform: none !important; } 
-            #preview-panel { overflow: visible !important; height: auto !important; display: block !important; padding: 0 !important; } 
-            #editor-panel, #login-overlay, #mobile-add-btn, #mobile-add-modal, #header-modal { display: none !important; } 
-        }
+        /* Mobile specific fix for scrolling */
         @media (max-width: 768px) { 
             #editor-panel { padding-bottom: 250px !important; } 
+            #preview-panel {
+                display: block; /* Ensure block display on mobile when active */
+                height: 100%;
+                padding: 10px;
+                padding-bottom: 120px; /* Space for bottom nav */
+            }
+            .a4-paper {
+                transform: scale(0.6); /* Scale down paper slightly on mobile to fit better */
+                transform-origin: top center;
+                margin-bottom: 50px;
+            }
         }
     </style>
 </head>
@@ -684,17 +688,17 @@
                         labelHTML = `<span class="q-number">${mainQCounter}</span>`;
                     }
 
-                    // --- TRUE/FALSE ADDITION (FLOATING) ---
+                    // --- TRUE/FALSE ADDITION (INLINE END) ---
                     let tfLabel = '';
                     if (item.qType === 'tf') {
-                        // Float left puts it at the END of the line in RTL context
-                        tfLabel = `<span class="float-left text-sm font-bold text-gray-700 bg-gray-50 px-2 rounded-md border border-gray-200 ml-2 mt-1" dir="ltr">( ڕاست / هەڵە )</span>`;
+                        // Inline span with extra spacing
+                        tfLabel = `&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;<span class="inline-block text-sm font-bold text-gray-700 bg-gray-50 px-3 py-0.5 rounded-md border border-gray-200" dir="ltr">( ڕاست &nbsp;&nbsp;&nbsp;&nbsp;/&nbsp;&nbsp;&nbsp;&nbsp; هەڵە )</span>`;
                     }
 
                     let contentHTML = `<div class="flex items-start w-full">
                         ${labelHTML}
                         <div class="flex-1">
-                            ${item.text ? `<div class="font-bold text-right text-lg leading-relaxed mb-1" dir="auto">${tfLabel}${item.text}</div>` : ''}
+                            ${item.text ? `<div class="font-bold text-right text-lg leading-relaxed mb-1" dir="auto">${item.text}${tfLabel}</div>` : ''}
                             ${item.img ? `<img src="${item.img}" class="q-image" alt="Question Image">` : ''}
                             ${renderMCQOptions(item)}
                         </div>
