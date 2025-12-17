@@ -117,21 +117,30 @@
             overflow-y: auto;
             overflow-x: auto;
             -webkit-overflow-scrolling: touch;
-            padding-bottom: 150px; /* Increased bottom padding for better scrolling */
+            padding-bottom: 200px;
             scroll-behavior: smooth;
+            height: 100%;
         }
 
-        /* Mobile specific fix for scrolling */
+        @media print { 
+            @page { size: A4; margin: 0; } 
+            body { background: white; height: auto; overflow: visible; } 
+            .no-print { display: none !important; } 
+            .a4-paper { width: 100%; box-shadow: none; margin: 0; padding: 10mm; min-height: auto; transform: none !important; } 
+            #preview-panel { overflow: visible !important; height: auto !important; display: block !important; padding: 0 !important; } 
+            #editor-panel, #login-overlay, #mobile-add-btn, #mobile-add-modal, #header-modal { display: none !important; } 
+        }
         @media (max-width: 768px) { 
             #editor-panel { padding-bottom: 250px !important; } 
             #preview-panel {
-                display: block; /* Ensure block display on mobile when active */
-                height: 100%;
+                display: block;
                 padding: 10px;
-                padding-bottom: 120px; /* Space for bottom nav */
+                padding-bottom: 200px;
+                height: 100%;
+                overflow-y: auto;
             }
             .a4-paper {
-                transform: scale(0.6); /* Scale down paper slightly on mobile to fit better */
+                transform: scale(0.6);
                 transform-origin: top center;
                 margin-bottom: 50px;
             }
@@ -447,6 +456,7 @@
         // --- APP STATE ---
         let examData = [];
         let currentMode = 'question';
+        let editIndex = -1; // New variable to track editing
 
         function initMathButtons(containerId, inputId) {
             const container = document.getElementById(containerId);
@@ -470,9 +480,8 @@
             else if (code === 'pow') text = '$^{}$';
             else if (code === 'exp') text = '$e^{}$';
             else if (code === 'inf') text = '$\\infty$';
-            else text = btn.label; // Simple symbols
+            else text = btn.label; 
             
-            // Map simple codes to latex if needed, mostly the logic above covers blocks
             if(code === 'times') text = '$\\times$';
             if(code === 'div') text = '$\\div$';
             if(code === 'pm') text = '$\\pm$';
@@ -489,24 +498,108 @@
             input.selectionStart = input.selectionEnd = start + text.length - 1; 
         }
 
-        // Initialize toolbars
         initMathButtons('desk-math-toolbar-q', 'q_text');
         initMathButtons('desk-math-toolbar-opt', 'q_mcq_opts');
         initMathButtons('mob-math-toolbar-q', 'mob_q_text');
         initMathButtons('mob-math-toolbar-opt', 'mob_q_mcq_opts');
 
-        // --- DATA HANDLING ---
         function loadData() {
             const saved = localStorage.getItem('examData');
             if (saved) examData = JSON.parse(saved);
             renderQuestions();
-            updatePaper(); // Update header fields
+            updatePaper(); 
         }
 
         function saveData() {
             localStorage.setItem('examData', JSON.stringify(examData));
             renderQuestions();
         }
+
+        // --- EDIT LOGIC START ---
+        function editItem(index) {
+            editIndex = index;
+            const item = examData[index];
+            const isMobile = window.innerWidth < 1024;
+            
+            // Switch tab to editor if on mobile
+            if (isMobile && document.getElementById('editor-panel').classList.contains('hidden')) {
+                // If on mobile view, ensure we are in editor mode, not preview
+                if (document.getElementById('mobile-add-modal').classList.contains('hidden')) {
+                     openMobileAdd(); // Or open modal
+                }
+            }
+
+            // Determine if using desktop or mobile modal
+            const useMobileModal = isMobile; 
+
+            if (useMobileModal) {
+                 openMobileAdd();
+                 switchMode(item.type, 'mobile');
+                 // Populate Mobile Inputs
+                 if (item.type === 'question') {
+                     document.getElementById('mob_q_text').value = item.text || '';
+                     document.getElementById('mob_q_score').value = item.score || 2;
+                     document.getElementById('mob_q_type').value = item.qType;
+                     document.getElementById('mob_q_is_sub').checked = item.isSub || false;
+                     toggleSubOptions('mobile');
+                     if(item.isSub) document.getElementById('mob_q_sub_style').value = item.subStyle || 'alpha';
+                     document.getElementById('mob_q_spacing').value = item.spacing || 0;
+                     document.getElementById('mob-spacing-val').innerText = (item.spacing || 0) + 'mm';
+                     document.getElementById('mob_q_mcq_opts').value = item.opts || '';
+                     toggleMobileMCQ(item.qType);
+                     
+                     const btn = document.getElementById('mob-add-btn');
+                     btn.innerText = "داگرتنی گۆڕانکاری";
+                     btn.classList.replace('bg-blue-600', 'bg-green-600');
+                 } else {
+                     document.getElementById('mob_t_text').value = item.text || '';
+                     const btn = document.getElementById('mob-add-btn');
+                     btn.innerText = "داگرتنی گۆڕانکاری";
+                     btn.classList.replace('bg-blue-600', 'bg-green-600');
+                 }
+            } else {
+                switchMode(item.type, 'desktop');
+                // Populate Desktop Inputs
+                 if (item.type === 'question') {
+                     document.getElementById('q_text').value = item.text || '';
+                     document.getElementById('q_score').value = item.score || 2;
+                     document.getElementById('q_type').value = item.qType;
+                     document.getElementById('q_is_sub').checked = item.isSub || false;
+                     toggleSubOptions('desktop');
+                     if(item.isSub) document.getElementById('q_sub_style').value = item.subStyle || 'alpha';
+                     document.getElementById('q_spacing').value = item.spacing || 0;
+                     document.getElementById('desk-spacing-val').innerText = (item.spacing || 0) + 'mm';
+                     document.getElementById('q_mcq_opts').value = item.opts || '';
+                     toggleMCQ(item.qType, 'desktop');
+
+                     const btn = document.getElementById('desk-add-btn');
+                     btn.innerText = "داگرتنی گۆڕانکاری";
+                     btn.classList.replace('bg-blue-600', 'bg-green-600');
+                 } else {
+                     document.getElementById('t_text').value = item.text || '';
+                     const btn = document.getElementById('desk-add-btn');
+                     btn.innerText = "داگرتنی گۆڕانکاری";
+                     btn.classList.replace('bg-blue-600', 'bg-green-600');
+                 }
+            }
+        }
+
+        function resetEditMode() {
+            editIndex = -1;
+            // Reset Buttons
+            const btnD = document.getElementById('desk-add-btn');
+            btnD.innerText = "زیادکردن";
+            btnD.classList.replace('bg-green-600', 'bg-blue-600');
+            
+            const btnM = document.getElementById('mob-add-btn');
+            btnM.innerText = "زیادکردن";
+            btnM.classList.replace('bg-green-600', 'bg-blue-600');
+
+            clearInputsDesktop();
+            clearInputsMobile();
+            closeMobileAdd(); // Only if open
+        }
+        // --- EDIT LOGIC END ---
 
         function addItemDesktop() {
             const type = currentMode;
@@ -520,41 +613,56 @@
                 const fileInput = document.getElementById('q_image');
                 const opts = document.getElementById('q_mcq_opts').value;
 
-                if (!text && !fileInput.files[0]) return alert('تکایە دەق یان وێنە دابنێ');
+                if (!text && !fileInput.files[0] && editIndex === -1) return alert('تکایە دەق یان وێنە دابنێ');
                 if (!qType) return alert('تکایە جۆری پرسیار دیاری بکە');
 
-                const newItem = {
-                    id: Date.now(),
+                const itemData = {
+                    id: (editIndex > -1) ? examData[editIndex].id : Date.now(),
                     type: 'question',
                     text, score, qType, isSub, subStyle, spacing, opts,
-                    img: null
+                    img: (editIndex > -1) ? examData[editIndex].img : null
+                };
+
+                const finalize = () => {
+                     if (editIndex > -1) {
+                         examData[editIndex] = itemData;
+                     } else {
+                         examData.push(itemData);
+                     }
+                     saveData();
+                     resetEditMode();
                 };
 
                 if (fileInput.files[0]) {
                     const reader = new FileReader();
                     reader.onload = function(e) {
-                        newItem.img = e.target.result;
-                        examData.push(newItem);
-                        saveData();
-                        clearInputsDesktop();
+                        itemData.img = e.target.result;
+                        finalize();
                     };
                     reader.readAsDataURL(fileInput.files[0]);
                 } else {
-                    examData.push(newItem);
-                    saveData();
-                    clearInputsDesktop();
+                    finalize();
                 }
             } else {
                 const text = document.getElementById('t_text').value;
                 if (!text) return;
-                examData.push({ id: Date.now(), type: 'title', text });
+                const itemData = { 
+                    id: (editIndex > -1) ? examData[editIndex].id : Date.now(),
+                    type: 'title', 
+                    text 
+                };
+                
+                if (editIndex > -1) {
+                    examData[editIndex] = itemData;
+                } else {
+                    examData.push(itemData);
+                }
                 saveData();
-                document.getElementById('t_text').value = '';
+                resetEditMode();
             }
         }
         
         function addItemMobile() {
-            // Similar logic for mobile
              const type = currentMode;
             if (type === 'question') {
                 const text = document.getElementById('mob_q_text').value;
@@ -566,39 +674,52 @@
                 const fileInput = document.getElementById('mob_q_image');
                 const opts = document.getElementById('mob_q_mcq_opts').value;
 
-                if (!text && !fileInput.files[0]) return alert('تکایە دەق یان وێنە دابنێ');
+                if (!text && !fileInput.files[0] && editIndex === -1) return alert('تکایە دەق یان وێنە دابنێ');
                 if (!qType) return alert('تکایە جۆری پرسیار دیاری بکە');
 
-                const newItem = {
-                    id: Date.now(),
+                const itemData = {
+                    id: (editIndex > -1) ? examData[editIndex].id : Date.now(),
                     type: 'question',
                     text, score, qType, isSub, subStyle, spacing, opts,
-                    img: null
+                    img: (editIndex > -1) ? examData[editIndex].img : null
+                };
+
+                const finalize = () => {
+                     if (editIndex > -1) {
+                         examData[editIndex] = itemData;
+                     } else {
+                         examData.push(itemData);
+                     }
+                     saveData();
+                     resetEditMode();
                 };
 
                 if (fileInput.files[0]) {
                     const reader = new FileReader();
                     reader.onload = function(e) {
-                        newItem.img = e.target.result;
-                        examData.push(newItem);
-                        saveData();
-                        clearInputsMobile();
-                        closeMobileAdd();
+                        itemData.img = e.target.result;
+                        finalize();
                     };
                     reader.readAsDataURL(fileInput.files[0]);
                 } else {
-                    examData.push(newItem);
-                    saveData();
-                    clearInputsMobile();
-                    closeMobileAdd();
+                    finalize();
                 }
             } else {
                 const text = document.getElementById('mob_t_text').value;
                 if (!text) return;
-                examData.push({ id: Date.now(), type: 'title', text });
+                 const itemData = { 
+                    id: (editIndex > -1) ? examData[editIndex].id : Date.now(),
+                    type: 'title', 
+                    text 
+                };
+                
+                if (editIndex > -1) {
+                    examData[editIndex] = itemData;
+                } else {
+                    examData.push(itemData);
+                }
                 saveData();
-                document.getElementById('mob_t_text').value = '';
-                closeMobileAdd();
+                resetEditMode();
             }
         }
 
@@ -606,13 +727,14 @@
             document.getElementById('q_text').value = '';
             document.getElementById('q_image').value = '';
             document.getElementById('q_mcq_opts').value = '';
-            // Don't clear type/score/sub for faster entry
+            document.getElementById('t_text').value = '';
         }
         
         function clearInputsMobile() {
             document.getElementById('mob_q_text').value = '';
             document.getElementById('mob_q_image').value = '';
             document.getElementById('mob_q_mcq_opts').value = '';
+            document.getElementById('mob_t_text').value = '';
         }
 
         function toggleSubOptions(view) {
@@ -645,41 +767,44 @@
                 miniItem.className = 'bg-gray-100 p-2 rounded flex justify-between items-center group cursor-grab active:cursor-grabbing';
                 miniItem.setAttribute('data-id', item.id);
                 
-                // Mini List content
+                // Mini List content (Added Edit Button)
                 const miniText = item.type === 'title' ? `<b>[سەردێڕ]</b> ${item.text}` : 
                                  (item.text ? item.text.substring(0, 20) + '...' : '[وێنە]');
-                miniItem.innerHTML = `<span class="drag-handle"><i class="fa-solid fa-grip-vertical"></i></span><span>${miniText}</span><button onclick="deleteItem(${index})" class="text-red-500 hover:text-red-700 px-2"><i class="fa-solid fa-trash"></i></button>`;
+                
+                miniItem.innerHTML = `
+                    <span class="drag-handle"><i class="fa-solid fa-grip-vertical"></i></span>
+                    <span class="flex-1 mr-2 text-right">${miniText}</span>
+                    <div class="flex gap-1">
+                        <button onclick="editItem(${index})" class="text-blue-500 hover:text-blue-700 px-2"><i class="fa-solid fa-pen"></i></button>
+                        <button onclick="deleteItem(${index})" class="text-red-500 hover:text-red-700 px-2"><i class="fa-solid fa-trash"></i></button>
+                    </div>
+                `;
                 miniList.appendChild(miniItem);
 
                 // Main Paper Render
                 if (item.type === 'title') {
                     div.className = 'section-title';
                     div.innerText = item.text;
-                    // Reset counter logic optional on title? Usually reset on type change is enough.
                 } else {
                     div.className = 'w-full mb-2 break-inside-avoid';
                     
-                    // --- AUTO RESET NUMBERING LOGIC ---
                     if (!item.isSub) {
-                        // If type changed from previous MAIN question, reset counter
                         if (item.qType !== lastMainType) {
                             mainQCounter = 0;
                             lastMainType = item.qType;
                         }
                         mainQCounter++;
-                        subQCounter = 0; // Reset sub counter when new main question starts
+                        subQCounter = 0; 
                     } else {
                         subQCounter++;
                     }
 
-                    // --- LABEL LOGIC ---
                     let labelHTML = '';
                     if (item.isSub) {
                         let labelText;
                         if (item.subStyle === 'number') {
-                            labelText = subQCounter; // 1, 2, 3
+                            labelText = subQCounter; 
                         } else {
-                            // Default to Alpha (A, B, C)
                             const letters = ['A', 'B', 'C', 'D', 'E', 'F', 'G'];
                             labelText = letters[(subQCounter - 1) % letters.length] || subQCounter;
                         }
@@ -688,17 +813,10 @@
                         labelHTML = `<span class="q-number">${mainQCounter}</span>`;
                     }
 
-                    // --- TRUE/FALSE ADDITION (INLINE END) ---
-                    let tfLabel = '';
-                    if (item.qType === 'tf') {
-                        // Inline span with extra spacing
-                        tfLabel = `&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;<span class="inline-block text-sm font-bold text-gray-700 bg-gray-50 px-3 py-0.5 rounded-md border border-gray-200" dir="ltr">( ڕاست &nbsp;&nbsp;&nbsp;&nbsp;/&nbsp;&nbsp;&nbsp;&nbsp; هەڵە )</span>`;
-                    }
-
                     let contentHTML = `<div class="flex items-start w-full">
                         ${labelHTML}
                         <div class="flex-1">
-                            ${item.text ? `<div class="font-bold text-right text-lg leading-relaxed mb-1" dir="auto">${item.text}${tfLabel}</div>` : ''}
+                            ${item.text ? `<div class="font-bold text-right text-lg leading-relaxed mb-1" dir="auto">${item.text}</div>` : ''}
                             ${item.img ? `<img src="${item.img}" class="q-image" alt="Question Image">` : ''}
                             ${renderMCQOptions(item)}
                         </div>
@@ -713,18 +831,24 @@
                 container.appendChild(div);
             });
 
-            // Re-render MathJax
             if (window.MathJax) {
                 MathJax.typesetPromise([container]).catch((err) => console.log(err));
             }
         }
 
         function renderMCQOptions(item) {
-            if (item.qType !== 'mcq' || !item.opts) return '';
-            const options = item.opts.split('\n').filter(o => o.trim());
+            let options = [];
+            
+            if (item.qType === 'mcq' && item.opts) {
+                options = item.opts.split('\n').filter(o => o.trim());
+            } else if (item.qType === 'tf') {
+                options = ['ڕاست', 'هەڵە'];
+            } else {
+                return '';
+            }
+
             if (options.length === 0) return '';
             
-            // Grid layout based on string length? Default 2 cols or 4 cols
             let gridClass = 'grid-cols-2'; 
             if (options.some(o => o.length > 30)) gridClass = 'grid-cols-1';
             else if (options.every(o => o.length < 10)) gridClass = 'grid-cols-4';
@@ -732,9 +856,14 @@
             let html = `<div class="grid ${gridClass} gap-y-2 gap-x-8 mt-2 w-full pr-4">`;
             const labels = ['A', 'B', 'C', 'D', 'E', 'F'];
             options.forEach((opt, index) => {
-                const label = labels[index] || (index + 1);
-                // Simple logic: Prepend label automatically with bold style
-                html += `<div class="text-right flex items-baseline gap-2" dir="auto"><span class="font-bold font-sans">${label})</span> <span>${opt}</span></div>`;
+                // FIXED: Remove A/B labels for True/False
+                const label = (item.qType === 'tf') ? '' : (labels[index] || (index + 1)) + ')';
+                
+                html += `<div class="text-right flex items-baseline gap-2" dir="auto">`;
+                if(label) {
+                    html += `<span class="font-bold font-sans">${label}</span>`;
+                }
+                html += `<span>${opt}</span></div>`;
             });
             html += '</div>';
             return html;
@@ -744,6 +873,7 @@
             if(confirm('دڵنیای لە سڕینەوە؟')) {
                 examData.splice(index, 1);
                 saveData();
+                resetEditMode();
             }
         }
 
@@ -751,10 +881,10 @@
             if(confirm('هەموو پرسیارەکان دەسڕیتەوە؟')) {
                 examData = [];
                 saveData();
+                resetEditMode();
             }
         }
 
-        // --- SORTABLE ---
         new Sortable(document.getElementById('questions_mini_list'), {
             animation: 150,
             handle: '.drag-handle',
@@ -766,7 +896,6 @@
             }
         });
 
-        // --- UI HELPERS ---
         function switchMode(mode, view) {
             currentMode = mode;
             const prefix = view === 'mobile' ? 'mob-' : 'desk-';
@@ -784,7 +913,10 @@
         function toggleMobileMCQ(val) { toggleMCQ(val, 'mobile'); }
 
         function openMobileAdd() { document.getElementById('mobile-add-modal').classList.remove('hidden'); }
-        function closeMobileAdd() { document.getElementById('mobile-add-modal').classList.add('hidden'); }
+        function closeMobileAdd() { 
+            document.getElementById('mobile-add-modal').classList.add('hidden'); 
+            if(editIndex > -1) resetEditMode(); // Cancel edit on close if not saved
+        }
         
         function switchTab(tab) {
             const editor = document.getElementById('editor-panel');
@@ -823,7 +955,6 @@
                 if(el) el.innerText = val;
                 if(id === 'h_subject') document.getElementById('view_subject_2').innerText = val;
                 
-                // Save header settings
                 localStorage.setItem(id, val);
             });
             
@@ -837,13 +968,11 @@
             }
         }
 
-        // Load header settings
         headerFields.forEach(id => {
             const saved = localStorage.getItem(id);
             if(saved) document.getElementById(id).value = saved;
         });
         
-        // Logo handling
         document.getElementById('h_logo_input').addEventListener('change', function(e) {
             if (e.target.files[0]) {
                 const reader = new FileReader();
@@ -857,13 +986,11 @@
         const savedLogo = localStorage.getItem('header_logo');
         if(savedLogo) document.getElementById('header_logo_img').src = savedLogo;
 
-        // --- PDF GENERATION ---
         function downloadDirectPDF() {
             const element = document.getElementById('examPaper');
             const loading = document.getElementById('pdf-loading');
             loading.classList.remove('hidden');
             
-            // Adjust for PDF
             element.style.transform = 'none';
             element.style.margin = '0';
             
@@ -877,7 +1004,7 @@
 
             html2pdf().set(opt).from(element).save().then(() => {
                 loading.classList.add('hidden');
-                resizePaper(); // Restore
+                resizePaper();
             }).catch(err => {
                 console.error(err);
                 loading.classList.add('hidden');
@@ -886,11 +1013,9 @@
         }
 
         function resizePaper() {
-            // Simple logic to keep paper centered/scaled in preview if needed
-            // Currently handled by CSS transform-origin
+            // Placeholder
         }
 
-        // --- INIT ---
         const savedCode = localStorage.getItem('exam_app_code');
         if (savedCode) {
             document.getElementById('login-overlay').style.display = 'none';
