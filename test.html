@@ -3,7 +3,7 @@
 <head>
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0, maximum-scale=1.0, user-scalable=no">
-    <title>سیستەمی زیرەکی پرسیار - مۆبایل</title>
+    <title>سیستەمی زیرەکی پرسیار - تەواوکاری</title>
     
     <script src="https://cdn.tailwindcss.com"></script>
     
@@ -33,7 +33,7 @@
             const app = initializeApp(firebaseConfig);
             const auth = getAuth(app);
             const db = getFirestore(app);
-            const appId = 'exam-system-v2-mobile'; 
+            const appId = 'exam-system-v3-full'; 
 
             window.firebaseApp = { auth, db, appId, doc, getDoc, setDoc, addDoc, deleteDoc, updateDoc, collection, getDocs, query, orderBy };
 
@@ -78,7 +78,7 @@
         #editor-panel, #preview-panel { 
             overflow-y: auto; 
             height: 100%; 
-            padding-bottom: 150px; /* Extra padding for bottom nav */
+            padding-bottom: 150px;
             -webkit-overflow-scrolling: touch;
         }
         
@@ -96,10 +96,11 @@
         }
         
         /* EXAM STYLES */
-        .exam-header { display: grid; grid-template-columns: 1fr 1.2fr 1fr; gap: 5px; border-bottom: 2px double #000; padding-bottom: 5px; margin-bottom: 15px; align-items: center; }
+        .exam-header { display: grid; grid-template-columns: 1fr 1.5fr 1fr; gap: 5px; border-bottom: 2px double #000; padding-bottom: 5px; margin-bottom: 15px; align-items: center; }
         .header-section { display: flex; flex-direction: column; font-size: 12px; font-weight: bold; line-height: 1.3; }
         .header-center { text-align: center; align-items: center; }
         .header-left { text-align: left; align-items: flex-end; }
+        .header-logo-img { width: 70px; height: 70px; object-fit: contain; margin-bottom: 5px; }
         .q-number { background: #000; color: white; width: 24px; height: 24px; border-radius: 50%; display: inline-flex; align-items: center; justify-content: center; font-size: 12px; margin-left: 8px; font-weight: bold; -webkit-print-color-adjust: exact; print-color-adjust: exact; }
         .q-content { font-size: 16px; line-height: 1.6; }
         .page-break-marker { border-top: 2px dashed #cbd5e1; margin: 20px 0; position: relative; text-align: center; color: #94a3b8; font-size: 10px; page-break-after: always; break-after: always; }
@@ -115,7 +116,6 @@
             .page-break-marker { border: none; height: 0; margin: 0; }
         }
         
-        /* HIDE SCROLLBARS BUT ALLOW SCROLL */
         .no-scrollbar::-webkit-scrollbar { display: none; }
         .no-scrollbar { -ms-overflow-style: none; scrollbar-width: none; }
     </style>
@@ -183,14 +183,23 @@
                 </div>
 
                 <div id="math-toolbar-container" class="flex overflow-x-auto gap-1 py-1 mb-1 no-scrollbar"></div>
+                
                 <textarea id="q_text" rows="2" class="w-full p-2 border rounded text-sm focus:border-brand-500 focus:ring-1 focus:ring-brand-200 transition" placeholder="دەقی پرسیار..."></textarea>
                 
-                <div class="flex gap-2">
+                <div class="flex gap-2 items-center">
                      <div class="flex-1 bg-slate-50 border rounded p-1 flex items-center overflow-hidden">
                         <i class="fa-regular fa-image text-gray-400 mx-2"></i>
                         <input type="file" id="q_image" class="w-full text-xs bg-transparent">
                      </div>
-                     <input type="number" id="q_score" value="2" class="w-16 text-center border rounded text-sm font-bold" title="نمرە">
+                     <input type="number" id="q_score" value="2" class="w-16 text-center border rounded text-sm font-bold p-1" title="نمرە">
+                </div>
+
+                <div class="bg-gray-50 p-2 rounded border">
+                    <div class="flex justify-between items-center mb-1">
+                        <span class="text-xs font-bold text-gray-500">بۆشایی بۆ وەڵام (cm):</span>
+                        <span id="spacing-display" class="text-xs font-bold text-brand-600">0</span>
+                    </div>
+                    <input type="range" id="q_spacing" min="0" max="15" value="0" step="0.5" class="w-full accent-brand-600" oninput="document.getElementById('spacing-display').innerText = this.value">
                 </div>
 
                 <div class="border rounded bg-slate-50 p-2">
@@ -231,6 +240,12 @@
             <div id="view-settings" class="hidden flex-1 p-3 space-y-4">
                  <div class="bg-white p-3 rounded border shadow-sm">
                     <h3 class="font-bold text-xs text-brand-600 mb-2 border-b pb-1">سەرپەڕە (Header)</h3>
+                    
+                    <div class="mb-3">
+                        <label class="block text-xs font-bold text-gray-600 mb-1">لۆگۆی قوتابخانە:</label>
+                        <input type="file" id="h_logo_input" accept="image/*" class="w-full text-xs text-slate-500 file:mr-2 file:py-2 file:px-4 file:rounded-full file:border-0 file:text-xs file:font-semibold file:bg-brand-50 file:text-brand-700 hover:file:bg-brand-100">
+                    </div>
+
                     <div class="grid grid-cols-2 gap-2 text-xs">
                         <input id="h_school" class="border p-2 rounded" placeholder="قوتابخانە" oninput="updatePaper()">
                         <input id="h_subject" class="border p-2 rounded" placeholder="بابەت" oninput="updatePaper()">
@@ -260,7 +275,7 @@
                         <div id="view_school" class="mt-1 font-black">...</div>
                     </div>
                     <div class="header-section header-center">
-                        <img src="https://upload.wikimedia.org/wikipedia/commons/d/d3/Kurdistan_Regional_Government_emblem.svg" class="w-16 h-16 object-contain mb-1">
+                        <img id="header_logo_view" src="https://upload.wikimedia.org/wikipedia/commons/d/d3/Kurdistan_Regional_Government_emblem.svg" class="header-logo-img">
                         <div class="border-b-2 border-black pb-1 mb-1 text-lg">پرسیارەکانی <span id="view_subject">...</span></div>
                         <div class="text-[10px]"><span id="view_year">2024-2025</span></div>
                     </div>
@@ -295,15 +310,13 @@
             if(view === 'editor') {
                 editor.classList.remove('hidden');
                 preview.classList.add('hidden');
-                preview.classList.remove('flex'); // Important for flex layout
-                
+                preview.classList.remove('flex');
                 btnEd.className = "flex-1 py-4 text-center font-bold text-brand-600 border-t-4 border-brand-600 bg-blue-50";
                 btnPr.className = "flex-1 py-4 text-center font-bold text-gray-400 border-t-4 border-transparent";
             } else {
                 editor.classList.add('hidden');
                 preview.classList.remove('hidden');
-                preview.classList.add('flex'); // Show as flex
-                
+                preview.classList.add('flex');
                 btnPr.className = "flex-1 py-4 text-center font-bold text-brand-600 border-t-4 border-brand-600 bg-blue-50";
                 btnEd.className = "flex-1 py-4 text-center font-bold text-gray-400 border-t-4 border-transparent";
             }
@@ -315,16 +328,24 @@
         let bankData = [];
         let editIndex = -1;
         let mcqOptions = [{text:'', correct:false}, {text:'', correct:false}, {text:'', correct:false}, {text:'', correct:false}];
-
         let deviceId = localStorage.getItem('did') || crypto.randomUUID();
         localStorage.setItem('did', deviceId);
 
-        // --- MATH UI ---
-        const mathSymbols = ['+','-','\\times','\\div','=','\\approx','\\sqrt{}','\\frac{}{}','x^2','\\circ'];
+        // --- EXTENDED MATH UI ---
+        const mathSymbols = [
+            '+','-','\\times','\\div','=','\\neq','\\approx','\\pm',
+            '\\sqrt{}','\\sqrt[3]{}','\\frac{}{}','x^2','x_2','e^x',
+            '<','>','\\leq','\\geq','\\infty','\\pi','\\circ','\\angle','\\triangle',
+            '\\alpha','\\beta','\\theta','\\lambda','\\Delta',
+            '\\in','\\notin','\\cup','\\cap','\\subset','\\subseteq','\\emptyset',
+            '\\rightarrow','\\Rightarrow','\\Leftrightarrow',
+            '\\sum','\\int','\\lim','\\log','\\ln','\\sin','\\cos','\\tan'
+        ];
+        
         const tb = document.getElementById('math-toolbar-container');
         mathSymbols.forEach(s => {
             let btn = document.createElement('button');
-            btn.className = "flex-shrink-0 px-3 py-2 bg-white border rounded text-sm font-bold shadow-sm active:bg-gray-200";
+            btn.className = "flex-shrink-0 px-2 py-1 bg-white border rounded text-xs font-bold shadow-sm active:bg-gray-200 min-w-[30px]";
             btn.innerText = s.replace('\\','');
             btn.onclick = () => insertMath(s);
             tb.appendChild(btn);
@@ -360,7 +381,6 @@
             const type = document.getElementById('q_type').value;
             document.getElementById('mcq-container').style.display = type === 'mcq' ? 'block' : 'none';
         }
-
         renderMCQInputs(); 
 
         // --- CRUD ---
@@ -368,6 +388,7 @@
             const text = document.getElementById('q_text').value;
             const score = document.getElementById('q_score').value;
             const type = document.getElementById('q_type').value;
+            const spacing = document.getElementById('q_spacing').value; // Get Spacing
             const file = document.getElementById('q_image').files[0];
             
             if(!text && !file) return alert('تکایە دەق یان وێنە دابنێ');
@@ -378,6 +399,7 @@
                 qType: type,
                 text: text,
                 score: score,
+                spacing: spacing, // Save Spacing
                 options: type === 'mcq' ? JSON.parse(JSON.stringify(mcqOptions)) : null,
                 img: null
             };
@@ -422,6 +444,8 @@
             document.getElementById('q_text').value = item.text;
             document.getElementById('q_score').value = item.score;
             document.getElementById('q_type').value = item.qType;
+            document.getElementById('q_spacing').value = item.spacing || 0; // Load Spacing
+            document.getElementById('spacing-display').innerText = item.spacing || 0;
             
             if(item.qType === 'mcq' && item.options) {
                 mcqOptions = JSON.parse(JSON.stringify(item.options));
@@ -438,6 +462,8 @@
             editIndex = -1;
             document.getElementById('q_text').value = '';
             document.getElementById('q_image').value = '';
+            document.getElementById('q_spacing').value = 0; // Reset
+            document.getElementById('spacing-display').innerText = 0;
             document.getElementById('btn-add').innerText = "زیادکردن";
             document.getElementById('btn-add').classList.replace('bg-green-600', 'bg-brand-600');
             mcqOptions = [{text:'', correct:false}, {text:'', correct:false}, {text:'', correct:false}, {text:'', correct:false}];
@@ -457,6 +483,8 @@
                 }
 
                 qCount++;
+                let spacer = item.spacing > 0 ? `<div style="height: ${item.spacing}cm"></div>` : ''; // Apply Spacing
+
                 let content = `
                 <div class="flex items-start gap-2 w-full break-inside-avoid relative group">
                     <span class="q-number">${qCount}</span>
@@ -464,6 +492,7 @@
                         <div class="q-content font-bold mb-1" dir="auto">${item.text}</div>
                         ${item.img ? `<img src="${item.img}" class="max-h-32 my-2 border border-dashed p-1">` : ''}
                         ${renderOptionsHTML(item)}
+                        ${spacer}
                     </div>
                     <span class="text-[10px] border px-1 rounded absolute left-0 top-0 bg-white">${item.score} نمرە</span>
                 </div>
@@ -510,17 +539,25 @@
                 }
                 list.appendChild(div);
             });
-            
-            new Sortable(list, {
-                animation: 150,
-                onEnd: (evt) => {
-                    const item = examData.splice(evt.oldIndex, 1)[0];
-                    examData.splice(evt.newIndex, 0, item);
-                    renderPaper();
-                    updateList(); 
-                }
-            });
+            new Sortable(list, { animation: 150, onEnd: (evt) => { const item = examData.splice(evt.oldIndex, 1)[0]; examData.splice(evt.newIndex, 0, item); renderPaper(); updateList(); }});
         }
+
+        // --- HEADER LOGO HANDLER ---
+        document.getElementById('h_logo_input').addEventListener('change', function(e) {
+            if(e.target.files[0]) {
+                const reader = new FileReader();
+                reader.onload = function(evt) {
+                    const res = evt.target.result;
+                    document.getElementById('header_logo_view').src = res;
+                    localStorage.setItem('header_logo_data', res); // Persist
+                }
+                reader.readAsDataURL(e.target.files[0]);
+            }
+        });
+
+        // Restore Logo on Load
+        const savedLogo = localStorage.getItem('header_logo_data');
+        if(savedLogo) document.getElementById('header_logo_view').src = savedLogo;
 
         // --- FIREBASE OPS ---
         async function saveCurrentExam() {
@@ -590,7 +627,7 @@
             renderPaper();
             updateList();
             setTab('create');
-            showMobileView('editor'); // Switch back to editor on load
+            showMobileView('editor');
         }
         
         async function deleteExam(id, e) {
@@ -610,7 +647,7 @@
             setTab('create');
         }
 
-        // --- UTILS ---
+        // --- BANK UTILS ---
         async function addToBank(idx) {
             if(!window.currentUser) return alert('Login required');
             const item = examData[idx];
@@ -634,13 +671,25 @@
             
             bankData.filter(i => i.text.toLowerCase().includes(term)).forEach(item => {
                 const div = document.createElement('div');
-                div.className = "bg-white p-3 rounded-lg border text-sm mb-2 shadow-sm";
+                div.className = "bg-white p-3 rounded-lg border text-sm mb-2 shadow-sm flex flex-col gap-2";
                 div.innerHTML = `
-                    <div class="mb-2 font-bold text-gray-700">${item.text}</div>
-                    <button onclick='importFromBank(${JSON.stringify(item)})' class="w-full bg-slate-100 py-2 rounded text-brand-600 font-bold active:bg-slate-200">زیادکردن</button>
+                    <div class="font-bold text-gray-700">${item.text}</div>
+                    <div class="flex gap-2">
+                        <button onclick='importFromBank(${JSON.stringify(item)})' class="flex-1 bg-blue-50 py-2 rounded text-blue-600 font-bold active:bg-blue-100">زیادکردن</button>
+                        <button onclick="deleteFromBank('${item.id}')" class="bg-red-50 px-3 rounded text-red-500 font-bold active:bg-red-100"><i class="fa-solid fa-trash"></i></button>
+                    </div>
                 `;
                 container.appendChild(div);
             });
+        }
+
+        async function deleteFromBank(id) {
+            if(!confirm('دڵنیای لە سڕینەوەی ئەم پرسیارە لە بانک؟')) return;
+            const { db, doc, deleteDoc, appId } = window.firebaseApp;
+            try {
+                await deleteDoc(doc(db, 'artifacts', appId, 'users', window.currentUser.uid, 'bank', id));
+                loadBank(); // Reload List
+            } catch(e) { console.error(e); alert('کێشەیەک هەیە'); }
         }
 
         function importFromBank(item) {
@@ -725,7 +774,7 @@
             const el = document.getElementById('examPaper');
             const clone = el.cloneNode(true);
             clone.style.transform = "scale(1)"; 
-            document.body.appendChild(clone); // Temp append for PDF gen
+            document.body.appendChild(clone); 
             
             html2pdf().set({
                 margin: 0,
