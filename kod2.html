@@ -3,21 +3,29 @@
 <head>
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0, maximum-scale=1.0, user-scalable=no">
-    <title>سیستەمی پرسیار - مامۆستا</title>
-    
+    <title>بەڕێوەبەری کۆدەکان (Admin Pro)</title>
     <script src="https://cdn.tailwindcss.com"></script>
-    
-    <script src="https://cdnjs.cloudflare.com/ajax/libs/html2pdf.js/0.10.1/html2pdf.bundle.min.js"></script>
-    
-    <script src="https://cdnjs.cloudflare.com/ajax/libs/Sortable/1.15.0/Sortable.min.js"></script>
-    
     <link href="https://fonts.googleapis.com/css2?family=Nrt+Reg&family=Vazirmatn:wght@300;400;700;900&display=swap" rel="stylesheet">
     <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.4.0/css/all.min.css">
-    
+
+    <script>
+        tailwind.config = {
+            theme: {
+                extend: {
+                    fontFamily: { sans: ['Vazirmatn', 'Arial'], nrt: ['Nrt Reg', 'Arial'] },
+                    colors: { 
+                        primary: { 50: '#eff6ff', 600: '#2563eb', 900: '#1e3a8a' },
+                        danger: { 50: '#fef2f2', 600: '#dc2626' }
+                    }
+                }
+            }
+        }
+    </script>
+
     <script type="module">
         import { initializeApp } from "https://www.gstatic.com/firebasejs/11.6.1/firebase-app.js";
         import { getAuth, signInAnonymously, onAuthStateChanged } from "https://www.gstatic.com/firebasejs/11.6.1/firebase-auth.js";
-        import { getFirestore, doc, getDoc, setDoc, updateDoc, addDoc, deleteDoc, collection, getDocs, query, orderBy } from "https://www.gstatic.com/firebasejs/11.6.1/firebase-firestore.js";
+        import { getFirestore, doc, getDoc, setDoc, deleteDoc, collection, getDocs, writeBatch } from "https://www.gstatic.com/firebasejs/11.6.1/firebase-firestore.js";
 
         const firebaseConfig = {
             apiKey: "AIzaSyBHxuOA6uuX1EZGse5_JOHc3WMjvPywLD4",
@@ -35,814 +43,275 @@
             const db = getFirestore(app);
             const appId = 'exam-system-v11-secure'; 
 
-            window.firebaseApp = { auth, db, appId, doc, getDoc, setDoc, addDoc, deleteDoc, updateDoc, collection, getDocs, query, orderBy };
+            window.firebaseApp = { db, appId, doc, setDoc, deleteDoc, collection, getDocs, writeBatch };
 
             onAuthStateChanged(auth, (user) => {
                 if (user) {
-                    window.currentUser = user;
-                    // If session exists, load data
-                    if(localStorage.getItem('is_logged_in') === 'true') {
-                        document.getElementById('login-overlay').style.display = 'none';
-                        loadExamList();
-                    }
+                    document.getElementById('status-indicator').classList.remove('bg-red-500');
+                    document.getElementById('status-indicator').classList.add('bg-green-500');
                 } else {
                     signInAnonymously(auth);
                 }
             });
 
         } catch (e) {
-            console.error("Firebase Init Error", e);
+            console.error("Firebase Error", e);
         }
     </script>
-    
-    <script>
-        window.MathJax = {
-            tex: { inlineMath: [['$', '$'], ['\\(', '\\)']] },
-            svg: { fontCache: 'global' },
-            chtml: { displayAlign: 'right' },
-            startup: { typeset: false } 
-        };
-    </script>
-    <script id="MathJax-script" async src="https://cdn.jsdelivr.net/npm/mathjax@3/es5/tex-mml-chtml.js"></script>
-
-    <script>
-        tailwind.config = {
-            theme: {
-                extend: {
-                    fontFamily: { sans: ['Vazirmatn', 'Arial', 'sans-serif'], nrt: ['Nrt Reg', 'Arial', 'sans-serif'] },
-                    colors: { brand: { 50: '#f0f9ff', 500: '#0ea5e9', 600: '#0284c7', 900: '#0c4a6e' } },
-                    screens: { 'print': {'raw': 'print'} }
-                }
-            }
-        }
-    </script>
-
-    <style>
-        html, body { height: 100%; overflow: hidden; background-color: #f8fafc; }
-        .main-layout { display: flex; flex-direction: column; height: 100vh; }
-        .content-area { flex: 1; overflow: hidden; display: flex; position: relative; }
-        #editor-panel, #preview-panel { overflow-y: auto; height: 100%; padding-bottom: 150px; -webkit-overflow-scrolling: touch; }
-        
-        /* A4 PAPER - COMPACT MODE */
-        .a4-paper { 
-            width: 210mm; min-height: 297mm; background: white; margin: 0 auto; padding: 10mm; 
-            box-shadow: 0 4px 15px rgba(0,0,0,0.1); font-family: 'Nrt Reg', sans-serif; 
-            color: black; transform-origin: top center; transition: transform 0.3s;
-        }
-
-        @media (max-width: 1023px) {
-            .a4-paper { transform: scale(0.55); margin-top: 10px; margin-bottom: 50px; }
-            #preview-panel { display: flex; justify-content: center; background: #e2e8f0; }
-        }
-        
-        .exam-header { display: grid; grid-template-columns: 1fr 1.5fr 1fr; gap: 5px; border-bottom: 2px double #000; padding-bottom: 5px; margin-bottom: 10px; align-items: center; }
-        .header-section { display: flex; flex-direction: column; font-size: 11px; font-weight: bold; line-height: 1.2; }
-        .header-center { text-align: center; align-items: center; }
-        .header-left { text-align: left; align-items: flex-end; }
-        .header-logo-img { width: 60px; height: 60px; object-fit: contain; margin-bottom: 2px; }
-        
-        .q-wrapper { margin-bottom: 6px; break-inside: avoid; } 
-        .q-number { background: #000; color: white; width: 22px; height: 22px; border-radius: 50%; display: inline-flex; align-items: center; justify-content: center; font-size: 11px; margin-left: 6px; font-weight: bold; -webkit-print-color-adjust: exact; print-color-adjust: exact; flex-shrink: 0; }
-        .q-sub-label { font-weight: bold; margin-left: 5px; min-width: 20px; display: inline-block; font-size: 14px; }
-        
-        .q-content { font-size: 14px; line-height: 1.4; text-align: right !important; direction: rtl !important; display: block; width: 100%; font-weight: bold; }
-        .q-options-grid { font-size: 13px; margin-top: 2px; }
-        
-        .section-title { width: 100%; text-align: center; font-weight: 900; font-size: 16px; padding: 4px; border-top: 2px solid #000; border-bottom: 2px solid #000; margin: 10px 0; background-color: #f3f4f6; -webkit-print-color-adjust: exact; }
-        .page-break-marker { border-top: 2px dashed #cbd5e1; margin: 20px 0; position: relative; text-align: center; color: #94a3b8; font-size: 10px; page-break-after: always; break-after: always; }
-        .page-break-marker::after { content: 'پەڕەی نوێ (Page Break)'; background: #f8fafc; padding: 0 10px; position: relative; top: -8px; }
-
-        @media print { 
-            @page { size: A4; margin: 0; } 
-            body { background: white; height: auto; display: block; overflow: visible; } 
-            .no-print { display: none !important; } 
-            .a4-paper { width: 100%; box-shadow: none; margin: 0; padding: 10mm; height: auto; transform: none !important; overflow: visible; } 
-            #editor-panel { display: none !important; }
-            #preview-panel { display: block !important; padding: 0 !important; overflow: visible !important; height: auto !important; }
-            .section-title { background-color: #f3f4f6 !important; }
-        }
-        
-        .no-scrollbar::-webkit-scrollbar { display: none; }
-    </style>
 </head>
-<body class="font-sans text-slate-800 main-layout">
+<body class="bg-gray-50 font-sans text-gray-800 pb-20">
 
-    <div id="login-overlay" class="fixed inset-0 bg-slate-900/95 z-[100] flex items-center justify-center backdrop-blur-sm p-4">
+    <div id="login-screen" class="fixed inset-0 bg-primary-900 flex flex-col items-center justify-center z-50 p-4">
         <div class="bg-white p-6 rounded-2xl shadow-2xl w-full max-w-sm text-center">
-            <div id="login-loader" class="hidden absolute inset-0 bg-white/80 flex items-center justify-center rounded-2xl"><div class="animate-spin h-8 w-8 border-4 border-brand-500 rounded-full border-t-transparent"></div></div>
-            <h2 class="text-2xl font-bold mb-4 text-brand-900">چوونەژوورەوە</h2>
-            <div class="text-xs text-gray-500 mb-2">تکایە کۆدی چالاککردن بنووسە</div>
-            <input type="number" id="password-input" class="w-full p-3 border-2 rounded-xl text-center text-xl font-bold mb-3 focus:border-brand-500 outline-none" placeholder="کۆد...">
-            <p id="login-error-msg" class="text-red-500 text-xs mb-2 hidden"></p>
-            <button onclick="checkPassword()" id="login-btn" class="w-full bg-brand-600 hover:bg-brand-500 text-white font-bold py-3 rounded-xl transition">چوونەژوورەوە</button>
+            <div class="w-16 h-16 bg-primary-50 text-primary-600 rounded-full flex items-center justify-center text-3xl mx-auto mb-4">
+                <i class="fa-solid fa-lock"></i>
+            </div>
+            <h1 class="text-xl font-bold mb-1">پەنێڵی ئەدمین</h1>
+            <p class="text-gray-400 text-xs mb-6">بەڕێوەبردنی کۆدی خوێندکاران</p>
+            
+            <input type="password" id="admin-pass" class="w-full p-3 border-2 border-gray-200 rounded-xl text-center text-lg mb-4 outline-none focus:border-primary-600 transition" placeholder="پاسۆرد" inputmode="numeric">
+            <button onclick="adminLogin()" class="w-full bg-primary-600 hover:bg-primary-900 text-white font-bold py-3.5 rounded-xl transition shadow-lg">چوونەژوورەوە</button>
         </div>
     </div>
 
-    <div class="content-area block lg:flex lg:flex-row">
+    <div id="dashboard" class="hidden min-h-screen">
         
-        <div id="editor-panel" class="w-full lg:w-[400px] bg-white lg:border-l z-20 flex flex-col shadow-xl">
-            
-            <div class="p-3 border-b bg-slate-50 flex justify-between items-center sticky top-0 z-10">
-                <div class="font-bold text-brand-900 flex items-center gap-2 text-sm">
-                    <i class="fa-solid fa-layer-group"></i> <span id="current-exam-title">تاقیکردنەوەی نوێ</span>
+        <div class="bg-white shadow-sm sticky top-0 z-40 border-b border-gray-200">
+            <div class="max-w-3xl mx-auto px-4 py-3 flex justify-between items-center">
+                <div class="flex items-center gap-2">
+                    <div id="status-indicator" class="w-2.5 h-2.5 rounded-full bg-red-500 animate-pulse"></div>
+                    <span class="font-bold text-gray-700">کۆدەکان</span>
                 </div>
-                <button onclick="createNewExam()" class="text-xs bg-green-100 text-green-700 px-2 py-1 rounded">+ نوێ</button>
-            </div>
-
-            <div class="flex text-xs font-bold border-b bg-white sticky top-[50px] z-10 shadow-sm">
-                <button onclick="setTab('create')" id="tab-create" class="flex-1 py-3 text-brand-600 border-b-2 border-brand-600 bg-blue-50">نووسین</button>
-                <button onclick="setTab('archive')" id="tab-archive" class="flex-1 py-3 text-gray-500">ئەرشیف</button>
-                <button onclick="setTab('bank')" id="tab-bank" class="flex-1 py-3 text-gray-500">بانک</button>
-                <button onclick="setTab('settings')" id="tab-settings" class="flex-1 py-3 text-gray-500">ڕێکخستن</button>
-            </div>
-
-            <div id="view-create" class="flex-1 p-3 space-y-3">
-                
-                <div class="flex gap-2 mb-2">
-                    <button onclick="addSectionTitle()" class="bg-gray-800 text-white px-3 py-2 rounded text-xs font-bold w-1/2 shadow-sm">
-                        <i class="fa-solid fa-heading"></i> سەردێڕ
+                <div class="flex gap-2">
+                    <button onclick="exportData()" class="bg-blue-50 text-blue-600 p-2 rounded-lg text-xs font-bold border border-blue-100 flex items-center gap-1">
+                        <i class="fa-solid fa-download"></i> <span class="hidden sm:inline">داگرتن</span>
                     </button>
-                    <button onclick="addPageBreak()" class="bg-gray-600 text-white px-3 py-2 rounded text-xs font-bold w-1/2">
-                        <i class="fa-solid fa-scissors"></i> پەڕەی نوێ
+                    <button onclick="document.getElementById('import-file').click()" class="bg-green-50 text-green-600 p-2 rounded-lg text-xs font-bold border border-green-100 flex items-center gap-1">
+                        <i class="fa-solid fa-upload"></i> <span class="hidden sm:inline">هێنانەوە</span>
                     </button>
+                    <input type="file" id="import-file" accept=".json" class="hidden" onchange="importData(this)">
+                    <button onclick="location.reload()" class="bg-red-50 text-red-600 p-2 rounded-lg text-xs"><i class="fa-solid fa-power-off"></i></button>
                 </div>
+            </div>
+        </div>
 
-                <div id="math-toolbar-container" class="flex overflow-x-auto gap-1 py-1 mb-1 no-scrollbar"></div>
+        <div class="max-w-3xl mx-auto p-4 space-y-4">
+
+            <div class="bg-white p-4 rounded-2xl shadow-sm border border-gray-100">
+                <h2 class="text-sm font-bold text-gray-500 mb-3 uppercase tracking-wider">زیادکردنی کۆد</h2>
                 
-                <textarea id="q_text" rows="2" class="w-full p-2 border rounded text-sm focus:border-brand-500 focus:ring-1 focus:ring-brand-200 transition text-right" dir="auto" placeholder="دەقی پرسیار..."></textarea>
-                
-                <div class="flex gap-2 items-center">
-                     <div class="flex-1 bg-slate-50 border rounded p-1 flex items-center overflow-hidden">
-                        <i class="fa-regular fa-image text-gray-400 mx-2"></i>
-                        <input type="file" id="q_image" class="w-full text-xs bg-transparent">
-                     </div>
-                     <input type="number" id="q_score" value="2" class="w-16 text-center border rounded text-sm font-bold p-1" title="نمرە">
-                </div>
-
-                <div class="bg-blue-50 p-2 rounded border border-blue-100 mt-1">
-                    <div class="flex justify-between items-center mb-1">
-                        <span class="text-xs font-bold text-gray-600">بۆشایی بۆ وەڵام (cm):</span>
-                        <span id="spacing-display" class="text-xs font-bold text-blue-600 bg-white px-2 rounded">0</span>
-                    </div>
-                    <input type="range" id="q_spacing" min="0" max="15" value="0" step="0.5" class="w-full accent-blue-600 cursor-pointer" oninput="document.getElementById('spacing-display').innerText = this.value">
-                </div>
-
-                <div class="border rounded bg-slate-50 p-2">
-                    <div class="flex justify-between items-center mb-2">
-                        <label class="text-xs font-bold text-gray-600">جۆری پرسیار:</label>
-                        <select id="q_type" class="text-xs border rounded p-1 bg-white" onchange="toggleQuestionInputs()">
-                            <option value="mcq">هەڵبژاردن</option>
-                            <option value="text">نووسین (Inshai)</option>
-                            <option value="match">ڕاکێشان (Matching)</option>
-                        </select>
+                <div class="flex flex-col gap-3">
+                    <div class="flex gap-2">
+                        <div class="relative flex-1">
+                            <input type="number" id="new-code" class="w-full p-3 bg-gray-50 border border-gray-200 rounded-xl text-left font-mono font-bold text-lg tracking-widest outline-none focus:border-primary-600 focus:bg-white transition" placeholder="کۆد (6+ ژمارە)">
+                            <button onclick="generateRandom()" class="absolute left-2 top-2 bottom-2 px-3 text-gray-400 hover:text-primary-600 transition"><i class="fa-solid fa-shuffle"></i></button>
+                        </div>
                     </div>
                     
-                    <div id="sub-label-box" class="hidden mb-2 border-t pt-2">
-                        <div class="flex justify-between items-center">
-                            <label class="text-xs text-gray-600">شێوازی لق:</label>
-                            <select id="q_sub_style" class="text-xs border rounded p-1 bg-white w-2/3">
-                                <option value="none">هیچ (ئاسایی)</option>
-                                <option value="alpha">A, B, C</option>
-                                <option value="number">1, 2, 3</option>
-                            </select>
+                    <input type="text" id="code-note" class="w-full p-3 bg-gray-50 border border-gray-200 rounded-xl text-sm outline-none focus:border-primary-600 focus:bg-white" placeholder="تێبینی (ناوی قوتابی، پۆل...)">
+                    
+                    <div class="flex items-center gap-2 bg-gray-50 p-2 rounded-xl border border-gray-200">
+                        <div class="bg-white p-2 rounded-lg text-gray-500"><i class="fa-regular fa-calendar-xmark"></i></div>
+                        <div class="flex-1">
+                            <label class="block text-[10px] text-gray-400 font-bold mb-0.5">بەرواری بەسەرچوون (ئیختیاری)</label>
+                            <input type="date" id="expiry-date" class="w-full bg-transparent text-sm font-bold text-gray-700 outline-none">
                         </div>
                     </div>
 
-                    <div id="mcq-container">
-                        <div id="mcq-inputs" class="space-y-2 mb-2"></div>
-                        <button onclick="addMCQOption()" class="text-xs text-brand-600 font-bold w-full text-right py-1">+ زیادکردنی هەڵبژاردە</button>
-                    </div>
-
-                    <div id="match-container" class="hidden">
-                         <div class="text-xs text-gray-400 mb-1 text-center font-bold">جووتەکان:</div>
-                         <div id="match-inputs" class="space-y-1 mb-2"></div>
-                         <button onclick="addMatchPair()" class="text-xs text-brand-600 font-bold w-full text-right py-1">+ زیادکردنی جووت</button>
-                    </div>
+                    <button onclick="saveCode()" class="w-full bg-primary-600 hover:bg-primary-700 text-white font-bold py-3 rounded-xl shadow-lg shadow-primary-600/30 transition flex items-center justify-center gap-2">
+                        <i class="fa-solid fa-plus"></i> دروستکردن
+                    </button>
                 </div>
-
-                <div class="flex gap-2">
-                    <button onclick="addItem()" id="btn-add" class="flex-1 bg-brand-600 hover:bg-brand-700 text-white py-3 rounded-lg font-bold shadow-md transition">زیادکردن</button>
-                    <button onclick="clearForm()" class="px-4 bg-gray-200 rounded-lg text-gray-600"><i class="fa-solid fa-rotate-left"></i></button>
-                </div>
-
-                <div id="questions-list" class="space-y-2 mt-4 pb-20"></div>
             </div>
 
-            <div id="view-settings" class="hidden flex-1 p-3 space-y-4">
-                 <div class="bg-white p-3 rounded border shadow-sm">
-                    <h3 class="font-bold text-xs text-brand-600 mb-2 border-b pb-1">زانیاری سەرپەڕە</h3>
-                    <div class="mb-3"><label class="text-xs font-bold text-gray-600">لۆگۆ:</label><input type="file" id="h_logo_input" accept="image/*" class="w-full text-xs"></div>
-                    <div class="grid grid-cols-2 gap-3 text-xs">
-                        <div class="col-span-2"><input id="h_gov" class="border p-2 rounded w-full" value="حکومەتی هەرێمی کوردستان" oninput="updatePaper()"></div>
-                        <div class="col-span-2"><input id="h_min" class="border p-2 rounded w-full" value="وەزارەتی پەروەردە" oninput="updatePaper()"></div>
-                        <div class="col-span-2"><input id="h_dir" class="border p-2 rounded w-full" placeholder="بەڕێوەبەرایەتی..." oninput="updatePaper()"></div>
-                        <div><input id="h_school" class="border p-2 rounded w-full" placeholder="قوتابخانە" oninput="updatePaper()"></div>
-                        <div><input id="h_subject" class="border p-2 rounded w-full" placeholder="بابەت" oninput="updatePaper()"></div>
-                        <div><input id="h_class" class="border p-2 rounded w-full" placeholder="پۆل" oninput="updatePaper()"></div>
-                        <div><input id="h_time" class="border p-2 rounded w-full" value="٢ کاتژمێر" oninput="updatePaper()"></div>
-                        <div><input id="h_type" class="border p-2 rounded w-full" value="خولی یەکەم" oninput="updatePaper()"></div>
-                        <div><input id="h_year" class="border p-2 rounded w-full" value="2024 - 2025" oninput="updatePaper()"></div>
-                        <div><input id="h_date" class="border p-2 rounded w-full" placeholder="بەروار" oninput="updatePaper()"></div>
-                    </div>
-                 </div>
-                 
-                 <div class="bg-white p-3 rounded border shadow-sm">
-                    <h3 class="font-bold text-xs text-brand-600 mb-2 border-b pb-1">کردارەکان</h3>
-                    <div class="grid grid-cols-2 gap-2">
-                        <button onclick="shuffleQuestions()" class="bg-orange-100 text-orange-700 py-3 rounded text-xs font-bold">تێکەڵکردن</button>
-                        <button onclick="generateAnswerKey()" class="bg-yellow-100 text-yellow-700 py-3 rounded text-xs font-bold">وەڵامنامە</button>
-                        <button onclick="downloadWord()" class="bg-blue-100 text-blue-700 py-3 rounded text-xs font-bold">Word</button>
-                        <button onclick="downloadPDF()" class="bg-green-100 text-green-700 py-3 rounded text-xs font-bold">PDF</button>
-                    </div>
-                 </div>
+            <div class="flex justify-between items-end px-1">
+                <h2 class="text-sm font-bold text-gray-500 uppercase tracking-wider">لیستی کۆدەکان</h2>
+                <button onclick="loadCodes()" class="text-xs text-primary-600 font-bold bg-primary-50 px-3 py-1 rounded-full"><i class="fa-solid fa-rotate"></i> نوێکردنەوە</button>
             </div>
 
-            <div id="view-archive" class="hidden flex-1 p-3"><div id="exam-list-container" class="space-y-2"></div><button onclick="saveCurrentExam()" class="w-full mt-4 bg-green-600 text-white py-3 rounded-lg font-bold">هەڵگرتن</button></div>
-            <div id="view-bank" class="hidden flex-1 p-3"><input type="text" id="bank-search" class="w-full p-2 border rounded mb-2" oninput="filterBank()"><div id="bank-list-container" class="space-y-2"></div></div>
+            <div id="codes-list" class="space-y-3 pb-10">
+                <div class="text-center py-10 text-gray-400">
+                    <i class="fa-solid fa-spinner fa-spin text-2xl mb-2"></i>
+                    <p class="text-xs">خەریکی هێنانەوە...</p>
+                </div>
+            </div>
+
         </div>
-        
-        <div id="preview-panel" class="hidden lg:flex w-full bg-slate-200 pt-8 flex justify-center items-start">
-            <div id="examPaper" class="a4-paper">
-                <div class="exam-header">
-                    <div class="header-section text-right">
-                        <div id="view_gov">حکومەتی هەرێمی کوردستان</div>
-                        <div id="view_min">وەزارەتی پەروەردە</div>
-                        <div id="view_dir">...</div>
-                        <div id="view_school" class="mt-1 font-black">...</div>
-                    </div>
-                    <div class="header-section header-center">
-                        <img id="header_logo_view" src="https://upload.wikimedia.org/wikipedia/commons/d/d3/Kurdistan_Regional_Government_emblem.svg" class="header-logo-img">
-                        <div class="border-b-2 border-black pb-1 mb-1 text-lg">پرسیارەکانی <span id="view_subject">...</span></div>
-                        <div class="text-[12px]"><span id="view_type">...</span> - <span id="view_year">2024-2025</span></div>
-                    </div>
-                    <div class="header-section header-left">
-                        <div>پۆل: <span id="view_class">...</span></div>
-                        <div>کات: <span id="view_time">...</span></div>
-                        <div>بەروار: <span id="view_date">...</span></div>
-                    </div>
-                </div>
-                <div id="paper_questions" class="w-full"></div>
-            </div>
-        </div>
-    </div>
-
-    <div class="lg:hidden fixed bottom-0 left-0 w-full bg-white border-t flex z-50 pb-safe">
-        <button onclick="showMobileView('editor')" id="mb-editor" class="flex-1 py-4 text-center font-bold text-brand-600 border-t-4 border-brand-600 bg-blue-50">نووسین</button>
-        <button onclick="showMobileView('preview')" id="mb-preview" class="flex-1 py-4 text-center font-bold text-gray-400 border-t-4 border-transparent">پەڕە</button>
     </div>
 
     <script>
-        // --- MOBILE NAV ---
-        function showMobileView(view) {
-            const ed = document.getElementById('editor-panel'), pr = document.getElementById('preview-panel');
-            if(view==='editor'){ ed.classList.remove('hidden'); pr.classList.add('hidden'); pr.classList.remove('flex'); }
-            else { ed.classList.add('hidden'); pr.classList.remove('hidden'); pr.classList.add('flex'); }
-        }
-
-        // --- AUTH & INIT ---
-        let currentExamId = null;
-        let examData = [];
-        let bankData = [];
-        let editIndex = -1;
-        let mcqOptions = [{text:'', correct:false}, {text:'', correct:false}, {text:'', correct:false}, {text:'', correct:false}];
-        let matchPairs = [{right:'', left:''}, {right:'', left:''}];
-        let userIsAdmin = false;
-        
-        let deviceId = localStorage.getItem('did') || crypto.randomUUID();
-        localStorage.setItem('did', deviceId);
-
-        // --- SECURE LOGIN LOGIC ---
-        async function checkPassword() {
-            const input = document.getElementById('password-input').value.trim();
-            const btn = document.getElementById('login-btn');
-            const errorMsg = document.getElementById('login-error-msg');
-            const loader = document.getElementById('login-loader');
-            
-            errorMsg.classList.add('hidden');
-            if(!input) return;
-
-            // 1. MASTER CODE CHECK
-            if(input === '11223344009') {
-                userIsAdmin = true;
-                grantAccess();
-                return;
-            }
-
-            // 2. FIRESTORE CHECK
-            btn.disabled = true;
-            loader.classList.remove('hidden');
-            
-            try {
-                const { db, doc, getDoc, appId } = window.firebaseApp;
-                const docRef = doc(db, 'artifacts', appId, 'access_codes', input);
-                const docSnap = await getDoc(docRef);
-
-                if (docSnap.exists()) {
-                    userIsAdmin = false;
-                    grantAccess();
-                } else {
-                    errorMsg.innerText = "کۆدەکە هەڵەیە یان بوونی نییە";
-                    errorMsg.classList.remove('hidden');
-                }
-            } catch(e) {
-                console.error(e);
-                errorMsg.innerText = "کێشەی ئینتەرنێت هەیە";
-                errorMsg.classList.remove('hidden');
-            } finally {
-                btn.disabled = false;
-                loader.classList.add('hidden');
-            }
-        }
-
-        function grantAccess() {
-            document.getElementById('login-overlay').style.display = 'none';
-            localStorage.setItem('is_logged_in', 'true');
-            loadExamList();
-        }
-
-        // --- MATH UI ---
-        const mathSymbols = [
-            '+','-','\\times','\\div','=','\\neq','\\approx','\\pm',
-            '\\sqrt{}','\\sqrt[3]{}','\\frac{}{}','x^2','x_2','e^x',
-            '<','>','\\leq','\\geq','\\infty','\\pi','\\circ','\\angle','\\triangle',
-            '\\alpha','\\beta','\\theta','\\lambda','\\Delta',
-            '\\in','\\notin','\\cup','\\cap','\\subset','\\subseteq','\\emptyset',
-            '\\rightarrow','\\Rightarrow','\\Leftrightarrow',
-            '\\sum','\\int','\\lim','\\log','\\ln','\\sin','\\cos','\\tan'
-        ];
-        const tb = document.getElementById('math-toolbar-container');
-        mathSymbols.forEach(s => {
-            let btn = document.createElement('button');
-            btn.className = "flex-shrink-0 px-2 py-1 bg-white border rounded text-xs font-bold shadow-sm active:bg-gray-200 min-w-[30px]";
-            btn.innerText = s.replace('\\','');
-            
-            btn.onclick = () => { 
-                let f = document.getElementById('q_text'); 
-                let start = f.selectionStart;
-                let end = f.selectionEnd;
-                let text = f.value;
-                let before = text.substring(0, start);
-                let after = text.substring(end, text.length);
-                f.value = before + '$' + s + '$' + after;
-                f.focus();
-                let bracePos = s.indexOf('{}');
-                if(bracePos !== -1) {
-                    f.selectionStart = f.selectionEnd = start + 1 + bracePos + 1;
-                } else {
-                    f.selectionStart = f.selectionEnd = start + s.length + 2; 
-                }
-            };
-            tb.appendChild(btn);
-        });
-
-        // --- INPUT LOGIC ---
-        function renderMCQInputs() {
-            const container = document.getElementById('mcq-inputs');
-            container.innerHTML = '';
-            mcqOptions.forEach((opt, idx) => {
-                let div = document.createElement('div');
-                div.className = "flex gap-2 items-center bg-white p-1 rounded border";
-                div.innerHTML = `
-                    <input type="radio" name="correct_opt" ${opt.correct ? 'checked' : ''} onclick="mcqOptions.forEach((o,i)=>o.correct=(i===${idx}))" class="w-5 h-5 accent-green-600">
-                    <input type="text" value="${opt.text}" oninput="mcqOptions[${idx}].text=this.value" class="flex-1 p-2 bg-transparent text-sm outline-none" placeholder="هەڵبژاردەی ${idx+1}">
-                    <button onclick="if(mcqOptions.length>2){mcqOptions.splice(${idx},1);renderMCQInputs();}" class="text-red-400 px-2"><i class="fa-solid fa-xmark"></i></button>
-                `;
-                container.appendChild(div);
-            });
-        }
-        function addMCQOption() { mcqOptions.push({text:'', correct:false}); renderMCQInputs(); }
-
-        function renderMatchInputs() {
-            const container = document.getElementById('match-inputs');
-            container.innerHTML = '';
-            matchPairs.forEach((pair, idx) => {
-                let div = document.createElement('div');
-                div.className = "flex gap-1 items-center bg-white p-1 rounded border";
-                div.innerHTML = `
-                    <input type="text" value="${pair.right}" oninput="matchPairs[${idx}].right=this.value" class="flex-1 p-1 border rounded text-xs text-right h-8" placeholder="ڕاست">
-                    <input type="text" value="${pair.left}" oninput="matchPairs[${idx}].left=this.value" class="flex-1 p-1 border rounded text-xs text-left h-8" placeholder="چەپ" dir="ltr">
-                    <button onclick="if(matchPairs.length>1){matchPairs.splice(${idx},1);renderMatchInputs();}" class="text-red-400 px-1 text-xs"><i class="fa-solid fa-xmark"></i></button>
-                `;
-                container.appendChild(div);
-            });
-        }
-        function addMatchPair() { matchPairs.push({right:'', left:''}); renderMatchInputs(); }
-
-        function toggleQuestionInputs() {
-            const type = document.getElementById('q_type').value;
-            document.getElementById('mcq-container').style.display = type === 'mcq' ? 'block' : 'none';
-            document.getElementById('match-container').style.display = type === 'match' ? 'block' : 'none';
-            document.getElementById('sub-label-box').style.display = type === 'text' ? 'block' : 'none';
-        }
-
-        renderMCQInputs(); 
-        renderMatchInputs();
-
-        // --- ADD ITEMS ---
-        function addSectionTitle() {
-            const title = prompt("سەردێڕ بنووسە:");
-            if(title) { examData.push({ type: 'title', id: Date.now(), text: title }); renderPaper(); updateList(); }
-        }
-
-        function addPageBreak() { examData.push({ type: 'break', id: Date.now() }); renderPaper(); updateList(); }
-
-        function addItem() {
-            const text = document.getElementById('q_text').value;
-            const score = document.getElementById('q_score').value;
-            const type = document.getElementById('q_type').value;
-            const spacing = document.getElementById('q_spacing').value;
-            const subStyle = document.getElementById('q_sub_style').value;
-            const file = document.getElementById('q_image').files[0];
-            
-            if(type !== 'match' && !text && !file) return alert('تکایە دەق یان وێنە دابنێ');
-            if(type === 'match' && matchPairs.every(p => !p.right && !p.left)) return alert('تکایە جووتەکان پڕ بکەرەوە');
-
-            const item = {
-                id: Date.now(),
-                type: 'question',
-                qType: type,
-                text: text,
-                score: score,
-                spacing: spacing,
-                subStyle: subStyle, 
-                options: type === 'mcq' ? JSON.parse(JSON.stringify(mcqOptions)) : null,
-                matchPairs: type === 'match' ? JSON.parse(JSON.stringify(matchPairs)) : null,
-                img: null
-            };
-
-            const processAndSave = () => {
-                if(editIndex > -1) examData[editIndex] = item;
-                else examData.push(item);
-                renderPaper();
-                updateList();
-                clearForm();
-            };
-
-            if(file) {
-                const reader = new FileReader();
-                reader.onload = (e) => { item.img = e.target.result; processAndSave(); };
-                reader.readAsDataURL(file);
+        // --- AUTH ---
+        function adminLogin() {
+            if (document.getElementById('admin-pass').value === '11223344009') {
+                document.getElementById('login-screen').classList.add('hidden');
+                document.getElementById('dashboard').classList.remove('hidden');
+                loadCodes();
             } else {
-                if(editIndex > -1 && examData[editIndex].img) item.img = examData[editIndex].img; 
-                processAndSave();
+                alert('پاسۆرد هەڵەیە!');
             }
         }
 
-        function deleteItem(idx) { if(confirm('دڵنیای؟')) { examData.splice(idx, 1); renderPaper(); updateList(); } }
-
-        function editItem(idx) {
-            const item = examData[idx];
-            if(item.type === 'break' || item.type === 'title') return;
-            
-            editIndex = idx;
-            document.getElementById('q_text').value = item.text;
-            document.getElementById('q_score').value = item.score;
-            document.getElementById('q_type').value = item.qType;
-            document.getElementById('q_spacing').value = item.spacing || 0;
-            document.getElementById('spacing-display').innerText = item.spacing || 0;
-            document.getElementById('q_sub_style').value = item.subStyle || 'none';
-            
-            if(item.qType === 'mcq') mcqOptions = JSON.parse(JSON.stringify(item.options));
-            if(item.qType === 'match') matchPairs = JSON.parse(JSON.stringify(item.matchPairs));
-            
-            toggleQuestionInputs();
-            renderMCQInputs();
-            renderMatchInputs();
-            document.getElementById('btn-add').innerText = "گۆڕانکاری";
-            document.getElementById('btn-add').classList.replace('bg-brand-600', 'bg-green-600');
+        function generateRandom() {
+            document.getElementById('new-code').value = Math.floor(10000000 + Math.random() * 90000000);
         }
 
-        function clearForm() {
-            editIndex = -1;
-            document.getElementById('q_text').value = '';
-            document.getElementById('q_image').value = '';
-            document.getElementById('q_spacing').value = 0;
-            document.getElementById('spacing-display').innerText = 0;
-            document.getElementById('btn-add').innerText = "زیادکردن";
-            document.getElementById('btn-add').classList.replace('bg-green-600', 'bg-brand-600');
-            mcqOptions = [{text:'', correct:false}, {text:'', correct:false}, {text:'', correct:false}, {text:'', correct:false}];
-            matchPairs = [{right:'', left:''}, {right:'', left:''}];
-            renderMCQInputs();
-            renderMatchInputs();
-        }
+        // --- CRUD ---
+        async function saveCode() {
+            const code = document.getElementById('new-code').value.trim();
+            const note = document.getElementById('code-note').value.trim() || 'بێ تێبینی';
+            const expiry = document.getElementById('expiry-date').value;
 
-        // --- RENDER PAPER ---
-        function renderPaper() {
-            const container = document.getElementById('paper_questions');
-            container.innerHTML = '';
-            let qCount = 0;
-            let subCount = 0;
+            if (code.length < 6) return alert('کۆد دەبێت ٦ ژمارە زیاتر بێت');
 
-            examData.forEach(item => {
-                if(item.type === 'title') { 
-                    qCount = 0; 
-                    container.innerHTML += `<div class="section-title">${item.text}</div>`; 
-                    return; 
-                }
-                if(item.type === 'break') { container.innerHTML += `<div class="page-break-marker"></div>`; return; }
+            const btn = event.currentTarget;
+            const originalHTML = btn.innerHTML;
+            btn.innerHTML = '<i class="fa-solid fa-spinner fa-spin"></i>';
+            btn.disabled = true;
 
-                let labelHTML = '';
-                if (item.subStyle && item.subStyle !== 'none') {
-                    if (item.subStyle === 'alpha') { subCount++; labelHTML = `<span class="q-sub-label">${String.fromCharCode(64 + subCount)})</span>`; } 
-                    else if (item.subStyle === 'number') { subCount++; labelHTML = `<span class="q-sub-label">${subCount}-</span>`; }
-                } else {
-                    qCount++; subCount = 0; labelHTML = `<span class="q-number">${qCount}</span>`;
-                }
-
-                let spacer = item.spacing > 0 ? `<div style="height: ${item.spacing}cm"></div>` : '';
-
-                let extraContent = '';
-                if(item.qType === 'mcq' && item.options) {
-                     extraContent = `<div class="grid grid-cols-2 gap-x-4 gap-y-2 q-options-grid mt-2 pr-2">`;
-                     const labels = ['A','B','C','D','E'];
-                     item.options.forEach((opt, i) => {
-                        if(opt.text) extraContent += `<div class="flex items-center gap-2"><span class="font-bold font-mono">${labels[i]})</span><span>${opt.text}</span></div>`;
-                     });
-                     extraContent += `</div>`;
-                }
-                
-                if(item.qType === 'match' && item.matchPairs) {
-                    extraContent = `<div class="mt-2 w-full flex justify-center">
-                        <table class="border-collapse w-auto text-sm mr-0">`; 
-                    item.matchPairs.forEach(p => { 
-                        extraContent += `<tr><td class="pl-4 py-1 font-bold text-right">${p.right}</td><td class="px-4 py-1 text-center text-gray-300">--</td><td class="pr-4 py-1 text-left font-bold" dir="ltr">${p.left}</td></tr>`; 
-                    });
-                    extraContent += `</table></div>`;
-                }
-
-                let content = `
-                <div class="flex items-start gap-2 w-full q-wrapper relative group mt-2">
-                    ${labelHTML}
-                    <div class="flex-1 text-right" dir="rtl">
-                        <div class="flex justify-between items-start">
-                            <div class="flex-1 pl-2">
-                                ${item.text ? `<div class="q-content mb-1">${item.text}</div>` : ''}
-                                ${extraContent}
-                                ${spacer} 
-                            </div>
-                            ${item.img ? `<img src="${item.img}" class="w-24 h-24 object-contain border border-dashed p-1 bg-white flex-none order-first ml-2">` : ''} 
-                        </div>
-                    </div>
-                    ${item.subStyle === 'none' ? `<span class="text-[10px] border px-1 rounded absolute left-0 top-0 bg-white">${item.score} نمرە</span>` : ''}
-                </div>
-                `;
-                container.innerHTML += content;
-            });
-            
-            if (window.MathJax) { MathJax.typesetPromise([container]).then(() => console.log('Math rendered')); }
-        }
-
-        function updateList() {
-            const list = document.getElementById('questions-list');
-            list.innerHTML = '';
-            examData.forEach((item, idx) => {
-                let div = document.createElement('div');
-                div.className = "bg-white p-3 rounded-lg border flex justify-between items-center shadow-sm text-xs";
-                
-                if(item.type === 'break') {
-                     div.innerHTML = `<span class="text-gray-400 border-b border-dashed w-full text-center">--- پەڕەی نوێ ---</span> <button onclick="deleteItem(${idx})" class="text-red-500 p-2"><i class="fa-solid fa-trash"></i></button>`;
-                } else if(item.type === 'title') {
-                     div.innerHTML = `<span class="font-bold w-full text-center bg-gray-100 p-1">[سەردێڕ] ${item.text}</span> <button onclick="deleteItem(${idx})" class="text-red-500 p-2"><i class="fa-solid fa-trash"></i></button>`;
-                } else {
-                    let txt = item.text ? item.text.substring(0,15) : (item.qType === 'match' ? 'ڕاکێشان' : 'وێنە');
-                    div.innerHTML = `
-                        <span class="truncate w-1/2 font-bold text-sm">${idx+1}. ${txt}...</span>
-                        <div class="flex gap-2">
-                            <button onclick="addToBank(${idx})" class="text-blue-500 bg-blue-50 p-2 rounded-full" title="ناردن بۆ بانک"><i class="fa-solid fa-building-columns"></i></button>
-                            <button onclick="editItem(${idx})" class="text-green-600 bg-green-50 p-2 rounded-full"><i class="fa-solid fa-pen"></i></button>
-                            <button onclick="deleteItem(${idx})" class="text-red-500 bg-red-50 p-2 rounded-full"><i class="fa-solid fa-trash"></i></button>
-                        </div>
-                    `;
-                }
-                list.appendChild(div);
-            });
-            new Sortable(list, { animation: 150, onEnd: (evt) => { const item = examData.splice(evt.oldIndex, 1)[0]; examData.splice(evt.newIndex, 0, item); renderPaper(); updateList(); }});
-        }
-
-        // --- SHUFFLE LOGIC (MCQ ONLY) ---
-        function shuffleQuestions() {
-            if(!confirm('تەنها پرسیارە هەڵبژاردنەکان تێکەڵ دەکەیت؟')) return;
-
-            // 1. Shuffle Options INSIDE MCQs
-            examData.forEach(q => {
-                if(q.qType === 'mcq' && q.options) {
-                    for (let i = q.options.length - 1; i > 0; i--) {
-                        const j = Math.floor(Math.random() * (i + 1));
-                        [q.options[i], q.options[j]] = [q.options[j], q.options[i]];
-                    }
-                }
-            });
-
-            // 2. Shuffle Order of MCQs only
-            let mcqIndices = [];
-            examData.forEach((item, index) => {
-                if(item.type === 'question' && item.qType === 'mcq') mcqIndices.push(index);
-            });
-
-            let shuffledIndices = [...mcqIndices];
-            for (let i = shuffledIndices.length - 1; i > 0; i--) {
-                const j = Math.floor(Math.random() * (i + 1));
-                [shuffledIndices[i], shuffledIndices[j]] = [shuffledIndices[j], shuffledIndices[i]];
-            }
-
-            let tempItems = {};
-            mcqIndices.forEach((oldIdx, i) => {
-                tempItems[oldIdx] = examData[shuffledIndices[i]];
-            });
-
-            mcqIndices.forEach(idx => {
-                examData[idx] = tempItems[idx];
-            });
-
-            renderPaper();
-            updateList();
-        }
-
-        // --- HEADER LOGO ---
-        document.getElementById('h_logo_input').addEventListener('change', function(e) {
-            if(e.target.files[0]) {
-                const reader = new FileReader();
-                reader.onload = function(evt) {
-                    const res = evt.target.result;
-                    document.getElementById('header_logo_view').src = res;
-                    localStorage.setItem('header_logo_data', res); 
-                }
-                reader.readAsDataURL(e.target.files[0]);
-            }
-        });
-        const savedLogo = localStorage.getItem('header_logo_data');
-        if(savedLogo) document.getElementById('header_logo_view').src = savedLogo;
-
-        // --- FIREBASE OPS ---
-        async function saveCurrentExam() {
-            if(!window.currentUser) return alert('تکایە سەرەتا بچۆژوورەوە');
-            const { db, collection, addDoc, doc, updateDoc, appId } = window.firebaseApp;
-            const uid = window.currentUser.uid;
-            
-            const title = prompt('ناوی تاقیکردنەوە:', document.getElementById('h_subject').value);
-            if(!title) return;
-
-            const headerData = {};
-            ['gov','min','dir','school','subject','class','time','type','year','date'].forEach(id => {
-                headerData[id] = document.getElementById('h_'+id).value;
-            });
-
-            const payload = {
-                title: title,
-                data: examData,
-                header: headerData,
-                updatedAt: new Date().toISOString()
-            };
+            const { db, setDoc, doc, appId } = window.firebaseApp;
 
             try {
-                if(currentExamId) {
-                    await updateDoc(doc(db, 'artifacts', appId, 'users', uid, 'exams', currentExamId), payload);
-                } else {
-                    const ref = await addDoc(collection(db, 'artifacts', appId, 'users', uid, 'exams'), payload);
-                    currentExamId = ref.id;
-                }
-                alert('هەڵگیرا!');
-                loadExamList();
-            } catch(e) { console.error(e); alert('هەڵە!'); }
-        }
+                const data = {
+                    note: note,
+                    createdAt: new Date().toISOString(),
+                    expiresAt: expiry || null, // If empty, it's null (forever)
+                    active: true
+                };
 
-        async function loadExamList() {
-            const { db, collection, getDocs, query, orderBy, appId } = window.firebaseApp;
-            const uid = window.currentUser.uid;
-            const listEl = document.getElementById('exam-list-container');
-            listEl.innerHTML = '';
-            const q = query(collection(db, 'artifacts', appId, 'users', uid, 'exams'), orderBy('updatedAt', 'desc'));
-            const snap = await getDocs(q);
-            snap.forEach(doc => {
-                const d = doc.data();
-                const div = document.createElement('div');
-                div.className = "bg-white p-3 rounded-lg border flex justify-between items-center shadow-sm mb-2 active:bg-blue-50";
-                div.onclick = (e) => { if(!e.target.closest('button')) loadExam(doc.id, d); };
-                div.innerHTML = `<div><div class="font-bold text-sm text-gray-800">${d.title}</div><div class="text-[10px] text-gray-400">${new Date(d.updatedAt).toLocaleDateString()}</div></div><button onclick="deleteExam('${doc.id}', event)" class="text-red-400 p-2"><i class="fa-solid fa-trash"></i></button>`;
-                listEl.appendChild(div);
-            });
-        }
+                await setDoc(doc(db, 'artifacts', appId, 'access_codes', code), data);
+                
+                // Reset Form
+                document.getElementById('new-code').value = '';
+                document.getElementById('code-note').value = '';
+                document.getElementById('expiry-date').value = '';
+                loadCodes();
 
-        function loadExam(id, data) {
-            currentExamId = id;
-            examData = data.data || [];
-            if(data.header) {
-                ['gov','min','dir','school','subject','class','time','type','year','date'].forEach(field => {
-                    if(data.header[field]) document.getElementById('h_'+field).value = data.header[field];
-                });
-                updatePaper();
+            } catch (e) {
+                alert('هەڵە ڕوویدا: ' + e.message);
+            } finally {
+                btn.innerHTML = originalHTML;
+                btn.disabled = false;
             }
-            document.getElementById('current-exam-title').innerText = data.title;
-            renderPaper(); updateList(); setTab('create');
-        }
-        
-        async function deleteExam(id, e) {
-            e.stopPropagation(); if(!confirm('دڵنیای؟')) return;
-            const { db, doc, deleteDoc, appId } = window.firebaseApp;
-            await deleteDoc(doc(db, 'artifacts', appId, 'users', window.currentUser.uid, 'exams', id));
-            loadExamList();
         }
 
-        function createNewExam() {
-            currentExamId = null; examData = [];
-            document.getElementById('current-exam-title').innerText = "تاقیکردنەوەی نوێ";
-            renderPaper(); updateList(); setTab('create');
-        }
-
-        async function addToBank(idx) {
-            if(!window.currentUser) return alert('پێویستە بچیتە ژوورەوە');
-            const item = examData[idx];
-            if(item.type === 'break' || item.type === 'title') return;
-            const { db, addDoc, collection, appId } = window.firebaseApp;
-            try { await addDoc(collection(db, 'artifacts', appId, 'users', window.currentUser.uid, 'bank'), item); alert('نێردرا بۆ بانک'); loadBank(); } catch(e) { alert('هەڵە ڕوویدا'); }
-        }
-
-        async function loadBank() {
+        async function loadCodes() {
             const { db, collection, getDocs, appId } = window.firebaseApp;
-            bankData = [];
-            const snap = await getDocs(collection(db, 'artifacts', appId, 'users', window.currentUser.uid, 'bank'));
-            snap.forEach(doc => bankData.push({id: doc.id, ...doc.data()}));
-            filterBank();
-        }
+            const container = document.getElementById('codes-list');
+            
+            try {
+                const snap = await getDocs(collection(db, 'artifacts', appId, 'access_codes'));
+                container.innerHTML = '';
 
-        function filterBank() {
-            const term = document.getElementById('bank-search').value.toLowerCase();
-            const container = document.getElementById('bank-list-container');
-            container.innerHTML = '';
-            bankData.filter(i => i.text && i.text.toLowerCase().includes(term)).forEach(item => {
-                const div = document.createElement('div');
-                div.className = "bg-white p-3 rounded-lg border text-sm mb-2 shadow-sm flex flex-col gap-2";
-                div.innerHTML = `
-                    <div class="font-bold text-gray-700">${item.text}</div>
-                    <div class="flex gap-2">
-                        <button onclick='importFromBank(${JSON.stringify(item)})' class="flex-1 bg-blue-50 py-2 rounded text-blue-600 font-bold active:bg-blue-100">زیادکردن</button>
-                    </div>
-                `;
-                container.appendChild(div);
-            });
-        }
-
-        function importFromBank(item) {
-            const newItem = JSON.parse(JSON.stringify(item));
-            newItem.id = Date.now();
-            delete newItem._id; 
-            examData.push(newItem);
-            renderPaper(); updateList();
-            alert('زیادکرا');
-        }
-
-        function setTab(tab) {
-            ['create','archive','bank','settings'].forEach(t => {
-                document.getElementById(`view-${t}`).classList.add('hidden');
-                document.getElementById(`tab-${t}`).classList.remove('border-b-2', 'border-brand-600', 'bg-blue-50', 'text-brand-600');
-                document.getElementById(`tab-${t}`).classList.add('text-gray-500');
-            });
-            document.getElementById(`view-${tab}`).classList.remove('hidden');
-            document.getElementById(`tab-${tab}`).classList.add('border-b-2', 'border-brand-600', 'bg-blue-50', 'text-brand-600');
-            document.getElementById(`tab-${tab}`).classList.remove('text-gray-500');
-            if(tab === 'archive') loadExamList();
-            if(tab === 'bank') loadBank();
-        }
-
-        function updatePaper() {
-            ['gov','min','dir','school','subject','class','time','type','year','date'].forEach(id => {
-                const val = document.getElementById('h_'+id).value;
-                if(document.getElementById('view_'+id)) document.getElementById('view_'+id).innerText = val;
-            });
-        }
-        
-        function downloadPDF() {
-            const el = document.getElementById('examPaper');
-            const clone = el.cloneNode(true); clone.style.transform = "scale(1)"; 
-            document.body.appendChild(clone); 
-            html2pdf().set({ margin: 0, filename: 'Exam.pdf', image: { type: 'jpeg', quality: 0.98 }, html2canvas: { scale: 2 }, jsPDF: { unit: 'mm', format: 'a4', orientation: 'portrait' } }).from(clone).save().then(() => document.body.removeChild(clone));
-        }
-        
-        function downloadWord() {
-            const header = document.querySelector('.exam-header').outerHTML;
-            const body = document.getElementById('paper_questions').innerHTML;
-            const html = `<html dir="rtl"><body>${header}${body}</body></html>`;
-            const blob = new Blob(['\ufeff', html], { type: 'application/msword' });
-            const link = document.createElement("a"); link.href = URL.createObjectURL(blob); link.download = "exam.doc"; link.click();
-        }
-        
-        function generateAnswerKey() {
-            let html = `<html dir="rtl"><head><style>table, th, td { border: 1px solid black; border-collapse: collapse; padding: 5px; text-align: center; }</style></head><body><h2>وەڵامنامە</h2><table style="width:100%"><tr><th>#</th><th>وەڵام</th></tr>`;
-            let count = 0;
-            const labels = ['A','B','C','D','E'];
-            examData.forEach(q => {
-                if(q.type === 'break' || q.type === 'title') return;
-                count++;
-                let ans = '-';
-                if(q.qType === 'mcq' && q.options) {
-                    const idx = q.options.findIndex(o => o.correct);
-                    if(idx > -1) ans = labels[idx];
+                if (snap.empty) {
+                    container.innerHTML = '<div class="text-center py-10 text-gray-400 bg-white rounded-2xl border border-dashed"><p>هیچ کۆدێک نییە</p></div>';
+                    return;
                 }
-                html += `<tr><td>${count}</td><td>${ans}</td></tr>`;
-            });
-            html += `</table></body></html>`;
-            const win = window.open('','_blank');
-            win.document.write(html);
+
+                // Convert to array and sort by date (newest first)
+                const codes = [];
+                snap.forEach(d => codes.push({ id: d.id, ...d.data() }));
+                codes.sort((a, b) => new Date(b.createdAt) - new Date(a.createdAt));
+
+                const today = new Date().toISOString().split('T')[0]; // YYYY-MM-DD
+
+                codes.forEach(item => {
+                    // Check Expiration
+                    let isExpired = false;
+                    let expiryText = 'بێ سنوور';
+                    let statusClass = 'bg-green-100 text-green-700';
+                    let icon = 'fa-check';
+
+                    if (item.expiresAt) {
+                        expiryText = item.expiresAt;
+                        if (item.expiresAt < today) {
+                            isExpired = true;
+                            statusClass = 'bg-red-100 text-red-700';
+                            icon = 'fa-ban';
+                            expiryText += ' (بەسەرچوو)';
+                        } else {
+                            // Valid but has date
+                            statusClass = 'bg-blue-100 text-blue-700';
+                            icon = 'fa-clock';
+                        }
+                    }
+
+                    const div = document.createElement('div');
+                    div.className = `bg-white p-4 rounded-2xl shadow-sm border ${isExpired ? 'border-red-200' : 'border-gray-100'} flex justify-between items-center transition hover:shadow-md`;
+                    div.innerHTML = `
+                        <div class="flex-1 overflow-hidden">
+                            <div class="flex items-center gap-2 mb-1">
+                                <span class="font-mono font-bold text-lg text-gray-800 select-all cursor-pointer" onclick="navigator.clipboard.writeText('${item.id}'); alert('کۆپی کرا')">${item.id}</span>
+                                <span class="text-[10px] px-2 py-0.5 rounded-full ${statusClass} font-bold flex items-center gap-1">
+                                    <i class="fa-solid ${icon}"></i> ${isExpired ? 'ناچالاک' : 'چالاک'}
+                                </span>
+                            </div>
+                            <div class="text-sm text-gray-600 truncate font-medium">${item.note}</div>
+                            <div class="text-[10px] text-gray-400 mt-1 flex gap-3">
+                                <span><i class="fa-regular fa-calendar"></i> ${new Date(item.createdAt).toLocaleDateString('ckb')}</span>
+                                <span><i class="fa-solid fa-hourglass-end"></i> ${expiryText}</span>
+                            </div>
+                        </div>
+                        <button onclick="deleteCode('${item.id}')" class="w-10 h-10 rounded-full bg-red-50 text-red-500 hover:bg-red-500 hover:text-white transition flex items-center justify-center ml-2 shadow-sm">
+                            <i class="fa-solid fa-trash"></i>
+                        </button>
+                    `;
+                    container.appendChild(div);
+                });
+
+            } catch (e) {
+                container.innerHTML = '<p class="text-center text-red-500">هەڵە لە هێنانەوەی داتا</p>';
+            }
+        }
+
+        async function deleteCode(code) {
+            if(!confirm('دڵنیای لە سڕینەوەی ئەم کۆدە؟')) return;
+            const { db, doc, deleteDoc, appId } = window.firebaseApp;
+            await deleteDoc(doc(db, 'artifacts', appId, 'access_codes', code));
+            loadCodes();
+        }
+
+        // --- BACKUP & RESTORE ---
+        async function exportData() {
+            const { db, collection, getDocs, appId } = window.firebaseApp;
+            const snap = await getDocs(collection(db, 'artifacts', appId, 'access_codes'));
+            const data = {};
+            snap.forEach(d => data[d.id] = d.data());
+
+            const blob = new Blob([JSON.stringify(data, null, 2)], { type: 'application/json' });
+            const url = URL.createObjectURL(blob);
+            const a = document.createElement('a');
+            a.href = url;
+            a.download = `codes_backup_${new Date().toISOString().split('T')[0]}.json`;
+            a.click();
+        }
+
+        function importData(input) {
+            const file = input.files[0];
+            if (!file) return;
+
+            const reader = new FileReader();
+            reader.onload = async (e) => {
+                try {
+                    const data = JSON.parse(e.target.result);
+                    const { db, doc, writeBatch, appId } = window.firebaseApp;
+                    const batch = writeBatch(db);
+                    
+                    let count = 0;
+                    for (const [code, info] of Object.entries(data)) {
+                        const ref = doc(db, 'artifacts', appId, 'access_codes', code);
+                        batch.set(ref, info);
+                        count++;
+                    }
+                    
+                    await batch.commit();
+                    alert(`${count} کۆد بە سەرکەوتوویی گەڕێندرانەوە!`);
+                    loadCodes();
+                } catch (err) {
+                    alert('فایلەکە هەڵەیە!');
+                    console.error(err);
+                }
+            };
+            reader.readAsText(file);
         }
     </script>
 </body>
