@@ -3,7 +3,7 @@
 <head>
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0, maximum-scale=1.0, user-scalable=no">
-    <title>سیستەمی زیرەکی پرسیار - تەواوکاری</title>
+    <title>سیستەمی زیرەکی پرسیار - وەشانی جێگیر</title>
     
     <script src="https://cdn.tailwindcss.com"></script>
     
@@ -33,7 +33,7 @@
             const app = initializeApp(firebaseConfig);
             const auth = getAuth(app);
             const db = getFirestore(app);
-            const appId = 'exam-system-v5-complete'; 
+            const appId = 'exam-system-v6-fixed'; 
 
             window.firebaseApp = { auth, db, appId, doc, getDoc, setDoc, addDoc, deleteDoc, updateDoc, collection, getDocs, query, orderBy };
 
@@ -97,7 +97,7 @@
         .header-logo-img { width: 70px; height: 70px; object-fit: contain; margin-bottom: 5px; }
         
         /* Question Styles */
-        .q-number { background: #000; color: white; width: 24px; height: 24px; border-radius: 50%; display: inline-flex; align-items: center; justify-content: center; font-size: 12px; margin-left: 8px; font-weight: bold; -webkit-print-color-adjust: exact; print-color-adjust: exact; }
+        .q-number { background: #000; color: white; width: 24px; height: 24px; border-radius: 50%; display: inline-flex; align-items: center; justify-content: center; font-size: 12px; margin-left: 8px; font-weight: bold; -webkit-print-color-adjust: exact; print-color-adjust: exact; flex-shrink: 0; }
         .q-sub-label { font-weight: bold; margin-left: 5px; min-width: 20px; display: inline-block; }
         .q-content { font-size: 16px; line-height: 1.6; }
         
@@ -105,6 +105,11 @@
         .section-title { width: 100%; text-align: center; font-weight: 900; font-size: 18px; padding: 5px; border-top: 2px solid #000; border-bottom: 2px solid #000; margin: 15px 0; background-color: #f3f4f6; -webkit-print-color-adjust: exact; }
         .page-break-marker { border-top: 2px dashed #cbd5e1; margin: 20px 0; position: relative; text-align: center; color: #94a3b8; font-size: 10px; page-break-after: always; break-after: always; }
         .page-break-marker::after { content: 'پەڕەی نوێ (Page Break)'; background: #f8fafc; padding: 0 10px; position: relative; top: -8px; }
+
+        /* MATCHING GRID STYLE (FIXED ALIGNMENT) */
+        .match-row { display: flex; justify-content: space-between; align-items: center; margin-bottom: 10px; border-bottom: 1px dashed #eee; padding-bottom: 5px; }
+        .match-col-a { width: 45%; text-align: right; font-weight: bold; }
+        .match-col-b { width: 45%; text-align: left; direction: ltr; }
 
         @media print { 
             @page { size: A4; margin: 0; } 
@@ -161,7 +166,7 @@
 
                 <div id="math-toolbar-container" class="flex overflow-x-auto gap-1 py-1 mb-1 no-scrollbar"></div>
                 
-                <textarea id="q_text" rows="2" class="w-full p-2 border rounded text-sm focus:border-brand-500 focus:ring-1 focus:ring-brand-200 transition" placeholder="دەقی پرسیار..."></textarea>
+                <textarea id="q_text" rows="2" class="w-full p-2 border rounded text-sm focus:border-brand-500 focus:ring-1 focus:ring-brand-200 transition" placeholder="دەقی پرسیار (بۆ ڕاکێشان پێویست نییە)..."></textarea>
                 
                 <div class="flex gap-2 items-center">
                      <div class="flex-1 bg-slate-50 border rounded p-1 flex items-center overflow-hidden">
@@ -169,14 +174,6 @@
                         <input type="file" id="q_image" class="w-full text-xs bg-transparent">
                      </div>
                      <input type="number" id="q_score" value="2" class="w-16 text-center border rounded text-sm font-bold p-1" title="نمرە">
-                </div>
-
-                <div class="bg-gray-50 p-2 rounded border">
-                    <div class="flex justify-between items-center mb-1">
-                        <span class="text-xs font-bold text-gray-500">بۆشایی بۆ وەڵام (cm):</span>
-                        <span id="spacing-display" class="text-xs font-bold text-brand-600">0</span>
-                    </div>
-                    <input type="range" id="q_spacing" min="0" max="15" value="0" step="0.5" class="w-full accent-brand-600" oninput="document.getElementById('spacing-display').innerText = this.value">
                 </div>
 
                 <div class="border rounded bg-slate-50 p-2">
@@ -206,9 +203,9 @@
                     </div>
 
                     <div id="match-container" class="hidden">
-                         <div class="text-xs text-gray-400 mb-1 text-center">وشە و بەرامبەرەکەی بنووسە</div>
+                         <div class="text-xs text-gray-400 mb-1 text-center font-bold">جووتەکان لێرە بنووسە:</div>
                          <div id="match-inputs" class="space-y-2 mb-2"></div>
-                         <button onclick="addMatchPair()" class="text-xs text-brand-600 font-bold w-full text-right py-1">+ زیادکردنی دێڕ</button>
+                         <button onclick="addMatchPair()" class="text-xs text-brand-600 font-bold w-full text-right py-1">+ زیادکردنی جووت</button>
                     </div>
                 </div>
 
@@ -220,8 +217,6 @@
                 <div id="questions-list" class="space-y-2 mt-4 pb-20"></div>
             </div>
 
-            <div id="view-archive" class="hidden flex-1 p-3"><div id="exam-list-container" class="space-y-2"></div><button onclick="saveCurrentExam()" class="w-full mt-4 bg-green-600 text-white py-3 rounded-lg font-bold">هەڵگرتن</button></div>
-            <div id="view-bank" class="hidden flex-1 p-3"><input type="text" id="bank-search" class="w-full p-2 border rounded mb-2" oninput="filterBank()"><div id="bank-list-container" class="space-y-2"></div></div>
             <div id="view-settings" class="hidden flex-1 p-3 space-y-4">
                  <div class="bg-white p-3 rounded border shadow-sm">
                     <h3 class="font-bold text-xs text-brand-600 mb-2 border-b pb-1">زانیاری سەرپەڕە</h3>
@@ -239,11 +234,19 @@
                         <div><input id="h_date" class="border p-2 rounded w-full" placeholder="بەروار" oninput="updatePaper()"></div>
                     </div>
                  </div>
-                 <div class="grid grid-cols-2 gap-2">
-                    <button onclick="downloadWord()" class="bg-blue-100 text-blue-700 py-3 rounded text-xs font-bold">Word</button>
-                    <button onclick="downloadPDF()" class="bg-green-100 text-green-700 py-3 rounded text-xs font-bold">PDF</button>
+                 <div class="bg-white p-3 rounded border shadow-sm">
+                    <h3 class="font-bold text-xs text-brand-600 mb-2 border-b pb-1">کردارەکان</h3>
+                    <div class="grid grid-cols-2 gap-2">
+                        <button onclick="shuffleQuestions()" class="bg-orange-100 text-orange-700 py-3 rounded text-xs font-bold">تێکەڵکردن</button>
+                        <button onclick="generateAnswerKey()" class="bg-yellow-100 text-yellow-700 py-3 rounded text-xs font-bold">وەڵامنامە</button>
+                        <button onclick="downloadWord()" class="bg-blue-100 text-blue-700 py-3 rounded text-xs font-bold">Word</button>
+                        <button onclick="downloadPDF()" class="bg-green-100 text-green-700 py-3 rounded text-xs font-bold">PDF</button>
+                    </div>
                  </div>
             </div>
+
+            <div id="view-archive" class="hidden flex-1 p-3"><div id="exam-list-container" class="space-y-2"></div><button onclick="saveCurrentExam()" class="w-full mt-4 bg-green-600 text-white py-3 rounded-lg font-bold">هەڵگرتن</button></div>
+            <div id="view-bank" class="hidden flex-1 p-3"><input type="text" id="bank-search" class="w-full p-2 border rounded mb-2" oninput="filterBank()"><div id="bank-list-container" class="space-y-2"></div></div>
         </div>
         
         <div id="preview-panel" class="hidden lg:flex w-full bg-slate-200 pt-8 flex justify-center items-start">
@@ -295,8 +298,16 @@
         let deviceId = localStorage.getItem('did') || crypto.randomUUID();
         localStorage.setItem('did', deviceId);
 
-        // --- MATH UI ---
-        const mathSymbols = ['+','-','\\times','\\div','=','\\approx','\\pm','\\sqrt{}','\\frac{}{}','x^2','\\circ','\\angle','\\triangle','\\alpha','\\beta','\\theta','\\pi'];
+        // --- MATH UI (FULL LIST RESTORED) ---
+        const mathSymbols = [
+            '+','-','\\times','\\div','=','\\neq','\\approx','\\pm',
+            '\\sqrt{}','\\sqrt[3]{}','\\frac{}{}','x^2','x_2','e^x',
+            '<','>','\\leq','\\geq','\\infty','\\pi','\\circ','\\angle','\\triangle',
+            '\\alpha','\\beta','\\theta','\\lambda','\\Delta',
+            '\\in','\\notin','\\cup','\\cap','\\subset','\\subseteq','\\emptyset',
+            '\\rightarrow','\\Rightarrow','\\Leftrightarrow',
+            '\\sum','\\int','\\lim','\\log','\\ln','\\sin','\\cos','\\tan'
+        ];
         const tb = document.getElementById('math-toolbar-container');
         mathSymbols.forEach(s => {
             let btn = document.createElement('button');
@@ -367,11 +378,12 @@
             const text = document.getElementById('q_text').value;
             const score = document.getElementById('q_score').value;
             const type = document.getElementById('q_type').value;
-            const spacing = document.getElementById('q_spacing').value;
             const subStyle = document.getElementById('q_sub_style').value;
             const file = document.getElementById('q_image').files[0];
             
-            if(!text && !file) return alert('تکایە دەق یان وێنە دابنێ');
+            // For matching, text is optional
+            if(type !== 'match' && !text && !file) return alert('تکایە دەق یان وێنە دابنێ');
+            if(type === 'match' && matchPairs.every(p => !p.right && !p.left)) return alert('تکایە جووتەکان پڕ بکەرەوە');
 
             const item = {
                 id: Date.now(),
@@ -379,8 +391,7 @@
                 qType: type,
                 text: text,
                 score: score,
-                spacing: spacing,
-                subStyle: subStyle, // Saved A/B or 1/2
+                subStyle: subStyle, 
                 options: type === 'mcq' ? JSON.parse(JSON.stringify(mcqOptions)) : null,
                 matchPairs: type === 'match' ? JSON.parse(JSON.stringify(matchPairs)) : null,
                 img: null
@@ -414,8 +425,6 @@
             document.getElementById('q_text').value = item.text;
             document.getElementById('q_score').value = item.score;
             document.getElementById('q_type').value = item.qType;
-            document.getElementById('q_spacing').value = item.spacing || 0;
-            document.getElementById('spacing-display').innerText = item.spacing || 0;
             document.getElementById('q_sub_style').value = item.subStyle || 'none';
             
             if(item.qType === 'mcq') mcqOptions = JSON.parse(JSON.stringify(item.options));
@@ -432,8 +441,6 @@
             editIndex = -1;
             document.getElementById('q_text').value = '';
             document.getElementById('q_image').value = '';
-            document.getElementById('q_spacing').value = 0;
-            document.getElementById('spacing-display').innerText = 0;
             document.getElementById('btn-add').innerText = "زیادکردن";
             document.getElementById('btn-add').classList.replace('bg-green-600', 'bg-brand-600');
             mcqOptions = [{text:'', correct:false}, {text:'', correct:false}, {text:'', correct:false}, {text:'', correct:false}];
@@ -442,52 +449,26 @@
             renderMatchInputs();
         }
 
-        // --- RENDER PAPER (THE CORE) ---
+        // --- RENDER PAPER (UPDATED) ---
         function renderPaper() {
             const container = document.getElementById('paper_questions');
             container.innerHTML = '';
             let qCount = 0;
             let subCount = 0;
-            let lastType = null;
 
             examData.forEach(item => {
-                // 1. SECTION TITLE
-                if(item.type === 'title') {
-                    container.innerHTML += `<div class="section-title">${item.text}</div>`;
-                    return;
-                }
-                // 2. PAGE BREAK
-                if(item.type === 'break') {
-                    container.innerHTML += `<div class="page-break-marker"></div>`;
-                    return;
-                }
+                if(item.type === 'title') { container.innerHTML += `<div class="section-title">${item.text}</div>`; return; }
+                if(item.type === 'break') { container.innerHTML += `<div class="page-break-marker"></div>`; return; }
 
-                // QUESTION LOGIC
                 let labelHTML = '';
-                
-                // If it's a sub-question (Text with A/B or 1/2)
                 if (item.subStyle && item.subStyle !== 'none') {
-                    if (item.subStyle === 'alpha') {
-                        subCount++;
-                        // If it's the first sub-part, show number too? usually we just show the indent
-                        // Let's assume user handled the main question number in previous text. 
-                        // Or better: Indent it.
-                        const char = String.fromCharCode(64 + subCount); // A, B, C...
-                        labelHTML = `<span class="q-sub-label">${char})</span>`;
-                    } else if (item.subStyle === 'number') {
-                        subCount++;
-                        labelHTML = `<span class="q-sub-label">${subCount}-</span>`;
-                    }
+                    if (item.subStyle === 'alpha') { subCount++; labelHTML = `<span class="q-sub-label">${String.fromCharCode(64 + subCount)})</span>`; } 
+                    else if (item.subStyle === 'number') { subCount++; labelHTML = `<span class="q-sub-label">${subCount}-</span>`; }
                 } else {
-                    // Main Question Number
-                    qCount++;
-                    subCount = 0; // Reset sub counter for new main question
-                    labelHTML = `<span class="q-number">${qCount}</span>`;
+                    qCount++; subCount = 0; labelHTML = `<span class="q-number">${qCount}</span>`;
                 }
 
-                let spacer = item.spacing > 0 ? `<div style="height: ${item.spacing}cm"></div>` : '';
                 let extraContent = '';
-
                 // RENDER MCQ
                 if(item.qType === 'mcq' && item.options) {
                      extraContent = `<div class="grid grid-cols-2 gap-x-4 gap-y-2 mt-2 pr-2">`;
@@ -498,17 +479,16 @@
                      extraContent += `</div>`;
                 }
                 
-                // RENDER MATCHING (THE NEW FEATURE)
+                // RENDER MATCHING (FIXED ALIGNMENT)
                 if(item.qType === 'match' && item.matchPairs) {
-                    extraContent = `<div class="flex justify-between px-4 mt-2 mb-2 w-full">`;
-                    // Right Col
-                    extraContent += `<ul class="list-decimal space-y-4 pr-4">`;
-                    item.matchPairs.forEach(p => { extraContent += `<li>${p.right}</li>`; });
-                    extraContent += `</ul>`;
-                    // Left Col
-                    extraContent += `<ul class="list-[upper-alpha] space-y-4 pl-4" dir="ltr">`; // Using LTR for left side A/B/C looks better in matches
-                    item.matchPairs.forEach(p => { extraContent += `<li class="text-right">${p.left}</li>`; });
-                    extraContent += `</ul>`;
+                    extraContent = `<div class="mt-2 w-full pr-4">`;
+                    item.matchPairs.forEach(p => { 
+                        extraContent += `
+                        <div class="match-row">
+                            <div class="match-col-a">${p.right}</div>
+                            <div class="match-col-b">${p.left}</div>
+                        </div>`; 
+                    });
                     extraContent += `</div>`;
                 }
 
@@ -516,10 +496,9 @@
                 <div class="flex items-start gap-2 w-full break-inside-avoid relative group mt-2">
                     ${labelHTML}
                     <div class="flex-1">
-                        <div class="q-content font-bold mb-1" dir="auto">${item.text}</div>
+                        ${item.text ? `<div class="q-content font-bold mb-1" dir="auto">${item.text}</div>` : ''}
                         ${item.img ? `<img src="${item.img}" class="max-h-32 my-2 border border-dashed p-1">` : ''}
                         ${extraContent}
-                        ${spacer}
                     </div>
                     ${item.subStyle === 'none' ? `<span class="text-[10px] border px-1 rounded absolute left-0 top-0 bg-white">${item.score} نمرە</span>` : ''}
                 </div>
@@ -527,12 +506,8 @@
                 container.innerHTML += content;
             });
             
-            // MATHJAX FIX: Explicitly call typeset
-            if (window.MathJax) {
-                MathJax.typesetPromise([container]).then(() => {
-                    console.log('Math rendered successfully');
-                });
-            }
+            // Trigger MathJax
+            if (window.MathJax) { MathJax.typesetPromise([container]).then(() => console.log('Math rendered')); }
         }
 
         function updateList() {
@@ -547,8 +522,9 @@
                 } else if(item.type === 'title') {
                      div.innerHTML = `<span class="font-bold w-full text-center bg-gray-100 p-1">[سەردێڕ] ${item.text}</span> <button onclick="deleteItem(${idx})" class="text-red-500 p-2"><i class="fa-solid fa-trash"></i></button>`;
                 } else {
+                    let txt = item.text ? item.text.substring(0,15) : (item.qType === 'match' ? 'ڕاکێشان' : 'وێنە');
                     div.innerHTML = `
-                        <span class="truncate w-1/2 font-bold text-sm">${idx+1}. ${item.text.substring(0,15)}...</span>
+                        <span class="truncate w-1/2 font-bold text-sm">${idx+1}. ${txt}...</span>
                         <div class="flex gap-2">
                             <button onclick="editItem(${idx})" class="text-green-600 bg-green-50 p-2 rounded-full"><i class="fa-solid fa-pen"></i></button>
                             <button onclick="deleteItem(${idx})" class="text-red-500 bg-red-50 p-2 rounded-full"><i class="fa-solid fa-trash"></i></button>
@@ -683,6 +659,43 @@
             const html = `<html dir="rtl"><body>${header}${body}</body></html>`;
             const blob = new Blob(['\ufeff', html], { type: 'application/msword' });
             const link = document.createElement("a"); link.href = URL.createObjectURL(blob); link.download = "exam.doc"; link.click();
+        }
+
+        function shuffleQuestions() {
+            if(!confirm('تێکەڵکردن؟')) return;
+            for (let i = examData.length - 1; i > 0; i--) {
+                 if(examData[i].type === 'break') continue;
+                 const j = Math.floor(Math.random() * (i + 1));
+                 [examData[i], examData[j]] = [examData[j], examData[i]];
+            }
+            examData.forEach(q => {
+                if(q.qType === 'mcq' && q.options) {
+                    for (let i = q.options.length - 1; i > 0; i--) {
+                        const j = Math.floor(Math.random() * (i + 1));
+                        [q.options[i], q.options[j]] = [q.options[j], q.options[i]];
+                    }
+                }
+            });
+            renderPaper(); updateList();
+        }
+        
+        function generateAnswerKey() {
+            let html = `<html dir="rtl"><head><style>table, th, td { border: 1px solid black; border-collapse: collapse; padding: 5px; text-align: center; }</style></head><body><h2>وەڵامنامە</h2><table style="width:100%"><tr><th>#</th><th>وەڵام</th></tr>`;
+            let count = 0;
+            const labels = ['A','B','C','D','E'];
+            examData.forEach(q => {
+                if(q.type === 'break') return;
+                count++;
+                let ans = '-';
+                if(q.qType === 'mcq' && q.options) {
+                    const idx = q.options.findIndex(o => o.correct);
+                    if(idx > -1) ans = labels[idx];
+                }
+                html += `<tr><td>${count}</td><td>${ans}</td></tr>`;
+            });
+            html += `</table></body></html>`;
+            const win = window.open('','_blank');
+            win.document.write(html);
         }
 
         function checkPassword() {
