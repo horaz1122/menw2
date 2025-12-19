@@ -691,7 +691,7 @@
             win.print();
         }
 
-        // --- NEW FEATURE: SHUFFLE MCQ OPTIONS AND ANSWERS ---
+        // --- UPDATED SHUFFLE FEATURE: REMOVES DUPLICATE LABELS ---
         function shuffleMCQAndAnswers() {
             if (!confirm('دڵنیای هەموو هەڵبژاردنەکانی پرسیارەکان تێکەڵ دەکەیت؟\nئەم کارە وەڵامە ڕاستەکانیش دەگۆڕێت بەپێی شوێنی نوێیان.')) return;
 
@@ -707,11 +707,14 @@
                         currentCorrectIndex = letterMap.indexOf(currentAns);
                     }
 
-                    // 2. Parse existing options into objects
+                    // 2. Parse existing options into objects & CLEAN PREFIXES
                     let lines = item.opts.split('\n').filter(line => line.trim() !== '');
                     let optionsObjs = lines.map((line, index) => {
-                        // Remove existing prefixes (A), 1), etc)
-                        let cleanText = line.replace(/^[A-Z0-9ا-ی]+\)\s*/, '').trim();
+                        // Regex to remove A) A. 1) etc.
+                        let cleanText = line.replace(/^([A-Z0-9ا-یa-z]+)[\)\.-]\s+/, '').trim();
+                        // Fallback if no space matched but has prefix
+                        cleanText = cleanText.replace(/^[A-Z0-9ا-یa-z]+[\)\.-]/, '').trim();
+
                         return {
                             text: cleanText,
                             isCorrect: (index === currentCorrectIndex)
@@ -730,6 +733,7 @@
 
                     optionsObjs.forEach((opt, index) => {
                         let letter = letterMap[index] || (index + 1);
+                        // We add the prefix back here freshly
                         newOptsString += `${letter}) ${opt.text}\n`;
                         
                         // If this option was the correct one, update the answer key
@@ -939,6 +943,7 @@
             if (window.MathJax) MathJax.typesetPromise([container]);
         }
 
+        // --- UPDATED RENDER MCQ: STRIPS PREFIXES FROM DISPLAY ---
         function renderMCQOptions(item) {
             let options = [];
             if (item.qType === 'mcq' && item.opts) options = item.opts.split('\n').filter(o => o.trim());
@@ -948,11 +953,20 @@
             let gridClass = (options.some(o => o.length > 30)) ? 'grid-cols-1' : (options.every(o => o.length < 10) ? 'grid-cols-4' : 'grid-cols-2');
             
             let html = `<div class="grid ${gridClass} gap-y-2 gap-x-8 mt-2 w-full pr-4">`;
-            options.forEach((opt, index) => {
+            options.forEach((optRaw, index) => {
                 const label = (item.qType === 'tf') ? '' : (['A','B','C','D'][index] || index+1) + ')';
+                
+                // CLEAN THE OPTION TEXT BEFORE DISPLAYING
+                // If text comes as "A) Apple", we only want "Apple" because we add the label ourselves
+                let cleanOpt = optRaw;
+                if(item.qType === 'mcq') {
+                     cleanOpt = optRaw.replace(/^([A-Z0-9ا-یa-z]+)[\)\.-]\s+/, '').trim();
+                     cleanOpt = cleanOpt.replace(/^[A-Z0-9ا-یa-z]+[\)\.-]/, '').trim();
+                }
+
                 html += `<div class="text-right flex items-baseline gap-2" dir="auto">
                     ${label ? `<span class="font-bold font-sans">${label}</span>` : ''}
-                    <span>${opt}</span>
+                    <span>${cleanOpt}</span>
                 </div>`;
             });
             html += '</div>';
@@ -1063,4 +1077,3 @@
     </script>
 </body>
 </html>
-
