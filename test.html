@@ -3,7 +3,7 @@
 <head>
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0, maximum-scale=1.0, user-scalable=no">
-    <title>سیستەمی زیرەکی پرسیار - تەواوکاری</title>
+    <title>سیستەمی زیرەکی پرسیار - وەشانی تەواو</title>
     
     <script src="https://cdn.tailwindcss.com"></script>
     
@@ -33,7 +33,7 @@
             const app = initializeApp(firebaseConfig);
             const auth = getAuth(app);
             const db = getFirestore(app);
-            const appId = 'exam-system-v3-full'; 
+            const appId = 'exam-system-v4-fixed'; 
 
             window.firebaseApp = { auth, db, appId, doc, getDoc, setDoc, addDoc, deleteDoc, updateDoc, collection, getDocs, query, orderBy };
 
@@ -52,7 +52,13 @@
     </script>
     
     <script>
-        window.MathJax = { tex: { inlineMath: [['$', '$'], ['\\(', '\\)']] }, svg: { fontCache: 'global' } };
+        window.MathJax = {
+            tex: { inlineMath: [['$', '$'], ['\\(', '\\)']] },
+            svg: { fontCache: 'global' },
+            startup: {
+                typeset: false // We will call typeset manually
+            }
+        };
     </script>
     <script id="MathJax-script" async src="https://cdn.jsdelivr.net/npm/mathjax@3/es5/tex-mml-chtml.js"></script>
 
@@ -106,6 +112,7 @@
         .page-break-marker { border-top: 2px dashed #cbd5e1; margin: 20px 0; position: relative; text-align: center; color: #94a3b8; font-size: 10px; page-break-after: always; break-after: always; }
         .page-break-marker::after { content: 'پەڕەی نوێ (Page Break)'; background: #f8fafc; padding: 0 10px; position: relative; top: -8px; }
 
+        /* Print Fixes */
         @media print { 
             @page { size: A4; margin: 0; } 
             body { background: white; height: auto; display: block; overflow: visible; } 
@@ -239,18 +246,55 @@
 
             <div id="view-settings" class="hidden flex-1 p-3 space-y-4">
                  <div class="bg-white p-3 rounded border shadow-sm">
-                    <h3 class="font-bold text-xs text-brand-600 mb-2 border-b pb-1">سەرپەڕە (Header)</h3>
+                    <h3 class="font-bold text-xs text-brand-600 mb-2 border-b pb-1">زانیاری سەرپەڕە (Header)</h3>
                     
                     <div class="mb-3">
                         <label class="block text-xs font-bold text-gray-600 mb-1">لۆگۆی قوتابخانە:</label>
                         <input type="file" id="h_logo_input" accept="image/*" class="w-full text-xs text-slate-500 file:mr-2 file:py-2 file:px-4 file:rounded-full file:border-0 file:text-xs file:font-semibold file:bg-brand-50 file:text-brand-700 hover:file:bg-brand-100">
                     </div>
 
-                    <div class="grid grid-cols-2 gap-2 text-xs">
-                        <input id="h_school" class="border p-2 rounded" placeholder="قوتابخانە" oninput="updatePaper()">
-                        <input id="h_subject" class="border p-2 rounded" placeholder="بابەت" oninput="updatePaper()">
-                        <input id="h_class" class="border p-2 rounded" placeholder="پۆل" oninput="updatePaper()">
-                        <input id="h_time" class="border p-2 rounded" value="٢ کاتژمێر" oninput="updatePaper()">
+                    <div class="grid grid-cols-2 gap-3 text-xs">
+                        <div class="col-span-2">
+                            <label class="block mb-1 text-gray-500">حکومەت:</label>
+                            <input id="h_gov" class="border p-2 rounded w-full" value="حکومەتی هەرێمی کوردستان" oninput="updatePaper()">
+                        </div>
+                        <div class="col-span-2">
+                            <label class="block mb-1 text-gray-500">وەزارەت:</label>
+                            <input id="h_min" class="border p-2 rounded w-full" value="وەزارەتی پەروەردە" oninput="updatePaper()">
+                        </div>
+                        <div class="col-span-2">
+                            <label class="block mb-1 text-gray-500">بەڕێوەبەرایەتی:</label>
+                            <input id="h_dir" class="border p-2 rounded w-full" placeholder="پەروەردەی ..." oninput="updatePaper()">
+                        </div>
+                        
+                        <div>
+                             <label class="block mb-1 text-gray-500">قوتابخانە:</label>
+                             <input id="h_school" class="border p-2 rounded w-full" placeholder="ناوی قوتابخانە" oninput="updatePaper()">
+                        </div>
+                        <div>
+                             <label class="block mb-1 text-gray-500">بابەت:</label>
+                             <input id="h_subject" class="border p-2 rounded w-full" placeholder="ماتماتیک" oninput="updatePaper()">
+                        </div>
+                        <div>
+                             <label class="block mb-1 text-gray-500">پۆل:</label>
+                             <input id="h_class" class="border p-2 rounded w-full" placeholder="12" oninput="updatePaper()">
+                        </div>
+                        <div>
+                             <label class="block mb-1 text-gray-500">کات:</label>
+                             <input id="h_time" class="border p-2 rounded w-full" value="٢ کاتژمێر" oninput="updatePaper()">
+                        </div>
+                        <div>
+                             <label class="block mb-1 text-gray-500">خوول/جۆر:</label>
+                             <input id="h_type" class="border p-2 rounded w-full" value="خولی یەکەم" oninput="updatePaper()">
+                        </div>
+                        <div>
+                             <label class="block mb-1 text-gray-500">ساڵی خوێندن:</label>
+                             <input id="h_year" class="border p-2 rounded w-full" value="2024 - 2025" oninput="updatePaper()">
+                        </div>
+                        <div>
+                             <label class="block mb-1 text-gray-500">بەروار:</label>
+                             <input id="h_date" type="text" class="border p-2 rounded w-full" placeholder="YYYY/MM/DD" oninput="updatePaper()">
+                        </div>
                     </div>
                  </div>
                  
@@ -270,14 +314,15 @@
             <div id="examPaper" class="a4-paper">
                 <div class="exam-header">
                     <div class="header-section text-right">
-                        <div>حکومەتی هەرێم</div>
-                        <div>وەزارەتی پەروەردە</div>
+                        <div id="view_gov">حکومەتی هەرێمی کوردستان</div>
+                        <div id="view_min">وەزارەتی پەروەردە</div>
+                        <div id="view_dir">...</div>
                         <div id="view_school" class="mt-1 font-black">...</div>
                     </div>
                     <div class="header-section header-center">
                         <img id="header_logo_view" src="https://upload.wikimedia.org/wikipedia/commons/d/d3/Kurdistan_Regional_Government_emblem.svg" class="header-logo-img">
                         <div class="border-b-2 border-black pb-1 mb-1 text-lg">پرسیارەکانی <span id="view_subject">...</span></div>
-                        <div class="text-[10px]"><span id="view_year">2024-2025</span></div>
+                        <div class="text-[12px]"><span id="view_type">...</span> - <span id="view_year">2024-2025</span></div>
                     </div>
                     <div class="header-section header-left">
                         <div>پۆل: <span id="view_class">...</span></div>
@@ -388,7 +433,7 @@
             const text = document.getElementById('q_text').value;
             const score = document.getElementById('q_score').value;
             const type = document.getElementById('q_type').value;
-            const spacing = document.getElementById('q_spacing').value; // Get Spacing
+            const spacing = document.getElementById('q_spacing').value;
             const file = document.getElementById('q_image').files[0];
             
             if(!text && !file) return alert('تکایە دەق یان وێنە دابنێ');
@@ -399,7 +444,7 @@
                 qType: type,
                 text: text,
                 score: score,
-                spacing: spacing, // Save Spacing
+                spacing: spacing,
                 options: type === 'mcq' ? JSON.parse(JSON.stringify(mcqOptions)) : null,
                 img: null
             };
@@ -444,7 +489,7 @@
             document.getElementById('q_text').value = item.text;
             document.getElementById('q_score').value = item.score;
             document.getElementById('q_type').value = item.qType;
-            document.getElementById('q_spacing').value = item.spacing || 0; // Load Spacing
+            document.getElementById('q_spacing').value = item.spacing || 0; 
             document.getElementById('spacing-display').innerText = item.spacing || 0;
             
             if(item.qType === 'mcq' && item.options) {
@@ -462,7 +507,7 @@
             editIndex = -1;
             document.getElementById('q_text').value = '';
             document.getElementById('q_image').value = '';
-            document.getElementById('q_spacing').value = 0; // Reset
+            document.getElementById('q_spacing').value = 0; 
             document.getElementById('spacing-display').innerText = 0;
             document.getElementById('btn-add').innerText = "زیادکردن";
             document.getElementById('btn-add').classList.replace('bg-green-600', 'bg-brand-600');
@@ -483,7 +528,7 @@
                 }
 
                 qCount++;
-                let spacer = item.spacing > 0 ? `<div style="height: ${item.spacing}cm"></div>` : ''; // Apply Spacing
+                let spacer = item.spacing > 0 ? `<div style="height: ${item.spacing}cm"></div>` : '';
 
                 let content = `
                 <div class="flex items-start gap-2 w-full break-inside-avoid relative group">
@@ -499,7 +544,13 @@
                 `;
                 container.innerHTML += content;
             });
-            MathJax.typeset();
+            
+            // MATH RENDER FIX: Call MathJax typeset on the new content
+            if (window.MathJax) {
+                MathJax.typesetPromise([container]).then(() => {
+                    console.log('Math rendered!');
+                }).catch((err) => console.log('Math error', err));
+            }
         }
 
         function renderOptionsHTML(item) {
@@ -549,7 +600,7 @@
                 reader.onload = function(evt) {
                     const res = evt.target.result;
                     document.getElementById('header_logo_view').src = res;
-                    localStorage.setItem('header_logo_data', res); // Persist
+                    localStorage.setItem('header_logo_data', res); 
                 }
                 reader.readAsDataURL(e.target.files[0]);
             }
@@ -568,13 +619,15 @@
             const title = prompt('ناوی تاقیکردنەوە:', document.getElementById('h_subject').value);
             if(!title) return;
 
+            const headerData = {};
+            ['gov','min','dir','school','subject','class','time','type','year','date'].forEach(id => {
+                headerData[id] = document.getElementById('h_'+id).value;
+            });
+
             const payload = {
                 title: title,
                 data: examData,
-                header: {
-                    school: document.getElementById('h_school').value,
-                    subject: document.getElementById('h_subject').value,
-                },
+                header: headerData,
                 updatedAt: new Date().toISOString()
             };
 
@@ -619,8 +672,10 @@
             currentExamId = id;
             examData = data.data || [];
             if(data.header) {
-                document.getElementById('h_school').value = data.header.school;
-                document.getElementById('h_subject').value = data.header.subject;
+                // Populate all fields
+                ['gov','min','dir','school','subject','class','time','type','year','date'].forEach(field => {
+                    if(data.header[field]) document.getElementById('h_'+field).value = data.header[field];
+                });
                 updatePaper();
             }
             document.getElementById('current-exam-title').innerText = data.title;
@@ -688,7 +743,7 @@
             const { db, doc, deleteDoc, appId } = window.firebaseApp;
             try {
                 await deleteDoc(doc(db, 'artifacts', appId, 'users', window.currentUser.uid, 'bank', id));
-                loadBank(); // Reload List
+                loadBank(); 
             } catch(e) { console.error(e); alert('کێشەیەک هەیە'); }
         }
 
@@ -764,7 +819,8 @@
         }
 
         function updatePaper() {
-            ['school','subject','class','time'].forEach(id => {
+            // Update all header fields
+            ['gov','min','dir','school','subject','class','time','type','year','date'].forEach(id => {
                 const val = document.getElementById('h_'+id).value;
                 if(document.getElementById('view_'+id)) document.getElementById('view_'+id).innerText = val;
             });
