@@ -3,7 +3,7 @@
 <head>
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0, maximum-scale=1.0, user-scalable=no">
-    <title>سیستەمی زیرەکی پرسیار - وەشانی کۆتایی</title>
+    <title>سیستەمی پرسیار - چاککراوی تەواو</title>
     
     <script src="https://cdn.tailwindcss.com"></script>
     
@@ -33,7 +33,7 @@
             const app = initializeApp(firebaseConfig);
             const auth = getAuth(app);
             const db = getFirestore(app);
-            const appId = 'exam-system-final-fix'; 
+            const appId = 'exam-system-v7-final'; 
 
             window.firebaseApp = { auth, db, appId, doc, getDoc, setDoc, addDoc, deleteDoc, updateDoc, collection, getDocs, query, orderBy };
 
@@ -55,6 +55,7 @@
         window.MathJax = {
             tex: { inlineMath: [['$', '$'], ['\\(', '\\)']] },
             svg: { fontCache: 'global' },
+            chtml: { displayAlign: 'right' }, // Forces block math to right
             startup: { typeset: false } 
         };
     </script>
@@ -98,17 +99,13 @@
         
         .q-number { background: #000; color: white; width: 24px; height: 24px; border-radius: 50%; display: inline-flex; align-items: center; justify-content: center; font-size: 12px; margin-left: 8px; font-weight: bold; -webkit-print-color-adjust: exact; print-color-adjust: exact; flex-shrink: 0; }
         .q-sub-label { font-weight: bold; margin-left: 5px; min-width: 20px; display: inline-block; }
-        .q-content { font-size: 16px; line-height: 1.6; }
+        
+        /* Force Right Alignment for Math and Text */
+        .q-content { font-size: 16px; line-height: 1.6; text-align: right !important; direction: rtl !important; display: block; width: 100%; }
         
         .section-title { width: 100%; text-align: center; font-weight: 900; font-size: 18px; padding: 5px; border-top: 2px solid #000; border-bottom: 2px solid #000; margin: 15px 0; background-color: #f3f4f6; -webkit-print-color-adjust: exact; }
         .page-break-marker { border-top: 2px dashed #cbd5e1; margin: 20px 0; position: relative; text-align: center; color: #94a3b8; font-size: 10px; page-break-after: always; break-after: always; }
         .page-break-marker::after { content: 'پەڕەی نوێ (Page Break)'; background: #f8fafc; padding: 0 10px; position: relative; top: -8px; }
-
-        /* MATCHING STYLE FIXED */
-        .match-container-box { width: 70%; margin: 0 auto; } /* Reduced width to bring columns closer */
-        .match-row { display: flex; justify-content: space-between; align-items: center; margin-bottom: 8px; border-bottom: 1px dashed #ddd; padding-bottom: 4px; }
-        .match-col-a { text-align: right; font-weight: bold; }
-        .match-col-b { text-align: left; direction: ltr; }
 
         @media print { 
             @page { size: A4; margin: 0; } 
@@ -165,7 +162,7 @@
 
                 <div id="math-toolbar-container" class="flex overflow-x-auto gap-1 py-1 mb-1 no-scrollbar"></div>
                 
-                <textarea id="q_text" rows="2" class="w-full p-2 border rounded text-sm focus:border-brand-500 focus:ring-1 focus:ring-brand-200 transition" placeholder="دەقی پرسیار..."></textarea>
+                <textarea id="q_text" rows="2" class="w-full p-2 border rounded text-sm focus:border-brand-500 focus:ring-1 focus:ring-brand-200 transition text-right" dir="auto" placeholder="دەقی پرسیار..."></textarea>
                 
                 <div class="flex gap-2 items-center">
                      <div class="flex-1 bg-slate-50 border rounded p-1 flex items-center overflow-hidden">
@@ -297,7 +294,7 @@
         let deviceId = localStorage.getItem('did') || crypto.randomUUID();
         localStorage.setItem('did', deviceId);
 
-        // --- MATH UI (FIXED INSERTION) ---
+        // --- MATH UI (SINGLE $ FIX) ---
         const mathSymbols = [
             '+','-','\\times','\\div','=','\\neq','\\approx','\\pm',
             '\\sqrt{}','\\sqrt[3]{}','\\frac{}{}','x^2','x_2','e^x',
@@ -323,7 +320,13 @@
                 let after = text.substring(end, text.length);
                 f.value = before + '$' + s + '$' + after;
                 f.focus();
-                f.selectionEnd = start + s.length + 2; 
+                // Move cursor to middle of math if it has braces {}
+                let bracePos = s.indexOf('{}');
+                if(bracePos !== -1) {
+                    f.selectionStart = f.selectionEnd = start + 1 + bracePos + 1;
+                } else {
+                    f.selectionStart = f.selectionEnd = start + s.length + 2; 
+                }
             };
             tb.appendChild(btn);
         });
@@ -453,7 +456,7 @@
             renderMatchInputs();
         }
 
-        // --- RENDER PAPER (UPDATED) ---
+        // --- RENDER PAPER (TIGHT MATCHING & RIGHT MATH) ---
         function renderPaper() {
             const container = document.getElementById('paper_questions');
             container.innerHTML = '';
@@ -483,24 +486,26 @@
                      extraContent += `</div>`;
                 }
                 
-                // RENDER MATCHING (NARROWER WIDTH)
+                // RENDER MATCHING (COMPACT TABLE STYLE)
                 if(item.qType === 'match' && item.matchPairs) {
-                    extraContent = `<div class="mt-2 w-full match-container-box">`;
+                    extraContent = `<div class="mt-2 w-full flex justify-center">
+                        <table class="border-collapse w-auto text-sm mr-0">`; // w-auto means shrink to fit
                     item.matchPairs.forEach(p => { 
                         extraContent += `
-                        <div class="match-row">
-                            <div class="match-col-a">${p.right}</div>
-                            <div class="match-col-b">${p.left}</div>
-                        </div>`; 
+                        <tr>
+                            <td class="pl-4 py-1 font-bold text-right">${p.right}</td>
+                            <td class="px-4 py-1 text-center text-gray-300">--</td>
+                            <td class="pr-4 py-1 text-left font-bold" dir="ltr">${p.left}</td>
+                        </tr>`; 
                     });
-                    extraContent += `</div>`;
+                    extraContent += `</table></div>`;
                 }
 
                 let content = `
                 <div class="flex items-start gap-2 w-full break-inside-avoid relative group mt-2">
                     ${labelHTML}
-                    <div class="flex-1">
-                        ${item.text ? `<div class="q-content font-bold mb-1" dir="auto">${item.text}</div>` : ''}
+                    <div class="flex-1 text-right" dir="rtl">
+                        ${item.text ? `<div class="q-content font-bold mb-1" dir="rtl" style="text-align:right;">${item.text}</div>` : ''}
                         ${item.img ? `<img src="${item.img}" class="max-h-32 my-2 border border-dashed p-1">` : ''}
                         ${extraContent}
                     </div>
@@ -510,7 +515,6 @@
                 container.innerHTML += content;
             });
             
-            // Trigger MathJax
             if (window.MathJax) { MathJax.typesetPromise([container]).then(() => console.log('Math rendered')); }
         }
 
@@ -530,6 +534,7 @@
                     div.innerHTML = `
                         <span class="truncate w-1/2 font-bold text-sm">${idx+1}. ${txt}...</span>
                         <div class="flex gap-2">
+                            <button onclick="addToBank(${idx})" class="text-blue-500 bg-blue-50 p-2 rounded-full" title="ناردن بۆ بانک"><i class="fa-solid fa-building-columns"></i></button>
                             <button onclick="editItem(${idx})" class="text-green-600 bg-green-50 p-2 rounded-full"><i class="fa-solid fa-pen"></i></button>
                             <button onclick="deleteItem(${idx})" class="text-red-500 bg-red-50 p-2 rounded-full"><i class="fa-solid fa-trash"></i></button>
                         </div>
@@ -631,6 +636,49 @@
             renderPaper(); updateList(); setTab('create');
         }
 
+        // --- BANK UTILS ---
+        async function addToBank(idx) {
+            if(!window.currentUser) return alert('پێویستە بچیتە ژوورەوە');
+            const item = examData[idx];
+            if(item.type === 'break' || item.type === 'title') return;
+            const { db, addDoc, collection, appId } = window.firebaseApp;
+            try { await addDoc(collection(db, 'artifacts', appId, 'users', window.currentUser.uid, 'bank'), item); alert('نێردرا بۆ بانک'); loadBank(); } catch(e) { alert('هەڵە ڕوویدا'); }
+        }
+
+        async function loadBank() {
+            const { db, collection, getDocs, appId } = window.firebaseApp;
+            bankData = [];
+            const snap = await getDocs(collection(db, 'artifacts', appId, 'users', window.currentUser.uid, 'bank'));
+            snap.forEach(doc => bankData.push({id: doc.id, ...doc.data()}));
+            filterBank();
+        }
+
+        function filterBank() {
+            const term = document.getElementById('bank-search').value.toLowerCase();
+            const container = document.getElementById('bank-list-container');
+            container.innerHTML = '';
+            bankData.filter(i => i.text && i.text.toLowerCase().includes(term)).forEach(item => {
+                const div = document.createElement('div');
+                div.className = "bg-white p-3 rounded-lg border text-sm mb-2 shadow-sm flex flex-col gap-2";
+                div.innerHTML = `
+                    <div class="font-bold text-gray-700">${item.text}</div>
+                    <div class="flex gap-2">
+                        <button onclick='importFromBank(${JSON.stringify(item)})' class="flex-1 bg-blue-50 py-2 rounded text-blue-600 font-bold active:bg-blue-100">زیادکردن</button>
+                    </div>
+                `;
+                container.appendChild(div);
+            });
+        }
+
+        function importFromBank(item) {
+            const newItem = JSON.parse(JSON.stringify(item));
+            newItem.id = Date.now();
+            delete newItem._id; 
+            examData.push(newItem);
+            renderPaper(); updateList();
+            alert('زیادکرا');
+        }
+
         function setTab(tab) {
             ['create','archive','bank','settings'].forEach(t => {
                 document.getElementById(`view-${t}`).classList.add('hidden');
@@ -641,6 +689,7 @@
             document.getElementById(`tab-${tab}`).classList.add('border-b-2', 'border-brand-600', 'bg-blue-50', 'text-brand-600');
             document.getElementById(`tab-${tab}`).classList.remove('text-gray-500');
             if(tab === 'archive') loadExamList();
+            if(tab === 'bank') loadBank();
         }
 
         function updatePaper() {
