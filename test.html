@@ -3,7 +3,7 @@
 <head>
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0, maximum-scale=1.0, user-scalable=no">
-    <title>سیستەمی پرسیار - چاککراوی تەواو</title>
+    <title>سیستەمی پرسیار - وەشانی پێشکەوتوو</title>
     
     <script src="https://cdn.tailwindcss.com"></script>
     
@@ -33,7 +33,7 @@
             const app = initializeApp(firebaseConfig);
             const auth = getAuth(app);
             const db = getFirestore(app);
-            const appId = 'exam-system-v7-final'; 
+            const appId = 'exam-system-v8-shuffle-fix'; 
 
             window.firebaseApp = { auth, db, appId, doc, getDoc, setDoc, addDoc, deleteDoc, updateDoc, collection, getDocs, query, orderBy };
 
@@ -55,7 +55,7 @@
         window.MathJax = {
             tex: { inlineMath: [['$', '$'], ['\\(', '\\)']] },
             svg: { fontCache: 'global' },
-            chtml: { displayAlign: 'right' }, // Forces block math to right
+            chtml: { displayAlign: 'right' },
             startup: { typeset: false } 
         };
     </script>
@@ -100,12 +100,17 @@
         .q-number { background: #000; color: white; width: 24px; height: 24px; border-radius: 50%; display: inline-flex; align-items: center; justify-content: center; font-size: 12px; margin-left: 8px; font-weight: bold; -webkit-print-color-adjust: exact; print-color-adjust: exact; flex-shrink: 0; }
         .q-sub-label { font-weight: bold; margin-left: 5px; min-width: 20px; display: inline-block; }
         
-        /* Force Right Alignment for Math and Text */
         .q-content { font-size: 16px; line-height: 1.6; text-align: right !important; direction: rtl !important; display: block; width: 100%; }
         
         .section-title { width: 100%; text-align: center; font-weight: 900; font-size: 18px; padding: 5px; border-top: 2px solid #000; border-bottom: 2px solid #000; margin: 15px 0; background-color: #f3f4f6; -webkit-print-color-adjust: exact; }
         .page-break-marker { border-top: 2px dashed #cbd5e1; margin: 20px 0; position: relative; text-align: center; color: #94a3b8; font-size: 10px; page-break-after: always; break-after: always; }
         .page-break-marker::after { content: 'پەڕەی نوێ (Page Break)'; background: #f8fafc; padding: 0 10px; position: relative; top: -8px; }
+
+        /* MATCHING TABLE */
+        .match-container-box { width: auto; min-width: 50%; margin: 0 auto; } 
+        .match-row { display: flex; justify-content: space-between; align-items: center; margin-bottom: 8px; border-bottom: 1px dashed #ddd; padding-bottom: 4px; gap: 20px; }
+        .match-col-a { text-align: right; font-weight: bold; }
+        .match-col-b { text-align: left; direction: ltr; }
 
         @media print { 
             @page { size: A4; margin: 0; } 
@@ -199,8 +204,8 @@
                     </div>
 
                     <div id="match-container" class="hidden">
-                         <div class="text-xs text-gray-400 mb-1 text-center font-bold">جووتەکان لێرە بنووسە:</div>
-                         <div id="match-inputs" class="space-y-2 mb-2"></div>
+                         <div class="text-xs text-gray-400 mb-1 text-center font-bold">جووتەکان:</div>
+                         <div id="match-inputs" class="space-y-1 mb-2"></div>
                          <button onclick="addMatchPair()" class="text-xs text-brand-600 font-bold w-full text-right py-1">+ زیادکردنی جووت</button>
                     </div>
                 </div>
@@ -310,7 +315,6 @@
             btn.className = "flex-shrink-0 px-2 py-1 bg-white border rounded text-xs font-bold shadow-sm active:bg-gray-200 min-w-[30px]";
             btn.innerText = s.replace('\\','');
             
-            // FIXED INSERT LOGIC: Adds single $ for inline math
             btn.onclick = () => { 
                 let f = document.getElementById('q_text'); 
                 let start = f.selectionStart;
@@ -320,7 +324,6 @@
                 let after = text.substring(end, text.length);
                 f.value = before + '$' + s + '$' + after;
                 f.focus();
-                // Move cursor to middle of math if it has braces {}
                 let bracePos = s.indexOf('{}');
                 if(bracePos !== -1) {
                     f.selectionStart = f.selectionEnd = start + 1 + bracePos + 1;
@@ -331,7 +334,7 @@
             tb.appendChild(btn);
         });
 
-        // --- INPUT LOGIC ---
+        // --- INPUT LOGIC (SMALLER MATCHING) ---
         function renderMCQInputs() {
             const container = document.getElementById('mcq-inputs');
             container.innerHTML = '';
@@ -353,11 +356,11 @@
             container.innerHTML = '';
             matchPairs.forEach((pair, idx) => {
                 let div = document.createElement('div');
-                div.className = "flex gap-2 items-center bg-white p-1 rounded border";
+                div.className = "flex gap-1 items-center bg-white p-1 rounded border";
                 div.innerHTML = `
-                    <input type="text" value="${pair.right}" oninput="matchPairs[${idx}].right=this.value" class="flex-1 p-2 border-l bg-transparent text-sm outline-none text-right" placeholder="لای ڕاست">
-                    <input type="text" value="${pair.left}" oninput="matchPairs[${idx}].left=this.value" class="flex-1 p-2 bg-transparent text-sm outline-none text-left" placeholder="لای چەپ" dir="ltr">
-                    <button onclick="if(matchPairs.length>1){matchPairs.splice(${idx},1);renderMatchInputs();}" class="text-red-400 px-2"><i class="fa-solid fa-xmark"></i></button>
+                    <input type="text" value="${pair.right}" oninput="matchPairs[${idx}].right=this.value" class="flex-1 p-1 border rounded text-xs text-right h-8" placeholder="ڕاست">
+                    <input type="text" value="${pair.left}" oninput="matchPairs[${idx}].left=this.value" class="flex-1 p-1 border rounded text-xs text-left h-8" placeholder="چەپ" dir="ltr">
+                    <button onclick="if(matchPairs.length>1){matchPairs.splice(${idx},1);renderMatchInputs();}" class="text-red-400 px-1 text-xs"><i class="fa-solid fa-xmark"></i></button>
                 `;
                 container.appendChild(div);
             });
@@ -456,7 +459,7 @@
             renderMatchInputs();
         }
 
-        // --- RENDER PAPER (TIGHT MATCHING & RIGHT MATH) ---
+        // --- RENDER PAPER (RESET NUMBER, IMAGE LEFT) ---
         function renderPaper() {
             const container = document.getElementById('paper_questions');
             container.innerHTML = '';
@@ -464,7 +467,11 @@
             let subCount = 0;
 
             examData.forEach(item => {
-                if(item.type === 'title') { container.innerHTML += `<div class="section-title">${item.text}</div>`; return; }
+                if(item.type === 'title') { 
+                    qCount = 0; // RESET NUMBERING
+                    container.innerHTML += `<div class="section-title">${item.text}</div>`; 
+                    return; 
+                }
                 if(item.type === 'break') { container.innerHTML += `<div class="page-break-marker"></div>`; return; }
 
                 let labelHTML = '';
@@ -486,10 +493,10 @@
                      extraContent += `</div>`;
                 }
                 
-                // RENDER MATCHING (COMPACT TABLE STYLE)
+                // RENDER MATCHING (COMPACT TABLE)
                 if(item.qType === 'match' && item.matchPairs) {
                     extraContent = `<div class="mt-2 w-full flex justify-center">
-                        <table class="border-collapse w-auto text-sm mr-0">`; // w-auto means shrink to fit
+                        <table class="border-collapse w-auto text-sm mr-0">`; 
                     item.matchPairs.forEach(p => { 
                         extraContent += `
                         <tr>
@@ -501,13 +508,18 @@
                     extraContent += `</table></div>`;
                 }
 
+                // FLEX FOR IMAGE ON LEFT
                 let content = `
                 <div class="flex items-start gap-2 w-full break-inside-avoid relative group mt-2">
                     ${labelHTML}
                     <div class="flex-1 text-right" dir="rtl">
-                        ${item.text ? `<div class="q-content font-bold mb-1" dir="rtl" style="text-align:right;">${item.text}</div>` : ''}
-                        ${item.img ? `<img src="${item.img}" class="max-h-32 my-2 border border-dashed p-1">` : ''}
-                        ${extraContent}
+                        <div class="flex justify-between items-start">
+                            <div class="flex-1 pl-2">
+                                ${item.text ? `<div class="q-content font-bold mb-1">${item.text}</div>` : ''}
+                                ${extraContent}
+                            </div>
+                            ${item.img ? `<img src="${item.img}" class="w-24 h-24 object-contain border border-dashed p-1 bg-white flex-none">` : ''}
+                        </div>
                     </div>
                     ${item.subStyle === 'none' ? `<span class="text-[10px] border px-1 rounded absolute left-0 top-0 bg-white">${item.score} نمرە</span>` : ''}
                 </div>
@@ -543,6 +555,45 @@
                 list.appendChild(div);
             });
             new Sortable(list, { animation: 150, onEnd: (evt) => { const item = examData.splice(evt.oldIndex, 1)[0]; examData.splice(evt.newIndex, 0, item); renderPaper(); updateList(); }});
+        }
+
+        // --- SHUFFLE LOGIC (MCQ ONLY) ---
+        function shuffleQuestions() {
+            if(!confirm('تەنها پرسیارە هەڵبژاردنەکان تێکەڵ دەکەیت؟')) return;
+
+            // 1. Shuffle Options INSIDE MCQs
+            examData.forEach(q => {
+                if(q.qType === 'mcq' && q.options) {
+                    for (let i = q.options.length - 1; i > 0; i--) {
+                        const j = Math.floor(Math.random() * (i + 1));
+                        [q.options[i], q.options[j]] = [q.options[j], q.options[i]];
+                    }
+                }
+            });
+
+            // 2. Shuffle Order of MCQs only (keeping them in MCQ slots)
+            let mcqIndices = [];
+            examData.forEach((item, index) => {
+                if(item.type === 'question' && item.qType === 'mcq') mcqIndices.push(index);
+            });
+
+            let shuffledIndices = [...mcqIndices];
+            for (let i = shuffledIndices.length - 1; i > 0; i--) {
+                const j = Math.floor(Math.random() * (i + 1));
+                [shuffledIndices[i], shuffledIndices[j]] = [shuffledIndices[j], shuffledIndices[i]];
+            }
+
+            let tempItems = {};
+            mcqIndices.forEach((oldIdx, i) => {
+                tempItems[oldIdx] = examData[shuffledIndices[i]];
+            });
+
+            mcqIndices.forEach(idx => {
+                examData[idx] = tempItems[idx];
+            });
+
+            renderPaper();
+            updateList();
         }
 
         // --- HEADER LOGO ---
@@ -713,31 +764,13 @@
             const blob = new Blob(['\ufeff', html], { type: 'application/msword' });
             const link = document.createElement("a"); link.href = URL.createObjectURL(blob); link.download = "exam.doc"; link.click();
         }
-
-        function shuffleQuestions() {
-            if(!confirm('تێکەڵکردن؟')) return;
-            for (let i = examData.length - 1; i > 0; i--) {
-                 if(examData[i].type === 'break') continue;
-                 const j = Math.floor(Math.random() * (i + 1));
-                 [examData[i], examData[j]] = [examData[j], examData[i]];
-            }
-            examData.forEach(q => {
-                if(q.qType === 'mcq' && q.options) {
-                    for (let i = q.options.length - 1; i > 0; i--) {
-                        const j = Math.floor(Math.random() * (i + 1));
-                        [q.options[i], q.options[j]] = [q.options[j], q.options[i]];
-                    }
-                }
-            });
-            renderPaper(); updateList();
-        }
         
         function generateAnswerKey() {
             let html = `<html dir="rtl"><head><style>table, th, td { border: 1px solid black; border-collapse: collapse; padding: 5px; text-align: center; }</style></head><body><h2>وەڵامنامە</h2><table style="width:100%"><tr><th>#</th><th>وەڵام</th></tr>`;
             let count = 0;
             const labels = ['A','B','C','D','E'];
             examData.forEach(q => {
-                if(q.type === 'break') return;
+                if(q.type === 'break' || q.type === 'title') return;
                 count++;
                 let ans = '-';
                 if(q.qType === 'mcq' && q.options) {
