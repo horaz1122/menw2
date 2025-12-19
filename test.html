@@ -3,7 +3,7 @@
 <head>
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0, maximum-scale=1.0, user-scalable=no">
-    <title>سیستەمی پرسیار - وەشانی تەواو بە بۆشایی</title>
+    <title>سیستەمی پرسیار - پارێزراو (Admin System)</title>
     
     <script src="https://cdn.tailwindcss.com"></script>
     
@@ -33,14 +33,18 @@
             const app = initializeApp(firebaseConfig);
             const auth = getAuth(app);
             const db = getFirestore(app);
-            const appId = 'exam-system-v10-spacing'; 
+            const appId = 'exam-system-v11-secure'; 
 
             window.firebaseApp = { auth, db, appId, doc, getDoc, setDoc, addDoc, deleteDoc, updateDoc, collection, getDocs, query, orderBy };
 
             onAuthStateChanged(auth, (user) => {
                 if (user) {
                     window.currentUser = user;
-                    loadExamList(); 
+                    // If session exists, load data
+                    if(localStorage.getItem('is_logged_in') === 'true') {
+                        document.getElementById('login-overlay').style.display = 'none';
+                        loadExamList();
+                    }
                 } else {
                     signInAnonymously(auth);
                 }
@@ -79,7 +83,7 @@
         .content-area { flex: 1; overflow: hidden; display: flex; position: relative; }
         #editor-panel, #preview-panel { overflow-y: auto; height: 100%; padding-bottom: 150px; -webkit-overflow-scrolling: touch; }
         
-        /* A4 PAPER */
+        /* A4 PAPER - COMPACT MODE */
         .a4-paper { 
             width: 210mm; min-height: 297mm; background: white; margin: 0 auto; padding: 10mm; 
             box-shadow: 0 4px 15px rgba(0,0,0,0.1); font-family: 'Nrt Reg', sans-serif; 
@@ -125,10 +129,12 @@
 
     <div id="login-overlay" class="fixed inset-0 bg-slate-900/95 z-[100] flex items-center justify-center backdrop-blur-sm p-4">
         <div class="bg-white p-6 rounded-2xl shadow-2xl w-full max-w-sm text-center">
+            <div id="login-loader" class="hidden absolute inset-0 bg-white/80 flex items-center justify-center rounded-2xl"><div class="animate-spin h-8 w-8 border-4 border-brand-500 rounded-full border-t-transparent"></div></div>
             <h2 class="text-2xl font-bold mb-4 text-brand-900">چوونەژوورەوە</h2>
-            <div class="bg-blue-50 p-3 rounded-lg mb-4 text-sm text-blue-800">کۆد: <b>07501784002</b></div>
-            <input type="number" id="password-input" class="w-full p-3 border-2 rounded-xl text-center text-xl font-bold mb-3 focus:border-brand-500 outline-none" placeholder="کۆد لێرە بنووسە">
-            <button onclick="checkPassword()" class="w-full bg-brand-600 hover:bg-brand-500 text-white font-bold py-3 rounded-xl transition">چوونەژوورەوە</button>
+            <div class="text-xs text-gray-500 mb-2">تکایە کۆدی چالاککردن بنووسە</div>
+            <input type="number" id="password-input" class="w-full p-3 border-2 rounded-xl text-center text-xl font-bold mb-3 focus:border-brand-500 outline-none" placeholder="کۆد...">
+            <p id="login-error-msg" class="text-red-500 text-xs mb-2 hidden"></p>
+            <button onclick="checkPassword()" id="login-btn" class="w-full bg-brand-600 hover:bg-brand-500 text-white font-bold py-3 rounded-xl transition">چوونەژوورەوە</button>
         </div>
     </div>
 
@@ -239,6 +245,7 @@
                         <div><input id="h_date" class="border p-2 rounded w-full" placeholder="بەروار" oninput="updatePaper()"></div>
                     </div>
                  </div>
+                 
                  <div class="bg-white p-3 rounded border shadow-sm">
                     <h3 class="font-bold text-xs text-brand-600 mb-2 border-b pb-1">کردارەکان</h3>
                     <div class="grid grid-cols-2 gap-2">
@@ -247,6 +254,16 @@
                         <button onclick="downloadWord()" class="bg-blue-100 text-blue-700 py-3 rounded text-xs font-bold">Word</button>
                         <button onclick="downloadPDF()" class="bg-green-100 text-green-700 py-3 rounded text-xs font-bold">PDF</button>
                     </div>
+                 </div>
+
+                 <div class="bg-red-50 p-3 rounded border border-red-100 shadow-sm">
+                    <h3 class="font-bold text-xs text-red-600 mb-2 border-b border-red-200 pb-1">بەڕێوەبردنی کۆدەکان (تەنها ئەدمین)</h3>
+                    <div class="flex gap-2 mb-2">
+                        <input type="text" id="new-access-code" class="flex-1 p-2 border rounded text-xs" placeholder="کۆدی نوێ بنووسە...">
+                        <button onclick="createAccessCode()" class="bg-red-600 text-white px-3 py-1 rounded text-xs font-bold">زیادکردن</button>
+                    </div>
+                    <div id="admin-codes-list" class="space-y-1 text-xs text-gray-600 max-h-32 overflow-y-auto"></div>
+                    <button onclick="loadAdminCodes()" class="text-[10px] text-blue-500 underline mt-1">پیشاندانی کۆدەکان</button>
                  </div>
             </div>
 
@@ -299,9 +316,100 @@
         let editIndex = -1;
         let mcqOptions = [{text:'', correct:false}, {text:'', correct:false}, {text:'', correct:false}, {text:'', correct:false}];
         let matchPairs = [{right:'', left:''}, {right:'', left:''}];
+        let userIsAdmin = false;
         
         let deviceId = localStorage.getItem('did') || crypto.randomUUID();
         localStorage.setItem('did', deviceId);
+
+        // --- SECURE LOGIN LOGIC ---
+        async function checkPassword() {
+            const input = document.getElementById('password-input').value.trim();
+            const btn = document.getElementById('login-btn');
+            const errorMsg = document.getElementById('login-error-msg');
+            const loader = document.getElementById('login-loader');
+            
+            errorMsg.classList.add('hidden');
+            if(!input) return;
+
+            // 1. MASTER CODE CHECK
+            if(input === '11223344009') {
+                userIsAdmin = true;
+                grantAccess();
+                return;
+            }
+
+            // 2. FIRESTORE CHECK
+            btn.disabled = true;
+            loader.classList.remove('hidden');
+            
+            try {
+                const { db, doc, getDoc, appId } = window.firebaseApp;
+                const docRef = doc(db, 'artifacts', appId, 'access_codes', input);
+                const docSnap = await getDoc(docRef);
+
+                if (docSnap.exists()) {
+                    userIsAdmin = false;
+                    grantAccess();
+                } else {
+                    errorMsg.innerText = "کۆدەکە هەڵەیە یان بوونی نییە";
+                    errorMsg.classList.remove('hidden');
+                }
+            } catch(e) {
+                console.error(e);
+                errorMsg.innerText = "کێشەی ئینتەرنێت هەیە";
+                errorMsg.classList.remove('hidden');
+            } finally {
+                btn.disabled = false;
+                loader.classList.add('hidden');
+            }
+        }
+
+        function grantAccess() {
+            document.getElementById('login-overlay').style.display = 'none';
+            localStorage.setItem('is_logged_in', 'true');
+            loadExamList();
+        }
+
+        // --- ADMIN FUNCTIONS ---
+        async function createAccessCode() {
+            if(!userIsAdmin) return alert('تەنها ئەدمین دەتوانێت ئەم کارە بکات (کۆدی ماستەر)');
+            const code = document.getElementById('new-access-code').value.trim();
+            if(!code) return;
+
+            const { db, doc, setDoc, appId } = window.firebaseApp;
+            try {
+                await setDoc(doc(db, 'artifacts', appId, 'access_codes', code), {
+                    createdAt: new Date().toISOString(),
+                    createdBy: 'admin'
+                });
+                alert('کۆدەکە زیادکرا: ' + code);
+                document.getElementById('new-access-code').value = '';
+                loadAdminCodes();
+            } catch(e) { alert('هەڵە ڕوویدا'); }
+        }
+
+        async function loadAdminCodes() {
+            if(!userIsAdmin) return alert('تەنها بۆ ئەدمینە');
+            const { db, collection, getDocs, appId } = window.firebaseApp;
+            const list = document.getElementById('admin-codes-list');
+            list.innerHTML = 'خەریکی هێنانەوە...';
+            
+            const snap = await getDocs(collection(db, 'artifacts', appId, 'access_codes'));
+            list.innerHTML = '';
+            
+            if(snap.empty) { list.innerHTML = 'هیچ کۆدێک نییە'; return; }
+
+            snap.forEach(d => {
+                list.innerHTML += `<div class="flex justify-between border-b pb-1"><span>${d.id}</span> <button onclick="deleteAccessCode('${d.id}')" class="text-red-500 font-bold">X</button></div>`;
+            });
+        }
+
+        async function deleteAccessCode(code) {
+            if(!confirm('دڵنیای؟')) return;
+            const { db, doc, deleteDoc, appId } = window.firebaseApp;
+            await deleteDoc(doc(db, 'artifacts', appId, 'access_codes', code));
+            loadAdminCodes();
+        }
 
         // --- MATH UI ---
         const mathSymbols = [
@@ -393,7 +501,7 @@
             const text = document.getElementById('q_text').value;
             const score = document.getElementById('q_score').value;
             const type = document.getElementById('q_type').value;
-            const spacing = document.getElementById('q_spacing').value; // Get Spacing
+            const spacing = document.getElementById('q_spacing').value;
             const subStyle = document.getElementById('q_sub_style').value;
             const file = document.getElementById('q_image').files[0];
             
@@ -406,7 +514,7 @@
                 qType: type,
                 text: text,
                 score: score,
-                spacing: spacing, // Save Spacing
+                spacing: spacing,
                 subStyle: subStyle, 
                 options: type === 'mcq' ? JSON.parse(JSON.stringify(mcqOptions)) : null,
                 matchPairs: type === 'match' ? JSON.parse(JSON.stringify(matchPairs)) : null,
@@ -441,7 +549,7 @@
             document.getElementById('q_text').value = item.text;
             document.getElementById('q_score').value = item.score;
             document.getElementById('q_type').value = item.qType;
-            document.getElementById('q_spacing').value = item.spacing || 0; // Load Spacing
+            document.getElementById('q_spacing').value = item.spacing || 0;
             document.getElementById('spacing-display').innerText = item.spacing || 0;
             document.getElementById('q_sub_style').value = item.subStyle || 'none';
             
@@ -459,7 +567,7 @@
             editIndex = -1;
             document.getElementById('q_text').value = '';
             document.getElementById('q_image').value = '';
-            document.getElementById('q_spacing').value = 0; // Reset
+            document.getElementById('q_spacing').value = 0;
             document.getElementById('spacing-display').innerText = 0;
             document.getElementById('btn-add').innerText = "زیادکردن";
             document.getElementById('btn-add').classList.replace('bg-green-600', 'bg-brand-600');
@@ -492,11 +600,9 @@
                     qCount++; subCount = 0; labelHTML = `<span class="q-number">${qCount}</span>`;
                 }
 
-                // Apply Spacing Logic Here
                 let spacer = item.spacing > 0 ? `<div style="height: ${item.spacing}cm"></div>` : '';
 
                 let extraContent = '';
-                // RENDER MCQ
                 if(item.qType === 'mcq' && item.options) {
                      extraContent = `<div class="grid grid-cols-2 gap-x-4 gap-y-2 q-options-grid mt-2 pr-2">`;
                      const labels = ['A','B','C','D','E'];
@@ -506,17 +612,11 @@
                      extraContent += `</div>`;
                 }
                 
-                // RENDER MATCHING
                 if(item.qType === 'match' && item.matchPairs) {
                     extraContent = `<div class="mt-2 w-full flex justify-center">
                         <table class="border-collapse w-auto text-sm mr-0">`; 
                     item.matchPairs.forEach(p => { 
-                        extraContent += `
-                        <tr>
-                            <td class="pl-4 py-1 font-bold text-right">${p.right}</td>
-                            <td class="px-4 py-1 text-center text-gray-300">--</td>
-                            <td class="pr-4 py-1 text-left font-bold" dir="ltr">${p.left}</td>
-                        </tr>`; 
+                        extraContent += `<tr><td class="pl-4 py-1 font-bold text-right">${p.right}</td><td class="px-4 py-1 text-center text-gray-300">--</td><td class="pr-4 py-1 text-left font-bold" dir="ltr">${p.left}</td></tr>`; 
                     });
                     extraContent += `</table></div>`;
                 }
@@ -584,7 +684,7 @@
                 }
             });
 
-            // 2. Shuffle Order of MCQs only (keeping them in MCQ slots)
+            // 2. Shuffle Order of MCQs only
             let mcqIndices = [];
             examData.forEach((item, index) => {
                 if(item.type === 'question' && item.qType === 'mcq') mcqIndices.push(index);
@@ -700,7 +800,6 @@
             renderPaper(); updateList(); setTab('create');
         }
 
-        // --- BANK UTILS ---
         async function addToBank(idx) {
             if(!window.currentUser) return alert('پێویستە بچیتە ژوورەوە');
             const item = examData[idx];
@@ -795,13 +894,6 @@
             html += `</table></body></html>`;
             const win = window.open('','_blank');
             win.document.write(html);
-        }
-
-        function checkPassword() {
-            if(document.getElementById('password-input').value === '07501784002') {
-                document.getElementById('login-overlay').style.display = 'none';
-                updateList();
-            } else { alert('کۆد هەڵەیە'); }
         }
     </script>
 </body>
