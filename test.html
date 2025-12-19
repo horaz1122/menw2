@@ -3,7 +3,7 @@
 <head>
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0, maximum-scale=1.0, user-scalable=no">
-    <title>سیستەمی زیرەکی پرسیار - وەشانی جێگیر</title>
+    <title>سیستەمی زیرەکی پرسیار - وەشانی کۆتایی</title>
     
     <script src="https://cdn.tailwindcss.com"></script>
     
@@ -33,7 +33,7 @@
             const app = initializeApp(firebaseConfig);
             const auth = getAuth(app);
             const db = getFirestore(app);
-            const appId = 'exam-system-v6-fixed'; 
+            const appId = 'exam-system-final-fix'; 
 
             window.firebaseApp = { auth, db, appId, doc, getDoc, setDoc, addDoc, deleteDoc, updateDoc, collection, getDocs, query, orderBy };
 
@@ -96,20 +96,19 @@
         .header-left { text-align: left; align-items: flex-end; }
         .header-logo-img { width: 70px; height: 70px; object-fit: contain; margin-bottom: 5px; }
         
-        /* Question Styles */
         .q-number { background: #000; color: white; width: 24px; height: 24px; border-radius: 50%; display: inline-flex; align-items: center; justify-content: center; font-size: 12px; margin-left: 8px; font-weight: bold; -webkit-print-color-adjust: exact; print-color-adjust: exact; flex-shrink: 0; }
         .q-sub-label { font-weight: bold; margin-left: 5px; min-width: 20px; display: inline-block; }
         .q-content { font-size: 16px; line-height: 1.6; }
         
-        /* Items */
         .section-title { width: 100%; text-align: center; font-weight: 900; font-size: 18px; padding: 5px; border-top: 2px solid #000; border-bottom: 2px solid #000; margin: 15px 0; background-color: #f3f4f6; -webkit-print-color-adjust: exact; }
         .page-break-marker { border-top: 2px dashed #cbd5e1; margin: 20px 0; position: relative; text-align: center; color: #94a3b8; font-size: 10px; page-break-after: always; break-after: always; }
         .page-break-marker::after { content: 'پەڕەی نوێ (Page Break)'; background: #f8fafc; padding: 0 10px; position: relative; top: -8px; }
 
-        /* MATCHING GRID STYLE (FIXED ALIGNMENT) */
-        .match-row { display: flex; justify-content: space-between; align-items: center; margin-bottom: 10px; border-bottom: 1px dashed #eee; padding-bottom: 5px; }
-        .match-col-a { width: 45%; text-align: right; font-weight: bold; }
-        .match-col-b { width: 45%; text-align: left; direction: ltr; }
+        /* MATCHING STYLE FIXED */
+        .match-container-box { width: 70%; margin: 0 auto; } /* Reduced width to bring columns closer */
+        .match-row { display: flex; justify-content: space-between; align-items: center; margin-bottom: 8px; border-bottom: 1px dashed #ddd; padding-bottom: 4px; }
+        .match-col-a { text-align: right; font-weight: bold; }
+        .match-col-b { text-align: left; direction: ltr; }
 
         @media print { 
             @page { size: A4; margin: 0; } 
@@ -166,7 +165,7 @@
 
                 <div id="math-toolbar-container" class="flex overflow-x-auto gap-1 py-1 mb-1 no-scrollbar"></div>
                 
-                <textarea id="q_text" rows="2" class="w-full p-2 border rounded text-sm focus:border-brand-500 focus:ring-1 focus:ring-brand-200 transition" placeholder="دەقی پرسیار (بۆ ڕاکێشان پێویست نییە)..."></textarea>
+                <textarea id="q_text" rows="2" class="w-full p-2 border rounded text-sm focus:border-brand-500 focus:ring-1 focus:ring-brand-200 transition" placeholder="دەقی پرسیار..."></textarea>
                 
                 <div class="flex gap-2 items-center">
                      <div class="flex-1 bg-slate-50 border rounded p-1 flex items-center overflow-hidden">
@@ -298,7 +297,7 @@
         let deviceId = localStorage.getItem('did') || crypto.randomUUID();
         localStorage.setItem('did', deviceId);
 
-        // --- MATH UI (FULL LIST RESTORED) ---
+        // --- MATH UI (FIXED INSERTION) ---
         const mathSymbols = [
             '+','-','\\times','\\div','=','\\neq','\\approx','\\pm',
             '\\sqrt{}','\\sqrt[3]{}','\\frac{}{}','x^2','x_2','e^x',
@@ -313,7 +312,19 @@
             let btn = document.createElement('button');
             btn.className = "flex-shrink-0 px-2 py-1 bg-white border rounded text-xs font-bold shadow-sm active:bg-gray-200 min-w-[30px]";
             btn.innerText = s.replace('\\','');
-            btn.onclick = () => { let f = document.getElementById('q_text'); f.value += `$${s}$`; f.focus(); };
+            
+            // FIXED INSERT LOGIC: Adds single $ for inline math
+            btn.onclick = () => { 
+                let f = document.getElementById('q_text'); 
+                let start = f.selectionStart;
+                let end = f.selectionEnd;
+                let text = f.value;
+                let before = text.substring(0, start);
+                let after = text.substring(end, text.length);
+                f.value = before + '$' + s + '$' + after;
+                f.focus();
+                f.selectionEnd = start + s.length + 2; 
+            };
             tb.appendChild(btn);
         });
 
@@ -362,17 +373,11 @@
 
         // --- ADD ITEMS ---
         function addSectionTitle() {
-            const title = prompt("سەردێڕ بنووسە (بۆ نموونە: پرسیارە بیرکارییەکان)");
-            if(title) {
-                examData.push({ type: 'title', id: Date.now(), text: title });
-                renderPaper(); updateList();
-            }
+            const title = prompt("سەردێڕ بنووسە:");
+            if(title) { examData.push({ type: 'title', id: Date.now(), text: title }); renderPaper(); updateList(); }
         }
 
-        function addPageBreak() {
-            examData.push({ type: 'break', id: Date.now() });
-            renderPaper(); updateList();
-        }
+        function addPageBreak() { examData.push({ type: 'break', id: Date.now() }); renderPaper(); updateList(); }
 
         function addItem() {
             const text = document.getElementById('q_text').value;
@@ -381,7 +386,6 @@
             const subStyle = document.getElementById('q_sub_style').value;
             const file = document.getElementById('q_image').files[0];
             
-            // For matching, text is optional
             if(type !== 'match' && !text && !file) return alert('تکایە دەق یان وێنە دابنێ');
             if(type === 'match' && matchPairs.every(p => !p.right && !p.left)) return alert('تکایە جووتەکان پڕ بکەرەوە');
 
@@ -479,9 +483,9 @@
                      extraContent += `</div>`;
                 }
                 
-                // RENDER MATCHING (FIXED ALIGNMENT)
+                // RENDER MATCHING (NARROWER WIDTH)
                 if(item.qType === 'match' && item.matchPairs) {
-                    extraContent = `<div class="mt-2 w-full pr-4">`;
+                    extraContent = `<div class="mt-2 w-full match-container-box">`;
                     item.matchPairs.forEach(p => { 
                         extraContent += `
                         <div class="match-row">
