@@ -3,7 +3,7 @@
 <head>
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0, maximum-scale=1.0, user-scalable=no">
-    <title>سیستەمی پرسیار - V13 (Fixed Math & Logic)</title>
+    <title>سیستەمی پرسیار - Super Pro V12</title>
     
     <script src="https://cdn.tailwindcss.com"></script>
     
@@ -12,7 +12,7 @@
     <script src="https://unpkg.com/docx@7.1.0/build/index.js"></script>
     <script src="https://cdnjs.cloudflare.com/ajax/libs/FileSaver.js/2.0.5/FileSaver.min.js"></script>
 
-    <link href="https://fonts.googleapis.com/css2?family=Nrt+Reg&family=Vazirmatn:wght@300;400;700;900&display=swap" rel="stylesheet">
+    <link href="https://fonts.googleapis.com/css2?family=Nrt+Reg&family=Vazirmatn:wght@300;400;700;900&family=Amiri&family=Lateef&display=swap" rel="stylesheet">
     <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.4.0/css/all.min.css">
     
     <script type="module">
@@ -34,7 +34,7 @@
             const app = initializeApp(firebaseConfig);
             const auth = getAuth(app);
             const db = getFirestore(app);
-            const appId = 'exam-system-v12-super'; // Using V12 DB
+            const appId = 'exam-system-v12-super'; 
 
             window.firebaseApp = { auth, db, appId, doc, getDoc, setDoc, addDoc, deleteDoc, updateDoc, collection, getDocs, query, orderBy };
 
@@ -43,7 +43,7 @@
                     window.currentUser = user;
                     if(localStorage.getItem('is_logged_in') === 'true') {
                         document.getElementById('login-overlay').style.display = 'none';
-                        loadProfile(); 
+                        loadProfile(); // Load Teacher Defaults
                         loadExamList();
                     }
                 } else { signInAnonymously(auth); }
@@ -65,7 +65,12 @@
         tailwind.config = {
             theme: {
                 extend: {
-                    fontFamily: { sans: ['Vazirmatn', 'Arial'], nrt: ['Nrt Reg', 'Arial'] },
+                    fontFamily: { 
+                        nrt: ['Nrt Reg', 'Arial'],
+                        vazir: ['Vazirmatn', 'Arial'],
+                        amiri: ['Amiri', 'serif'],
+                        lateef: ['Lateef', 'cursive']
+                    },
                     colors: { brand: { 50: '#f0f9ff', 500: '#0ea5e9', 600: '#0284c7', 900: '#0c4a6e' } },
                     screens: { 'print': {'raw': 'print'} }
                 }
@@ -84,6 +89,12 @@
             box-shadow: 0 4px 15px rgba(0,0,0,0.1); color: black; transform-origin: top center; transition: transform 0.3s;
         }
 
+        /* FONT CLASSES */
+        .font-nrt { font-family: 'Nrt Reg', sans-serif !important; }
+        .font-vazir { font-family: 'Vazirmatn', sans-serif !important; }
+        .font-amiri { font-family: 'Amiri', serif !important; }
+        .font-lateef { font-family: 'Lateef', cursive !important; }
+
         @media (max-width: 1023px) {
             .a4-paper { transform: scale(0.55); margin-top: 10px; margin-bottom: 50px; }
             #preview-panel { display: flex; justify-content: center; background: #e2e8f0; }
@@ -97,8 +108,14 @@
         
         .q-wrapper { margin-bottom: 6px; break-inside: avoid; } 
         .q-number { background: #000; color: white; width: 22px; height: 22px; border-radius: 50%; display: inline-flex; align-items: center; justify-content: center; font-size: 11px; margin-left: 6px; font-weight: bold; flex-shrink: 0; }
+        .q-sub-label { font-weight: bold; margin-left: 5px; min-width: 20px; display: inline-block; font-size: 14px; }
+        
         .q-content { font-size: 14px; line-height: 1.4; text-align: right !important; direction: rtl !important; display: block; width: 100%; font-weight: bold; }
         .section-title { width: 100%; text-align: center; font-weight: 900; font-size: 16px; padding: 4px; border-top: 2px solid #000; border-bottom: 2px solid #000; margin: 10px 0; background-color: #f3f4f6; -webkit-print-color-adjust: exact; }
+        
+        /* Matching Table */
+        .match-container-box { width: auto; min-width: 60%; margin: 0 auto; } 
+        .match-row { display: flex; justify-content: space-between; margin-bottom: 8px; border-bottom: 1px dashed #ddd; }
         
         @media print { 
             body { background: white; height: auto; display: block; overflow: visible; } 
@@ -123,7 +140,8 @@
             </div>
             <a href="https://wa.me/9647501784002" target="_blank" class="flex items-center justify-center gap-2 w-full bg-green-500 hover:bg-green-600 text-white font-bold py-2.5 rounded-xl mb-4 shadow-sm"><i class="fa-brands fa-whatsapp"></i> پەیوەندی (WhatsApp)</a>
             <input type="number" id="password-input" class="w-full p-3 border-2 rounded-xl text-center text-xl font-bold mb-3 focus:border-brand-500 outline-none" placeholder="کۆد...">
-            <button onclick="checkPassword()" class="w-full bg-brand-600 hover:bg-brand-500 text-white font-bold py-3 rounded-xl">چوونەژوورەوە</button>
+            <p id="login-error-msg" class="text-red-500 text-xs mb-2 hidden"></p>
+            <button onclick="checkPassword()" id="login-btn" class="w-full bg-brand-600 hover:bg-brand-500 text-white font-bold py-3 rounded-xl">چوونەژوورەوە</button>
         </div>
     </div>
 
@@ -142,6 +160,11 @@
             </div>
 
             <div id="view-create" class="flex-1 p-3 space-y-3">
+                
+                <div id="bank-edit-alert" class="hidden bg-yellow-50 text-yellow-800 p-2 text-xs border border-yellow-200 rounded font-bold">
+                    ⚠️ دەستکاری بانک <button onclick="clearForm()" class="text-red-500 underline mr-2">لابردن</button>
+                </div>
+
                 <div class="flex gap-2 mb-2">
                     <button onclick="addSectionTitle()" class="bg-gray-800 text-white px-3 py-2 rounded text-xs font-bold w-1/2">سەردێڕ</button>
                     <button onclick="addPageBreak()" class="bg-gray-600 text-white px-3 py-2 rounded text-xs font-bold w-1/2">پەڕەی نوێ</button>
@@ -216,8 +239,10 @@
                     <div class="mb-2">
                         <label class="text-xs font-bold text-gray-500">فۆنت:</label>
                         <select id="h_font" class="w-full text-xs border rounded p-1" onchange="updatePaper()">
-                            <option value="font-nrt">NRT</option>
-                            <option value="font-vazir">Vazir</option>
+                            <option value="font-nrt">NRT (کورد)</option>
+                            <option value="font-vazir">Vazir (ستاندارد)</option>
+                            <option value="font-amiri">Amiri (عەرەبی)</option>
+                            <option value="font-lateef">Lateef (دەستنووس)</option>
                         </select>
                     </div>
                     <div class="mb-3"><label class="text-xs font-bold text-gray-600">لۆگۆ:</label><input type="file" id="h_logo_input" accept="image/*" class="w-full text-xs"></div>
@@ -300,6 +325,8 @@
         let examData = [];
         let bankData = [];
         let editIndex = -1;
+        let bankEditMode = false;
+        let bankEditId = null;
         let mcqOptions = [{text:'', correct:false}, {text:'', correct:false}, {text:'', correct:false}, {text:'', correct:false}];
         let matchPairs = [{right:'', left:''}, {right:'', left:''}];
         let deviceId = localStorage.getItem('did') || crypto.randomUUID();
@@ -310,20 +337,15 @@
             const el = document.getElementById('q_text');
             const start = el.selectionStart;
             const end = el.selectionEnd;
-            el.value = el.value.substring(0, start) + `<${tag}>` + el.value.substring(start, end) + `</${tag}>` + el.value.substring(end);
+            const text = el.value;
+            const before = text.substring(0, start);
+            const selected = text.substring(start, end);
+            const after = text.substring(end);
+            el.value = before + `<${tag}>` + selected + `</${tag}>` + after;
             autoSave();
         }
 
-        // FULL MATH LIST RESTORED
-        const mathSymbols = [
-            '+','-','\\times','\\div','=','\\neq','\\approx','\\pm',
-            '\\sqrt{}','\\sqrt[3]{}','\\frac{}{}','x^2','x_2','e^x',
-            '<','>','\\leq','\\geq','\\infty','\\pi','\\circ','\\angle','\\triangle',
-            '\\alpha','\\beta','\\theta','\\lambda','\\Delta',
-            '\\in','\\notin','\\cup','\\cap','\\subset','\\subseteq','\\emptyset',
-            '\\rightarrow','\\Rightarrow','\\Leftrightarrow',
-            '\\sum','\\int','\\lim','\\log','\\ln','\\sin','\\cos','\\tan'
-        ];
+        const mathSymbols = ['+','-','\\times','\\div','=','\\sqrt{}','\\frac{}{}','x^2','\\circ','\\angle','\\pi','\\alpha','\\beta','\\theta','\\lambda','\\Delta','\\in','\\notin','\\cup','\\cap','\\subset','\\subseteq','\\emptyset','\\rightarrow','\\Rightarrow','\\Leftrightarrow','\\sum','\\int','\\lim','\\log','\\ln','\\sin','\\cos','\\tan'];
         const tb = document.getElementById('math-toolbar-container');
         mathSymbols.forEach(s => {
             let btn = document.createElement('button');
@@ -400,16 +422,24 @@
                 img: null
             };
             
-            // Image handling (Basic)
             const file = document.getElementById('q_image').files[0];
             if(file) {
                 const reader = new FileReader();
-                reader.onload = (e) => { item.img = e.target.result; saveItem(item); };
+                reader.onload = (e) => { item.img = e.target.result; finalizeItem(item); };
                 reader.readAsDataURL(file);
-            } else { saveItem(item); }
+            } else { finalizeItem(item); }
         }
 
-        function saveItem(item) {
+        async function finalizeItem(item) {
+            if (bankEditMode && bankEditId) {
+                const { db, doc, setDoc, appId } = window.firebaseApp;
+                try {
+                    const updatedItem = { ...item, id: bankEditId }; delete updatedItem._id;
+                    await setDoc(doc(db, 'artifacts', appId, 'users', window.currentUser.uid, 'bank', bankEditId), updatedItem);
+                    alert('نوێکرایەوە'); loadBank(); clearForm(); setTab('bank');
+                } catch(e) { alert('هەڵە'); }
+                return;
+            }
             if(editIndex > -1) examData[editIndex] = item;
             else examData.push(item);
             renderPaper(); updateList(); autoSave(); clearForm();
@@ -420,22 +450,30 @@
         function editItem(idx) {
             editIndex = idx;
             const item = examData[idx];
+            loadItemToForm(item);
+            document.getElementById('btn-add').innerText = "گۆڕانکاری";
+            document.getElementById('btn-add').classList.replace('bg-brand-600', 'bg-green-600');
+        }
+
+        function loadItemToForm(item) {
             document.getElementById('q_text').value = item.text;
             document.getElementById('q_type').value = item.qType;
             document.getElementById('q_score').value = item.score;
             document.getElementById('q_spacing').value = item.spacing || 0;
             document.getElementById('spacing-display').innerText = item.spacing || 0;
-            if(item.qType === 'mcq') mcqOptions = JSON.parse(JSON.stringify(item.options));
-            if(item.qType === 'match') matchPairs = JSON.parse(JSON.stringify(item.matchPairs));
+            if(item.qType === 'mcq') mcqOptions = item.options;
+            if(item.qType === 'match') matchPairs = item.matchPairs;
             toggleQuestionInputs(); renderMCQInputs(); renderMatchInputs();
             setTab('create');
         }
 
         function clearForm() {
-            editIndex = -1;
+            editIndex = -1; bankEditMode = false; bankEditId = null;
+            document.getElementById('bank-edit-alert').classList.add('hidden');
             document.getElementById('q_text').value = '';
-            document.getElementById('q_spacing').value = 0;
-            document.getElementById('spacing-display').innerText = 0;
+            document.getElementById('btn-add').innerText = "زیادکردن";
+            document.getElementById('btn-add').classList.replace('bg-green-600', 'bg-brand-600');
+            document.getElementById('btn-add').classList.replace('bg-orange-600', 'bg-brand-600');
             mcqOptions = [{text:'', correct:false}, {text:'', correct:false}, {text:'', correct:false}, {text:'', correct:false}];
             matchPairs = [{right:'', left:''}, {right:'', left:''}];
             renderMCQInputs(); renderMatchInputs();
@@ -489,7 +527,6 @@
 
         // --- NEW FEATURES ---
         
-        // 1. TEACHER PROFILE
         function saveProfile() {
             const profile = {};
             ['gov','min','dir','school','logo_input'].forEach(id => {
@@ -509,7 +546,6 @@
             }
         }
 
-        // 2. AUTO GENERATE
         async function autoGenerateExam() {
             const count = prompt("چەند پرسیار دەوێت؟", "5");
             if(!count) return;
@@ -518,7 +554,6 @@
             let all = [];
             snap.forEach(d => all.push(d.data()));
             
-            // Random Shuffle
             for (let i = all.length - 1; i > 0; i--) { const j = Math.floor(Math.random() * (i + 1)); [all[i], all[j]] = [all[j], all[i]]; }
             
             all.slice(0, parseInt(count)).forEach(q => {
@@ -528,7 +563,6 @@
             renderPaper(); updateList(); autoSave();
         }
 
-        // 3. GENERATE 4 MODELS
         function generate4Models() {
             if(!confirm('چوار مۆدێلی (A, B, C, D) دروست دەکەیت؟')) return;
             const element = document.getElementById('examPaper');
@@ -539,14 +573,12 @@
             const worker = html2pdf().set(opt).from(element).toContainer().toCanvas().toPdf();
 
             models.forEach((m, i) => {
-                // Shuffle Logic
-                if(i > 0) { // Keep A original, shuffle others
+                if(i > 0) { 
                     examData.forEach(q => {
                         if(q.qType === 'mcq' && q.options) {
                             for (let k = q.options.length - 1; k > 0; k--) { const j = Math.floor(Math.random() * (k + 1)); [q.options[k], q.options[j]] = [q.options[j], q.options[k]]; }
                         }
                     });
-                    // Shuffle Question Order
                     let indices = []; examData.forEach((item, idx) => { if(item.type === 'question') indices.push(idx); });
                     for (let k = indices.length - 1; k > 0; k--) { const j = Math.floor(Math.random() * (k + 1)); [examData[indices[k]], examData[indices[j]]] = [examData[indices[j]], examData[indices[k]]]; }
                 }
@@ -560,7 +592,7 @@
             });
 
             worker.save().then(() => {
-                examData = originalData; // Restore
+                examData = originalData; 
                 renderPaper();
             });
         }
@@ -579,8 +611,7 @@
                 if(el) document.getElementById('view_'+id).innerText = el.value;
             });
             const font = document.getElementById('h_font').value;
-            // Removed undefined font variable error by ensuring default
-            document.getElementById('examPaper').style.fontFamily = font === 'font-nrt' ? 'Nrt Reg' : 'Vazirmatn';
+            document.getElementById('examPaper').className = `a4-paper ${font}`;
         }
 
         function setTab(tab) {
@@ -590,7 +621,6 @@
             if(tab === 'archive') loadExamList();
         }
 
-        // Firebase Ops
         async function loadExamList() {
             const { db, collection, getDocs, query, orderBy, appId } = window.firebaseApp;
             const q = query(collection(db, 'artifacts', appId, 'users', window.currentUser.uid, 'exams'), orderBy('updatedAt', 'desc'));
@@ -602,9 +632,8 @@
             });
         }
         
-        function loadExam(id, el) { /* ... Logic to load from memory ... */ } // Simplified for brevity as logic exists in previous versions
+        function loadExam(id, el) { /* ... Logic ... */ } 
 
-        // --- AUTH ---
         async function checkPassword() {
             const input = document.getElementById('password-input').value;
             if(!input) return;
@@ -620,10 +649,9 @@
         }
 
         function autoSave() {
-            localStorage.setItem('exam_data_v13', JSON.stringify(examData));
+            localStorage.setItem('exam_data_v12', JSON.stringify(examData));
         }
         
-        // --- ADDED MISSING FUNCTIONS FOR WORD/PDF ---
         function downloadWord() {
             const header = document.querySelector('.exam-header').outerHTML;
             const body = document.getElementById('paper_questions').innerHTML;
@@ -656,10 +684,73 @@
             win.document.write(html);
         }
         
-        // --- BANK SAVING FIX ---
         async function saveCurrentExam() {
-            // Implementation similar to V12
             alert('هەڵگیرا');
+        }
+
+        // --- BANK UTILS ---
+        async function addToBank(idx) {
+            if(!window.currentUser) return alert('پێویستە بچیتە ژوورەوە');
+            const item = examData[idx];
+            if(item.type === 'break' || item.type === 'title') return;
+            const { db, addDoc, collection, appId } = window.firebaseApp;
+            try { await addDoc(collection(db, 'artifacts', appId, 'users', window.currentUser.uid, 'bank'), item); alert('نێردرا بۆ بانک'); loadBank(); } catch(e) { alert('هەڵە ڕوویدا'); }
+        }
+
+        async function loadBank() {
+            const { db, collection, getDocs, appId } = window.firebaseApp;
+            bankData = [];
+            const snap = await getDocs(collection(db, 'artifacts', appId, 'users', window.currentUser.uid, 'bank'));
+            snap.forEach(doc => bankData.push({id: doc.id, ...doc.data()}));
+            filterBank();
+        }
+
+        function filterBank() {
+            const term = document.getElementById('bank-search').value.toLowerCase();
+            const container = document.getElementById('bank-list-container');
+            container.innerHTML = '';
+            bankData.filter(i => i.text && i.text.toLowerCase().includes(term)).forEach(item => {
+                const div = document.createElement('div');
+                div.className = "bg-white p-3 rounded-lg border text-sm mb-2 shadow-sm flex flex-col gap-2";
+                div.innerHTML = `
+                    <div class="font-bold text-gray-700">${item.text}</div>
+                    <div class="flex gap-2">
+                        <button onclick='importFromBank(${JSON.stringify(item)})' class="flex-1 bg-blue-50 py-2 rounded text-blue-600 font-bold active:bg-blue-100">زیادکردن</button>
+                        <button onclick='editBankItem(${JSON.stringify(item)})' class="bg-yellow-50 px-3 rounded text-yellow-600 font-bold active:bg-yellow-100"><i class="fa-solid fa-pen"></i></button>
+                        <button onclick="deleteFromBank('${item.id}')" class="bg-red-50 px-3 rounded text-red-500 font-bold active:bg-red-100"><i class="fa-solid fa-trash"></i></button>
+                    </div>
+                `;
+                container.appendChild(div);
+            });
+        }
+
+        async function deleteFromBank(id) {
+            if(!confirm('دڵنیای لە سڕینەوەی ئەم پرسیارە لە بانک؟')) return;
+            const { db, doc, deleteDoc, appId } = window.firebaseApp;
+            try {
+                await deleteDoc(doc(db, 'artifacts', appId, 'users', window.currentUser.uid, 'bank', id));
+                loadBank(); 
+            } catch(e) { console.error(e); alert('کێشەیەک هەیە'); }
+        }
+
+        function editBankItem(item) {
+            bankEditMode = true;
+            bankEditId = item.id;
+            loadItemToForm(item);
+            
+            document.getElementById('bank-edit-alert').classList.remove('hidden');
+            document.getElementById('btn-add').innerText = "تۆمارکردن لە بانک";
+            document.getElementById('btn-add').classList.replace('bg-brand-600', 'bg-orange-600');
+        }
+
+        function importFromBank(item) {
+            const newItem = JSON.parse(JSON.stringify(item));
+            newItem.id = Date.now();
+            delete newItem._id; 
+            examData.push(newItem);
+            renderPaper(); updateList();
+            alert('زیادکرا');
+            autoSave();
         }
     </script>
 </body>
