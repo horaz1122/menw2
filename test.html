@@ -3,7 +3,7 @@
 <head>
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0, maximum-scale=1.0, user-scalable=no">
-    <title>سیستەمی پرسیار - وەشانی تەواو (Bank Edit + True/False)</title>
+    <title>سیستەمی پرسیار - وەشانی Inline</title>
     
     <script src="https://cdn.tailwindcss.com"></script>
     
@@ -104,8 +104,8 @@
         .q-number { background: #000; color: white; width: 22px; height: 22px; border-radius: 50%; display: inline-flex; align-items: center; justify-content: center; font-size: 11px; margin-left: 6px; font-weight: bold; -webkit-print-color-adjust: exact; print-color-adjust: exact; flex-shrink: 0; }
         .q-sub-label { font-weight: bold; margin-left: 5px; min-width: 20px; display: inline-block; font-size: 14px; }
         
-        .q-content { font-size: 14px; line-height: 1.4; text-align: right !important; direction: rtl !important; display: block; width: 100%; font-weight: bold; }
-        .q-options-grid { font-size: 13px; margin-top: 2px; }
+        /* MODIFIED FOR INLINE FLOW */
+        .q-content { font-size: 14px; line-height: 1.8; text-align: right !important; direction: rtl !important; display: block; width: 100%; font-weight: bold; }
         
         .section-title { width: 100%; text-align: center; font-weight: 900; font-size: 16px; padding: 4px; border-top: 2px solid #000; border-bottom: 2px solid #000; margin: 10px 0; background-color: #f3f4f6; -webkit-print-color-adjust: exact; }
         .page-break-marker { border-top: 2px dashed #cbd5e1; margin: 20px 0; position: relative; text-align: center; color: #94a3b8; font-size: 10px; page-break-after: always; break-after: always; }
@@ -323,13 +323,12 @@
         let bankData = [];
         let editIndex = -1;
         
-        // Variables for Bank Editing
         let bankEditMode = false;
         let bankEditId = null;
 
         let mcqOptions = [{text:'', correct:false}, {text:'', correct:false}, {text:'', correct:false}, {text:'', correct:false}];
         let matchPairs = [{right:'', left:''}, {right:'', left:''}];
-        let tfAnswer = 'true'; // Default True for True/False
+        let tfAnswer = 'true'; 
         let userIsAdmin = false;
         
         let deviceId = localStorage.getItem('did') || crypto.randomUUID();
@@ -495,13 +494,11 @@
             };
 
             const finalizeItem = async () => {
-                // *** BANK EDIT MODE LOGIC ***
                 if (bankEditMode && bankEditId) {
                     const { db, doc, setDoc, appId } = window.firebaseApp;
                     try {
-                        const updatedItem = { ...item, id: bankEditId }; // Keep original ID
-                        delete updatedItem._id; // Cleanup
-                        // Save to Bank Collection
+                        const updatedItem = { ...item, id: bankEditId }; 
+                        delete updatedItem._id; 
                         await setDoc(doc(db, 'artifacts', appId, 'users', window.currentUser.uid, 'bank', bankEditId), updatedItem);
                         alert('گۆڕانکارییەکان لە بانک تۆمارکران');
                         loadBank();
@@ -511,7 +508,6 @@
                     return;
                 }
 
-                // *** NORMAL EXAM ADD LOGIC ***
                 if(editIndex > -1) examData[editIndex] = item;
                 else examData.push(item);
                 renderPaper();
@@ -574,9 +570,8 @@
             document.getElementById('spacing-display').innerText = 0;
             document.getElementById('btn-add').innerText = "زیادکردن";
             document.getElementById('btn-add').classList.replace('bg-green-600', 'bg-brand-600');
-            document.getElementById('btn-add').classList.replace('bg-orange-600', 'bg-brand-600'); // Reset bank color if set
+            document.getElementById('btn-add').classList.replace('bg-orange-600', 'bg-brand-600'); 
             
-            // Reset TF
             tfAnswer = 'true';
             document.querySelector(`input[name="tf_choice"][value="true"]`).checked = true;
 
@@ -586,7 +581,7 @@
             renderMatchInputs();
         }
 
-        // --- RENDER PAPER ---
+        // --- RENDER PAPER (MODIFIED FOR INLINE) ---
         function renderPaper() {
             const container = document.getElementById('paper_questions');
             container.innerHTML = '';
@@ -611,30 +606,31 @@
 
                 let spacer = item.spacing > 0 ? `<div style="height: ${item.spacing}cm"></div>` : '';
 
-                let extraContent = '';
-                if(item.qType === 'mcq' && item.options) {
-                     extraContent = `<div class="grid grid-cols-2 gap-x-4 gap-y-2 q-options-grid mt-2 pr-2">`;
-                     const labels = ['A','B','C','D','E'];
-                     item.options.forEach((opt, i) => {
-                        if(opt.text) extraContent += `<div class="flex items-center gap-2"><span class="font-bold font-mono">${labels[i]})</span><span>${opt.text}</span></div>`;
-                     });
-                     extraContent += `</div>`;
-                }
-                
-                if(item.qType === 'match' && item.matchPairs) {
-                    extraContent = `<div class="mt-2 w-full flex justify-center">
-                        <table class="border-collapse w-auto text-sm mr-0">`; 
-                    item.matchPairs.forEach(p => { 
-                        extraContent += `<tr><td class="pl-4 py-1 font-bold text-right">${p.right}</td><td class="px-4 py-1 text-center text-gray-300">--</td><td class="pr-4 py-1 text-left font-bold" dir="ltr">${p.left}</td></tr>`; 
-                    });
-                    extraContent += `</table></div>`;
-                }
+                let mainContent = item.text || '';
+                let extraContentBelow = '';
 
-                if(item.qType === 'tf') {
-                    extraContent = `<div class="flex justify-end mt-1 pl-4" dir="ltr">
-                        <span class="font-bold font-nrt text-sm">( ڕاست / هەڵە )</span>
-                    </div>`;
+                // --- INLINE LOGIC START ---
+                if (item.qType === 'tf') {
+                    mainContent += ` <span class="inline-block font-bold text-sm mr-4" dir="ltr">( ڕاست / هەڵە )</span>`;
+                } 
+                else if (item.qType === 'mcq' && item.options) {
+                     const labels = ['A','B','C','D','E'];
+                     mainContent += `<span class="inline-block mr-2"></span>`; 
+                     item.options.forEach((opt, i) => {
+                        if(opt.text) {
+                            mainContent += `<span class="inline-block ml-5 font-bold text-sm"><span class="font-mono">${labels[i]})</span> ${opt.text}</span>`;
+                        }
+                     });
                 }
+                else if(item.qType === 'match' && item.matchPairs) {
+                     extraContentBelow = `<div class="mt-2 w-full flex justify-center">
+                        <table class="border-collapse w-auto text-sm mr-0">`; 
+                     item.matchPairs.forEach(p => { 
+                        extraContentBelow += `<tr><td class="pl-4 py-1 font-bold text-right">${p.right}</td><td class="px-4 py-1 text-center text-gray-300">--</td><td class="pr-4 py-1 text-left font-bold" dir="ltr">${p.left}</td></tr>`; 
+                     });
+                     extraContentBelow += `</table></div>`;
+                }
+                // --- INLINE LOGIC END ---
 
                 let content = `
                 <div class="flex items-start gap-2 w-full q-wrapper relative group mt-2">
@@ -642,8 +638,10 @@
                     <div class="flex-1 text-right" dir="rtl">
                         <div class="flex justify-between items-start">
                             <div class="flex-1 pl-2">
-                                ${item.text ? `<div class="q-content mb-1">${item.text}</div>` : ''}
-                                ${extraContent}
+                                <div class="q-content mb-1 leading-8">
+                                    ${mainContent}
+                                </div>
+                                ${extraContentBelow}
                                 ${spacer} 
                             </div>
                             ${item.img ? `<img src="${item.img}" class="w-24 h-24 object-contain border border-dashed p-1 bg-white flex-none order-first ml-2">` : ''} 
@@ -815,7 +813,6 @@
             try { await addDoc(collection(db, 'artifacts', appId, 'users', window.currentUser.uid, 'bank'), item); alert('نێردرا بۆ بانک'); loadBank(); } catch(e) { alert('هەڵە ڕوویدا'); }
         }
 
-        // --- NEW BANK FEATURES (DELETE & EDIT) ---
         async function loadBank() {
             const { db, collection, getDocs, appId } = window.firebaseApp;
             bankData = [];
@@ -856,8 +853,6 @@
             bankEditMode = true;
             bankEditId = item.id;
             loadItemToForm(item);
-            
-            // UI Feedback
             document.getElementById('bank-edit-alert').classList.remove('hidden');
             document.getElementById('btn-add').innerText = "تۆمارکردن لە بانک";
             document.getElementById('btn-add').classList.replace('bg-brand-600', 'bg-orange-600');
