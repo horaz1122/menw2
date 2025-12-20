@@ -3,7 +3,7 @@
 <head>
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0, maximum-scale=1.0, user-scalable=no">
-    <title>سیستەمی پرسیار - وەشانی Inline</title>
+    <title>سیستەمی پرسیار - وەشانی دیزاینی نوێ</title>
     
     <script src="https://cdn.tailwindcss.com"></script>
     
@@ -104,8 +104,8 @@
         .q-number { background: #000; color: white; width: 22px; height: 22px; border-radius: 50%; display: inline-flex; align-items: center; justify-content: center; font-size: 11px; margin-left: 6px; font-weight: bold; -webkit-print-color-adjust: exact; print-color-adjust: exact; flex-shrink: 0; }
         .q-sub-label { font-weight: bold; margin-left: 5px; min-width: 20px; display: inline-block; font-size: 14px; }
         
-        /* MODIFIED FOR INLINE FLOW */
-        .q-content { font-size: 14px; line-height: 1.8; text-align: right !important; direction: rtl !important; display: block; width: 100%; font-weight: bold; }
+        /* UPDATED: Better Line Height for Inline Elements */
+        .q-content { font-size: 14px; line-height: 2.2; text-align: right !important; direction: rtl !important; display: block; width: 100%; font-weight: bold; }
         
         .section-title { width: 100%; text-align: center; font-weight: 900; font-size: 16px; padding: 4px; border-top: 2px solid #000; border-bottom: 2px solid #000; margin: 10px 0; background-color: #f3f4f6; -webkit-print-color-adjust: exact; }
         .page-break-marker { border-top: 2px dashed #cbd5e1; margin: 20px 0; position: relative; text-align: center; color: #94a3b8; font-size: 10px; page-break-after: always; break-after: always; }
@@ -581,7 +581,7 @@
             renderMatchInputs();
         }
 
-        // --- RENDER PAPER (MODIFIED FOR INLINE) ---
+        // --- RENDER PAPER (MODIFIED FOR SPACING) ---
         function renderPaper() {
             const container = document.getElementById('paper_questions');
             container.innerHTML = '';
@@ -609,16 +609,20 @@
                 let mainContent = item.text || '';
                 let extraContentBelow = '';
 
-                // --- INLINE LOGIC START ---
+                // --- SPACING LOGIC START ---
                 if (item.qType === 'tf') {
-                    mainContent += ` <span class="inline-block font-bold text-sm mr-4" dir="ltr">( ڕاست / هەڵە )</span>`;
+                    // ~5 spaces gap then ( True ~10 spaces / ~10 spaces False )
+                    mainContent += `<span style="display:inline-block; width: 30px;"></span>`;
+                    mainContent += `<span class="inline-block font-bold text-sm font-nrt" dir="ltr" style="white-space: nowrap;">( ڕاست <span style="display:inline-block; width: 50px; text-align:center;">/</span> هەڵە )</span>`;
                 } 
                 else if (item.qType === 'mcq' && item.options) {
                      const labels = ['A','B','C','D','E'];
-                     mainContent += `<span class="inline-block mr-2"></span>`; 
+                     // Gap before options start
+                     mainContent += `<span style="display:inline-block; width: 20px;"></span>`; 
                      item.options.forEach((opt, i) => {
                         if(opt.text) {
-                            mainContent += `<span class="inline-block ml-5 font-bold text-sm"><span class="font-mono">${labels[i]})</span> ${opt.text}</span>`;
+                            // Gap between options (~5-10 spaces)
+                            mainContent += `<span class="inline-block ml-8 font-bold text-sm"><span class="font-mono">${labels[i]})</span> ${opt.text}</span>`;
                         }
                      });
                 }
@@ -630,7 +634,7 @@
                      });
                      extraContentBelow += `</table></div>`;
                 }
-                // --- INLINE LOGIC END ---
+                // --- SPACING LOGIC END ---
 
                 let content = `
                 <div class="flex items-start gap-2 w-full q-wrapper relative group mt-2">
@@ -638,7 +642,7 @@
                     <div class="flex-1 text-right" dir="rtl">
                         <div class="flex justify-between items-start">
                             <div class="flex-1 pl-2">
-                                <div class="q-content mb-1 leading-8">
+                                <div class="q-content mb-1">
                                     ${mainContent}
                                 </div>
                                 ${extraContentBelow}
