@@ -3,7 +3,7 @@
 <head>
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0, maximum-scale=1.0, user-scalable=no">
-    <title>سیستەمی پرسیار - وەشانی نوێ (Group Label)</title>
+    <title>سیستەمی پرسیار - وەشانی کۆتایی</title>
     
     <script src="https://cdn.tailwindcss.com"></script>
     
@@ -272,7 +272,6 @@
                         <button onclick="generateAnswerKey()" class="bg-yellow-100 text-yellow-700 py-3 rounded text-xs font-bold">وەڵامنامە</button>
                         <button onclick="downloadWord()" class="bg-blue-100 text-blue-700 py-3 rounded text-xs font-bold">Word</button>
                         <button onclick="downloadPDF()" class="bg-green-100 text-green-700 py-3 rounded text-xs font-bold">PDF</button>
-                        <button onclick="createGroupAB()" class="bg-purple-100 text-purple-700 py-3 rounded text-xs font-bold col-span-2 shadow-sm border border-purple-200">دروستکردنی گروپی A / B</button>
                     </div>
                  </div>
             </div>
@@ -583,29 +582,20 @@
             renderMatchInputs();
         }
 
-        // --- RENDER PAPER ---
+        // --- RENDER PAPER (FIXED TF & WRAP LOGIC) ---
         function renderPaper() {
             const container = document.getElementById('paper_questions');
-            container.innerHTML = generatePaperHTML(examData); 
-            if (window.MathJax) { MathJax.typesetPromise([container]).then(() => console.log('Math rendered')); }
-        }
-
-        function generatePaperHTML(dataList, groupName = '') {
-            let html = '';
+            container.innerHTML = '';
             let qCount = 0;
             let subCount = 0;
 
-            if(groupName) {
-                html += `<div style="position:absolute; top:10mm; left:10mm; font-weight:900; font-size:18px; border:2px solid black; padding:5px 10px; border-radius:5px; background:#f0f0f0;">Group ${groupName}</div>`;
-            }
-
-            dataList.forEach(item => {
+            examData.forEach(item => {
                 if(item.type === 'title') { 
                     qCount = 0; 
-                    html += `<div class="section-title">${item.text}</div>`; 
+                    container.innerHTML += `<div class="section-title">${item.text}</div>`; 
                     return; 
                 }
-                if(item.type === 'break') { html += `<div class="page-break-marker"></div>`; return; }
+                if(item.type === 'break') { container.innerHTML += `<div class="page-break-marker"></div>`; return; }
 
                 let labelHTML = '';
                 if (item.subStyle && item.subStyle !== 'none') {
@@ -620,14 +610,22 @@
                 let mainContent = item.text || '';
                 let extraContentBelow = '';
 
+                // --- SMART WRAP LOGIC ---
+                // We use display: inline-block with white-space: nowrap for the answers block.
+                // This ensures "True/False" or "A) Option" stays together.
+                // If it fits on the line, it flows. If not, it drops to the next line automatically.
+
                 if (item.qType === 'tf') {
+                    // Added margin-right for the spacing requested. Removed dir=ltr to fix text issue.
                     mainContent += `<span style="display:inline-block; margin-right: 30px; font-weight:bold; white-space: nowrap;">( ڕاست &nbsp;&nbsp;&nbsp;&nbsp;&nbsp;/&nbsp;&nbsp;&nbsp;&nbsp;&nbsp; هەڵە )</span>`;
                 } 
                 else if (item.qType === 'mcq' && item.options) {
                      const labels = ['A','B','C','D','E'];
+                     // margin-right: 30px creates the gap before the first option.
                      mainContent += `<span style="display:inline-block; width: 10px;"></span>`; 
                      item.options.forEach((opt, i) => {
                         if(opt.text) {
+                            // Each option is an inline-block. It wraps if needed.
                             mainContent += `<span style="display:inline-block; white-space: nowrap; margin-right: 25px; font-weight:bold; font-size:13px;"><span class="font-mono">${labels[i]})</span> ${opt.text}</span>`;
                         }
                      });
@@ -659,9 +657,10 @@
                     ${item.subStyle === 'none' ? `<span class="text-[10px] border px-1 rounded absolute left-0 top-0 bg-white">${item.score} نمرە</span>` : ''}
                 </div>
                 `;
-                html += content;
+                container.innerHTML += content;
             });
-            return html;
+            
+            if (window.MathJax) { MathJax.typesetPromise([container]).then(() => console.log('Math rendered')); }
         }
 
         function updateList() {
@@ -691,6 +690,7 @@
             new Sortable(list, { animation: 150, onEnd: (evt) => { const item = examData.splice(evt.oldIndex, 1)[0]; examData.splice(evt.newIndex, 0, item); renderPaper(); updateList(); }});
         }
 
+        // --- SHUFFLE LOGIC ---
         function shuffleQuestions() {
             if(!confirm('تەنها پرسیارە هەڵبژاردنەکان تێکەڵ دەکەیت؟')) return;
             examData.forEach(q => {
@@ -719,83 +719,6 @@
             });
             renderPaper();
             updateList();
-        }
-
-        // --- NEW GROUP A/B LOGIC ---
-        function createGroupAB() {
-            const shuffleArray = (arr) => {
-                for (let i = arr.length - 1; i > 0; i--) {
-                    const j = Math.floor(Math.random() * (i + 1));
-                    [arr[i], arr[j]] = [arr[j], arr[i]];
-                }
-                return arr;
-            };
-
-            const dataA = JSON.parse(JSON.stringify(examData));
-            const dataB = JSON.parse(JSON.stringify(examData));
-
-            dataB.forEach(q => {
-                if(q.qType === 'mcq' && q.options) {
-                    shuffleArray(q.options);
-                }
-            });
-
-            let mcqIndices = [];
-            dataB.forEach((item, index) => {
-                if(item.type === 'question' && item.qType === 'mcq') mcqIndices.push(index);
-            });
-
-            let shuffledIndices = shuffleArray([...mcqIndices]);
-            let tempItems = {};
-            mcqIndices.forEach((oldIdx, i) => {
-                tempItems[oldIdx] = dataB[shuffledIndices[i]]; 
-            });
-            mcqIndices.forEach(idx => {
-                dataB[idx] = tempItems[idx];
-            });
-
-            const headerHTML = document.querySelector('.exam-header').outerHTML;
-            const style = document.querySelector('style').innerHTML;
-            const fonts = `<link href="https://fonts.googleapis.com/css2?family=Nrt+Reg&family=Vazirmatn:wght@300;400;700;900&display=swap" rel="stylesheet">`;
-            
-            const contentA = generatePaperHTML(dataA, "A");
-            const contentB = generatePaperHTML(dataB, "B");
-
-            const fullHTML = `
-            <!DOCTYPE html>
-            <html lang="ckb" dir="rtl">
-            <head>
-                <meta charset="UTF-8">
-                <title>تاقیکردنەوەی A / B</title>
-                ${fonts}
-                <style>${style}</style>
-                <style>
-                    body { background: white; }
-                    .a4-paper { transform: none; box-shadow: none; margin: 0; height: auto; padding: 10mm; width: 100%; }
-                    @media print { 
-                        .page-break-group { page-break-after: always; } 
-                    }
-                </style>
-            </head>
-            <body>
-                <div class="a4-paper page-break-group">
-                    ${headerHTML}
-                    <div class="w-full">${contentA}</div>
-                </div>
-                <div class="a4-paper">
-                    ${headerHTML}
-                    <div class="w-full">${contentB}</div>
-                </div>
-                <script>
-                    window.onload = function() { window.print(); }
-                <\/script>
-            </body>
-            </html>
-            `;
-
-            const win = window.open('', '_blank');
-            win.document.write(fullHTML);
-            win.document.close();
         }
 
         // --- HEADER LOGO ---
