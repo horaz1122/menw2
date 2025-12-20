@@ -3,7 +3,7 @@
 <head>
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0, maximum-scale=1.0, user-scalable=no">
-    <title>سیستەمی پرسیار - گروپی A/B</title>
+    <title>سیستەمی پرسیار - وەشانی نوێ (Group Label)</title>
     
     <script src="https://cdn.tailwindcss.com"></script>
     
@@ -261,6 +261,7 @@
                         <div><input id="h_type" class="border p-2 rounded w-full" value="خولی یەکەم" oninput="updatePaper()"></div>
                         <div><input id="h_year" class="border p-2 rounded w-full" value="2024 - 2025" oninput="updatePaper()"></div>
                         <div><input id="h_date" class="border p-2 rounded w-full" placeholder="بەروار" oninput="updatePaper()"></div>
+                        <div><input id="h_group" class="border p-2 rounded w-full bg-yellow-50 font-bold" placeholder="گروپ (A, B...)" oninput="updatePaper()"></div>
                     </div>
                  </div>
                  
@@ -298,6 +299,7 @@
                         <div>پۆل: <span id="view_class">...</span></div>
                         <div>کات: <span id="view_time">...</span></div>
                         <div>بەروار: <span id="view_date">...</span></div>
+                        <div id="view_group_container" class="hidden font-bold mt-1 text-brand-900 border-t pt-1 border-gray-400">گروپ: <span id="view_group"></span></div>
                     </div>
                 </div>
                 <div id="paper_questions" class="w-full"></div>
@@ -584,11 +586,10 @@
         // --- RENDER PAPER ---
         function renderPaper() {
             const container = document.getElementById('paper_questions');
-            container.innerHTML = generatePaperHTML(examData); // Re-using the logic
+            container.innerHTML = generatePaperHTML(examData); 
             if (window.MathJax) { MathJax.typesetPromise([container]).then(() => console.log('Math rendered')); }
         }
 
-        // Extracted Logic for reuse in Group A/B Generation
         function generatePaperHTML(dataList, groupName = '') {
             let html = '';
             let qCount = 0;
@@ -690,7 +691,6 @@
             new Sortable(list, { animation: 150, onEnd: (evt) => { const item = examData.splice(evt.oldIndex, 1)[0]; examData.splice(evt.newIndex, 0, item); renderPaper(); updateList(); }});
         }
 
-        // --- SHUFFLE LOGIC ---
         function shuffleQuestions() {
             if(!confirm('تەنها پرسیارە هەڵبژاردنەکان تێکەڵ دەکەیت؟')) return;
             examData.forEach(q => {
@@ -723,7 +723,6 @@
 
         // --- NEW GROUP A/B LOGIC ---
         function createGroupAB() {
-            // Helper shuffle
             const shuffleArray = (arr) => {
                 for (let i = arr.length - 1; i > 0; i--) {
                     const j = Math.floor(Math.random() * (i + 1));
@@ -732,20 +731,15 @@
                 return arr;
             };
 
-            // 1. Prepare Group A (Clone Original)
             const dataA = JSON.parse(JSON.stringify(examData));
-
-            // 2. Prepare Group B (Clone & Shuffle)
             const dataB = JSON.parse(JSON.stringify(examData));
 
-            // 2.1 Shuffle Options inside MCQs for B
             dataB.forEach(q => {
                 if(q.qType === 'mcq' && q.options) {
                     shuffleArray(q.options);
                 }
             });
 
-            // 2.2 Shuffle Order of MCQs for B
             let mcqIndices = [];
             dataB.forEach((item, index) => {
                 if(item.type === 'question' && item.qType === 'mcq') mcqIndices.push(index);
@@ -760,12 +754,10 @@
                 dataB[idx] = tempItems[idx];
             });
 
-            // 3. Generate HTML Window
             const headerHTML = document.querySelector('.exam-header').outerHTML;
             const style = document.querySelector('style').innerHTML;
             const fonts = `<link href="https://fonts.googleapis.com/css2?family=Nrt+Reg&family=Vazirmatn:wght@300;400;700;900&display=swap" rel="stylesheet">`;
             
-            // Build Content
             const contentA = generatePaperHTML(dataA, "A");
             const contentB = generatePaperHTML(dataB, "B");
 
@@ -831,7 +823,7 @@
             if(!title) return;
 
             const headerData = {};
-            ['gov','min','dir','school','subject','class','time','type','year','date'].forEach(id => {
+            ['gov','min','dir','school','subject','class','time','type','year','date', 'group'].forEach(id => {
                 headerData[id] = document.getElementById('h_'+id).value;
             });
 
@@ -875,7 +867,7 @@
             currentExamId = id;
             examData = data.data || [];
             if(data.header) {
-                ['gov','min','dir','school','subject','class','time','type','year','date'].forEach(field => {
+                ['gov','min','dir','school','subject','class','time','type','year','date', 'group'].forEach(field => {
                     if(data.header[field]) document.getElementById('h_'+field).value = data.header[field];
                 });
                 updatePaper();
@@ -973,9 +965,20 @@
         }
 
         function updatePaper() {
-            ['gov','min','dir','school','subject','class','time','type','year','date'].forEach(id => {
+            ['gov','min','dir','school','subject','class','time','type','year','date', 'group'].forEach(id => {
                 const val = document.getElementById('h_'+id).value;
-                if(document.getElementById('view_'+id)) document.getElementById('view_'+id).innerText = val;
+                if(id === 'group') {
+                     const el = document.getElementById('view_group');
+                     const container = document.getElementById('view_group_container');
+                     if(val) {
+                         el.innerText = val;
+                         container.classList.remove('hidden');
+                     } else {
+                         container.classList.add('hidden');
+                     }
+                } else {
+                    if(document.getElementById('view_'+id)) document.getElementById('view_'+id).innerText = val;
+                }
             });
         }
         
