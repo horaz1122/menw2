@@ -3,7 +3,7 @@
 <head>
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0, maximum-scale=1.0, user-scalable=no">
-    <title>سیستەمی پرسیار - وەشانی A/B</title>
+    <title>سیستەمی پرسیار - وەشانی A/B & AutoSave</title>
     
     <script src="https://cdn.tailwindcss.com"></script>
     <script src="https://cdnjs.cloudflare.com/ajax/libs/html2pdf.js/0.10.1/html2pdf.bundle.min.js"></script>
@@ -110,8 +110,7 @@
         .page-break-marker::after { content: 'پەڕەی نوێ (Page Break)'; background: #f8fafc; padding: 0 10px; position: relative; top: -8px; }
 
         /* True/False Styling */
-        .tf-option { display: inline-flex; items-center; gap: 5px; margin-left: 15px; font-weight: bold; font-size: 12px; }
-        .tf-circle { width: 16px; height: 16px; border: 1.5px solid #000; border-radius: 50%; display: inline-block; vertical-align: middle; margin-left: 4px; }
+        .tf-circle { display: inline-block; width: 18px; height: 18px; border: 2px solid #000; border-radius: 50%; margin-left: 5px; vertical-align: middle; }
 
         @media print { 
             @page { size: A4; margin: 0; } 
@@ -198,8 +197,7 @@
                         <label class="text-xs font-bold text-gray-600">جۆری پرسیار:</label>
                         <select id="q_type" class="text-xs border rounded p-1 bg-white" onchange="toggleQuestionInputs()">
                             <option value="mcq">هەڵبژاردن</option>
-                            <option value="tf">ڕاست و هەڵە</option>
-                            <option value="text">نووسین (Inshai)</option>
+                            <option value="tf">ڕاست و هەڵە</option> <option value="text">نووسین (Inshai)</option>
                             <option value="match">ڕاکێشان (Matching)</option>
                         </select>
                     </div>
@@ -256,13 +254,14 @@
                  <div class="bg-white p-3 rounded border shadow-sm">
                     <h3 class="font-bold text-xs text-brand-600 mb-2 border-b pb-1">کردارەکان</h3>
                     <div class="grid grid-cols-2 gap-2">
-                        <button onclick="generateAB()" class="col-span-2 bg-gradient-to-r from-purple-500 to-indigo-600 text-white py-3 rounded text-sm font-bold shadow-lg hover:shadow-xl transition">
-                            <i class="fa-solid fa-shuffle"></i> دروستکردنی A و B
+                        <button onclick="generateAB()" class="col-span-2 bg-gradient-to-r from-purple-600 to-indigo-600 text-white py-3 rounded-lg text-sm font-bold shadow-lg hover:shadow-xl transition transform active:scale-95">
+                            <i class="fa-solid fa-shuffle"></i> دروستکردنی A و B (PDF)
                         </button>
+                        
                         <button onclick="shuffleQuestions()" class="bg-orange-100 text-orange-700 py-3 rounded text-xs font-bold">تێکەڵکردنی پرسیار</button>
                         <button onclick="generateAnswerKey()" class="bg-yellow-100 text-yellow-700 py-3 rounded text-xs font-bold">وەڵامنامە</button>
                         <button onclick="downloadWord()" class="bg-blue-100 text-blue-700 py-3 rounded text-xs font-bold">Word</button>
-                        <button onclick="downloadPDF()" class="bg-green-100 text-green-700 py-3 rounded text-xs font-bold">PDF (Normal)</button>
+                        <button onclick="downloadPDF()" class="bg-green-100 text-green-700 py-3 rounded text-xs font-bold">PDF (سادە)</button>
                     </div>
                  </div>
             </div>
@@ -323,30 +322,34 @@
         let deviceId = localStorage.getItem('did') || crypto.randomUUID();
         localStorage.setItem('did', deviceId);
 
-        // --- AUTO RESTORE ---
-        window.addEventListener('load', () => {
-            const savedData = localStorage.getItem('auto_save_exam');
-            if(savedData && document.getElementById('login-overlay').style.display === 'none') {
-                examData = JSON.parse(savedData);
-                renderPaper(); updateList();
-            }
-            const savedHeader = localStorage.getItem('auto_save_header');
-            if(savedHeader) {
-                const h = JSON.parse(savedHeader);
-                for(let k in h) { if(document.getElementById(k)) document.getElementById(k).value = h[k]; }
-                updatePaper();
-            }
-        });
-
-        function saveLocal() {
-            localStorage.setItem('auto_save_exam', JSON.stringify(examData));
+        // --- AUTO SAVE LOGIC (NEW) ---
+        function autoSave() {
+            localStorage.setItem('autosave_examData', JSON.stringify(examData));
             const header = {};
-            ['h_gov','h_min','h_dir','h_school','h_subject','h_class','h_time','h_type','h_year','h_date'].forEach(id => {
-                header[id] = document.getElementById(id).value;
+            ['gov','min','dir','school','subject','class','time','type','year','date'].forEach(id => {
+                header[id] = document.getElementById('h_'+id).value;
             });
-            localStorage.setItem('auto_save_header', JSON.stringify(header));
+            localStorage.setItem('autosave_header', JSON.stringify(header));
         }
 
+        function loadAutoSave() {
+            const savedData = localStorage.getItem('autosave_examData');
+            if(savedData) {
+                examData = JSON.parse(savedData);
+                renderPaper();
+                updateList();
+            }
+            const savedHeader = localStorage.getItem('autosave_header');
+            if(savedHeader) {
+                const h = JSON.parse(savedHeader);
+                for (const key in h) {
+                    if(document.getElementById('h_'+key)) document.getElementById('h_'+key).value = h[key];
+                }
+                updatePaper();
+            }
+        }
+
+        // --- SECURE LOGIN LOGIC ---
         async function checkPassword() {
             const input = document.getElementById('password-input').value.trim();
             const btn = document.getElementById('login-btn');
@@ -391,11 +394,7 @@
             document.getElementById('login-overlay').style.display = 'none';
             localStorage.setItem('is_logged_in', 'true');
             loadExamList();
-            // Load local save if exists
-            if(localStorage.getItem('auto_save_exam')) {
-                examData = JSON.parse(localStorage.getItem('auto_save_exam'));
-                renderPaper(); updateList();
-            }
+            loadAutoSave(); // Load autosave after login
         }
 
         // --- MATH UI ---
@@ -479,10 +478,10 @@
         // --- ADD ITEMS ---
         function addSectionTitle() {
             const title = prompt("سەردێڕ بنووسە:");
-            if(title) { examData.push({ type: 'title', id: Date.now(), text: title }); renderPaper(); updateList(); saveLocal(); }
+            if(title) { examData.push({ type: 'title', id: Date.now(), text: title }); renderPaper(); updateList(); autoSave(); }
         }
 
-        function addPageBreak() { examData.push({ type: 'break', id: Date.now() }); renderPaper(); updateList(); saveLocal(); }
+        function addPageBreak() { examData.push({ type: 'break', id: Date.now() }); renderPaper(); updateList(); autoSave(); }
 
         async function addItem() {
             const text = document.getElementById('q_text').value;
@@ -495,9 +494,10 @@
             if(type !== 'match' && !text && !file) return alert('تکایە دەق یان وێنە دابنێ');
             if(type === 'match' && matchPairs.every(p => !p.right && !p.left)) return alert('تکایە جووتەکان پڕ بکەرەوە');
 
+            // Handle True/False logic silently (no user input needed)
             let finalOptions = null;
-            if(type === 'mcq') finalOptions = JSON.parse(JSON.stringify(mcqOptions));
-            if(type === 'tf') finalOptions = [{text:'True', correct:false}, {text:'False', correct:false}]; // Logic handled in renderer
+            if (type === 'mcq') finalOptions = JSON.parse(JSON.stringify(mcqOptions));
+            if (type === 'tf') finalOptions = [{text: 'True', correct: false}, {text: 'False', correct: false}];
 
             const item = {
                 id: Date.now(),
@@ -531,7 +531,7 @@
                 else examData.push(item);
                 renderPaper();
                 updateList();
-                saveLocal();
+                autoSave(); // Auto Save trigger
                 clearForm();
             };
 
@@ -545,7 +545,7 @@
             }
         }
 
-        function deleteItem(idx) { if(confirm('دڵنیای؟')) { examData.splice(idx, 1); renderPaper(); updateList(); saveLocal(); } }
+        function deleteItem(idx) { if(confirm('دڵنیای؟')) { examData.splice(idx, 1); renderPaper(); updateList(); autoSave(); } }
 
         function editItem(idx) {
             const item = examData[idx];
@@ -586,7 +586,7 @@
             document.getElementById('spacing-display').innerText = 0;
             document.getElementById('btn-add').innerText = "زیادکردن";
             document.getElementById('btn-add').classList.replace('bg-green-600', 'bg-brand-600');
-            document.getElementById('btn-add').classList.replace('bg-orange-600', 'bg-brand-600');
+            document.getElementById('btn-add').classList.replace('bg-orange-600', 'bg-brand-600'); 
             mcqOptions = [{text:'', correct:false}, {text:'', correct:false}, {text:'', correct:false}, {text:'', correct:false}];
             matchPairs = [{right:'', left:''}, {right:'', left:''}];
             renderMCQInputs();
@@ -619,6 +619,8 @@
                 let spacer = item.spacing > 0 ? `<div style="height: ${item.spacing}cm"></div>` : '';
 
                 let extraContent = '';
+                
+                // MCQ Rendering
                 if(item.qType === 'mcq' && item.options) {
                      extraContent = `<div class="grid grid-cols-2 gap-x-4 gap-y-2 q-options-grid mt-2 pr-2">`;
                      const labels = ['A','B','C','D','E'];
@@ -628,14 +630,16 @@
                      extraContent += `</div>`;
                 }
                 
+                // True/False Rendering (New)
                 if(item.qType === 'tf') {
                     extraContent = `
-                    <div class="flex gap-8 mt-2 mr-4 text-sm font-bold">
+                    <div class="flex gap-10 mt-3 mr-4 text-sm font-bold">
                         <div class="flex items-center gap-2"><span class="tf-circle"></span> ڕاست</div>
                         <div class="flex items-center gap-2"><span class="tf-circle"></span> هەڵە</div>
                     </div>`;
                 }
                 
+                // Match Rendering
                 if(item.qType === 'match' && item.matchPairs) {
                     extraContent = `<div class="mt-2 w-full flex justify-center">
                         <table class="border-collapse w-auto text-sm mr-0">`; 
@@ -691,7 +695,7 @@
                 }
                 list.appendChild(div);
             });
-            new Sortable(list, { animation: 150, onEnd: (evt) => { const item = examData.splice(evt.oldIndex, 1)[0]; examData.splice(evt.newIndex, 0, item); renderPaper(); updateList(); saveLocal(); }});
+            new Sortable(list, { animation: 150, onEnd: (evt) => { const item = examData.splice(evt.oldIndex, 1)[0]; examData.splice(evt.newIndex, 0, item); renderPaper(); updateList(); autoSave(); }});
         }
 
         // --- SHUFFLE LOGIC ---
@@ -704,13 +708,17 @@
 
         function shuffleQuestions() {
             if(!confirm('تەنها پرسیارە هەڵبژاردنەکان تێکەڵ دەکەیت؟')) return;
-            // Shuffle Options
+            // Only shuffle Options inside MCQs, not the questions themselves (unless requested)
+            // But usually "Shuffle Questions" implies order. Let's do both for manual shuffle.
+            
+            // 1. Shuffle Options
             examData.forEach(q => {
                 if(q.qType === 'mcq' && q.options) {
                     shuffleArray(q.options);
                 }
             });
-            // Shuffle Questions Order
+
+            // 2. Shuffle Order of MCQs only
             let mcqIndices = [];
             examData.forEach((item, index) => {
                 if(item.type === 'question' && item.qType === 'mcq') mcqIndices.push(index);
@@ -719,34 +727,33 @@
             shuffleArray(shuffledIndices);
             
             let tempItems = {};
-            mcqIndices.forEach((oldIdx, i) => {
-                tempItems[oldIdx] = examData[shuffledIndices[i]];
-            });
-            mcqIndices.forEach(idx => {
-                examData[idx] = tempItems[idx];
-            });
+            mcqIndices.forEach((oldIdx, i) => { tempItems[oldIdx] = examData[shuffledIndices[i]]; });
+            mcqIndices.forEach(idx => { examData[idx] = tempItems[idx]; });
+            
             renderPaper();
             updateList();
-            saveLocal();
+            autoSave();
         }
 
-        // --- A/B GENERATION ---
+        // --- A/B GENERATION (The New Feature) ---
         async function generateAB() {
+            // 1. Store Original State
             const originalData = JSON.parse(JSON.stringify(examData));
-            const typeLabel = document.getElementById('view_type').innerText;
+            const originalType = document.getElementById('view_type').innerText;
             
-            // 1. Generate Group A (Normal)
-            document.getElementById('view_type').innerText = typeLabel + " (Group A)";
-            alert('PDF بۆ گروپی A ئامادە دەکرێت...');
+            alert('دەستکرا بە دروستکردنی گروپی A و B. تکایە چاوەڕێبە...');
+
+            // 2. Generate Group A (Original)
+            document.getElementById('view_type').innerText = originalType + " (Group A)";
             await downloadPDF('Exam_Group_A.pdf');
 
-            // 2. Shuffle for Group B
+            // 3. Shuffle for Group B
             // Shuffle MCQ Options
             examData.forEach(q => {
                 if(q.qType === 'mcq' && q.options) shuffleArray(q.options);
             });
             
-            // Shuffle MCQ Order
+            // Shuffle MCQ Question Order
             let mcqIndices = [];
             examData.forEach((item, index) => {
                  if(item.type === 'question' && item.qType === 'mcq') mcqIndices.push(index);
@@ -758,21 +765,21 @@
             mcqIndices.forEach((oldIdx, i) => { tempItems[oldIdx] = examData[shuffledIndices[i]]; });
             mcqIndices.forEach(idx => { examData[idx] = tempItems[idx]; });
             
+            // Render Group B
             renderPaper();
             
-            // 3. Generate Group B
+            // 4. Generate Group B PDF (Wait a bit for render)
             setTimeout(async () => {
-                document.getElementById('view_type').innerText = typeLabel + " (Group B)";
-                alert('PDF بۆ گروپی B ئامادە دەکرێت...');
+                document.getElementById('view_type').innerText = originalType + " (Group B)";
                 await downloadPDF('Exam_Group_B.pdf');
                 
-                // 4. Restore
+                // 5. Restore Original State
                 setTimeout(() => {
                     examData = originalData;
-                    document.getElementById('view_type').innerText = typeLabel;
+                    document.getElementById('view_type').innerText = originalType;
                     renderPaper();
                     updateList();
-                    alert('هەردوو فایلەکە دابەزێنران');
+                    alert('هەردوو فایلەکە دابەزێنران!');
                 }, 1000);
             }, 1000);
         }
@@ -853,7 +860,7 @@
             }
             document.getElementById('current-exam-title').innerText = data.title;
             renderPaper(); updateList(); setTab('create');
-            saveLocal();
+            autoSave();
         }
         
         async function deleteExam(id, e) {
@@ -867,7 +874,7 @@
             currentExamId = null; examData = [];
             document.getElementById('current-exam-title').innerText = "تاقیکردنەوەی نوێ";
             renderPaper(); updateList(); setTab('create');
-            saveLocal();
+            autoSave();
         }
 
         async function addToBank(idx) {
@@ -929,7 +936,7 @@
             newItem.id = Date.now();
             delete newItem._id; 
             examData.push(newItem);
-            renderPaper(); updateList(); saveLocal();
+            renderPaper(); updateList(); autoSave();
             alert('زیادکرا');
         }
 
@@ -951,7 +958,7 @@
                 const val = document.getElementById('h_'+id).value;
                 if(document.getElementById('view_'+id)) document.getElementById('view_'+id).innerText = val;
             });
-            saveLocal();
+            autoSave();
         }
         
         async function downloadPDF(filename = 'Exam.pdf') {
@@ -981,10 +988,6 @@
                 if(q.qType === 'mcq' && q.options) {
                     const idx = q.options.findIndex(o => o.correct);
                     if(idx > -1) ans = labels[idx];
-                } else if(q.qType === 'tf') { // True False Answer Key
-                     // This relies on you remembering to check the radio in editing mode, 
-                     // but currently TF doesn't have a 'correct' radio visible. 
-                     // For now, it will just show empty.
                 }
                 html += `<tr><td>${count}</td><td>${ans}</td></tr>`;
             });
