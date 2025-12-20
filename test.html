@@ -3,10 +3,12 @@
 <head>
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0, maximum-scale=1.0, user-scalable=no">
-    <title>سیستەمی پرسیار - وەشانی A/B & AutoSave</title>
+    <title>سیستەمی پرسیار - وەشانی تەواو (Bank Edit + True/False)</title>
     
     <script src="https://cdn.tailwindcss.com"></script>
+    
     <script src="https://cdnjs.cloudflare.com/ajax/libs/html2pdf.js/0.10.1/html2pdf.bundle.min.js"></script>
+    
     <script src="https://cdnjs.cloudflare.com/ajax/libs/Sortable/1.15.0/Sortable.min.js"></script>
     
     <link href="https://fonts.googleapis.com/css2?family=Nrt+Reg&family=Vazirmatn:wght@300;400;700;900&display=swap" rel="stylesheet">
@@ -80,7 +82,7 @@
         .content-area { flex: 1; overflow: hidden; display: flex; position: relative; }
         #editor-panel, #preview-panel { overflow-y: auto; height: 100%; padding-bottom: 150px; -webkit-overflow-scrolling: touch; }
         
-        /* A4 PAPER */
+        /* A4 PAPER - COMPACT MODE */
         .a4-paper { 
             width: 210mm; min-height: 297mm; background: white; margin: 0 auto; padding: 10mm; 
             box-shadow: 0 4px 15px rgba(0,0,0,0.1); font-family: 'Nrt Reg', sans-serif; 
@@ -108,9 +110,6 @@
         .section-title { width: 100%; text-align: center; font-weight: 900; font-size: 16px; padding: 4px; border-top: 2px solid #000; border-bottom: 2px solid #000; margin: 10px 0; background-color: #f3f4f6; -webkit-print-color-adjust: exact; }
         .page-break-marker { border-top: 2px dashed #cbd5e1; margin: 20px 0; position: relative; text-align: center; color: #94a3b8; font-size: 10px; page-break-after: always; break-after: always; }
         .page-break-marker::after { content: 'پەڕەی نوێ (Page Break)'; background: #f8fafc; padding: 0 10px; position: relative; top: -8px; }
-
-        /* True/False Styling */
-        .tf-circle { display: inline-block; width: 18px; height: 18px; border: 2px solid #000; border-radius: 50%; margin-left: 5px; vertical-align: middle; }
 
         @media print { 
             @page { size: A4; margin: 0; } 
@@ -197,7 +196,8 @@
                         <label class="text-xs font-bold text-gray-600">جۆری پرسیار:</label>
                         <select id="q_type" class="text-xs border rounded p-1 bg-white" onchange="toggleQuestionInputs()">
                             <option value="mcq">هەڵبژاردن</option>
-                            <option value="tf">ڕاست و هەڵە</option> <option value="text">نووسین (Inshai)</option>
+                            <option value="tf">ڕاست و هەڵە (True/False)</option>
+                            <option value="text">نووسین (Inshai)</option>
                             <option value="match">ڕاکێشان (Matching)</option>
                         </select>
                     </div>
@@ -216,6 +216,20 @@
                     <div id="mcq-container">
                         <div id="mcq-inputs" class="space-y-2 mb-2"></div>
                         <button onclick="addMCQOption()" class="text-xs text-brand-600 font-bold w-full text-right py-1">+ زیادکردنی هەڵبژاردە</button>
+                    </div>
+
+                    <div id="tf-container" class="hidden mt-2 bg-white p-2 border rounded">
+                        <div class="text-xs font-bold text-gray-600 mb-2">وەڵامی ڕاست دیاری بکە (بۆ وەڵامنامە):</div>
+                        <div class="flex gap-4 justify-center">
+                            <label class="flex items-center gap-1 cursor-pointer bg-green-50 px-3 py-1 rounded border border-green-200">
+                                <input type="radio" name="tf_choice" value="true" onchange="tfAnswer='true'" checked class="accent-green-600">
+                                <span class="text-xs font-bold text-green-700">ڕاست</span>
+                            </label>
+                            <label class="flex items-center gap-1 cursor-pointer bg-red-50 px-3 py-1 rounded border border-red-200">
+                                <input type="radio" name="tf_choice" value="false" onchange="tfAnswer='false'" class="accent-red-600">
+                                <span class="text-xs font-bold text-red-700">هەڵە</span>
+                            </label>
+                        </div>
                     </div>
 
                     <div id="match-container" class="hidden">
@@ -254,14 +268,10 @@
                  <div class="bg-white p-3 rounded border shadow-sm">
                     <h3 class="font-bold text-xs text-brand-600 mb-2 border-b pb-1">کردارەکان</h3>
                     <div class="grid grid-cols-2 gap-2">
-                        <button onclick="generateAB()" class="col-span-2 bg-gradient-to-r from-purple-600 to-indigo-600 text-white py-3 rounded-lg text-sm font-bold shadow-lg hover:shadow-xl transition transform active:scale-95">
-                            <i class="fa-solid fa-shuffle"></i> دروستکردنی A و B (PDF)
-                        </button>
-                        
-                        <button onclick="shuffleQuestions()" class="bg-orange-100 text-orange-700 py-3 rounded text-xs font-bold">تێکەڵکردنی پرسیار</button>
+                        <button onclick="shuffleQuestions()" class="bg-orange-100 text-orange-700 py-3 rounded text-xs font-bold">تێکەڵکردن</button>
                         <button onclick="generateAnswerKey()" class="bg-yellow-100 text-yellow-700 py-3 rounded text-xs font-bold">وەڵامنامە</button>
                         <button onclick="downloadWord()" class="bg-blue-100 text-blue-700 py-3 rounded text-xs font-bold">Word</button>
-                        <button onclick="downloadPDF()" class="bg-green-100 text-green-700 py-3 rounded text-xs font-bold">PDF (سادە)</button>
+                        <button onclick="downloadPDF()" class="bg-green-100 text-green-700 py-3 rounded text-xs font-bold">PDF</button>
                     </div>
                  </div>
             </div>
@@ -307,47 +317,23 @@
             else { ed.classList.add('hidden'); pr.classList.remove('hidden'); pr.classList.add('flex'); }
         }
 
+        // --- AUTH & INIT ---
         let currentExamId = null;
         let examData = [];
         let bankData = [];
         let editIndex = -1;
         
+        // Variables for Bank Editing
         let bankEditMode = false;
         let bankEditId = null;
 
         let mcqOptions = [{text:'', correct:false}, {text:'', correct:false}, {text:'', correct:false}, {text:'', correct:false}];
         let matchPairs = [{right:'', left:''}, {right:'', left:''}];
+        let tfAnswer = 'true'; // Default True
         let userIsAdmin = false;
         
         let deviceId = localStorage.getItem('did') || crypto.randomUUID();
         localStorage.setItem('did', deviceId);
-
-        // --- AUTO SAVE LOGIC (NEW) ---
-        function autoSave() {
-            localStorage.setItem('autosave_examData', JSON.stringify(examData));
-            const header = {};
-            ['gov','min','dir','school','subject','class','time','type','year','date'].forEach(id => {
-                header[id] = document.getElementById('h_'+id).value;
-            });
-            localStorage.setItem('autosave_header', JSON.stringify(header));
-        }
-
-        function loadAutoSave() {
-            const savedData = localStorage.getItem('autosave_examData');
-            if(savedData) {
-                examData = JSON.parse(savedData);
-                renderPaper();
-                updateList();
-            }
-            const savedHeader = localStorage.getItem('autosave_header');
-            if(savedHeader) {
-                const h = JSON.parse(savedHeader);
-                for (const key in h) {
-                    if(document.getElementById('h_'+key)) document.getElementById('h_'+key).value = h[key];
-                }
-                updatePaper();
-            }
-        }
 
         // --- SECURE LOGIN LOGIC ---
         async function checkPassword() {
@@ -394,7 +380,6 @@
             document.getElementById('login-overlay').style.display = 'none';
             localStorage.setItem('is_logged_in', 'true');
             loadExamList();
-            loadAutoSave(); // Load autosave after login
         }
 
         // --- MATH UI ---
@@ -469,6 +454,7 @@
             const type = document.getElementById('q_type').value;
             document.getElementById('mcq-container').style.display = type === 'mcq' ? 'block' : 'none';
             document.getElementById('match-container').style.display = type === 'match' ? 'block' : 'none';
+            document.getElementById('tf-container').style.display = type === 'tf' ? 'block' : 'none';
             document.getElementById('sub-label-box').style.display = type === 'text' ? 'block' : 'none';
         }
 
@@ -478,10 +464,10 @@
         // --- ADD ITEMS ---
         function addSectionTitle() {
             const title = prompt("سەردێڕ بنووسە:");
-            if(title) { examData.push({ type: 'title', id: Date.now(), text: title }); renderPaper(); updateList(); autoSave(); }
+            if(title) { examData.push({ type: 'title', id: Date.now(), text: title }); renderPaper(); updateList(); }
         }
 
-        function addPageBreak() { examData.push({ type: 'break', id: Date.now() }); renderPaper(); updateList(); autoSave(); }
+        function addPageBreak() { examData.push({ type: 'break', id: Date.now() }); renderPaper(); updateList(); }
 
         async function addItem() {
             const text = document.getElementById('q_text').value;
@@ -494,11 +480,6 @@
             if(type !== 'match' && !text && !file) return alert('تکایە دەق یان وێنە دابنێ');
             if(type === 'match' && matchPairs.every(p => !p.right && !p.left)) return alert('تکایە جووتەکان پڕ بکەرەوە');
 
-            // Handle True/False logic silently (no user input needed)
-            let finalOptions = null;
-            if (type === 'mcq') finalOptions = JSON.parse(JSON.stringify(mcqOptions));
-            if (type === 'tf') finalOptions = [{text: 'True', correct: false}, {text: 'False', correct: false}];
-
             const item = {
                 id: Date.now(),
                 type: 'question',
@@ -507,17 +488,20 @@
                 score: score,
                 spacing: spacing,
                 subStyle: subStyle, 
-                options: finalOptions,
+                options: type === 'mcq' ? JSON.parse(JSON.stringify(mcqOptions)) : null,
                 matchPairs: type === 'match' ? JSON.parse(JSON.stringify(matchPairs)) : null,
+                tfAnswer: type === 'tf' ? tfAnswer : null,
                 img: null
             };
 
             const finalizeItem = async () => {
+                // *** BANK EDIT MODE LOGIC ***
                 if (bankEditMode && bankEditId) {
                     const { db, doc, setDoc, appId } = window.firebaseApp;
                     try {
-                        const updatedItem = { ...item, id: bankEditId };
-                        delete updatedItem._id; 
+                        const updatedItem = { ...item, id: bankEditId }; // Keep original ID
+                        delete updatedItem._id; // Cleanup
+                        // Save to Bank Collection
                         await setDoc(doc(db, 'artifacts', appId, 'users', window.currentUser.uid, 'bank', bankEditId), updatedItem);
                         alert('گۆڕانکارییەکان لە بانک تۆمارکران');
                         loadBank();
@@ -527,11 +511,11 @@
                     return;
                 }
 
+                // *** NORMAL EXAM ADD LOGIC ***
                 if(editIndex > -1) examData[editIndex] = item;
                 else examData.push(item);
                 renderPaper();
                 updateList();
-                autoSave(); // Auto Save trigger
                 clearForm();
             };
 
@@ -545,7 +529,7 @@
             }
         }
 
-        function deleteItem(idx) { if(confirm('دڵنیای؟')) { examData.splice(idx, 1); renderPaper(); updateList(); autoSave(); } }
+        function deleteItem(idx) { if(confirm('دڵنیای؟')) { examData.splice(idx, 1); renderPaper(); updateList(); } }
 
         function editItem(idx) {
             const item = examData[idx];
@@ -567,6 +551,10 @@
             
             if(item.qType === 'mcq') mcqOptions = JSON.parse(JSON.stringify(item.options));
             if(item.qType === 'match') matchPairs = JSON.parse(JSON.stringify(item.matchPairs));
+            if(item.qType === 'tf') {
+                tfAnswer = item.tfAnswer || 'true';
+                document.querySelector(`input[name="tf_choice"][value="${tfAnswer}"]`).checked = true;
+            }
             
             toggleQuestionInputs();
             renderMCQInputs();
@@ -586,7 +574,12 @@
             document.getElementById('spacing-display').innerText = 0;
             document.getElementById('btn-add').innerText = "زیادکردن";
             document.getElementById('btn-add').classList.replace('bg-green-600', 'bg-brand-600');
-            document.getElementById('btn-add').classList.replace('bg-orange-600', 'bg-brand-600'); 
+            document.getElementById('btn-add').classList.replace('bg-orange-600', 'bg-brand-600'); // Reset bank color if set
+            
+            // Reset TF
+            tfAnswer = 'true';
+            document.querySelector(`input[name="tf_choice"][value="true"]`).checked = true;
+
             mcqOptions = [{text:'', correct:false}, {text:'', correct:false}, {text:'', correct:false}, {text:'', correct:false}];
             matchPairs = [{right:'', left:''}, {right:'', left:''}];
             renderMCQInputs();
@@ -619,8 +612,6 @@
                 let spacer = item.spacing > 0 ? `<div style="height: ${item.spacing}cm"></div>` : '';
 
                 let extraContent = '';
-                
-                // MCQ Rendering
                 if(item.qType === 'mcq' && item.options) {
                      extraContent = `<div class="grid grid-cols-2 gap-x-4 gap-y-2 q-options-grid mt-2 pr-2">`;
                      const labels = ['A','B','C','D','E'];
@@ -630,16 +621,6 @@
                      extraContent += `</div>`;
                 }
                 
-                // True/False Rendering (New)
-                if(item.qType === 'tf') {
-                    extraContent = `
-                    <div class="flex gap-10 mt-3 mr-4 text-sm font-bold">
-                        <div class="flex items-center gap-2"><span class="tf-circle"></span> ڕاست</div>
-                        <div class="flex items-center gap-2"><span class="tf-circle"></span> هەڵە</div>
-                    </div>`;
-                }
-                
-                // Match Rendering
                 if(item.qType === 'match' && item.matchPairs) {
                     extraContent = `<div class="mt-2 w-full flex justify-center">
                         <table class="border-collapse w-auto text-sm mr-0">`; 
@@ -647,6 +628,12 @@
                         extraContent += `<tr><td class="pl-4 py-1 font-bold text-right">${p.right}</td><td class="px-4 py-1 text-center text-gray-300">--</td><td class="pr-4 py-1 text-left font-bold" dir="ltr">${p.left}</td></tr>`; 
                     });
                     extraContent += `</table></div>`;
+                }
+
+                if(item.qType === 'tf') {
+                    extraContent = `<div class="flex justify-end mt-1 pl-4" dir="ltr">
+                        <span class="font-bold font-nrt text-sm">( ڕاست / هەڵە )</span>
+                    </div>`;
                 }
 
                 let content = `
@@ -695,93 +682,38 @@
                 }
                 list.appendChild(div);
             });
-            new Sortable(list, { animation: 150, onEnd: (evt) => { const item = examData.splice(evt.oldIndex, 1)[0]; examData.splice(evt.newIndex, 0, item); renderPaper(); updateList(); autoSave(); }});
+            new Sortable(list, { animation: 150, onEnd: (evt) => { const item = examData.splice(evt.oldIndex, 1)[0]; examData.splice(evt.newIndex, 0, item); renderPaper(); updateList(); }});
         }
 
         // --- SHUFFLE LOGIC ---
-        function shuffleArray(array) {
-            for (let i = array.length - 1; i > 0; i--) {
-                const j = Math.floor(Math.random() * (i + 1));
-                [array[i], array[j]] = [array[j], array[i]];
-            }
-        }
-
         function shuffleQuestions() {
             if(!confirm('تەنها پرسیارە هەڵبژاردنەکان تێکەڵ دەکەیت؟')) return;
-            // Only shuffle Options inside MCQs, not the questions themselves (unless requested)
-            // But usually "Shuffle Questions" implies order. Let's do both for manual shuffle.
-            
-            // 1. Shuffle Options
             examData.forEach(q => {
                 if(q.qType === 'mcq' && q.options) {
-                    shuffleArray(q.options);
+                    for (let i = q.options.length - 1; i > 0; i--) {
+                        const j = Math.floor(Math.random() * (i + 1));
+                        [q.options[i], q.options[j]] = [q.options[j], q.options[i]];
+                    }
                 }
             });
-
-            // 2. Shuffle Order of MCQs only
             let mcqIndices = [];
             examData.forEach((item, index) => {
                 if(item.type === 'question' && item.qType === 'mcq') mcqIndices.push(index);
             });
             let shuffledIndices = [...mcqIndices];
-            shuffleArray(shuffledIndices);
-            
+            for (let i = shuffledIndices.length - 1; i > 0; i--) {
+                const j = Math.floor(Math.random() * (i + 1));
+                [shuffledIndices[i], shuffledIndices[j]] = [shuffledIndices[j], shuffledIndices[i]];
+            }
             let tempItems = {};
-            mcqIndices.forEach((oldIdx, i) => { tempItems[oldIdx] = examData[shuffledIndices[i]]; });
-            mcqIndices.forEach(idx => { examData[idx] = tempItems[idx]; });
-            
+            mcqIndices.forEach((oldIdx, i) => {
+                tempItems[oldIdx] = examData[shuffledIndices[i]];
+            });
+            mcqIndices.forEach(idx => {
+                examData[idx] = tempItems[idx];
+            });
             renderPaper();
             updateList();
-            autoSave();
-        }
-
-        // --- A/B GENERATION (The New Feature) ---
-        async function generateAB() {
-            // 1. Store Original State
-            const originalData = JSON.parse(JSON.stringify(examData));
-            const originalType = document.getElementById('view_type').innerText;
-            
-            alert('دەستکرا بە دروستکردنی گروپی A و B. تکایە چاوەڕێبە...');
-
-            // 2. Generate Group A (Original)
-            document.getElementById('view_type').innerText = originalType + " (Group A)";
-            await downloadPDF('Exam_Group_A.pdf');
-
-            // 3. Shuffle for Group B
-            // Shuffle MCQ Options
-            examData.forEach(q => {
-                if(q.qType === 'mcq' && q.options) shuffleArray(q.options);
-            });
-            
-            // Shuffle MCQ Question Order
-            let mcqIndices = [];
-            examData.forEach((item, index) => {
-                 if(item.type === 'question' && item.qType === 'mcq') mcqIndices.push(index);
-            });
-            let shuffledIndices = [...mcqIndices];
-            shuffleArray(shuffledIndices);
-            
-            let tempItems = {};
-            mcqIndices.forEach((oldIdx, i) => { tempItems[oldIdx] = examData[shuffledIndices[i]]; });
-            mcqIndices.forEach(idx => { examData[idx] = tempItems[idx]; });
-            
-            // Render Group B
-            renderPaper();
-            
-            // 4. Generate Group B PDF (Wait a bit for render)
-            setTimeout(async () => {
-                document.getElementById('view_type').innerText = originalType + " (Group B)";
-                await downloadPDF('Exam_Group_B.pdf');
-                
-                // 5. Restore Original State
-                setTimeout(() => {
-                    examData = originalData;
-                    document.getElementById('view_type').innerText = originalType;
-                    renderPaper();
-                    updateList();
-                    alert('هەردوو فایلەکە دابەزێنران!');
-                }, 1000);
-            }, 1000);
         }
 
         // --- HEADER LOGO ---
@@ -837,7 +769,7 @@
             const uid = window.currentUser.uid;
             const listEl = document.getElementById('exam-list-container');
             listEl.innerHTML = '';
-            const q = query(collection(db, 'artifacts', appId, 'users', uid, 'exams'), orderBy('updatedAt', 'desc'));
+            const q = query(collection(db, 'artifacts', appId, 'users', uid, 'exams', orderBy('updatedAt', 'desc'));
             const snap = await getDocs(q);
             snap.forEach(doc => {
                 const d = doc.data();
@@ -860,7 +792,6 @@
             }
             document.getElementById('current-exam-title').innerText = data.title;
             renderPaper(); updateList(); setTab('create');
-            autoSave();
         }
         
         async function deleteExam(id, e) {
@@ -874,7 +805,6 @@
             currentExamId = null; examData = [];
             document.getElementById('current-exam-title').innerText = "تاقیکردنەوەی نوێ";
             renderPaper(); updateList(); setTab('create');
-            autoSave();
         }
 
         async function addToBank(idx) {
@@ -885,6 +815,7 @@
             try { await addDoc(collection(db, 'artifacts', appId, 'users', window.currentUser.uid, 'bank'), item); alert('نێردرا بۆ بانک'); loadBank(); } catch(e) { alert('هەڵە ڕوویدا'); }
         }
 
+        // --- NEW BANK FEATURES (DELETE & EDIT) ---
         async function loadBank() {
             const { db, collection, getDocs, appId } = window.firebaseApp;
             bankData = [];
@@ -926,6 +857,7 @@
             bankEditId = item.id;
             loadItemToForm(item);
             
+            // UI Feedback
             document.getElementById('bank-edit-alert').classList.remove('hidden');
             document.getElementById('btn-add').innerText = "تۆمارکردن لە بانک";
             document.getElementById('btn-add').classList.replace('bg-brand-600', 'bg-orange-600');
@@ -936,7 +868,7 @@
             newItem.id = Date.now();
             delete newItem._id; 
             examData.push(newItem);
-            renderPaper(); updateList(); autoSave();
+            renderPaper(); updateList();
             alert('زیادکرا');
         }
 
@@ -958,15 +890,13 @@
                 const val = document.getElementById('h_'+id).value;
                 if(document.getElementById('view_'+id)) document.getElementById('view_'+id).innerText = val;
             });
-            autoSave();
         }
         
-        async function downloadPDF(filename = 'Exam.pdf') {
+        function downloadPDF() {
             const el = document.getElementById('examPaper');
             const clone = el.cloneNode(true); clone.style.transform = "scale(1)"; 
             document.body.appendChild(clone); 
-            await html2pdf().set({ margin: 0, filename: filename, image: { type: 'jpeg', quality: 0.98 }, html2canvas: { scale: 2 }, jsPDF: { unit: 'mm', format: 'a4', orientation: 'portrait' } }).from(clone).save();
-            document.body.removeChild(clone);
+            html2pdf().set({ margin: 0, filename: 'Exam.pdf', image: { type: 'jpeg', quality: 0.98 }, html2canvas: { scale: 2 }, jsPDF: { unit: 'mm', format: 'a4', orientation: 'portrait' } }).from(clone).save().then(() => document.body.removeChild(clone));
         }
         
         function downloadWord() {
@@ -978,7 +908,7 @@
         }
         
         function generateAnswerKey() {
-            let html = `<html dir="rtl"><head><style>table, th, td { border: 1px solid black; border-collapse: collapse; padding: 5px; text-align: center; }</style></head><body><h2>وەڵامنامە</h2><table style="width:100%"><tr><th>#</th><th>وەڵام</th></tr>`;
+            let html = `<html dir="rtl"><head><style>table, th, td { border: 1px solid black; border-collapse: collapse; padding: 5px; text-align: center; font-family: sans-serif; }</style></head><body><h2>وەڵامنامە</h2><table style="width:100%"><tr><th>#</th><th>وەڵام</th></tr>`;
             let count = 0;
             const labels = ['A','B','C','D','E'];
             examData.forEach(q => {
@@ -988,6 +918,8 @@
                 if(q.qType === 'mcq' && q.options) {
                     const idx = q.options.findIndex(o => o.correct);
                     if(idx > -1) ans = labels[idx];
+                } else if(q.qType === 'tf') {
+                    ans = q.tfAnswer === 'true' ? 'ڕاست' : 'هەڵە';
                 }
                 html += `<tr><td>${count}</td><td>${ans}</td></tr>`;
             });
