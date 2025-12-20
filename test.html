@@ -329,7 +329,7 @@
 
         let mcqOptions = [{text:'', correct:false}, {text:'', correct:false}, {text:'', correct:false}, {text:'', correct:false}];
         let matchPairs = [{right:'', left:''}, {right:'', left:''}];
-        let tfAnswer = 'true'; // Default True
+        let tfAnswer = 'true'; // Default True for True/False
         let userIsAdmin = false;
         
         let deviceId = localStorage.getItem('did') || crypto.randomUUID();
@@ -769,7 +769,7 @@
             const uid = window.currentUser.uid;
             const listEl = document.getElementById('exam-list-container');
             listEl.innerHTML = '';
-            const q = query(collection(db, 'artifacts', appId, 'users', uid, 'exams', orderBy('updatedAt', 'desc'));
+            const q = query(collection(db, 'artifacts', appId, 'users', uid, 'exams'), orderBy('updatedAt', 'desc'));
             const snap = await getDocs(q);
             snap.forEach(doc => {
                 const d = doc.data();
