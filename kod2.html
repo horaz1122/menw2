@@ -3,7 +3,7 @@
 <head>
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0, maximum-scale=1.0, user-scalable=no">
-    <title>بەڕێوەبەری کۆدەکان (Admin Pro)</title>
+    <title>بەڕێوەبەری کۆدەکان (Admin V12)</title>
     <script src="https://cdn.tailwindcss.com"></script>
     <link href="https://fonts.googleapis.com/css2?family=Nrt+Reg&family=Vazirmatn:wght@300;400;700;900&display=swap" rel="stylesheet">
     <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.4.0/css/all.min.css">
@@ -41,7 +41,9 @@
             const app = initializeApp(firebaseConfig);
             const auth = getAuth(app);
             const db = getFirestore(app);
-            const appId = 'exam-system-v11-secure'; 
+            
+            // گرنگ: ئەمە دەبێت هەمان ئایدی بەرنامە نوێیەکە بێت
+            const appId = 'exam-system-v12-super'; 
 
             window.firebaseApp = { db, appId, doc, setDoc, deleteDoc, collection, getDocs, writeBatch };
 
@@ -66,7 +68,7 @@
             <div class="w-16 h-16 bg-primary-50 text-primary-600 rounded-full flex items-center justify-center text-3xl mx-auto mb-4">
                 <i class="fa-solid fa-lock"></i>
             </div>
-            <h1 class="text-xl font-bold mb-1">پەنێڵی ئەدمین</h1>
+            <h1 class="text-xl font-bold mb-1">پەنێڵی ئەدمین (V12)</h1>
             <p class="text-gray-400 text-xs mb-6">بەڕێوەبردنی کۆدی خوێندکاران</p>
             
             <input type="password" id="admin-pass" class="w-full p-3 border-2 border-gray-200 rounded-xl text-center text-lg mb-4 outline-none focus:border-primary-600 transition" placeholder="پاسۆرد" inputmode="numeric">
@@ -80,7 +82,7 @@
             <div class="max-w-3xl mx-auto px-4 py-3 flex justify-between items-center">
                 <div class="flex items-center gap-2">
                     <div id="status-indicator" class="w-2.5 h-2.5 rounded-full bg-red-500 animate-pulse"></div>
-                    <span class="font-bold text-gray-700">کۆدەکان</span>
+                    <span class="font-bold text-gray-700">کۆدەکان (V12)</span>
                 </div>
                 <div class="flex gap-2">
                     <button onclick="exportData()" class="bg-blue-50 text-blue-600 p-2 rounded-lg text-xs font-bold border border-blue-100 flex items-center gap-1">
@@ -140,7 +142,7 @@
     </div>
 
     <script>
-        // --- AUTH ---
+        // --- ADMIN LOGIN ---
         function adminLogin() {
             if (document.getElementById('admin-pass').value === '11223344009') {
                 document.getElementById('login-screen').classList.add('hidden');
@@ -171,23 +173,24 @@
             const { db, setDoc, doc, appId } = window.firebaseApp;
 
             try {
-                const data = {
+                // Save to the NEW version path
+                await setDoc(doc(db, 'artifacts', appId, 'access_codes', code), {
+                    active: true,
                     note: note,
                     createdAt: new Date().toISOString(),
-                    expiresAt: expiry || null, // If empty, it's null (forever)
-                    active: true
-                };
+                    expiresAt: expiry || null, 
+                    createdBy: 'Admin Panel V12'
+                });
 
-                await setDoc(doc(db, 'artifacts', appId, 'access_codes', code), data);
-                
-                // Reset Form
+                alert(`کۆدی ${code} بە سەرکەوتوویی زیادکرا بۆ وەشانی V12.`);
                 document.getElementById('new-code').value = '';
                 document.getElementById('code-note').value = '';
                 document.getElementById('expiry-date').value = '';
                 loadCodes();
 
-            } catch (e) {
-                alert('هەڵە ڕوویدا: ' + e.message);
+            } catch (error) {
+                console.error(error);
+                alert('هەڵەیەک ڕوویدا لە کاتی پەیوەستبوون.');
             } finally {
                 btn.innerHTML = originalHTML;
                 btn.disabled = false;
@@ -207,15 +210,13 @@
                     return;
                 }
 
-                // Convert to array and sort by date (newest first)
                 const codes = [];
                 snap.forEach(d => codes.push({ id: d.id, ...d.data() }));
                 codes.sort((a, b) => new Date(b.createdAt) - new Date(a.createdAt));
 
-                const today = new Date().toISOString().split('T')[0]; // YYYY-MM-DD
+                const today = new Date().toISOString().split('T')[0];
 
                 codes.forEach(item => {
-                    // Check Expiration
                     let isExpired = false;
                     let expiryText = 'بێ سنوور';
                     let statusClass = 'bg-green-100 text-green-700';
@@ -229,7 +230,6 @@
                             icon = 'fa-ban';
                             expiryText += ' (بەسەرچوو)';
                         } else {
-                            // Valid but has date
                             statusClass = 'bg-blue-100 text-blue-700';
                             icon = 'fa-clock';
                         }
@@ -281,7 +281,7 @@
             const url = URL.createObjectURL(blob);
             const a = document.createElement('a');
             a.href = url;
-            a.download = `codes_backup_${new Date().toISOString().split('T')[0]}.json`;
+            a.download = `codes_v12_backup_${new Date().toISOString().split('T')[0]}.json`;
             a.click();
         }
 
