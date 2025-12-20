@@ -3,7 +3,7 @@
 <head>
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0, maximum-scale=1.0, user-scalable=no">
-    <title>سیستەمی پرسیار - Super Pro V12</title>
+    <title>سیستەمی پرسیار - PDF Fixed V14</title>
     
     <script src="https://cdn.tailwindcss.com"></script>
     
@@ -43,7 +43,7 @@
                     window.currentUser = user;
                     if(localStorage.getItem('is_logged_in') === 'true') {
                         document.getElementById('login-overlay').style.display = 'none';
-                        loadProfile(); // Load Teacher Defaults
+                        loadProfile(); 
                         loadExamList();
                     }
                 } else { signInAnonymously(auth); }
@@ -117,6 +117,9 @@
         .match-container-box { width: auto; min-width: 60%; margin: 0 auto; } 
         .match-row { display: flex; justify-content: space-between; margin-bottom: 8px; border-bottom: 1px dashed #ddd; }
         
+        /* Loader for PDF */
+        #pdf-loader { position: fixed; inset: 0; background: rgba(0,0,0,0.8); z-index: 200; display: none; justify-content: center; align-items: center; flex-direction: column; color: white; }
+
         @media print { 
             body { background: white; height: auto; display: block; overflow: visible; } 
             .no-print { display: none !important; } 
@@ -131,6 +134,11 @@
 </head>
 <body class="font-sans text-slate-800 main-layout">
 
+    <div id="pdf-loader">
+        <div class="animate-spin rounded-full h-12 w-12 border-4 border-white border-t-transparent mb-4"></div>
+        <p class="font-bold">خەریکی دروستکردنی PDF...</p>
+    </div>
+
     <div id="login-overlay" class="fixed inset-0 bg-slate-900/95 z-[100] flex items-center justify-center backdrop-blur-sm p-4">
         <div class="bg-white p-6 rounded-2xl shadow-2xl w-full max-w-sm text-center">
             <h2 class="text-2xl font-bold mb-4 text-brand-900">چوونەژوورەوە</h2>
@@ -140,8 +148,7 @@
             </div>
             <a href="https://wa.me/9647501784002" target="_blank" class="flex items-center justify-center gap-2 w-full bg-green-500 hover:bg-green-600 text-white font-bold py-2.5 rounded-xl mb-4 shadow-sm"><i class="fa-brands fa-whatsapp"></i> پەیوەندی (WhatsApp)</a>
             <input type="number" id="password-input" class="w-full p-3 border-2 rounded-xl text-center text-xl font-bold mb-3 focus:border-brand-500 outline-none" placeholder="کۆد...">
-            <p id="login-error-msg" class="text-red-500 text-xs mb-2 hidden"></p>
-            <button onclick="checkPassword()" id="login-btn" class="w-full bg-brand-600 hover:bg-brand-500 text-white font-bold py-3 rounded-xl">چوونەژوورەوە</button>
+            <button onclick="checkPassword()" class="w-full bg-brand-600 hover:bg-brand-500 text-white font-bold py-3 rounded-xl">چوونەژوورەوە</button>
         </div>
     </div>
 
@@ -160,11 +167,6 @@
             </div>
 
             <div id="view-create" class="flex-1 p-3 space-y-3">
-                
-                <div id="bank-edit-alert" class="hidden bg-yellow-50 text-yellow-800 p-2 text-xs border border-yellow-200 rounded font-bold">
-                    ⚠️ دەستکاری بانک <button onclick="clearForm()" class="text-red-500 underline mr-2">لابردن</button>
-                </div>
-
                 <div class="flex gap-2 mb-2">
                     <button onclick="addSectionTitle()" class="bg-gray-800 text-white px-3 py-2 rounded text-xs font-bold w-1/2">سەردێڕ</button>
                     <button onclick="addPageBreak()" class="bg-gray-600 text-white px-3 py-2 rounded text-xs font-bold w-1/2">پەڕەی نوێ</button>
@@ -178,7 +180,7 @@
                     <div id="math-toolbar-container" class="flex gap-1"></div>
                 </div>
                 
-                <textarea id="q_text" rows="2" class="w-full p-2 border rounded text-sm transition text-right" dir="auto" placeholder="دەقی پرسیار..." oninput="autoSave()"></textarea>
+                <textarea id="q_text" rows="2" class="w-full p-2 border rounded text-sm transition text-right" dir="auto" placeholder="دەقی پرسیار..."></textarea>
                 
                 <div class="flex gap-2 items-center">
                      <div class="flex-1 bg-slate-50 border rounded p-1 flex items-center overflow-hidden">
@@ -337,15 +339,11 @@
             const el = document.getElementById('q_text');
             const start = el.selectionStart;
             const end = el.selectionEnd;
-            const text = el.value;
-            const before = text.substring(0, start);
-            const selected = text.substring(start, end);
-            const after = text.substring(end);
-            el.value = before + `<${tag}>` + selected + `</${tag}>` + after;
-            autoSave();
+            el.value = el.value.substring(0, start) + `<${tag}>` + el.value.substring(start, end) + `</${tag}>` + el.value.substring(end);
         }
 
-        const mathSymbols = ['+','-','\\times','\\div','=','\\sqrt{}','\\frac{}{}','x^2','\\circ','\\angle','\\pi','\\alpha','\\beta','\\theta','\\lambda','\\Delta','\\in','\\notin','\\cup','\\cap','\\subset','\\subseteq','\\emptyset','\\rightarrow','\\Rightarrow','\\Leftrightarrow','\\sum','\\int','\\lim','\\log','\\ln','\\sin','\\cos','\\tan'];
+        // FULL MATH
+        const mathSymbols = ['+','-','\\times','\\div','=','\\neq','\\approx','\\pm','\\sqrt{}','\\sqrt[3]{}','\\frac{}{}','x^2','x_2','e^x','<','>','\\leq','\\geq','\\infty','\\pi','\\circ','\\angle','\\triangle','\\alpha','\\beta','\\theta','\\lambda','\\Delta','\\in','\\notin','\\cup','\\cap','\\subset','\\subseteq','\\emptyset','\\rightarrow','\\Rightarrow','\\Leftrightarrow','\\sum','\\int','\\lim','\\log','\\ln','\\sin','\\cos','\\tan'];
         const tb = document.getElementById('math-toolbar-container');
         mathSymbols.forEach(s => {
             let btn = document.createElement('button');
@@ -354,7 +352,6 @@
             btn.onclick = () => { 
                 let f = document.getElementById('q_text'); 
                 f.value = f.value.substring(0, f.selectionStart) + '$' + s + '$' + f.value.substring(f.selectionEnd); 
-                autoSave();
             };
             tb.appendChild(btn);
         });
@@ -401,8 +398,8 @@
         renderMCQInputs(); renderMatchInputs();
 
         // --- MAIN LOGIC ---
-        function addSectionTitle() { examData.push({ type: 'title', id: Date.now(), text: prompt("سەردێڕ:") || "بەش" }); renderPaper(); updateList(); autoSave(); }
-        function addPageBreak() { examData.push({ type: 'break', id: Date.now() }); renderPaper(); updateList(); autoSave(); }
+        function addSectionTitle() { examData.push({ type: 'title', id: Date.now(), text: prompt("سەردێڕ:") || "بەش" }); renderPaper(); updateList(); }
+        function addPageBreak() { examData.push({ type: 'break', id: Date.now() }); renderPaper(); updateList(); }
 
         function addItem() {
             const text = document.getElementById('q_text').value;
@@ -425,12 +422,12 @@
             const file = document.getElementById('q_image').files[0];
             if(file) {
                 const reader = new FileReader();
-                reader.onload = (e) => { item.img = e.target.result; finalizeItem(item); };
+                reader.onload = (e) => { item.img = e.target.result; saveItem(item); };
                 reader.readAsDataURL(file);
-            } else { finalizeItem(item); }
+            } else { saveItem(item); }
         }
 
-        async function finalizeItem(item) {
+        async function saveItem(item) {
             if (bankEditMode && bankEditId) {
                 const { db, doc, setDoc, appId } = window.firebaseApp;
                 try {
@@ -442,20 +439,14 @@
             }
             if(editIndex > -1) examData[editIndex] = item;
             else examData.push(item);
-            renderPaper(); updateList(); autoSave(); clearForm();
+            renderPaper(); updateList(); clearForm();
         }
 
-        function deleteItem(idx) { if(confirm('دڵنیای؟')) { examData.splice(idx, 1); renderPaper(); updateList(); autoSave(); } }
+        function deleteItem(idx) { if(confirm('دڵنیای؟')) { examData.splice(idx, 1); renderPaper(); updateList(); } }
         
         function editItem(idx) {
             editIndex = idx;
             const item = examData[idx];
-            loadItemToForm(item);
-            document.getElementById('btn-add').innerText = "گۆڕانکاری";
-            document.getElementById('btn-add').classList.replace('bg-brand-600', 'bg-green-600');
-        }
-
-        function loadItemToForm(item) {
             document.getElementById('q_text').value = item.text;
             document.getElementById('q_type').value = item.qType;
             document.getElementById('q_score').value = item.score;
@@ -468,12 +459,10 @@
         }
 
         function clearForm() {
-            editIndex = -1; bankEditMode = false; bankEditId = null;
-            document.getElementById('bank-edit-alert').classList.add('hidden');
+            editIndex = -1;
             document.getElementById('q_text').value = '';
-            document.getElementById('btn-add').innerText = "زیادکردن";
-            document.getElementById('btn-add').classList.replace('bg-green-600', 'bg-brand-600');
-            document.getElementById('btn-add').classList.replace('bg-orange-600', 'bg-brand-600');
+            document.getElementById('q_spacing').value = 0;
+            document.getElementById('spacing-display').innerText = 0;
             mcqOptions = [{text:'', correct:false}, {text:'', correct:false}, {text:'', correct:false}, {text:'', correct:false}];
             matchPairs = [{right:'', left:''}, {right:'', left:''}];
             renderMCQInputs(); renderMatchInputs();
@@ -525,7 +514,7 @@
             if(window.MathJax) MathJax.typesetPromise([container]);
         }
 
-        // --- NEW FEATURES ---
+        // --- FEATURES ---
         
         function saveProfile() {
             const profile = {};
@@ -560,7 +549,7 @@
                 q.id = Date.now() + Math.random();
                 examData.push(q);
             });
-            renderPaper(); updateList(); autoSave();
+            renderPaper(); updateList();
         }
 
         function generate4Models() {
@@ -621,6 +610,7 @@
             if(tab === 'archive') loadExamList();
         }
 
+        // Firebase Ops
         async function loadExamList() {
             const { db, collection, getDocs, query, orderBy, appId } = window.firebaseApp;
             const q = query(collection(db, 'artifacts', appId, 'users', window.currentUser.uid, 'exams'), orderBy('updatedAt', 'desc'));
@@ -632,8 +622,59 @@
             });
         }
         
-        function loadExam(id, el) { /* ... Logic ... */ } 
+        function loadExam(id, el) { /* simplified */ } 
 
+        // --- ROBUST PDF DOWNLOAD (FIXED) ---
+        function downloadPDF() {
+            const loader = document.getElementById('pdf-loader');
+            loader.style.display = 'flex';
+            
+            // Clone the element to render it properly without mobile scaling
+            const original = document.getElementById('examPaper');
+            const clone = original.cloneNode(true);
+            
+            // Set clone to fixed A4 size and clean styles
+            clone.style.width = '210mm';
+            clone.style.minHeight = '297mm';
+            clone.style.margin = '0';
+            clone.style.transform = 'none';
+            clone.style.boxShadow = 'none';
+            clone.classList.remove('a4-paper'); // Remove responsive class if needed
+            clone.style.background = 'white';
+            clone.style.color = 'black';
+            clone.style.padding = '10mm';
+            clone.style.direction = 'rtl';
+            
+            // Append clone to body but hidden
+            clone.style.position = 'absolute';
+            clone.style.left = '-9999px';
+            clone.style.top = '0';
+            document.body.appendChild(clone);
+
+            const opt = {
+                margin: 0,
+                filename: 'Exam_Paper.pdf',
+                image: { type: 'jpeg', quality: 0.98 },
+                html2canvas: { 
+                    scale: 2, 
+                    useCORS: true,
+                    scrollY: 0
+                },
+                jsPDF: { unit: 'mm', format: 'a4', orientation: 'portrait' }
+            };
+
+            html2pdf().set(opt).from(clone).save().then(() => {
+                document.body.removeChild(clone);
+                loader.style.display = 'none';
+            }).catch(err => {
+                console.error(err);
+                document.body.removeChild(clone);
+                loader.style.display = 'none';
+                alert('هەڵەیەک ڕوویدا لە دروستکردنی PDF');
+            });
+        }
+
+        // --- AUTH ---
         async function checkPassword() {
             const input = document.getElementById('password-input').value;
             if(!input) return;
@@ -648,21 +689,12 @@
             } catch(e) { alert('کێشە هەیە'); }
         }
 
-        function autoSave() {
-            localStorage.setItem('exam_data_v12', JSON.stringify(examData));
-        }
-        
         function downloadWord() {
             const header = document.querySelector('.exam-header').outerHTML;
             const body = document.getElementById('paper_questions').innerHTML;
             const html = `<html dir="rtl"><body>${header}${body}</body></html>`;
             const blob = new Blob(['\ufeff', html], { type: 'application/msword' });
             const link = document.createElement("a"); link.href = URL.createObjectURL(blob); link.download = "exam.doc"; link.click();
-        }
-        
-        function downloadPDF() {
-             const el = document.getElementById('examPaper');
-             html2pdf().from(el).save();
         }
         
         function generateAnswerKey() {
@@ -750,7 +782,6 @@
             examData.push(newItem);
             renderPaper(); updateList();
             alert('زیادکرا');
-            autoSave();
         }
     </script>
 </body>
