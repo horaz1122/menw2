@@ -3,7 +3,7 @@
 <head>
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0, maximum-scale=1.0, user-scalable=no">
-    <title>سیستەمی پرسیار - وەشانی دیزاینی نوێ</title>
+    <title>سیستەمی پرسیار - وەشانی پێشکەوتوو</title>
     
     <script src="https://cdn.tailwindcss.com"></script>
     
@@ -82,7 +82,7 @@
         .content-area { flex: 1; overflow: hidden; display: flex; position: relative; }
         #editor-panel, #preview-panel { overflow-y: auto; height: 100%; padding-bottom: 150px; -webkit-overflow-scrolling: touch; }
         
-        /* A4 PAPER - COMPACT MODE */
+        /* A4 PAPER */
         .a4-paper { 
             width: 210mm; min-height: 297mm; background: white; margin: 0 auto; padding: 10mm; 
             box-shadow: 0 4px 15px rgba(0,0,0,0.1); font-family: 'Nrt Reg', sans-serif; 
@@ -104,8 +104,7 @@
         .q-number { background: #000; color: white; width: 22px; height: 22px; border-radius: 50%; display: inline-flex; align-items: center; justify-content: center; font-size: 11px; margin-left: 6px; font-weight: bold; -webkit-print-color-adjust: exact; print-color-adjust: exact; flex-shrink: 0; }
         .q-sub-label { font-weight: bold; margin-left: 5px; min-width: 20px; display: inline-block; font-size: 14px; }
         
-        /* UPDATED: Better Line Height for Inline Elements */
-        .q-content { font-size: 14px; line-height: 2.2; text-align: right !important; direction: rtl !important; display: block; width: 100%; font-weight: bold; }
+        .q-content { font-size: 14px; line-height: 2.2; text-align: justify; direction: rtl !important; display: block; width: 100%; font-weight: bold; }
         
         .section-title { width: 100%; text-align: center; font-weight: 900; font-size: 16px; padding: 4px; border-top: 2px solid #000; border-bottom: 2px solid #000; margin: 10px 0; background-color: #f3f4f6; -webkit-print-color-adjust: exact; }
         .page-break-marker { border-top: 2px dashed #cbd5e1; margin: 20px 0; position: relative; text-align: center; color: #94a3b8; font-size: 10px; page-break-after: always; break-after: always; }
@@ -581,7 +580,7 @@
             renderMatchInputs();
         }
 
-        // --- RENDER PAPER (MODIFIED FOR SPACING) ---
+        // --- RENDER PAPER (FIXED TF & WRAP LOGIC) ---
         function renderPaper() {
             const container = document.getElementById('paper_questions');
             container.innerHTML = '';
@@ -609,20 +608,23 @@
                 let mainContent = item.text || '';
                 let extraContentBelow = '';
 
-                // --- SPACING LOGIC START ---
+                // --- SMART WRAP LOGIC ---
+                // We use display: inline-block with white-space: nowrap for the answers block.
+                // This ensures "True/False" or "A) Option" stays together.
+                // If it fits on the line, it flows. If not, it drops to the next line automatically.
+
                 if (item.qType === 'tf') {
-                    // ~5 spaces gap then ( True ~10 spaces / ~10 spaces False )
-                    mainContent += `<span style="display:inline-block; width: 30px;"></span>`;
-                    mainContent += `<span class="inline-block font-bold text-sm font-nrt" dir="ltr" style="white-space: nowrap;">( ڕاست <span style="display:inline-block; width: 50px; text-align:center;">/</span> هەڵە )</span>`;
+                    // Added margin-right for the spacing requested. Removed dir=ltr to fix text issue.
+                    mainContent += `<span style="display:inline-block; margin-right: 30px; font-weight:bold; white-space: nowrap;">( ڕاست &nbsp;&nbsp;&nbsp;&nbsp;&nbsp;/&nbsp;&nbsp;&nbsp;&nbsp;&nbsp; هەڵە )</span>`;
                 } 
                 else if (item.qType === 'mcq' && item.options) {
                      const labels = ['A','B','C','D','E'];
-                     // Gap before options start
-                     mainContent += `<span style="display:inline-block; width: 20px;"></span>`; 
+                     // margin-right: 30px creates the gap before the first option.
+                     mainContent += `<span style="display:inline-block; width: 10px;"></span>`; 
                      item.options.forEach((opt, i) => {
                         if(opt.text) {
-                            // Gap between options (~5-10 spaces)
-                            mainContent += `<span class="inline-block ml-8 font-bold text-sm"><span class="font-mono">${labels[i]})</span> ${opt.text}</span>`;
+                            // Each option is an inline-block. It wraps if needed.
+                            mainContent += `<span style="display:inline-block; white-space: nowrap; margin-right: 25px; font-weight:bold; font-size:13px;"><span class="font-mono">${labels[i]})</span> ${opt.text}</span>`;
                         }
                      });
                 }
@@ -634,7 +636,6 @@
                      });
                      extraContentBelow += `</table></div>`;
                 }
-                // --- SPACING LOGIC END ---
 
                 let content = `
                 <div class="flex items-start gap-2 w-full q-wrapper relative group mt-2">
