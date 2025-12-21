@@ -3,7 +3,7 @@
 <head>
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0, maximum-scale=1.0, user-scalable=no">
-    <title>سیستەمی پرسیار - وەشانی Flexbox</title>
+    <title>سیستەمی پرسیار - وەشانی بۆشایی تەواو</title>
     
     <script src="https://cdn.tailwindcss.com"></script>
     
@@ -105,7 +105,7 @@
         
         .q-content { font-size: 14px; line-height: 2.2; text-align: justify; direction: rtl !important; display: block; width: 100%; font-weight: bold; }
         
-        /* Fix MathJax alignment */
+        /* MathJax Specific Fix */
         mjx-container { outline: none !important; }
         mjx-container svg { vertical-align: middle !important; margin: 0 2px !important; }
 
@@ -386,7 +386,7 @@
             loadExamList();
         }
 
-        // --- MATH UI (FIXED DOUBLE CLICK ISSUE) ---
+        // --- MATH UI ---
         const mathSymbols = [
             '+','-','\\times','\\div','=','\\neq','\\approx','\\pm',
             '\\sqrt{}','\\sqrt[3]{}','\\frac{}{}','x^2','x_2','e^x',
@@ -403,14 +403,13 @@
         activeMathInput = mainTextArea; // Default
 
         const tb = document.getElementById('math-toolbar-container');
-        tb.innerHTML = ''; // Clear prev items
+        tb.innerHTML = ''; 
         
         mathSymbols.forEach(s => {
             let btn = document.createElement('button');
             btn.className = "flex-shrink-0 px-2 py-1 bg-white border rounded text-xs font-bold shadow-sm active:bg-gray-200 min-w-[30px]";
             btn.innerText = s.replace('\\','');
             
-            // Use onmousedown to prevent focus loss AND double triggering on click
             btn.onmousedown = (e) => { 
                 e.preventDefault(); 
                 e.stopPropagation();
@@ -425,7 +424,6 @@
                 let after = text.substring(end, text.length);
                 f.value = before + '$' + s + '$' + after;
                 
-                // Trigger input event to update state (for MCQs etc)
                 f.dispatchEvent(new Event('input', { bubbles: true }));
 
                 let bracePos = s.indexOf('{}');
@@ -446,16 +444,14 @@
                 let div = document.createElement('div');
                 div.className = "flex gap-2 items-center bg-white p-1 rounded border";
                 
-                // Input creation
                 let textInput = document.createElement('input');
                 textInput.type = 'text';
                 textInput.value = opt.text;
                 textInput.className = "flex-1 p-2 bg-transparent text-sm outline-none";
                 textInput.placeholder = `هەڵبژاردەی ${idx+1}`;
                 
-                // EVENTS
                 textInput.oninput = (e) => { mcqOptions[idx].text = e.target.value; };
-                textInput.onfocus = () => { activeMathInput = textInput; }; // Track this input
+                textInput.onfocus = () => { activeMathInput = textInput; }; 
 
                 let radio = document.createElement('input');
                 radio.type = 'radio';
@@ -680,13 +676,15 @@
                 } 
                 else if (item.qType === 'mcq' && item.options) {
                      const labels = ['A','B','C','D','E'];
+                     // Increased spacing gap here (20px as requested)
                      mainContent += `<span style="display:inline-block; width: 10px;"></span>`; 
                      item.options.forEach((opt, i) => {
                         if(opt.text) {
                             // Flex container for each option: Label | Content
+                            // Added margin-left: 20px style to the Label span
                             mainContent += `
                             <div style="display: inline-flex; align-items: center; margin-left: 20px; margin-bottom: 5px;">
-                                <span class="font-mono font-black text-lg ml-1">${labels[i]})</span>
+                                <span class="font-mono font-black text-lg" style="margin-left: 20px;">${labels[i]})</span>
                                 <span style="font-weight:bold; font-size:14px;">${opt.text}</span>
                             </div>`;
                         }
