@@ -3,7 +3,7 @@
 <head>
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0, maximum-scale=1.0, user-scalable=no">
-    <title>سیستەمی پرسیار - پارەدان و کۆد</title>
+    <title>سیستەمی پرسیار</title>
     
     <script src="https://cdn.tailwindcss.com"></script>
     <script src="https://cdnjs.cloudflare.com/ajax/libs/html2pdf.js/0.10.1/html2pdf.bundle.min.js"></script>
@@ -31,21 +31,17 @@
             const app = initializeApp(firebaseConfig);
             const auth = getAuth(app);
             const db = getFirestore(app);
-            const appId = 'exam-system-v12-locked'; // Changed app ID version
+            // Must match the ID in the admin panel
+            const appId = 'exam-system-v12-locked'; 
 
             window.firebaseApp = { auth, db, appId, doc, getDoc, setDoc, addDoc, deleteDoc, updateDoc, collection, getDocs, query, orderBy };
 
             onAuthStateChanged(auth, (user) => {
                 if (user) {
                     window.currentUser = user;
-                    // Check if already logged in locally
                     if(localStorage.getItem('is_logged_in') === 'true') {
                         document.getElementById('login-overlay').style.display = 'none';
                         loadExamList();
-                        // Check if admin to show admin tab
-                        if(localStorage.getItem('is_admin') === 'true') {
-                            document.getElementById('tab-admin').classList.remove('hidden');
-                        }
                     }
                 } else {
                     signInAnonymously(auth);
@@ -84,7 +80,6 @@
         .content-area { flex: 1; overflow: hidden; display: flex; position: relative; }
         #editor-panel, #preview-panel { overflow-y: auto; height: 100%; padding-bottom: 150px; -webkit-overflow-scrolling: touch; }
         
-        /* A4 PAPER */
         .a4-paper { 
             width: 210mm; min-height: 297mm; background: white; margin: 0 auto; padding: 10mm; 
             box-shadow: 0 4px 15px rgba(0,0,0,0.1); font-family: 'Nrt Reg', sans-serif; 
@@ -105,33 +100,12 @@
         .q-wrapper { margin-bottom: 6px; break-inside: avoid; } 
         .q-number { background: #000; color: white; width: 22px; height: 22px; border-radius: 50%; display: inline-flex; align-items: center; justify-content: center; font-size: 11px; margin-left: 6px; font-weight: bold; -webkit-print-color-adjust: exact; print-color-adjust: exact; flex-shrink: 0; }
         .q-sub-label { font-weight: bold; margin-left: 5px; min-width: 20px; display: inline-block; font-size: 14px; }
-        
         .q-content { font-size: 14px; line-height: 2.2; text-align: justify; direction: rtl !important; display: block; width: 100%; font-weight: bold; }
         
-        /* MathJax Spacing Fix */
-        mjx-container { 
-            display: inline-block !important;
-            margin: 0 8px !important; 
-            vertical-align: middle !important;
-            outline: none !important;
-        }
+        mjx-container { display: inline-block !important; margin: 0 8px !important; vertical-align: middle !important; outline: none !important; }
         
-        /* Fix MCQ Alignment */
-        .mcq-option-wrapper {
-            display: inline-flex !important; 
-            align-items: center !important;  
-            margin-left: 20px;
-            margin-bottom: 5px;
-            height: auto;
-        }
-        
-        .mcq-label {
-            font-family: monospace;
-            font-weight: 900;
-            font-size: 16px;
-            margin-left: 5px;
-            flex-shrink: 0;
-        }
+        .mcq-option-wrapper { display: inline-flex !important; align-items: center !important; margin-left: 20px; margin-bottom: 5px; height: auto; }
+        .mcq-label { font-family: monospace; font-weight: 900; font-size: 16px; margin-left: 5px; flex-shrink: 0; }
 
         .section-title { width: 100%; text-align: center; font-weight: 900; font-size: 16px; padding: 4px; border-top: 2px solid #000; border-bottom: 2px solid #000; margin: 10px 0; background-color: #f3f4f6; -webkit-print-color-adjust: exact; }
         .page-break-marker { border-top: 2px dashed #cbd5e1; margin: 20px 0; position: relative; text-align: center; color: #94a3b8; font-size: 10px; page-break-after: always; break-after: always; }
@@ -193,26 +167,11 @@
                 <button onclick="createNewExam()" class="text-xs bg-green-100 text-green-700 px-2 py-1 rounded">+ نوێ</button>
             </div>
 
-            <div class="flex text-xs font-bold border-b bg-white sticky top-[50px] z-10 shadow-sm overflow-x-auto">
+            <div class="flex text-xs font-bold border-b bg-white sticky top-[50px] z-10 shadow-sm">
                 <button onclick="setTab('create')" id="tab-create" class="flex-1 py-3 text-brand-600 border-b-2 border-brand-600 bg-blue-50">نووسین</button>
                 <button onclick="setTab('archive')" id="tab-archive" class="flex-1 py-3 text-gray-500">ئەرشیف</button>
                 <button onclick="setTab('bank')" id="tab-bank" class="flex-1 py-3 text-gray-500">بانک</button>
                 <button onclick="setTab('settings')" id="tab-settings" class="flex-1 py-3 text-gray-500">ڕێکخستن</button>
-                <button onclick="setTab('admin')" id="tab-admin" class="hidden flex-1 py-3 text-purple-600 bg-purple-50"><i class="fa-solid fa-user-shield"></i> ئەدمین</button>
-            </div>
-
-            <div id="view-admin" class="hidden flex-1 p-3 space-y-3 bg-purple-50">
-                <h3 class="font-bold text-purple-800 text-sm border-b pb-2">دروستکردنی کۆدی نوێ</h3>
-                <div class="flex gap-2">
-                    <input type="text" id="admin-new-code" class="flex-1 p-2 border rounded text-center font-bold" placeholder="کۆد بنووسە یان Generated">
-                    <button onclick="generateRandomCode()" class="bg-gray-200 px-3 rounded text-sm"><i class="fa-solid fa-shuffle"></i></button>
-                </div>
-                <button onclick="createAccessCode()" class="w-full bg-purple-600 text-white py-2 rounded font-bold hover:bg-purple-700">تۆمارکردنی کۆد</button>
-                
-                <div class="mt-4">
-                    <h3 class="font-bold text-gray-600 text-xs mb-2">کۆدە چالاکەکان:</h3>
-                    <div id="admin-code-list" class="space-y-2 h-64 overflow-y-auto"></div>
-                </div>
             </div>
 
             <div id="view-create" class="flex-1 p-3 space-y-3">
@@ -384,19 +343,16 @@
         let bankData = [];
         let editIndex = -1;
         let activeMathInput = null; 
-        
         let bankEditMode = false;
         let bankEditId = null;
-
         let mcqOptions = [{text:'', correct:false}, {text:'', correct:false}, {text:'', correct:false}, {text:'', correct:false}];
         let matchPairs = [{right:'', left:''}, {right:'', left:''}];
         let tfAnswer = 'true'; 
-        let userIsAdmin = false;
         
         let deviceId = localStorage.getItem('did') || crypto.randomUUID();
         localStorage.setItem('did', deviceId);
 
-        // --- SECURE LOGIN LOGIC ---
+        // --- SECURE LOGIN LOGIC (Standard User) ---
         async function checkPassword() {
             const input = document.getElementById('password-input').value.trim();
             const btn = document.getElementById('login-btn');
@@ -406,28 +362,17 @@
             errorMsg.classList.add('hidden');
             if(!input) return;
 
-            // MASTER ADMIN CODE
-            if(input === '11223344009') {
-                userIsAdmin = true;
-                localStorage.setItem('is_admin', 'true');
-                grantAccess();
-                document.getElementById('tab-admin').classList.remove('hidden');
-                return;
-            }
-
             btn.disabled = true;
             loader.classList.remove('hidden');
             
             try {
                 const { db, doc, getDoc, updateDoc, appId } = window.firebaseApp;
-                // Check if code exists in 'access_codes' collection
                 const docRef = doc(db, 'artifacts', appId, 'access_codes', input);
                 const docSnap = await getDoc(docRef);
 
                 if (docSnap.exists()) {
                     const codeData = docSnap.data();
                     
-                    // DEVICE LOCK LOGIC
                     if (!codeData.used) {
                         // First time use: Lock to this device
                         await updateDoc(docRef, { 
@@ -441,11 +386,11 @@
                         grantAccess();
                     } else {
                         // Used on different device
-                        errorMsg.innerText = "ئەم کۆدە پێشتر لەسەر ئامێرێکی تر بەکارهاتووە! ناتوانیت لێرە بەکاری بهێنیت.";
+                        errorMsg.innerText = "ئەم کۆدە پێشتر لەسەر ئامێرێکی تر بەکارهاتووە!";
                         errorMsg.classList.remove('hidden');
                     }
                 } else {
-                    errorMsg.innerText = "کۆدەکە هەڵەیە یان بوونی نییە";
+                    errorMsg.innerText = "کۆدەکە هەڵەیە";
                     errorMsg.classList.remove('hidden');
                 }
             } catch(e) {
@@ -464,20 +409,12 @@
             loadExamList();
         }
 
-        // --- MATH UI (FIXED DOUBLE CLICK ISSUE) ---
-        const mathSymbols = [
-            '+','-','\\times','\\div','=','\\neq','\\approx','\\pm',
-            '\\sqrt{}','\\sqrt[3]{}','\\frac{}{}','x^2','x_2','e^x',
-            '<','>','\\leq','\\geq','\\infty','\\pi','\\circ','\\angle','\\triangle',
-            '\\alpha','\\beta','\\theta','\\lambda','\\Delta',
-            '\\in','\\notin','\\cup','\\cap','\\subset','\\subseteq','\\emptyset',
-            '\\rightarrow','\\Rightarrow','\\Leftrightarrow',
-            '\\sum','\\int','\\lim','\\log','\\ln','\\sin','\\cos','\\tan'
-        ];
+        // --- MATH UI ---
+        const mathSymbols = ['+','-','\\times','\\div','=','\\neq','\\approx','\\pm','\\sqrt{}','\\sqrt[3]{}','\\frac{}{}','x^2','x_2','e^x','<','>','\\leq','\\geq','\\infty','\\pi','\\circ','\\angle','\\triangle','\\alpha','\\beta','\\theta','\\lambda','\\Delta','\\in','\\notin','\\cup','\\cap','\\subset','\\subseteq','\\emptyset','\\rightarrow','\\Rightarrow','\\Leftrightarrow','\\sum','\\int','\\lim','\\log','\\ln','\\sin','\\cos','\\tan'];
         
         const mainTextArea = document.getElementById('q_text');
         mainTextArea.addEventListener('focus', () => { activeMathInput = mainTextArea; });
-        activeMathInput = mainTextArea; // Default
+        activeMathInput = mainTextArea; 
 
         const tb = document.getElementById('math-toolbar-container');
         tb.innerHTML = ''; 
@@ -488,27 +425,17 @@
             btn.innerText = s.replace('\\','');
             
             btn.onmousedown = (e) => { 
-                e.preventDefault(); 
-                e.stopPropagation();
-                
+                e.preventDefault(); e.stopPropagation();
                 if(!activeMathInput) return;
-
                 let f = activeMathInput;
                 let start = f.selectionStart;
                 let end = f.selectionEnd;
                 let text = f.value;
-                let before = text.substring(0, start);
-                let after = text.substring(end, text.length);
-                f.value = before + '$' + s + '$' + after;
-                
+                f.value = text.substring(0, start) + '$' + s + '$' + text.substring(end, text.length);
                 f.dispatchEvent(new Event('input', { bubbles: true }));
-
                 let bracePos = s.indexOf('{}');
-                if(bracePos !== -1) {
-                    f.selectionStart = f.selectionEnd = start + 1 + bracePos + 1;
-                } else {
-                    f.selectionStart = f.selectionEnd = start + s.length + 2; 
-                }
+                if(bracePos !== -1) f.selectionStart = f.selectionEnd = start + 1 + bracePos + 1;
+                else f.selectionStart = f.selectionEnd = start + s.length + 2; 
             };
             tb.appendChild(btn);
         });
@@ -520,32 +447,24 @@
             mcqOptions.forEach((opt, idx) => {
                 let div = document.createElement('div');
                 div.className = "flex gap-2 items-center bg-white p-1 rounded border";
-                
                 let textInput = document.createElement('input');
                 textInput.type = 'text';
                 textInput.value = opt.text;
                 textInput.className = "flex-1 p-2 bg-transparent text-sm outline-none";
                 textInput.placeholder = `هەڵبژاردەی ${idx+1}`;
-                
                 textInput.oninput = (e) => { mcqOptions[idx].text = e.target.value; };
                 textInput.onfocus = () => { activeMathInput = textInput; }; 
-
                 let radio = document.createElement('input');
                 radio.type = 'radio';
                 radio.name = 'correct_opt';
                 radio.checked = opt.correct;
                 radio.className = "w-5 h-5 accent-green-600";
                 radio.onclick = () => mcqOptions.forEach((o,i)=>o.correct=(i===idx));
-
                 let delBtn = document.createElement('button');
                 delBtn.innerHTML = '<i class="fa-solid fa-xmark"></i>';
                 delBtn.className = "text-red-400 px-2";
                 delBtn.onclick = () => { if(mcqOptions.length>2){mcqOptions.splice(idx,1);renderMCQInputs();} };
-
-                div.appendChild(radio);
-                div.appendChild(textInput);
-                div.appendChild(delBtn);
-                container.appendChild(div);
+                div.appendChild(radio); div.appendChild(textInput); div.appendChild(delBtn); container.appendChild(div);
             });
         }
         function addMCQOption() { mcqOptions.push({text:'', correct:false}); renderMCQInputs(); }
@@ -556,14 +475,12 @@
             matchPairs.forEach((pair, idx) => {
                 let div = document.createElement('div');
                 div.className = "flex gap-1 items-center bg-white p-1 rounded border";
-                
                 let rightInput = document.createElement('input');
                 rightInput.value = pair.right;
                 rightInput.className = "flex-1 p-1 border rounded text-xs text-right h-8";
                 rightInput.placeholder = "ڕاست";
                 rightInput.oninput = (e) => { matchPairs[idx].right = e.target.value; };
                 rightInput.onfocus = () => { activeMathInput = rightInput; };
-
                 let leftInput = document.createElement('input');
                 leftInput.value = pair.left;
                 leftInput.className = "flex-1 p-1 border rounded text-xs text-left h-8";
@@ -571,16 +488,11 @@
                 leftInput.dir = "ltr";
                 leftInput.oninput = (e) => { matchPairs[idx].left = e.target.value; };
                 leftInput.onfocus = () => { activeMathInput = leftInput; };
-
                 let delBtn = document.createElement('button');
                 delBtn.innerHTML = '<i class="fa-solid fa-xmark"></i>';
                 delBtn.className = "text-red-400 px-1 text-xs";
                 delBtn.onclick = () => { if(matchPairs.length>1){matchPairs.splice(idx,1);renderMatchInputs();} };
-
-                div.appendChild(rightInput);
-                div.appendChild(leftInput);
-                div.appendChild(delBtn);
-                container.appendChild(div);
+                div.appendChild(rightInput); div.appendChild(leftInput); div.appendChild(delBtn); container.appendChild(div);
             });
         }
         function addMatchPair() { matchPairs.push({right:'', left:''}); renderMatchInputs(); }
@@ -666,7 +578,6 @@
         function editItem(idx) {
             const item = examData[idx];
             if(item.type === 'break' || item.type === 'title') return;
-            
             editIndex = idx;
             loadItemToForm(item);
             document.getElementById('btn-add').innerText = "گۆڕانکاری";
@@ -680,14 +591,12 @@
             document.getElementById('q_spacing').value = item.spacing || 0;
             document.getElementById('spacing-display').innerText = item.spacing || 0;
             document.getElementById('q_sub_style').value = item.subStyle || 'none';
-            
             if(item.qType === 'mcq') mcqOptions = JSON.parse(JSON.stringify(item.options));
             if(item.qType === 'match') matchPairs = JSON.parse(JSON.stringify(item.matchPairs));
             if(item.qType === 'tf') {
                 tfAnswer = item.tfAnswer || 'true';
                 document.querySelector(`input[name="tf_choice"][value="${tfAnswer}"]`).checked = true;
             }
-            
             toggleQuestionInputs();
             renderMCQInputs();
             renderMatchInputs();
@@ -699,7 +608,6 @@
             bankEditMode = false;
             bankEditId = null;
             document.getElementById('bank-edit-alert').classList.add('hidden');
-            
             document.getElementById('q_text').value = '';
             document.getElementById('q_image').value = '';
             document.getElementById('q_spacing').value = 0;
@@ -707,17 +615,14 @@
             document.getElementById('btn-add').innerText = "زیادکردن";
             document.getElementById('btn-add').classList.replace('bg-green-600', 'bg-brand-600');
             document.getElementById('btn-add').classList.replace('bg-orange-600', 'bg-brand-600'); 
-            
             tfAnswer = 'true';
             document.querySelector(`input[name="tf_choice"][value="true"]`).checked = true;
-
             mcqOptions = [{text:'', correct:false}, {text:'', correct:false}, {text:'', correct:false}, {text:'', correct:false}];
             matchPairs = [{right:'', left:''}, {right:'', left:''}];
             renderMCQInputs();
             renderMatchInputs();
         }
 
-        // --- RENDER PAPER (FIXED TF & WRAP LOGIC - FLEXBOX) ---
         function renderPaper() {
             const container = document.getElementById('paper_questions');
             container.innerHTML = '';
@@ -741,24 +646,17 @@
                 }
 
                 let spacer = item.spacing > 0 ? `<div style="height: ${item.spacing}cm"></div>` : '';
-
                 let mainContent = item.text || '';
                 let extraContentBelow = '';
-
-                // --- SMART WRAP LOGIC WITH FLEXBOX ---
-                // Using flexbox ensures Label (A) and Content (x+y) are distinct items that never text-wrap into each other.
 
                 if (item.qType === 'tf') {
                     mainContent += `<span style="display:inline-block; margin-right: 30px; font-weight:bold; white-space: nowrap;">( ڕاست &nbsp;&nbsp;&nbsp;&nbsp;&nbsp;/&nbsp;&nbsp;&nbsp;&nbsp;&nbsp; هەڵە )</span>`;
                 } 
                 else if (item.qType === 'mcq' && item.options) {
                      const labels = ['A','B','C','D','E'];
-                     // Increased spacing gap here (20px as requested)
                      mainContent += `<span style="display:inline-block; width: 10px;"></span>`; 
                      item.options.forEach((opt, i) => {
                         if(opt.text) {
-                            // Flex container for each option: Label | Content
-                            // Added margin-left: 20px style to the Label span
                             mainContent += `
                             <div class="mcq-option-wrapper">
                                 <span class="mcq-label">${labels[i]})</span>
@@ -806,7 +704,6 @@
             examData.forEach((item, idx) => {
                 let div = document.createElement('div');
                 div.className = "bg-white p-3 rounded-lg border flex justify-between items-center shadow-sm text-xs";
-                
                 if(item.type === 'break') {
                      div.innerHTML = `<span class="text-gray-400 border-b border-dashed w-full text-center">--- پەڕەی نوێ ---</span> <button onclick="deleteItem(${idx})" class="text-red-500 p-2"><i class="fa-solid fa-trash"></i></button>`;
                 } else if(item.type === 'title') {
@@ -827,7 +724,6 @@
             new Sortable(list, { animation: 150, onEnd: (evt) => { const item = examData.splice(evt.oldIndex, 1)[0]; examData.splice(evt.newIndex, 0, item); renderPaper(); updateList(); }});
         }
 
-        // --- SHUFFLE LOGIC ---
         function shuffleQuestions() {
             if(!confirm('تەنها پرسیارە هەڵبژاردنەکان تێکەڵ دەکەیت؟')) return;
             examData.forEach(q => {
@@ -858,7 +754,6 @@
             updateList();
         }
 
-        // --- HEADER LOGO ---
         document.getElementById('h_logo_input').addEventListener('change', function(e) {
             if(e.target.files[0]) {
                 const reader = new FileReader();
@@ -873,27 +768,17 @@
         const savedLogo = localStorage.getItem('header_logo_data');
         if(savedLogo) document.getElementById('header_logo_view').src = savedLogo;
 
-        // --- FIREBASE OPS ---
         async function saveCurrentExam() {
             if(!window.currentUser) return alert('تکایە سەرەتا بچۆژوورەوە');
             const { db, collection, addDoc, doc, updateDoc, appId } = window.firebaseApp;
             const uid = window.currentUser.uid;
-            
             const title = prompt('ناوی تاقیکردنەوە:', document.getElementById('h_subject').value);
             if(!title) return;
-
             const headerData = {};
             ['gov','min','dir','school','subject','class','time','type','year','date', 'group'].forEach(id => {
                 headerData[id] = document.getElementById('h_'+id).value;
             });
-
-            const payload = {
-                title: title,
-                data: examData,
-                header: headerData,
-                updatedAt: new Date().toISOString()
-            };
-
+            const payload = { title: title, data: examData, header: headerData, updatedAt: new Date().toISOString() };
             try {
                 if(currentExamId) {
                     await updateDoc(doc(db, 'artifacts', appId, 'users', uid, 'exams', currentExamId), payload);
@@ -1077,79 +962,6 @@
             const win = window.open('','_blank');
             win.document.write(html);
         }
-
-        // --- ADMIN PANEL FUNCTIONS ---
-        function generateRandomCode() {
-            const code = Math.floor(100000 + Math.random() * 900000).toString();
-            document.getElementById('admin-new-code').value = code;
-        }
-
-        async function createAccessCode() {
-            const code = document.getElementById('admin-new-code').value.trim();
-            if(!code) return alert('تکایە کۆد بنووسە');
-            
-            const { db, doc, setDoc, appId } = window.firebaseApp;
-            try {
-                await setDoc(doc(db, 'artifacts', appId, 'access_codes', code), {
-                    used: false,
-                    deviceId: null,
-                    createdAt: new Date().toISOString(),
-                    createdBy: window.currentUser.uid
-                });
-                alert('کۆد تۆمارکرا: ' + code);
-                loadAdminCodes();
-                document.getElementById('admin-new-code').value = '';
-            } catch(e) {
-                console.error(e);
-                alert('هەڵە لە تۆمارکردن');
-            }
-        }
-
-        async function loadAdminCodes() {
-            const { db, collection, getDocs, query, orderBy, appId } = window.firebaseApp;
-            const container = document.getElementById('admin-code-list');
-            container.innerHTML = '<div class="text-center text-gray-500">Loading...</div>';
-            
-            try {
-                const q = query(collection(db, 'artifacts', appId, 'access_codes'), orderBy('createdAt', 'desc'));
-                const snap = await getDocs(q);
-                container.innerHTML = '';
-                
-                snap.forEach(doc => {
-                    const d = doc.data();
-                    const statusClass = d.used ? 'bg-red-100 text-red-700' : 'bg-green-100 text-green-700';
-                    const statusText = d.used ? 'بەکارهاتووە' : 'نوێ';
-                    
-                    const div = document.createElement('div');
-                    div.className = "flex justify-between items-center bg-white p-2 rounded border shadow-sm text-sm";
-                    div.innerHTML = `
-                        <div class="font-mono font-bold text-lg select-all">${doc.id}</div>
-                        <div class="flex items-center gap-2">
-                            <span class="text-xs px-2 py-1 rounded ${statusClass}">${statusText}</span>
-                            ${d.used ? `<span class="text-[10px] text-gray-400" title="${d.deviceId}">${d.usedAt ? new Date(d.usedAt).toLocaleDateString() : ''}</span>` : ''}
-                            <button onclick="deleteAccessCode('${doc.id}')" class="text-red-500 hover:bg-red-50 p-1 rounded"><i class="fa-solid fa-trash"></i></button>
-                        </div>
-                    `;
-                    container.appendChild(div);
-                });
-            } catch(e) {
-                console.error(e);
-                container.innerHTML = 'Error loading codes.';
-            }
-        }
-
-        async function deleteAccessCode(code) {
-            if(!confirm('دڵنیای لە سڕینەوەی ئەم کۆدە؟')) return;
-            const { db, doc, deleteDoc, appId } = window.firebaseApp;
-            await deleteDoc(doc(db, 'artifacts', appId, 'access_codes', code));
-            loadAdminCodes();
-        }
-
-        // Load admin codes when tab is clicked
-        document.getElementById('tab-admin').addEventListener('click', () => {
-            loadAdminCodes();
-        });
-
     </script>
 </body>
 </html>
