@@ -123,7 +123,7 @@
         .no-scrollbar::-webkit-scrollbar { display: none; }
     </style>
 </head>
-<body class="font-sans text-slate-800 main-layout">
+<body class="font-sans text-slate-800 main-layout" onload="loadLocalDraft()">
 
     <div id="login-overlay" class="fixed inset-0 bg-slate-900/95 z-[100] flex items-center justify-center backdrop-blur-sm p-4">
         <div class="bg-white p-6 rounded-2xl shadow-2xl w-full max-w-sm text-center border-t-4 border-brand-500">
@@ -190,12 +190,18 @@
 
                 <div id="math-toolbar-container" class="flex overflow-x-auto gap-1 py-1 mb-1 no-scrollbar"></div>
                 
+                <div class="flex gap-1 mb-1 border-b pb-1">
+                    <button onclick="insertTag('b')" class="px-2 py-1 bg-gray-100 rounded text-xs font-bold hover:bg-gray-200">B</button>
+                    <button onclick="insertTag('i')" class="px-2 py-1 bg-gray-100 rounded text-xs italic hover:bg-gray-200">I</button>
+                    <button onclick="insertTag('u')" class="px-2 py-1 bg-gray-100 rounded text-xs underline hover:bg-gray-200">U</button>
+                </div>
+                
                 <textarea id="q_text" rows="2" class="w-full p-2 border rounded text-sm focus:border-brand-500 focus:ring-1 focus:ring-brand-200 transition text-right" dir="auto" placeholder="دەقی پرسیار..."></textarea>
                 
                 <div class="flex gap-2 items-center">
                      <div class="flex-1 bg-slate-50 border rounded p-1 flex items-center overflow-hidden">
                         <i class="fa-regular fa-image text-gray-400 mx-2"></i>
-                        <input type="file" id="q_image" class="w-full text-xs bg-transparent">
+                        <input type="file" id="q_image" accept="image/*" class="w-full text-xs bg-transparent">
                      </div>
                      <input type="number" id="q_score" value="2" class="w-16 text-center border rounded text-sm font-bold p-1" title="نمرە">
                 </div>
@@ -351,6 +357,82 @@
         let deviceId = localStorage.getItem('did') || crypto.randomUUID();
         localStorage.setItem('did', deviceId);
 
+        // --- RICH TEXT ---
+        function insertTag(tag) {
+            const textarea = document.getElementById('q_text');
+            const start = textarea.selectionStart;
+            const end = textarea.selectionEnd;
+            const text = textarea.value;
+            const before = text.substring(0, start);
+            const selected = text.substring(start, end);
+            const after = text.substring(end);
+            textarea.value = before + `<${tag}>` + selected + `</${tag}>` + after;
+            textarea.focus();
+            textarea.selectionStart = start + tag.length + 2;
+            textarea.selectionEnd = end + tag.length + 2;
+        }
+
+        // --- IMAGE COMPRESSION ---
+        function compressImage(file, callback) {
+            const reader = new FileReader();
+            reader.readAsDataURL(file);
+            reader.onload = (e) => {
+                const img = new Image();
+                img.src = e.target.result;
+                img.onload = () => {
+                    const canvas = document.createElement('canvas');
+                    const ctx = canvas.getContext('2d');
+                    // Resize to max 800px width for A4
+                    const maxWidth = 800;
+                    let width = img.width;
+                    let height = img.height;
+                    
+                    if (width > maxWidth) {
+                        height *= maxWidth / width;
+                        width = maxWidth;
+                    }
+                    
+                    canvas.width = width;
+                    canvas.height = height;
+                    ctx.drawImage(img, 0, 0, width, height);
+                    // Compress quality to 0.7
+                    callback(canvas.toDataURL('image/jpeg', 0.7));
+                }
+            }
+        }
+
+        // --- AUTO SAVE ---
+        function saveLocalDraft() {
+            localStorage.setItem('exam_draft_data', JSON.stringify(examData));
+            const headerData = {};
+            ['gov','min','dir','school','subject','class','time','type','year','date', 'group'].forEach(id => {
+               headerData[id] = document.getElementById('h_'+id).value;
+            });
+            localStorage.setItem('exam_draft_header', JSON.stringify(headerData));
+        }
+
+        function loadLocalDraft() {
+            // Always try to load draft if no exam is active
+            if(currentExamId) return;
+
+            const draftData = localStorage.getItem('exam_draft_data');
+            const draftHeader = localStorage.getItem('exam_draft_header');
+            
+            if(draftData) {
+                examData = JSON.parse(draftData);
+                renderPaper();
+                updateList();
+            }
+            if(draftHeader) {
+                const header = JSON.parse(draftHeader);
+                for(let key in header) {
+                    if(document.getElementById('h_'+key)) document.getElementById('h_'+key).value = header[key];
+                }
+                updatePaper();
+            }
+        }
+
+
         // --- SECURE LOGIN LOGIC ---
         async function checkPassword() {
             const input = document.getElementById('password-input').value.trim();
@@ -372,7 +454,6 @@
                 if (docSnap.exists()) {
                     const codeData = docSnap.data();
                     
-                    // --- EXPIRY CHECK ADDED HERE ---
                     const today = new Date().toISOString().split('T')[0];
                     if (codeData.expiryDate && codeData.expiryDate < today) {
                         errorMsg.innerText = "ئەم کۆدە بەسەرچووە!";
@@ -381,7 +462,6 @@
                         btn.disabled = false;
                         return;
                     }
-                    // --------------------------------
 
                     if (!codeData.used) {
                         await updateDoc(docRef, { used: true, deviceId: deviceId, usedAt: new Date().toISOString() });
@@ -514,10 +594,10 @@
         // --- ADD ITEMS ---
         function addSectionTitle() {
             const title = prompt("سەردێڕ بنووسە:");
-            if(title) { examData.push({ type: 'title', id: Date.now(), text: title }); renderPaper(); updateList(); }
+            if(title) { examData.push({ type: 'title', id: Date.now(), text: title }); renderPaper(); updateList(); saveLocalDraft(); }
         }
 
-        function addPageBreak() { examData.push({ type: 'break', id: Date.now() }); renderPaper(); updateList(); }
+        function addPageBreak() { examData.push({ type: 'break', id: Date.now() }); renderPaper(); updateList(); saveLocalDraft(); }
 
         async function addItem() {
             const text = document.getElementById('q_text').value;
@@ -563,20 +643,23 @@
                 else examData.push(item);
                 renderPaper();
                 updateList();
+                saveLocalDraft(); // Auto Save
                 clearForm();
             };
 
             if(file) {
-                const reader = new FileReader();
-                reader.onload = (e) => { item.img = e.target.result; finalizeItem(); };
-                reader.readAsDataURL(file);
+                // Use compression here
+                compressImage(file, (compressedDataUrl) => {
+                    item.img = compressedDataUrl;
+                    finalizeItem();
+                });
             } else {
                 if(editIndex > -1 && examData[editIndex].img) item.img = examData[editIndex].img; 
                 finalizeItem();
             }
         }
 
-        function deleteItem(idx) { if(confirm('دڵنیای؟')) { examData.splice(idx, 1); renderPaper(); updateList(); } }
+        function deleteItem(idx) { if(confirm('دڵنیای؟')) { examData.splice(idx, 1); renderPaper(); updateList(); saveLocalDraft(); } }
 
         function editItem(idx) {
             const item = examData[idx];
@@ -656,9 +739,9 @@
                     mainContent += `<span style="display:inline-block; margin-right: 30px; font-weight:bold; white-space: nowrap;">( ڕاست &nbsp;&nbsp;&nbsp;&nbsp;&nbsp;/&nbsp;&nbsp;&nbsp;&nbsp;&nbsp; هەڵە )</span>`;
                 } 
                 else if (item.qType === 'mcq' && item.options) {
-                     const labels = ['A','B','C','D','E'];
-                     mainContent += `<span style="display:inline-block; width: 10px;"></span>`; 
-                     item.options.forEach((opt, i) => {
+                      const labels = ['A','B','C','D','E'];
+                      mainContent += `<span style="display:inline-block; width: 10px;"></span>`; 
+                      item.options.forEach((opt, i) => {
                         if(opt.text) {
                             mainContent += `
                             <div class="mcq-option-wrapper">
@@ -666,15 +749,15 @@
                                 <span style="font-weight:bold; font-size:14px;">${opt.text}</span>
                             </div>`;
                         }
-                     });
+                      });
                 }
                 else if(item.qType === 'match' && item.matchPairs) {
-                     extraContentBelow = `<div class="mt-2 w-full flex justify-center">
+                      extraContentBelow = `<div class="mt-2 w-full flex justify-center">
                         <table class="border-collapse w-auto text-sm mr-0">`; 
-                     item.matchPairs.forEach(p => { 
+                      item.matchPairs.forEach(p => { 
                         extraContentBelow += `<tr><td class="pl-4 py-1 font-bold text-right">${p.right}</td><td class="px-4 py-1 text-center text-gray-300">--</td><td class="pr-4 py-1 text-left font-bold" dir="ltr">${p.left}</td></tr>`; 
-                     });
-                     extraContentBelow += `</table></div>`;
+                      });
+                      extraContentBelow += `</table></div>`;
                 }
 
                 let content = `
@@ -708,9 +791,9 @@
                 let div = document.createElement('div');
                 div.className = "bg-white p-3 rounded-lg border flex justify-between items-center shadow-sm text-xs";
                 if(item.type === 'break') {
-                     div.innerHTML = `<span class="text-gray-400 border-b border-dashed w-full text-center">--- پەڕەی نوێ ---</span> <button onclick="deleteItem(${idx})" class="text-red-500 p-2"><i class="fa-solid fa-trash"></i></button>`;
+                      div.innerHTML = `<span class="text-gray-400 border-b border-dashed w-full text-center">--- پەڕەی نوێ ---</span> <button onclick="deleteItem(${idx})" class="text-red-500 p-2"><i class="fa-solid fa-trash"></i></button>`;
                 } else if(item.type === 'title') {
-                     div.innerHTML = `<span class="font-bold w-full text-center bg-gray-100 p-1">[سەردێڕ] ${item.text}</span> <button onclick="deleteItem(${idx})" class="text-red-500 p-2"><i class="fa-solid fa-trash"></i></button>`;
+                      div.innerHTML = `<span class="font-bold w-full text-center bg-gray-100 p-1">[سەردێڕ] ${item.text}</span> <button onclick="deleteItem(${idx})" class="text-red-500 p-2"><i class="fa-solid fa-trash"></i></button>`;
                 } else {
                     let txt = item.text ? item.text.substring(0,15) : (item.qType === 'match' ? 'ڕاکێشان' : 'وێنە');
                     div.innerHTML = `
@@ -724,7 +807,7 @@
                 }
                 list.appendChild(div);
             });
-            new Sortable(list, { animation: 150, onEnd: (evt) => { const item = examData.splice(evt.oldIndex, 1)[0]; examData.splice(evt.newIndex, 0, item); renderPaper(); updateList(); }});
+            new Sortable(list, { animation: 150, onEnd: (evt) => { const item = examData.splice(evt.oldIndex, 1)[0]; examData.splice(evt.newIndex, 0, item); renderPaper(); updateList(); saveLocalDraft(); }});
         }
 
         function shuffleQuestions() {
@@ -755,17 +838,15 @@
             });
             renderPaper();
             updateList();
+            saveLocalDraft();
         }
 
         document.getElementById('h_logo_input').addEventListener('change', function(e) {
             if(e.target.files[0]) {
-                const reader = new FileReader();
-                reader.onload = function(evt) {
-                    const res = evt.target.result;
+                compressImage(e.target.files[0], (res) => {
                     document.getElementById('header_logo_view').src = res;
                     localStorage.setItem('header_logo_data', res); 
-                }
-                reader.readAsDataURL(e.target.files[0]);
+                });
             }
         });
         const savedLogo = localStorage.getItem('header_logo_data');
@@ -822,6 +903,8 @@
             }
             document.getElementById('current-exam-title').innerText = data.title;
             renderPaper(); updateList(); setTab('create');
+            // Save to draft so edits aren't lost
+            saveLocalDraft();
         }
         
         async function deleteExam(id, e) {
@@ -834,7 +917,12 @@
         function createNewExam() {
             currentExamId = null; examData = [];
             document.getElementById('current-exam-title').innerText = "تاقیکردنەوەی نوێ";
+            // Clear inputs
+            ['gov','min','dir','school','subject','class','time','type','year','date', 'group'].forEach(id => {
+                document.getElementById('h_'+id).value = '';
+            });
             renderPaper(); updateList(); setTab('create');
+            saveLocalDraft();
         }
 
         async function addToBank(idx) {
@@ -895,7 +983,7 @@
             newItem.id = Date.now();
             delete newItem._id; 
             examData.push(newItem);
-            renderPaper(); updateList();
+            renderPaper(); updateList(); saveLocalDraft();
             alert('زیادکرا');
         }
 
@@ -916,18 +1004,19 @@
             ['gov','min','dir','school','subject','class','time','type','year','date', 'group'].forEach(id => {
                 const val = document.getElementById('h_'+id).value;
                 if(id === 'group') {
-                     const el = document.getElementById('view_group');
-                     const container = document.getElementById('view_group_container');
-                     if(val) {
-                         el.innerText = val;
-                         container.classList.remove('hidden');
-                     } else {
-                         container.classList.add('hidden');
-                     }
+                      const el = document.getElementById('view_group');
+                      const container = document.getElementById('view_group_container');
+                      if(val) {
+                          el.innerText = val;
+                          container.classList.remove('hidden');
+                      } else {
+                          container.classList.add('hidden');
+                      }
                 } else {
                     if(document.getElementById('view_'+id)) document.getElementById('view_'+id).innerText = val;
                 }
             });
+            saveLocalDraft();
         }
         
         function downloadPDF() {
@@ -938,9 +1027,34 @@
         }
         
         function downloadWord() {
+            const style = document.getElementsByTagName('style')[0].innerText;
             const header = document.querySelector('.exam-header').outerHTML;
             const body = document.getElementById('paper_questions').innerHTML;
-            const html = `<html dir="rtl"><body>${header}${body}</body></html>`;
+            
+            // Adding proper XML namespace for Word and embedded CSS
+            const html = `
+            <html xmlns:o='urn:schemas-microsoft-com:office:office' xmlns:w='urn:schemas-microsoft-com:office:word' dir="rtl">
+            <head>
+                <meta charset="utf-8">
+                <style>
+                    body { font-family: 'Arial', sans-serif; }
+                    ${style}
+                    /* Word specific adjustments */
+                    .a4-paper { width: 100%; box-shadow: none; padding: 0; margin: 0; }
+                    .exam-header { border-bottom: 2px solid #000; }
+                    .mcq-option-wrapper { display: inline-block !important; }
+                    table { border-collapse: collapse; }
+                </style>
+            </head>
+            <body>
+                <div class="WordSection1">
+                    ${header}
+                    <br/>
+                    ${body}
+                </div>
+            </body>
+            </html>`;
+            
             const blob = new Blob(['\ufeff', html], { type: 'application/msword' });
             const link = document.createElement("a"); link.href = URL.createObjectURL(blob); link.download = "exam.doc"; link.click();
         }
