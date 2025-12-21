@@ -3,7 +3,7 @@
 <head>
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0, maximum-scale=1.0, user-scalable=no">
-    <title>سیستەمی پرسیار - وەشانی SVG</title>
+    <title>سیستەمی پرسیار - وەشانی Flexbox</title>
     
     <script src="https://cdn.tailwindcss.com"></script>
     
@@ -105,7 +105,7 @@
         
         .q-content { font-size: 14px; line-height: 2.2; text-align: justify; direction: rtl !important; display: block; width: 100%; font-weight: bold; }
         
-        /* MathJax Specific Fix to prevent double rendering artifacts */
+        /* Fix MathJax alignment */
         mjx-container { outline: none !important; }
         mjx-container svg { vertical-align: middle !important; margin: 0 2px !important; }
 
@@ -644,7 +644,7 @@
             renderMatchInputs();
         }
 
-        // --- RENDER PAPER (FIXED TF & WRAP LOGIC) ---
+        // --- RENDER PAPER (FIXED TF & WRAP LOGIC - FLEXBOX) ---
         function renderPaper() {
             const container = document.getElementById('paper_questions');
             container.innerHTML = '';
@@ -672,23 +672,23 @@
                 let mainContent = item.text || '';
                 let extraContentBelow = '';
 
-                // --- SMART WRAP LOGIC ---
-                // We use display: inline-block with white-space: nowrap for the answers block.
-                // This ensures "True/False" or "A) Option" stays together.
-                // If it fits on the line, it flows. If not, it drops to the next line automatically.
+                // --- SMART WRAP LOGIC WITH FLEXBOX ---
+                // Using flexbox ensures Label (A) and Content (x+y) are distinct items that never text-wrap into each other.
 
                 if (item.qType === 'tf') {
-                    // Added margin-right for the spacing requested. Removed dir=ltr to fix text issue.
                     mainContent += `<span style="display:inline-block; margin-right: 30px; font-weight:bold; white-space: nowrap;">( ڕاست &nbsp;&nbsp;&nbsp;&nbsp;&nbsp;/&nbsp;&nbsp;&nbsp;&nbsp;&nbsp; هەڵە )</span>`;
                 } 
                 else if (item.qType === 'mcq' && item.options) {
                      const labels = ['A','B','C','D','E'];
-                     // margin-right: 30px creates the gap before the first option.
                      mainContent += `<span style="display:inline-block; width: 10px;"></span>`; 
                      item.options.forEach((opt, i) => {
                         if(opt.text) {
-                            // Each option is an inline-block. It wraps if needed.
-                            mainContent += `<span style="display:inline-block; white-space: nowrap; margin-right: 25px; font-weight:bold; font-size:13px;"><span class="font-mono">${labels[i]})</span> ${opt.text}</span>`;
+                            // Flex container for each option: Label | Content
+                            mainContent += `
+                            <div style="display: inline-flex; align-items: center; margin-left: 20px; margin-bottom: 5px;">
+                                <span class="font-mono font-black text-lg ml-1">${labels[i]})</span>
+                                <span style="font-weight:bold; font-size:14px;">${opt.text}</span>
+                            </div>`;
                         }
                      });
                 }
