@@ -2,8 +2,8 @@
 <html lang="ckb" dir="rtl">
 <head>
     <meta charset="UTF-8">
-    <meta name="viewport" content="width=device-width, initial-scale=1.0">
-    <title>ئەدمین پەنێڵ - پێشکەوتوو</title>
+    <meta name="viewport" content="width=device-width, initial-scale=1.0, maximum-scale=1.0, user-scalable=no">
+    <title>ئەدمین - مۆبایل</title>
     <script src="https://cdn.tailwindcss.com"></script>
     <link href="https://fonts.googleapis.com/css2?family=Vazirmatn:wght@300;400;700;900&display=swap" rel="stylesheet">
     <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.4.0/css/all.min.css">
@@ -37,81 +37,85 @@
         window.orderBy = orderBy;
     </script>
 
-    <style>body { font-family: 'Vazirmatn', sans-serif; }</style>
+    <style>
+        body { font-family: 'Vazirmatn', sans-serif; background-color: #f3f4f6; }
+        .tap-highlight-transparent { -webkit-tap-highlight-color: transparent; }
+    </style>
 </head>
-<body class="bg-gray-100 min-h-screen">
+<body class="pb-20 tap-highlight-transparent">
 
-    <div id="login-box" class="fixed inset-0 flex items-center justify-center bg-gray-100 z-50">
-        <div class="bg-white p-8 rounded-xl shadow-lg w-96 text-center">
-            <h2 class="text-2xl font-bold mb-4 text-purple-700">چوونەژوورەوەی ئەدمین</h2>
-            <input type="password" id="admin-pass" class="w-full p-3 border rounded mb-3 text-center" placeholder="پاسۆرد...">
-            <button onclick="checkAdmin()" class="w-full bg-purple-600 text-white py-2 rounded font-bold hover:bg-purple-700">چوونەژوورەوە</button>
+    <div id="login-box" class="fixed inset-0 flex items-center justify-center bg-gray-900/90 z-50 p-4">
+        <div class="bg-white p-6 rounded-2xl shadow-2xl w-full max-w-sm text-center">
+            <div class="bg-purple-100 w-16 h-16 rounded-full flex items-center justify-center mx-auto mb-4">
+                <i class="fa-solid fa-user-shield text-3xl text-purple-600"></i>
+            </div>
+            <h2 class="text-xl font-bold mb-4 text-gray-800">چوونەژوورەوەی ئەدمین</h2>
+            <input type="password" id="admin-pass" class="w-full p-4 border-2 border-gray-200 rounded-xl mb-4 text-center text-lg outline-none focus:border-purple-500 transition" placeholder="پاسۆرد بنووسە">
+            <button onclick="checkAdmin()" class="w-full bg-purple-600 text-white py-4 rounded-xl font-bold text-lg active:scale-95 transition shadow-lg shadow-purple-200">چوونەژوورەوە</button>
         </div>
     </div>
 
-    <div id="dashboard" class="hidden container mx-auto p-4 max-w-5xl">
+    <div id="dashboard" class="hidden container mx-auto p-4 max-w-2xl">
         
-        <div class="flex justify-between items-center mb-6 bg-white p-4 rounded shadow-sm">
-            <h1 class="text-2xl font-bold text-gray-800"><i class="fa-solid fa-gauge"></i> بەڕێوەبردنی کۆدەکان</h1>
-            <button onclick="location.reload()" class="text-red-500 text-sm border border-red-200 px-3 py-1 rounded hover:bg-red-50">دەرچوون</button>
-        </div>
-
-        <div class="bg-white p-4 rounded shadow-sm mb-6">
-            <h3 class="font-bold text-gray-700 mb-3 border-b pb-2">دروستکردنی کۆدی نوێ</h3>
-            <div class="grid grid-cols-1 md:grid-cols-5 gap-3">
-                <div class="md:col-span-1">
-                    <label class="text-xs text-gray-500 block mb-1">کۆد</label>
-                    <div class="flex gap-1">
-                        <input type="text" id="new-code" class="w-full p-2 border rounded text-center font-mono font-bold bg-gray-50" placeholder="123456">
-                        <button onclick="generateRandom()" class="bg-gray-200 px-2 rounded hover:bg-gray-300"><i class="fa-solid fa-shuffle"></i></button>
-                    </div>
-                </div>
-                <div class="md:col-span-1">
-                    <label class="text-xs text-gray-500 block mb-1">ناوی مامۆستا</label>
-                    <input type="text" id="t-name" class="w-full p-2 border rounded" placeholder="ناوی سیانی...">
-                </div>
-                <div class="md:col-span-1">
-                    <label class="text-xs text-gray-500 block mb-1">مۆبایل (ئیختیاری)</label>
-                    <input type="number" id="t-phone" class="w-full p-2 border rounded" placeholder="0750...">
-                </div>
-                <div class="md:col-span-1">
-                    <label class="text-xs text-gray-500 block mb-1">بەرواری بەسەرچوون</label>
-                    <input type="date" id="t-date" class="w-full p-2 border rounded bg-white">
-                </div>
-                <div class="md:col-span-1 flex items-end">
-                    <button onclick="createCode()" class="w-full bg-green-600 text-white py-2 rounded font-bold hover:bg-green-700">زیادکردن</button>
-                </div>
+        <div class="flex justify-between items-center mb-6">
+            <div>
+                <h1 class="text-2xl font-black text-gray-800">بەڕێوەبردن</h1>
+                <p class="text-xs text-gray-500 font-bold">کۆنترۆڵی کۆدەکان</p>
             </div>
+            <button onclick="location.reload()" class="bg-white text-red-500 w-10 h-10 rounded-full shadow-sm flex items-center justify-center active:bg-red-50">
+                <i class="fa-solid fa-power-off"></i>
+            </button>
         </div>
 
-        <div class="flex flex-col md:flex-row justify-between items-center gap-4 mb-4">
-            <div class="flex bg-white rounded shadow-sm overflow-hidden w-full md:w-auto">
-                <button onclick="switchTab('active')" id="btn-active" class="px-6 py-2 bg-purple-600 text-white font-bold transition">کۆدە کاراکان</button>
-                <button onclick="switchTab('expired')" id="btn-expired" class="px-6 py-2 bg-gray-100 text-gray-600 font-bold transition">بەسەرچووەکان</button>
+        <div class="bg-white p-5 rounded-2xl shadow-sm border border-gray-100 mb-6">
+            <div class="flex justify-between items-center mb-4">
+                <h3 class="font-bold text-purple-700 flex items-center gap-2">
+                    <i class="fa-solid fa-circle-plus"></i> کۆدی نوێ
+                </h3>
             </div>
             
-            <div class="relative w-full md:w-1/3">
-                <input type="text" id="search-input" oninput="filterCodes()" class="w-full p-2 pr-8 border rounded shadow-sm" placeholder="گەڕان بەدوای ناوی مامۆستا...">
-                <i class="fa-solid fa-magnifying-glass absolute right-3 top-3 text-gray-400"></i>
+            <div class="space-y-3">
+                <div class="flex gap-2">
+                    <input type="text" id="new-code" class="flex-1 p-3 bg-gray-50 border border-gray-200 rounded-xl text-center font-mono font-bold text-lg focus:bg-white focus:border-purple-500 outline-none" placeholder="کۆد (Generated)">
+                    <button onclick="generateRandom()" class="bg-purple-100 text-purple-600 w-12 rounded-xl flex items-center justify-center active:bg-purple-200">
+                        <i class="fa-solid fa-shuffle"></i>
+                    </button>
+                </div>
+
+                <div class="grid grid-cols-2 gap-3">
+                    <input type="text" id="t-name" class="p-3 bg-gray-50 border border-gray-200 rounded-xl text-sm focus:bg-white focus:border-purple-500 outline-none" placeholder="ناوی مامۆستا">
+                    <input type="tel" id="t-phone" class="p-3 bg-gray-50 border border-gray-200 rounded-xl text-sm focus:bg-white focus:border-purple-500 outline-none text-right" placeholder="مۆبایل">
+                </div>
+
+                <div class="relative">
+                    <div class="absolute inset-y-0 right-0 flex items-center pr-3 pointer-events-none text-gray-400">
+                        <i class="fa-regular fa-calendar"></i>
+                    </div>
+                    <input type="date" id="t-date" class="w-full p-3 pr-10 bg-gray-50 border border-gray-200 rounded-xl text-sm focus:bg-white focus:border-purple-500 outline-none">
+                </div>
+
+                <button onclick="createCode()" class="w-full bg-gray-900 text-white py-3 rounded-xl font-bold mt-2 shadow-lg active:scale-95 transition">
+                    زیادکردنی کۆد <i class="fa-solid fa-check mr-2"></i>
+                </button>
             </div>
         </div>
 
-        <div class="bg-white rounded-lg shadow-sm overflow-hidden">
-            <table class="w-full text-right text-sm">
-                <thead class="bg-gray-50 text-gray-600 border-b">
-                    <tr>
-                        <th class="p-3">کۆد</th>
-                        <th class="p-3">ناوی مامۆستا</th>
-                        <th class="p-3">مۆبایل</th>
-                        <th class="p-3">بەسەرچوون</th>
-                        <th class="p-3">دۆخ</th>
-                        <th class="p-3 text-center">کردار</th>
-                    </tr>
-                </thead>
-                <tbody id="code-table-body">
-                    </tbody>
-            </table>
-            <div id="loading-msg" class="text-center p-4 text-gray-500">Loading...</div>
+        <div class="sticky top-2 z-10 space-y-2 mb-4">
+            <div class="bg-white p-2 rounded-xl shadow-sm border border-gray-100 flex items-center gap-2">
+                <i class="fa-solid fa-magnifying-glass text-gray-400 mr-2"></i>
+                <input type="text" id="search-input" oninput="filterCodes()" class="flex-1 outline-none text-sm font-bold" placeholder="گەڕان (ناو، کۆد)...">
+            </div>
+
+            <div class="flex bg-gray-200 p-1 rounded-xl">
+                <button onclick="switchTab('active')" id="btn-active" class="flex-1 py-2 rounded-lg text-sm font-bold shadow bg-white text-purple-700 transition-all">کارا</button>
+                <button onclick="switchTab('expired')" id="btn-expired" class="flex-1 py-2 rounded-lg text-sm font-bold text-gray-500 transition-all">بەسەرچوو</button>
+            </div>
+        </div>
+
+        <div id="code-list-container" class="space-y-3 pb-10">
+            <div class="text-center text-gray-400 mt-10">
+                <i class="fa-solid fa-spinner fa-spin text-2xl"></i>
+            </div>
         </div>
 
     </div>
@@ -120,7 +124,7 @@
         import { doc, setDoc, collection, query, orderBy, getDocs, deleteDoc } from "https://www.gstatic.com/firebasejs/11.6.1/firebase-firestore.js";
         
         let allCodes = [];
-        let currentTab = 'active'; // 'active' or 'expired'
+        let currentTab = 'active';
 
         window.createCode = async () => {
             const code = document.getElementById('new-code').value.trim();
@@ -128,7 +132,7 @@
             const phone = document.getElementById('t-phone').value.trim();
             const date = document.getElementById('t-date').value;
 
-            if(!code || !name || !date) return alert('تکایە کۆد، ناو، و بەروار پڕبکەرەوە');
+            if(!code || !name || !date) return alert('تکایە هەموو خانەکان پڕبکەرەوە');
 
             try {
                 await setDoc(doc(window.db, 'artifacts', window.appId, 'access_codes', code), {
@@ -139,94 +143,108 @@
                     teacherPhone: phone,
                     expiryDate: date
                 });
-                alert('سەرکەوتوو بوو');
-                // Clear inputs
+                // Reset Form
                 document.getElementById('new-code').value = '';
                 document.getElementById('t-name').value = '';
                 document.getElementById('t-phone').value = '';
                 loadCodes();
-            } catch(e) { console.error(e); alert('هەڵە ڕوویدا'); }
+                alert('زیادکرا ✅');
+            } catch(e) { console.error(e); alert('هەڵە!'); }
         }
 
         window.loadCodes = async () => {
-            document.getElementById('loading-msg').style.display = 'block';
-            document.getElementById('code-table-body').innerHTML = '';
+            const container = document.getElementById('code-list-container');
             
             try {
                 const q = query(collection(window.db, 'artifacts', window.appId, 'access_codes'), orderBy('createdAt', 'desc'));
                 const snap = await getDocs(q);
                 allCodes = [];
-                snap.forEach(d => {
-                    allCodes.push({id: d.id, ...d.data()});
-                });
-                renderTable();
-                document.getElementById('loading-msg').style.display = 'none';
+                snap.forEach(d => allCodes.push({id: d.id, ...d.data()}));
+                renderCards();
             } catch(e) {
                 console.error(e);
-                document.getElementById('loading-msg').innerText = 'Error';
+                container.innerHTML = '<div class="text-red-500 text-center">کێشە لە هێڵ هەیە</div>';
             }
         }
 
-        window.renderTable = () => {
-            const tbody = document.getElementById('code-table-body');
-            tbody.innerHTML = '';
+        window.renderCards = () => {
+            const container = document.getElementById('code-list-container');
+            container.innerHTML = '';
+            
             const search = document.getElementById('search-input').value.toLowerCase();
             const today = new Date().toISOString().split('T')[0];
 
             const filtered = allCodes.filter(item => {
                 const isExpired = item.expiryDate < today;
                 
-                // Tab Logic
                 if (currentTab === 'active' && isExpired) return false;
                 if (currentTab === 'expired' && !isExpired) return false;
 
-                // Search Logic
                 const nameMatch = item.teacherName ? item.teacherName.toLowerCase().includes(search) : false;
                 const codeMatch = item.id.includes(search);
-                
                 return nameMatch || codeMatch;
             });
 
             if(filtered.length === 0) {
-                tbody.innerHTML = `<tr><td colspan="6" class="p-4 text-center text-gray-400">هیچ داتایەک نەدۆزرایەوە</td></tr>`;
+                container.innerHTML = `<div class="flex flex-col items-center justify-center text-gray-400 mt-10"><i class="fa-regular fa-folder-open text-4xl mb-2"></i><span class="text-sm">هیچ داتایەک نییە</span></div>`;
                 return;
             }
 
             filtered.forEach(item => {
                 const isUsed = item.used;
-                const tr = document.createElement('tr');
-                tr.className = "border-b hover:bg-gray-50 transition";
-                tr.innerHTML = `
-                    <td class="p-3 font-mono font-bold text-blue-600 select-all cursor-pointer" onclick="copyToClip('${item.id}')">${item.id}</td>
-                    <td class="p-3 font-bold text-gray-800">${item.teacherName}</td>
-                    <td class="p-3 text-gray-500">${item.teacherPhone || '-'}</td>
-                    <td class="p-3 font-mono ${item.expiryDate < today ? 'text-red-500 font-bold' : 'text-green-600'}">${item.expiryDate}</td>
-                    <td class="p-3">
-                        <span class="text-xs px-2 py-1 rounded ${isUsed ? 'bg-orange-100 text-orange-700' : 'bg-blue-100 text-blue-700'}">
-                            ${isUsed ? 'بەکارهاتووە' : 'نوێ'}
-                        </span>
-                    </td>
-                    <td class="p-3 text-center">
-                        <button onclick="removeCode('${item.id}')" class="text-red-500 hover:bg-red-100 p-2 rounded transition"><i class="fa-solid fa-trash"></i></button>
-                    </td>
+                const isExpired = item.expiryDate < today;
+                
+                // Card HTML
+                const card = document.createElement('div');
+                card.className = "bg-white p-4 rounded-xl border border-gray-100 shadow-sm relative overflow-hidden group";
+                
+                // Status Border Line
+                const statusColor = isExpired ? 'bg-red-500' : (isUsed ? 'bg-orange-400' : 'bg-green-500');
+                card.innerHTML = `
+                    <div class="absolute right-0 top-0 bottom-0 w-1 ${statusColor}"></div>
+                    
+                    <div class="flex justify-between items-start mb-3 mr-2">
+                        <div>
+                            <div class="flex items-center gap-2 mb-1">
+                                <span class="font-mono text-xl font-black text-gray-800 tracking-widest">${item.id}</span>
+                                <button onclick="copyCode('${item.id}')" class="text-gray-400 active:text-purple-600"><i class="fa-regular fa-copy"></i></button>
+                            </div>
+                            <div class="text-gray-600 font-bold text-sm"><i class="fa-solid fa-user-tie text-gray-400 text-xs ml-1"></i> ${item.teacherName}</div>
+                        </div>
+                        <div class="flex flex-col items-end gap-1">
+                            <span class="text-[10px] font-bold px-2 py-1 rounded-md ${isUsed ? 'bg-orange-50 text-orange-600' : 'bg-green-50 text-green-600'}">
+                                ${isUsed ? 'بەکارهاتووە' : 'نوێ'}
+                            </span>
+                        </div>
+                    </div>
+
+                    <div class="flex justify-between items-center border-t pt-3 mr-2">
+                        <div class="flex gap-3 text-xs text-gray-500 font-bold">
+                            <span><i class="fa-solid fa-phone text-gray-300 ml-1"></i> ${item.teacherPhone || '-'}</span>
+                            <span class="${isExpired ? 'text-red-500' : ''}"><i class="fa-regular fa-calendar text-gray-300 ml-1"></i> ${item.expiryDate}</span>
+                        </div>
+                        <button onclick="removeCode('${item.id}')" class="w-8 h-8 flex items-center justify-center rounded-lg bg-red-50 text-red-500 active:bg-red-500 active:text-white transition">
+                            <i class="fa-solid fa-trash"></i>
+                        </button>
+                    </div>
                 `;
-                tbody.appendChild(tr);
+                container.appendChild(card);
             });
         }
 
         window.removeCode = async (id) => {
-            if(confirm('دڵنیای لە سڕینەوەی ئەم کۆدە؟')) {
+            if(confirm('سڕینەوەی ئەم کۆدە؟')) {
                 await deleteDoc(doc(window.db, 'artifacts', window.appId, 'access_codes', id));
                 loadCodes();
             }
         }
 
-        window.filterCodes = renderTable;
-
-        window.copyToClip = (text) => {
+        window.copyCode = (text) => {
             navigator.clipboard.writeText(text);
-            alert('کۆد کۆپی کرا: ' + text);
+            alert('کۆپی کرا: ' + text);
         }
+
+        window.filterCodes = renderCards;
 
         window.switchTab = (tab) => {
             currentTab = tab;
@@ -234,13 +252,13 @@
             const btnExpired = document.getElementById('btn-expired');
             
             if(tab === 'active') {
-                btnActive.className = "px-6 py-2 bg-purple-600 text-white font-bold transition";
-                btnExpired.className = "px-6 py-2 bg-gray-100 text-gray-600 font-bold transition";
+                btnActive.className = "flex-1 py-2 rounded-lg text-sm font-bold shadow bg-white text-purple-700 transition-all";
+                btnExpired.className = "flex-1 py-2 rounded-lg text-sm font-bold text-gray-500 transition-all";
             } else {
-                btnActive.className = "px-6 py-2 bg-gray-100 text-gray-600 font-bold transition";
-                btnExpired.className = "px-6 py-2 bg-red-600 text-white font-bold transition";
+                btnActive.className = "flex-1 py-2 rounded-lg text-sm font-bold text-gray-500 transition-all";
+                btnExpired.className = "flex-1 py-2 rounded-lg text-sm font-bold shadow bg-white text-red-500 transition-all";
             }
-            renderTable();
+            renderCards();
         }
     </script>
 
