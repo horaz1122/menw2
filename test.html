@@ -3,7 +3,7 @@
 <head>
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0, maximum-scale=1.0, user-scalable=no">
-    <title>سیستەمی پرسیار - وەشانی بیرکاری تەواو</title>
+    <title>سیستەمی پرسیار - وەشانی بێ کێشە</title>
     
     <script src="https://cdn.tailwindcss.com"></script>
     
@@ -323,7 +323,7 @@
         let examData = [];
         let bankData = [];
         let editIndex = -1;
-        let activeMathInput = null; // Track focused input for math toolbar
+        let activeMathInput = null; 
         
         let bankEditMode = false;
         let bankEditId = null;
@@ -383,7 +383,7 @@
             loadExamList();
         }
 
-        // --- MATH UI ---
+        // --- MATH UI (FIXED DOUBLE CLICK ISSUE) ---
         const mathSymbols = [
             '+','-','\\times','\\div','=','\\neq','\\approx','\\pm',
             '\\sqrt{}','\\sqrt[3]{}','\\frac{}{}','x^2','x_2','e^x',
@@ -400,13 +400,18 @@
         activeMathInput = mainTextArea; // Default
 
         const tb = document.getElementById('math-toolbar-container');
+        tb.innerHTML = ''; // Clear prev items
+        
         mathSymbols.forEach(s => {
             let btn = document.createElement('button');
             btn.className = "flex-shrink-0 px-2 py-1 bg-white border rounded text-xs font-bold shadow-sm active:bg-gray-200 min-w-[30px]";
             btn.innerText = s.replace('\\','');
             
-            btn.onclick = (e) => { 
-                e.preventDefault(); // Prevent losing focus in some browsers
+            // Use onmousedown to prevent focus loss AND double triggering on click
+            btn.onmousedown = (e) => { 
+                e.preventDefault(); 
+                e.stopPropagation();
+                
                 if(!activeMathInput) return;
 
                 let f = activeMathInput;
@@ -417,10 +422,9 @@
                 let after = text.substring(end, text.length);
                 f.value = before + '$' + s + '$' + after;
                 
-                // Trigger input event to ensure frameworks or listeners react (crucial for MCQ inputs)
+                // Trigger input event to update state (for MCQs etc)
                 f.dispatchEvent(new Event('input', { bubbles: true }));
 
-                f.focus();
                 let bracePos = s.indexOf('{}');
                 if(bracePos !== -1) {
                     f.selectionStart = f.selectionEnd = start + 1 + bracePos + 1;
@@ -476,11 +480,30 @@
             matchPairs.forEach((pair, idx) => {
                 let div = document.createElement('div');
                 div.className = "flex gap-1 items-center bg-white p-1 rounded border";
-                div.innerHTML = `
-                    <input type="text" value="${pair.right}" oninput="matchPairs[${idx}].right=this.value" class="flex-1 p-1 border rounded text-xs text-right h-8" placeholder="ڕاست">
-                    <input type="text" value="${pair.left}" oninput="matchPairs[${idx}].left=this.value" class="flex-1 p-1 border rounded text-xs text-left h-8" placeholder="چەپ" dir="ltr">
-                    <button onclick="if(matchPairs.length>1){matchPairs.splice(${idx},1);renderMatchInputs();}" class="text-red-400 px-1 text-xs"><i class="fa-solid fa-xmark"></i></button>
-                `;
+                
+                let rightInput = document.createElement('input');
+                rightInput.value = pair.right;
+                rightInput.className = "flex-1 p-1 border rounded text-xs text-right h-8";
+                rightInput.placeholder = "ڕاست";
+                rightInput.oninput = (e) => { matchPairs[idx].right = e.target.value; };
+                rightInput.onfocus = () => { activeMathInput = rightInput; };
+
+                let leftInput = document.createElement('input');
+                leftInput.value = pair.left;
+                leftInput.className = "flex-1 p-1 border rounded text-xs text-left h-8";
+                leftInput.placeholder = "چەپ";
+                leftInput.dir = "ltr";
+                leftInput.oninput = (e) => { matchPairs[idx].left = e.target.value; };
+                leftInput.onfocus = () => { activeMathInput = leftInput; };
+
+                let delBtn = document.createElement('button');
+                delBtn.innerHTML = '<i class="fa-solid fa-xmark"></i>';
+                delBtn.className = "text-red-400 px-1 text-xs";
+                delBtn.onclick = () => { if(matchPairs.length>1){matchPairs.splice(idx,1);renderMatchInputs();} };
+
+                div.appendChild(rightInput);
+                div.appendChild(leftInput);
+                div.appendChild(delBtn);
                 container.appendChild(div);
             });
         }
