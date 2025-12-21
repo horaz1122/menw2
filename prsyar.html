@@ -3,12 +3,10 @@
 <head>
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0, maximum-scale=1.0, user-scalable=no">
-    <title>سیستەمی پرسیار - وەشانی بێ کێشە</title>
+    <title>سیستەمی پرسیار - مامۆستا</title>
     
     <script src="https://cdn.tailwindcss.com"></script>
-    
     <script src="https://cdnjs.cloudflare.com/ajax/libs/html2pdf.js/0.10.1/html2pdf.bundle.min.js"></script>
-    
     <script src="https://cdnjs.cloudflare.com/ajax/libs/Sortable/1.15.0/Sortable.min.js"></script>
     
     <link href="https://fonts.googleapis.com/css2?family=Nrt+Reg&family=Vazirmatn:wght@300;400;700;900&display=swap" rel="stylesheet">
@@ -33,7 +31,7 @@
             const app = initializeApp(firebaseConfig);
             const auth = getAuth(app);
             const db = getFirestore(app);
-            const appId = 'exam-system-v11-secure'; 
+            const appId = 'exam-system-v12-locked'; 
 
             window.firebaseApp = { auth, db, appId, doc, getDoc, setDoc, addDoc, deleteDoc, updateDoc, collection, getDocs, query, orderBy };
 
@@ -81,7 +79,6 @@
         .content-area { flex: 1; overflow: hidden; display: flex; position: relative; }
         #editor-panel, #preview-panel { overflow-y: auto; height: 100%; padding-bottom: 150px; -webkit-overflow-scrolling: touch; }
         
-        /* A4 PAPER */
         .a4-paper { 
             width: 210mm; min-height: 297mm; background: white; margin: 0 auto; padding: 10mm; 
             box-shadow: 0 4px 15px rgba(0,0,0,0.1); font-family: 'Nrt Reg', sans-serif; 
@@ -102,36 +99,12 @@
         .q-wrapper { margin-bottom: 6px; break-inside: avoid; } 
         .q-number { background: #000; color: white; width: 22px; height: 22px; border-radius: 50%; display: inline-flex; align-items: center; justify-content: center; font-size: 11px; margin-left: 6px; font-weight: bold; -webkit-print-color-adjust: exact; print-color-adjust: exact; flex-shrink: 0; }
         .q-sub-label { font-weight: bold; margin-left: 5px; min-width: 20px; display: inline-block; font-size: 14px; }
-        
         .q-content { font-size: 14px; line-height: 2.2; text-align: justify; direction: rtl !important; display: block; width: 100%; font-weight: bold; }
         
-        /* --- MathJax & Alignment Fixes --- */
+        mjx-container { display: inline-block !important; margin: 0 8px !important; vertical-align: middle !important; outline: none !important; }
         
-        /* 1. Spacing for Math inside text (2 spaces approx = 8px) */
-        mjx-container { 
-            display: inline-block !important;
-            margin: 0 8px !important; 
-            vertical-align: middle !important;
-            outline: none !important;
-        }
-        
-        /* 2. Fix MCQ Alignment (Force side-by-side) */
-        .mcq-option-wrapper {
-            display: inline-flex !important; /* Force flex behavior */
-            align-items: center !important;  /* Center vertically */
-            margin-left: 20px;
-            margin-bottom: 5px;
-            height: auto;
-        }
-        
-        /* Ensure the letter doesn't shrink */
-        .mcq-label {
-            font-family: monospace;
-            font-weight: 900;
-            font-size: 16px;
-            margin-left: 5px; /* Space between A) and the answer */
-            flex-shrink: 0;
-        }
+        .mcq-option-wrapper { display: inline-flex !important; align-items: center !important; margin-left: 20px; margin-bottom: 5px; height: auto; }
+        .mcq-label { font-family: monospace; font-weight: 900; font-size: 16px; margin-left: 5px; flex-shrink: 0; }
 
         .section-title { width: 100%; text-align: center; font-weight: 900; font-size: 16px; padding: 4px; border-top: 2px solid #000; border-bottom: 2px solid #000; margin: 10px 0; background-color: #f3f4f6; -webkit-print-color-adjust: exact; }
         .page-break-marker { border-top: 2px dashed #cbd5e1; margin: 20px 0; position: relative; text-align: center; color: #94a3b8; font-size: 10px; page-break-after: always; break-after: always; }
@@ -153,13 +126,32 @@
 <body class="font-sans text-slate-800 main-layout">
 
     <div id="login-overlay" class="fixed inset-0 bg-slate-900/95 z-[100] flex items-center justify-center backdrop-blur-sm p-4">
-        <div class="bg-white p-6 rounded-2xl shadow-2xl w-full max-w-sm text-center">
+        <div class="bg-white p-6 rounded-2xl shadow-2xl w-full max-w-sm text-center border-t-4 border-brand-500">
             <div id="login-loader" class="hidden absolute inset-0 bg-white/80 flex items-center justify-center rounded-2xl"><div class="animate-spin h-8 w-8 border-4 border-brand-500 rounded-full border-t-transparent"></div></div>
-            <h2 class="text-2xl font-bold mb-4 text-brand-900">چوونەژوورەوە</h2>
-            <div class="text-xs text-gray-500 mb-2">تکایە کۆدی چالاککردن بنووسە</div>
-            <input type="number" id="password-input" class="w-full p-3 border-2 rounded-xl text-center text-xl font-bold mb-3 focus:border-brand-500 outline-none" placeholder="کۆد...">
-            <p id="login-error-msg" class="text-red-500 text-xs mb-2 hidden"></p>
-            <button onclick="checkPassword()" id="login-btn" class="w-full bg-brand-600 hover:bg-brand-500 text-white font-bold py-3 rounded-xl transition">چوونەژوورەوە</button>
+            
+            <div class="mb-4">
+                <i class="fa-solid fa-lock text-4xl text-brand-600 mb-2"></i>
+                <h2 class="text-2xl font-bold text-brand-900">چوونەژوورەوە</h2>
+            </div>
+
+            <div class="bg-blue-50 border border-blue-200 rounded-lg p-3 text-right mb-4 text-sm">
+                <p class="font-bold text-gray-700 mb-2"><i class="fa-solid fa-circle-info text-blue-500 ml-1"></i> ڕێنمایی:</p>
+                <p class="text-gray-600 mb-1">تکایە بڕی <span class="font-bold text-black">5000 دینار</span> بنێرە بە FIB بۆ:</p>
+                <div class="bg-white p-2 rounded text-center font-mono font-bold text-lg border mb-2 select-all">07501784002</div>
+                <p class="text-xs text-gray-500">دواتر وێنەی پسوڵەکە لە وەتسئەپ بنێرە بۆ وەرگرتنی کۆد.</p>
+            </div>
+
+            <a href="https://wa.me/9647501784002" target="_blank" class="flex items-center justify-center gap-2 w-full bg-green-500 hover:bg-green-600 text-white font-bold py-2 rounded-lg mb-4 transition shadow-sm">
+                <i class="fa-brands fa-whatsapp text-xl"></i> ناردنی نامە لە وەتسئەپ
+            </a>
+
+            <div class="relative">
+                <input type="number" id="password-input" class="w-full p-3 border-2 rounded-xl text-center text-xl font-bold mb-3 focus:border-brand-500 outline-none" placeholder="کۆدی چالاککردن لێرە بنووسە">
+            </div>
+            
+            <p id="login-error-msg" class="text-red-500 text-xs mb-2 hidden bg-red-50 p-2 rounded"></p>
+            
+            <button onclick="checkPassword()" id="login-btn" class="w-full bg-brand-600 hover:bg-brand-500 text-white font-bold py-3 rounded-xl transition shadow-lg">چوونەژوورەوە</button>
         </div>
     </div>
 
@@ -182,7 +174,6 @@
             </div>
 
             <div id="view-create" class="flex-1 p-3 space-y-3">
-                
                 <div id="bank-edit-alert" class="hidden bg-yellow-50 text-yellow-800 p-2 text-xs border border-yellow-200 rounded font-bold">
                     ⚠️ تۆ خەریکی دەستکاری پرسیاری بانکیت
                     <button onclick="clearForm()" class="text-red-500 underline mr-2">هەڵوەشاندنەوە</button>
@@ -351,14 +342,11 @@
         let bankData = [];
         let editIndex = -1;
         let activeMathInput = null; 
-        
         let bankEditMode = false;
         let bankEditId = null;
-
         let mcqOptions = [{text:'', correct:false}, {text:'', correct:false}, {text:'', correct:false}, {text:'', correct:false}];
         let matchPairs = [{right:'', left:''}, {right:'', left:''}];
         let tfAnswer = 'true'; 
-        let userIsAdmin = false;
         
         let deviceId = localStorage.getItem('did') || crypto.randomUUID();
         localStorage.setItem('did', deviceId);
@@ -373,25 +361,39 @@
             errorMsg.classList.add('hidden');
             if(!input) return;
 
-            if(input === '11223344009') {
-                userIsAdmin = true;
-                grantAccess();
-                return;
-            }
-
             btn.disabled = true;
             loader.classList.remove('hidden');
             
             try {
-                const { db, doc, getDoc, appId } = window.firebaseApp;
+                const { db, doc, getDoc, updateDoc, appId } = window.firebaseApp;
                 const docRef = doc(db, 'artifacts', appId, 'access_codes', input);
                 const docSnap = await getDoc(docRef);
 
                 if (docSnap.exists()) {
-                    userIsAdmin = false;
-                    grantAccess();
+                    const codeData = docSnap.data();
+                    
+                    // --- EXPIRY CHECK ADDED HERE ---
+                    const today = new Date().toISOString().split('T')[0];
+                    if (codeData.expiryDate && codeData.expiryDate < today) {
+                        errorMsg.innerText = "ئەم کۆدە بەسەرچووە!";
+                        errorMsg.classList.remove('hidden');
+                        loader.classList.add('hidden');
+                        btn.disabled = false;
+                        return;
+                    }
+                    // --------------------------------
+
+                    if (!codeData.used) {
+                        await updateDoc(docRef, { used: true, deviceId: deviceId, usedAt: new Date().toISOString() });
+                        grantAccess();
+                    } else if (codeData.deviceId === deviceId) {
+                        grantAccess();
+                    } else {
+                        errorMsg.innerText = "ئەم کۆدە پێشتر لەسەر ئامێرێکی تر بەکارهاتووە!";
+                        errorMsg.classList.remove('hidden');
+                    }
                 } else {
-                    errorMsg.innerText = "کۆدەکە هەڵەیە یان بوونی نییە";
+                    errorMsg.innerText = "کۆدەکە هەڵەیە";
                     errorMsg.classList.remove('hidden');
                 }
             } catch(e) {
@@ -410,20 +412,12 @@
             loadExamList();
         }
 
-        // --- MATH UI (FIXED DOUBLE CLICK ISSUE) ---
-        const mathSymbols = [
-            '+','-','\\times','\\div','=','\\neq','\\approx','\\pm',
-            '\\sqrt{}','\\sqrt[3]{}','\\frac{}{}','x^2','x_2','e^x',
-            '<','>','\\leq','\\geq','\\infty','\\pi','\\circ','\\angle','\\triangle',
-            '\\alpha','\\beta','\\theta','\\lambda','\\Delta',
-            '\\in','\\notin','\\cup','\\cap','\\subset','\\subseteq','\\emptyset',
-            '\\rightarrow','\\Rightarrow','\\Leftrightarrow',
-            '\\sum','\\int','\\lim','\\log','\\ln','\\sin','\\cos','\\tan'
-        ];
+        // --- MATH UI ---
+        const mathSymbols = ['+','-','\\times','\\div','=','\\neq','\\approx','\\pm','\\sqrt{}','\\sqrt[3]{}','\\frac{}{}','x^2','x_2','e^x','<','>','\\leq','\\geq','\\infty','\\pi','\\circ','\\angle','\\triangle','\\alpha','\\beta','\\theta','\\lambda','\\Delta','\\in','\\notin','\\cup','\\cap','\\subset','\\subseteq','\\emptyset','\\rightarrow','\\Rightarrow','\\Leftrightarrow','\\sum','\\int','\\lim','\\log','\\ln','\\sin','\\cos','\\tan'];
         
         const mainTextArea = document.getElementById('q_text');
         mainTextArea.addEventListener('focus', () => { activeMathInput = mainTextArea; });
-        activeMathInput = mainTextArea; // Default
+        activeMathInput = mainTextArea; 
 
         const tb = document.getElementById('math-toolbar-container');
         tb.innerHTML = ''; 
@@ -434,27 +428,17 @@
             btn.innerText = s.replace('\\','');
             
             btn.onmousedown = (e) => { 
-                e.preventDefault(); 
-                e.stopPropagation();
-                
+                e.preventDefault(); e.stopPropagation();
                 if(!activeMathInput) return;
-
                 let f = activeMathInput;
                 let start = f.selectionStart;
                 let end = f.selectionEnd;
                 let text = f.value;
-                let before = text.substring(0, start);
-                let after = text.substring(end, text.length);
-                f.value = before + '$' + s + '$' + after;
-                
+                f.value = text.substring(0, start) + '$' + s + '$' + text.substring(end, text.length);
                 f.dispatchEvent(new Event('input', { bubbles: true }));
-
                 let bracePos = s.indexOf('{}');
-                if(bracePos !== -1) {
-                    f.selectionStart = f.selectionEnd = start + 1 + bracePos + 1;
-                } else {
-                    f.selectionStart = f.selectionEnd = start + s.length + 2; 
-                }
+                if(bracePos !== -1) f.selectionStart = f.selectionEnd = start + 1 + bracePos + 1;
+                else f.selectionStart = f.selectionEnd = start + s.length + 2; 
             };
             tb.appendChild(btn);
         });
@@ -466,32 +450,24 @@
             mcqOptions.forEach((opt, idx) => {
                 let div = document.createElement('div');
                 div.className = "flex gap-2 items-center bg-white p-1 rounded border";
-                
                 let textInput = document.createElement('input');
                 textInput.type = 'text';
                 textInput.value = opt.text;
                 textInput.className = "flex-1 p-2 bg-transparent text-sm outline-none";
                 textInput.placeholder = `هەڵبژاردەی ${idx+1}`;
-                
                 textInput.oninput = (e) => { mcqOptions[idx].text = e.target.value; };
                 textInput.onfocus = () => { activeMathInput = textInput; }; 
-
                 let radio = document.createElement('input');
                 radio.type = 'radio';
                 radio.name = 'correct_opt';
                 radio.checked = opt.correct;
                 radio.className = "w-5 h-5 accent-green-600";
                 radio.onclick = () => mcqOptions.forEach((o,i)=>o.correct=(i===idx));
-
                 let delBtn = document.createElement('button');
                 delBtn.innerHTML = '<i class="fa-solid fa-xmark"></i>';
                 delBtn.className = "text-red-400 px-2";
                 delBtn.onclick = () => { if(mcqOptions.length>2){mcqOptions.splice(idx,1);renderMCQInputs();} };
-
-                div.appendChild(radio);
-                div.appendChild(textInput);
-                div.appendChild(delBtn);
-                container.appendChild(div);
+                div.appendChild(radio); div.appendChild(textInput); div.appendChild(delBtn); container.appendChild(div);
             });
         }
         function addMCQOption() { mcqOptions.push({text:'', correct:false}); renderMCQInputs(); }
@@ -502,14 +478,12 @@
             matchPairs.forEach((pair, idx) => {
                 let div = document.createElement('div');
                 div.className = "flex gap-1 items-center bg-white p-1 rounded border";
-                
                 let rightInput = document.createElement('input');
                 rightInput.value = pair.right;
                 rightInput.className = "flex-1 p-1 border rounded text-xs text-right h-8";
                 rightInput.placeholder = "ڕاست";
                 rightInput.oninput = (e) => { matchPairs[idx].right = e.target.value; };
                 rightInput.onfocus = () => { activeMathInput = rightInput; };
-
                 let leftInput = document.createElement('input');
                 leftInput.value = pair.left;
                 leftInput.className = "flex-1 p-1 border rounded text-xs text-left h-8";
@@ -517,16 +491,11 @@
                 leftInput.dir = "ltr";
                 leftInput.oninput = (e) => { matchPairs[idx].left = e.target.value; };
                 leftInput.onfocus = () => { activeMathInput = leftInput; };
-
                 let delBtn = document.createElement('button');
                 delBtn.innerHTML = '<i class="fa-solid fa-xmark"></i>';
                 delBtn.className = "text-red-400 px-1 text-xs";
                 delBtn.onclick = () => { if(matchPairs.length>1){matchPairs.splice(idx,1);renderMatchInputs();} };
-
-                div.appendChild(rightInput);
-                div.appendChild(leftInput);
-                div.appendChild(delBtn);
-                container.appendChild(div);
+                div.appendChild(rightInput); div.appendChild(leftInput); div.appendChild(delBtn); container.appendChild(div);
             });
         }
         function addMatchPair() { matchPairs.push({right:'', left:''}); renderMatchInputs(); }
@@ -612,7 +581,6 @@
         function editItem(idx) {
             const item = examData[idx];
             if(item.type === 'break' || item.type === 'title') return;
-            
             editIndex = idx;
             loadItemToForm(item);
             document.getElementById('btn-add').innerText = "گۆڕانکاری";
@@ -626,14 +594,12 @@
             document.getElementById('q_spacing').value = item.spacing || 0;
             document.getElementById('spacing-display').innerText = item.spacing || 0;
             document.getElementById('q_sub_style').value = item.subStyle || 'none';
-            
             if(item.qType === 'mcq') mcqOptions = JSON.parse(JSON.stringify(item.options));
             if(item.qType === 'match') matchPairs = JSON.parse(JSON.stringify(item.matchPairs));
             if(item.qType === 'tf') {
                 tfAnswer = item.tfAnswer || 'true';
                 document.querySelector(`input[name="tf_choice"][value="${tfAnswer}"]`).checked = true;
             }
-            
             toggleQuestionInputs();
             renderMCQInputs();
             renderMatchInputs();
@@ -645,7 +611,6 @@
             bankEditMode = false;
             bankEditId = null;
             document.getElementById('bank-edit-alert').classList.add('hidden');
-            
             document.getElementById('q_text').value = '';
             document.getElementById('q_image').value = '';
             document.getElementById('q_spacing').value = 0;
@@ -653,17 +618,14 @@
             document.getElementById('btn-add').innerText = "زیادکردن";
             document.getElementById('btn-add').classList.replace('bg-green-600', 'bg-brand-600');
             document.getElementById('btn-add').classList.replace('bg-orange-600', 'bg-brand-600'); 
-            
             tfAnswer = 'true';
             document.querySelector(`input[name="tf_choice"][value="true"]`).checked = true;
-
             mcqOptions = [{text:'', correct:false}, {text:'', correct:false}, {text:'', correct:false}, {text:'', correct:false}];
             matchPairs = [{right:'', left:''}, {right:'', left:''}];
             renderMCQInputs();
             renderMatchInputs();
         }
 
-        // --- RENDER PAPER (FIXED TF & WRAP LOGIC - FLEXBOX) ---
         function renderPaper() {
             const container = document.getElementById('paper_questions');
             container.innerHTML = '';
@@ -687,23 +649,17 @@
                 }
 
                 let spacer = item.spacing > 0 ? `<div style="height: ${item.spacing}cm"></div>` : '';
-
                 let mainContent = item.text || '';
                 let extraContentBelow = '';
-
-                // --- SMART WRAP LOGIC WITH FLEXBOX ---
-                // Using flexbox ensures Label (A) and Content (x+y) are distinct items that never text-wrap into each other.
 
                 if (item.qType === 'tf') {
                     mainContent += `<span style="display:inline-block; margin-right: 30px; font-weight:bold; white-space: nowrap;">( ڕاست &nbsp;&nbsp;&nbsp;&nbsp;&nbsp;/&nbsp;&nbsp;&nbsp;&nbsp;&nbsp; هەڵە )</span>`;
                 } 
                 else if (item.qType === 'mcq' && item.options) {
                      const labels = ['A','B','C','D','E'];
-                     // Increased spacing gap here (20px as requested)
                      mainContent += `<span style="display:inline-block; width: 10px;"></span>`; 
                      item.options.forEach((opt, i) => {
                         if(opt.text) {
-                            // Flex container for each option: Label | Content
                             mainContent += `
                             <div class="mcq-option-wrapper">
                                 <span class="mcq-label">${labels[i]})</span>
@@ -751,7 +707,6 @@
             examData.forEach((item, idx) => {
                 let div = document.createElement('div');
                 div.className = "bg-white p-3 rounded-lg border flex justify-between items-center shadow-sm text-xs";
-                
                 if(item.type === 'break') {
                      div.innerHTML = `<span class="text-gray-400 border-b border-dashed w-full text-center">--- پەڕەی نوێ ---</span> <button onclick="deleteItem(${idx})" class="text-red-500 p-2"><i class="fa-solid fa-trash"></i></button>`;
                 } else if(item.type === 'title') {
@@ -772,7 +727,6 @@
             new Sortable(list, { animation: 150, onEnd: (evt) => { const item = examData.splice(evt.oldIndex, 1)[0]; examData.splice(evt.newIndex, 0, item); renderPaper(); updateList(); }});
         }
 
-        // --- SHUFFLE LOGIC ---
         function shuffleQuestions() {
             if(!confirm('تەنها پرسیارە هەڵبژاردنەکان تێکەڵ دەکەیت؟')) return;
             examData.forEach(q => {
@@ -803,7 +757,6 @@
             updateList();
         }
 
-        // --- HEADER LOGO ---
         document.getElementById('h_logo_input').addEventListener('change', function(e) {
             if(e.target.files[0]) {
                 const reader = new FileReader();
@@ -818,27 +771,17 @@
         const savedLogo = localStorage.getItem('header_logo_data');
         if(savedLogo) document.getElementById('header_logo_view').src = savedLogo;
 
-        // --- FIREBASE OPS ---
         async function saveCurrentExam() {
             if(!window.currentUser) return alert('تکایە سەرەتا بچۆژوورەوە');
             const { db, collection, addDoc, doc, updateDoc, appId } = window.firebaseApp;
             const uid = window.currentUser.uid;
-            
             const title = prompt('ناوی تاقیکردنەوە:', document.getElementById('h_subject').value);
             if(!title) return;
-
             const headerData = {};
             ['gov','min','dir','school','subject','class','time','type','year','date', 'group'].forEach(id => {
                 headerData[id] = document.getElementById('h_'+id).value;
             });
-
-            const payload = {
-                title: title,
-                data: examData,
-                header: headerData,
-                updatedAt: new Date().toISOString()
-            };
-
+            const payload = { title: title, data: examData, header: headerData, updatedAt: new Date().toISOString() };
             try {
                 if(currentExamId) {
                     await updateDoc(doc(db, 'artifacts', appId, 'users', uid, 'exams', currentExamId), payload);
