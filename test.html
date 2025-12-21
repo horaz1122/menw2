@@ -3,7 +3,7 @@
 <head>
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0, maximum-scale=1.0, user-scalable=no">
-    <title>سیستەمی پرسیار</title>
+    <title>سیستەمی پرسیار - مامۆستا</title>
     
     <script src="https://cdn.tailwindcss.com"></script>
     <script src="https://cdnjs.cloudflare.com/ajax/libs/html2pdf.js/0.10.1/html2pdf.bundle.min.js"></script>
@@ -31,7 +31,6 @@
             const app = initializeApp(firebaseConfig);
             const auth = getAuth(app);
             const db = getFirestore(app);
-            // Must match the ID in the admin panel
             const appId = 'exam-system-v12-locked'; 
 
             window.firebaseApp = { auth, db, appId, doc, getDoc, setDoc, addDoc, deleteDoc, updateDoc, collection, getDocs, query, orderBy };
@@ -352,7 +351,7 @@
         let deviceId = localStorage.getItem('did') || crypto.randomUUID();
         localStorage.setItem('did', deviceId);
 
-        // --- SECURE LOGIN LOGIC (Standard User) ---
+        // --- SECURE LOGIN LOGIC ---
         async function checkPassword() {
             const input = document.getElementById('password-input').value.trim();
             const btn = document.getElementById('login-btn');
@@ -373,19 +372,23 @@
                 if (docSnap.exists()) {
                     const codeData = docSnap.data();
                     
+                    // --- EXPIRY CHECK ADDED HERE ---
+                    const today = new Date().toISOString().split('T')[0];
+                    if (codeData.expiryDate && codeData.expiryDate < today) {
+                        errorMsg.innerText = "ئەم کۆدە بەسەرچووە!";
+                        errorMsg.classList.remove('hidden');
+                        loader.classList.add('hidden');
+                        btn.disabled = false;
+                        return;
+                    }
+                    // --------------------------------
+
                     if (!codeData.used) {
-                        // First time use: Lock to this device
-                        await updateDoc(docRef, { 
-                            used: true, 
-                            deviceId: deviceId, 
-                            usedAt: new Date().toISOString() 
-                        });
+                        await updateDoc(docRef, { used: true, deviceId: deviceId, usedAt: new Date().toISOString() });
                         grantAccess();
                     } else if (codeData.deviceId === deviceId) {
-                        // Used, but matches this device
                         grantAccess();
                     } else {
-                        // Used on different device
                         errorMsg.innerText = "ئەم کۆدە پێشتر لەسەر ئامێرێکی تر بەکارهاتووە!";
                         errorMsg.classList.remove('hidden');
                     }
