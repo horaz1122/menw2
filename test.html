@@ -3,7 +3,7 @@
 <head>
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0, maximum-scale=1.0, user-scalable=no">
-    <title>سیستەمی پرسیار - وەشانی بۆشایی تەواو</title>
+    <title>سیستەمی پرسیار - وەشانی بۆشایی زیرەک</title>
     
     <script src="https://cdn.tailwindcss.com"></script>
     
@@ -105,9 +105,12 @@
         
         .q-content { font-size: 14px; line-height: 2.2; text-align: justify; direction: rtl !important; display: block; width: 100%; font-weight: bold; }
         
-        /* MathJax Specific Fix */
-        mjx-container { outline: none !important; }
-        mjx-container svg { vertical-align: middle !important; margin: 0 2px !important; }
+        /* MathJax Spacing Fix */
+        mjx-container { 
+            outline: none !important;
+            margin: 0 15px !important; /* Adds approx 3 spaces left and right */
+        }
+        mjx-container svg { vertical-align: middle !important; }
 
         .section-title { width: 100%; text-align: center; font-weight: 900; font-size: 16px; padding: 4px; border-top: 2px solid #000; border-bottom: 2px solid #000; margin: 10px 0; background-color: #f3f4f6; -webkit-print-color-adjust: exact; }
         .page-break-marker { border-top: 2px dashed #cbd5e1; margin: 20px 0; position: relative; text-align: center; color: #94a3b8; font-size: 10px; page-break-after: always; break-after: always; }
@@ -386,7 +389,7 @@
             loadExamList();
         }
 
-        // --- MATH UI ---
+        // --- MATH UI (FIXED DOUBLE CLICK ISSUE) ---
         const mathSymbols = [
             '+','-','\\times','\\div','=','\\neq','\\approx','\\pm',
             '\\sqrt{}','\\sqrt[3]{}','\\frac{}{}','x^2','x_2','e^x',
@@ -403,13 +406,14 @@
         activeMathInput = mainTextArea; // Default
 
         const tb = document.getElementById('math-toolbar-container');
-        tb.innerHTML = ''; 
+        tb.innerHTML = ''; // Clear prev items
         
         mathSymbols.forEach(s => {
             let btn = document.createElement('button');
             btn.className = "flex-shrink-0 px-2 py-1 bg-white border rounded text-xs font-bold shadow-sm active:bg-gray-200 min-w-[30px]";
             btn.innerText = s.replace('\\','');
             
+            // Use onmousedown to prevent focus loss AND double triggering on click
             btn.onmousedown = (e) => { 
                 e.preventDefault(); 
                 e.stopPropagation();
@@ -424,6 +428,7 @@
                 let after = text.substring(end, text.length);
                 f.value = before + '$' + s + '$' + after;
                 
+                // Trigger input event to update state (for MCQs etc)
                 f.dispatchEvent(new Event('input', { bubbles: true }));
 
                 let bracePos = s.indexOf('{}');
@@ -444,14 +449,16 @@
                 let div = document.createElement('div');
                 div.className = "flex gap-2 items-center bg-white p-1 rounded border";
                 
+                // Input creation
                 let textInput = document.createElement('input');
                 textInput.type = 'text';
                 textInput.value = opt.text;
                 textInput.className = "flex-1 p-2 bg-transparent text-sm outline-none";
                 textInput.placeholder = `هەڵبژاردەی ${idx+1}`;
                 
+                // EVENTS
                 textInput.oninput = (e) => { mcqOptions[idx].text = e.target.value; };
-                textInput.onfocus = () => { activeMathInput = textInput; }; 
+                textInput.onfocus = () => { activeMathInput = textInput; }; // Track this input
 
                 let radio = document.createElement('input');
                 radio.type = 'radio';
