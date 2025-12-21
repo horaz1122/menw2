@@ -3,12 +3,10 @@
 <head>
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0, maximum-scale=1.0, user-scalable=no">
-    <title>سیستەمی پرسیار - وەشانی بێ کێشە</title>
+    <title>سیستەمی پرسیار - پارەدان و کۆد</title>
     
     <script src="https://cdn.tailwindcss.com"></script>
-    
     <script src="https://cdnjs.cloudflare.com/ajax/libs/html2pdf.js/0.10.1/html2pdf.bundle.min.js"></script>
-    
     <script src="https://cdnjs.cloudflare.com/ajax/libs/Sortable/1.15.0/Sortable.min.js"></script>
     
     <link href="https://fonts.googleapis.com/css2?family=Nrt+Reg&family=Vazirmatn:wght@300;400;700;900&display=swap" rel="stylesheet">
@@ -33,16 +31,21 @@
             const app = initializeApp(firebaseConfig);
             const auth = getAuth(app);
             const db = getFirestore(app);
-            const appId = 'exam-system-v11-secure'; 
+            const appId = 'exam-system-v12-locked'; // Changed app ID version
 
             window.firebaseApp = { auth, db, appId, doc, getDoc, setDoc, addDoc, deleteDoc, updateDoc, collection, getDocs, query, orderBy };
 
             onAuthStateChanged(auth, (user) => {
                 if (user) {
                     window.currentUser = user;
+                    // Check if already logged in locally
                     if(localStorage.getItem('is_logged_in') === 'true') {
                         document.getElementById('login-overlay').style.display = 'none';
                         loadExamList();
+                        // Check if admin to show admin tab
+                        if(localStorage.getItem('is_admin') === 'true') {
+                            document.getElementById('tab-admin').classList.remove('hidden');
+                        }
                     }
                 } else {
                     signInAnonymously(auth);
@@ -105,9 +108,7 @@
         
         .q-content { font-size: 14px; line-height: 2.2; text-align: justify; direction: rtl !important; display: block; width: 100%; font-weight: bold; }
         
-        /* --- MathJax & Alignment Fixes --- */
-        
-        /* 1. Spacing for Math inside text (2 spaces approx = 8px) */
+        /* MathJax Spacing Fix */
         mjx-container { 
             display: inline-block !important;
             margin: 0 8px !important; 
@@ -115,21 +116,20 @@
             outline: none !important;
         }
         
-        /* 2. Fix MCQ Alignment (Force side-by-side) */
+        /* Fix MCQ Alignment */
         .mcq-option-wrapper {
-            display: inline-flex !important; /* Force flex behavior */
-            align-items: center !important;  /* Center vertically */
+            display: inline-flex !important; 
+            align-items: center !important;  
             margin-left: 20px;
             margin-bottom: 5px;
             height: auto;
         }
         
-        /* Ensure the letter doesn't shrink */
         .mcq-label {
             font-family: monospace;
             font-weight: 900;
             font-size: 16px;
-            margin-left: 5px; /* Space between A) and the answer */
+            margin-left: 5px;
             flex-shrink: 0;
         }
 
@@ -153,13 +153,32 @@
 <body class="font-sans text-slate-800 main-layout">
 
     <div id="login-overlay" class="fixed inset-0 bg-slate-900/95 z-[100] flex items-center justify-center backdrop-blur-sm p-4">
-        <div class="bg-white p-6 rounded-2xl shadow-2xl w-full max-w-sm text-center">
+        <div class="bg-white p-6 rounded-2xl shadow-2xl w-full max-w-sm text-center border-t-4 border-brand-500">
             <div id="login-loader" class="hidden absolute inset-0 bg-white/80 flex items-center justify-center rounded-2xl"><div class="animate-spin h-8 w-8 border-4 border-brand-500 rounded-full border-t-transparent"></div></div>
-            <h2 class="text-2xl font-bold mb-4 text-brand-900">چوونەژوورەوە</h2>
-            <div class="text-xs text-gray-500 mb-2">تکایە کۆدی چالاککردن بنووسە</div>
-            <input type="number" id="password-input" class="w-full p-3 border-2 rounded-xl text-center text-xl font-bold mb-3 focus:border-brand-500 outline-none" placeholder="کۆد...">
-            <p id="login-error-msg" class="text-red-500 text-xs mb-2 hidden"></p>
-            <button onclick="checkPassword()" id="login-btn" class="w-full bg-brand-600 hover:bg-brand-500 text-white font-bold py-3 rounded-xl transition">چوونەژوورەوە</button>
+            
+            <div class="mb-4">
+                <i class="fa-solid fa-lock text-4xl text-brand-600 mb-2"></i>
+                <h2 class="text-2xl font-bold text-brand-900">چوونەژوورەوە</h2>
+            </div>
+
+            <div class="bg-blue-50 border border-blue-200 rounded-lg p-3 text-right mb-4 text-sm">
+                <p class="font-bold text-gray-700 mb-2"><i class="fa-solid fa-circle-info text-blue-500 ml-1"></i> ڕێنمایی:</p>
+                <p class="text-gray-600 mb-1">تکایە بڕی <span class="font-bold text-black">5000 دینار</span> بنێرە بە FIB بۆ:</p>
+                <div class="bg-white p-2 rounded text-center font-mono font-bold text-lg border mb-2 select-all">07501784002</div>
+                <p class="text-xs text-gray-500">دواتر وێنەی پسوڵەکە لە وەتسئەپ بنێرە بۆ وەرگرتنی کۆد.</p>
+            </div>
+
+            <a href="https://wa.me/9647501784002" target="_blank" class="flex items-center justify-center gap-2 w-full bg-green-500 hover:bg-green-600 text-white font-bold py-2 rounded-lg mb-4 transition shadow-sm">
+                <i class="fa-brands fa-whatsapp text-xl"></i> ناردنی نامە لە وەتسئەپ
+            </a>
+
+            <div class="relative">
+                <input type="number" id="password-input" class="w-full p-3 border-2 rounded-xl text-center text-xl font-bold mb-3 focus:border-brand-500 outline-none" placeholder="کۆدی چالاککردن لێرە بنووسە">
+            </div>
+            
+            <p id="login-error-msg" class="text-red-500 text-xs mb-2 hidden bg-red-50 p-2 rounded"></p>
+            
+            <button onclick="checkPassword()" id="login-btn" class="w-full bg-brand-600 hover:bg-brand-500 text-white font-bold py-3 rounded-xl transition shadow-lg">چوونەژوورەوە</button>
         </div>
     </div>
 
@@ -174,15 +193,29 @@
                 <button onclick="createNewExam()" class="text-xs bg-green-100 text-green-700 px-2 py-1 rounded">+ نوێ</button>
             </div>
 
-            <div class="flex text-xs font-bold border-b bg-white sticky top-[50px] z-10 shadow-sm">
+            <div class="flex text-xs font-bold border-b bg-white sticky top-[50px] z-10 shadow-sm overflow-x-auto">
                 <button onclick="setTab('create')" id="tab-create" class="flex-1 py-3 text-brand-600 border-b-2 border-brand-600 bg-blue-50">نووسین</button>
                 <button onclick="setTab('archive')" id="tab-archive" class="flex-1 py-3 text-gray-500">ئەرشیف</button>
                 <button onclick="setTab('bank')" id="tab-bank" class="flex-1 py-3 text-gray-500">بانک</button>
                 <button onclick="setTab('settings')" id="tab-settings" class="flex-1 py-3 text-gray-500">ڕێکخستن</button>
+                <button onclick="setTab('admin')" id="tab-admin" class="hidden flex-1 py-3 text-purple-600 bg-purple-50"><i class="fa-solid fa-user-shield"></i> ئەدمین</button>
+            </div>
+
+            <div id="view-admin" class="hidden flex-1 p-3 space-y-3 bg-purple-50">
+                <h3 class="font-bold text-purple-800 text-sm border-b pb-2">دروستکردنی کۆدی نوێ</h3>
+                <div class="flex gap-2">
+                    <input type="text" id="admin-new-code" class="flex-1 p-2 border rounded text-center font-bold" placeholder="کۆد بنووسە یان Generated">
+                    <button onclick="generateRandomCode()" class="bg-gray-200 px-3 rounded text-sm"><i class="fa-solid fa-shuffle"></i></button>
+                </div>
+                <button onclick="createAccessCode()" class="w-full bg-purple-600 text-white py-2 rounded font-bold hover:bg-purple-700">تۆمارکردنی کۆد</button>
+                
+                <div class="mt-4">
+                    <h3 class="font-bold text-gray-600 text-xs mb-2">کۆدە چالاکەکان:</h3>
+                    <div id="admin-code-list" class="space-y-2 h-64 overflow-y-auto"></div>
+                </div>
             </div>
 
             <div id="view-create" class="flex-1 p-3 space-y-3">
-                
                 <div id="bank-edit-alert" class="hidden bg-yellow-50 text-yellow-800 p-2 text-xs border border-yellow-200 rounded font-bold">
                     ⚠️ تۆ خەریکی دەستکاری پرسیاری بانکیت
                     <button onclick="clearForm()" class="text-red-500 underline mr-2">هەڵوەشاندنەوە</button>
@@ -373,9 +406,12 @@
             errorMsg.classList.add('hidden');
             if(!input) return;
 
+            // MASTER ADMIN CODE
             if(input === '11223344009') {
                 userIsAdmin = true;
+                localStorage.setItem('is_admin', 'true');
                 grantAccess();
+                document.getElementById('tab-admin').classList.remove('hidden');
                 return;
             }
 
@@ -383,13 +419,31 @@
             loader.classList.remove('hidden');
             
             try {
-                const { db, doc, getDoc, appId } = window.firebaseApp;
+                const { db, doc, getDoc, updateDoc, appId } = window.firebaseApp;
+                // Check if code exists in 'access_codes' collection
                 const docRef = doc(db, 'artifacts', appId, 'access_codes', input);
                 const docSnap = await getDoc(docRef);
 
                 if (docSnap.exists()) {
-                    userIsAdmin = false;
-                    grantAccess();
+                    const codeData = docSnap.data();
+                    
+                    // DEVICE LOCK LOGIC
+                    if (!codeData.used) {
+                        // First time use: Lock to this device
+                        await updateDoc(docRef, { 
+                            used: true, 
+                            deviceId: deviceId, 
+                            usedAt: new Date().toISOString() 
+                        });
+                        grantAccess();
+                    } else if (codeData.deviceId === deviceId) {
+                        // Used, but matches this device
+                        grantAccess();
+                    } else {
+                        // Used on different device
+                        errorMsg.innerText = "ئەم کۆدە پێشتر لەسەر ئامێرێکی تر بەکارهاتووە! ناتوانیت لێرە بەکاری بهێنیت.";
+                        errorMsg.classList.remove('hidden');
+                    }
                 } else {
                     errorMsg.innerText = "کۆدەکە هەڵەیە یان بوونی نییە";
                     errorMsg.classList.remove('hidden');
@@ -704,6 +758,7 @@
                      item.options.forEach((opt, i) => {
                         if(opt.text) {
                             // Flex container for each option: Label | Content
+                            // Added margin-left: 20px style to the Label span
                             mainContent += `
                             <div class="mcq-option-wrapper">
                                 <span class="mcq-label">${labels[i]})</span>
@@ -1022,6 +1077,79 @@
             const win = window.open('','_blank');
             win.document.write(html);
         }
+
+        // --- ADMIN PANEL FUNCTIONS ---
+        function generateRandomCode() {
+            const code = Math.floor(100000 + Math.random() * 900000).toString();
+            document.getElementById('admin-new-code').value = code;
+        }
+
+        async function createAccessCode() {
+            const code = document.getElementById('admin-new-code').value.trim();
+            if(!code) return alert('تکایە کۆد بنووسە');
+            
+            const { db, doc, setDoc, appId } = window.firebaseApp;
+            try {
+                await setDoc(doc(db, 'artifacts', appId, 'access_codes', code), {
+                    used: false,
+                    deviceId: null,
+                    createdAt: new Date().toISOString(),
+                    createdBy: window.currentUser.uid
+                });
+                alert('کۆد تۆمارکرا: ' + code);
+                loadAdminCodes();
+                document.getElementById('admin-new-code').value = '';
+            } catch(e) {
+                console.error(e);
+                alert('هەڵە لە تۆمارکردن');
+            }
+        }
+
+        async function loadAdminCodes() {
+            const { db, collection, getDocs, query, orderBy, appId } = window.firebaseApp;
+            const container = document.getElementById('admin-code-list');
+            container.innerHTML = '<div class="text-center text-gray-500">Loading...</div>';
+            
+            try {
+                const q = query(collection(db, 'artifacts', appId, 'access_codes'), orderBy('createdAt', 'desc'));
+                const snap = await getDocs(q);
+                container.innerHTML = '';
+                
+                snap.forEach(doc => {
+                    const d = doc.data();
+                    const statusClass = d.used ? 'bg-red-100 text-red-700' : 'bg-green-100 text-green-700';
+                    const statusText = d.used ? 'بەکارهاتووە' : 'نوێ';
+                    
+                    const div = document.createElement('div');
+                    div.className = "flex justify-between items-center bg-white p-2 rounded border shadow-sm text-sm";
+                    div.innerHTML = `
+                        <div class="font-mono font-bold text-lg select-all">${doc.id}</div>
+                        <div class="flex items-center gap-2">
+                            <span class="text-xs px-2 py-1 rounded ${statusClass}">${statusText}</span>
+                            ${d.used ? `<span class="text-[10px] text-gray-400" title="${d.deviceId}">${d.usedAt ? new Date(d.usedAt).toLocaleDateString() : ''}</span>` : ''}
+                            <button onclick="deleteAccessCode('${doc.id}')" class="text-red-500 hover:bg-red-50 p-1 rounded"><i class="fa-solid fa-trash"></i></button>
+                        </div>
+                    `;
+                    container.appendChild(div);
+                });
+            } catch(e) {
+                console.error(e);
+                container.innerHTML = 'Error loading codes.';
+            }
+        }
+
+        async function deleteAccessCode(code) {
+            if(!confirm('دڵنیای لە سڕینەوەی ئەم کۆدە؟')) return;
+            const { db, doc, deleteDoc, appId } = window.firebaseApp;
+            await deleteDoc(doc(db, 'artifacts', appId, 'access_codes', code));
+            loadAdminCodes();
+        }
+
+        // Load admin codes when tab is clicked
+        document.getElementById('tab-admin').addEventListener('click', () => {
+            loadAdminCodes();
+        });
+
     </script>
 </body>
 </html>
