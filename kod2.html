@@ -2,30 +2,15 @@
 <html lang="ckb" dir="rtl">
 <head>
     <meta charset="UTF-8">
-    <meta name="viewport" content="width=device-width, initial-scale=1.0, maximum-scale=1.0, user-scalable=no">
-    <title>بەڕێوەبەری کۆدەکان (Admin V12)</title>
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>ئەدمین پەنێڵ - سیستەمی پرسیار</title>
     <script src="https://cdn.tailwindcss.com"></script>
-    <link href="https://fonts.googleapis.com/css2?family=Nrt+Reg&family=Vazirmatn:wght@300;400;700;900&display=swap" rel="stylesheet">
+    <link href="https://fonts.googleapis.com/css2?family=Vazirmatn:wght@300;400;700;900&display=swap" rel="stylesheet">
     <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.4.0/css/all.min.css">
-
-    <script>
-        tailwind.config = {
-            theme: {
-                extend: {
-                    fontFamily: { sans: ['Vazirmatn', 'Arial'], nrt: ['Nrt Reg', 'Arial'] },
-                    colors: { 
-                        primary: { 50: '#eff6ff', 600: '#2563eb', 900: '#1e3a8a' },
-                        danger: { 50: '#fef2f2', 600: '#dc2626' }
-                    }
-                }
-            }
-        }
-    </script>
-
+    
     <script type="module">
         import { initializeApp } from "https://www.gstatic.com/firebasejs/11.6.1/firebase-app.js";
-        import { getAuth, signInAnonymously, onAuthStateChanged } from "https://www.gstatic.com/firebasejs/11.6.1/firebase-auth.js";
-        import { getFirestore, doc, getDoc, setDoc, deleteDoc, collection, getDocs, writeBatch } from "https://www.gstatic.com/firebasejs/11.6.1/firebase-firestore.js";
+        import { getFirestore, doc, getDoc, setDoc, deleteDoc, collection, getDocs, query, orderBy } from "https://www.gstatic.com/firebasejs/11.6.1/firebase-firestore.js";
 
         const firebaseConfig = {
             apiKey: "AIzaSyBHxuOA6uuX1EZGse5_JOHc3WMjvPywLD4",
@@ -37,281 +22,110 @@
             measurementId: "G-7KLKMNVFHC"
         };
 
-        try {
-            const app = initializeApp(firebaseConfig);
-            const auth = getAuth(app);
-            const db = getFirestore(app);
-            
-            // گرنگ: ئەمە دەبێت هەمان ئایدی بەرنامە نوێیەکە بێت
-            const appId = 'exam-system-v12-super'; 
+        const app = initializeApp(firebaseConfig);
+        const db = getFirestore(app);
+        const appId = 'exam-system-v12-locked';
 
-            window.firebaseApp = { db, appId, doc, setDoc, deleteDoc, collection, getDocs, writeBatch };
+        window.db = db;
+        window.appId = appId;
+        window.doc = doc;
+        window.setDoc = setDoc;
+        window.deleteDoc = deleteDoc;
+        window.collection = collection;
+        window.getDocs = getDocs;
+        window.query = query;
+        window.orderBy = orderBy;
+    </script>
 
-            onAuthStateChanged(auth, (user) => {
-                if (user) {
-                    document.getElementById('status-indicator').classList.remove('bg-red-500');
-                    document.getElementById('status-indicator').classList.add('bg-green-500');
-                } else {
-                    signInAnonymously(auth);
-                }
+    <style>body { font-family: 'Vazirmatn', sans-serif; }</style>
+</head>
+<body class="bg-gray-100 min-h-screen flex items-center justify-center">
+
+    <div id="login-box" class="bg-white p-8 rounded-xl shadow-lg w-96 text-center">
+        <h2 class="text-2xl font-bold mb-4 text-purple-700">چوونەژوورەوەی ئەدمین</h2>
+        <input type="password" id="admin-pass" class="w-full p-3 border rounded mb-3 text-center" placeholder="پاسۆرد...">
+        <button onclick="checkAdmin()" class="w-full bg-purple-600 text-white py-2 rounded font-bold">چوونەژوورەوە</button>
+    </div>
+
+    <div id="dashboard" class="hidden bg-white p-6 rounded-xl shadow-lg w-full max-w-2xl">
+        <div class="flex justify-between items-center mb-6 border-b pb-4">
+            <h1 class="text-2xl font-bold text-gray-800">بەڕێوەبردنی کۆدەکان</h1>
+            <button onclick="location.reload()" class="text-red-500 text-sm">دەرچوون</button>
+        </div>
+
+        <div class="flex gap-2 mb-6">
+            <input type="text" id="new-code" class="flex-1 p-3 border rounded text-center font-mono text-lg font-bold bg-gray-50" placeholder="کۆدی نوێ...">
+            <button onclick="generateRandom()" class="bg-gray-200 px-4 rounded hover:bg-gray-300"><i class="fa-solid fa-shuffle"></i></button>
+            <button onclick="createCode()" class="bg-green-600 text-white px-6 rounded font-bold hover:bg-green-700">زیادکردن</button>
+        </div>
+
+        <div class="bg-gray-50 rounded-lg border h-96 overflow-y-auto p-2" id="code-list">
+            <div class="text-center text-gray-400 mt-10">Loading...</div>
+        </div>
+    </div>
+
+    <script type="module">
+        import { doc, setDoc, collection, query, orderBy, getDocs, deleteDoc } from "https://www.gstatic.com/firebasejs/11.6.1/firebase-firestore.js";
+        
+        window.createCode = async () => {
+            const code = document.getElementById('new-code').value.trim();
+            if(!code) return alert('کۆد بنووسە');
+            try {
+                await setDoc(doc(window.db, 'artifacts', window.appId, 'access_codes', code), {
+                    used: false,
+                    deviceId: null,
+                    createdAt: new Date().toISOString()
+                });
+                alert('کۆد زیادکرا');
+                loadCodes();
+                document.getElementById('new-code').value = '';
+            } catch(e) { console.error(e); alert('هەڵە'); }
+        }
+
+        window.loadCodes = async () => {
+            const list = document.getElementById('code-list');
+            list.innerHTML = '';
+            const q = query(collection(window.db, 'artifacts', window.appId, 'access_codes'), orderBy('createdAt', 'desc'));
+            const snap = await getDocs(q);
+            snap.forEach(d => {
+                const data = d.data();
+                const div = document.createElement('div');
+                div.className = "flex justify-between items-center bg-white p-3 rounded border shadow-sm mb-2";
+                div.innerHTML = `
+                    <div class="font-mono font-bold text-lg text-gray-700 select-all cursor-pointer" onclick="navigator.clipboard.writeText('${d.id}'); alert('کۆپی کرا')">${d.id}</div>
+                    <div class="flex items-center gap-3">
+                        <span class="text-xs px-2 py-1 rounded ${data.used ? 'bg-red-100 text-red-600' : 'bg-green-100 text-green-600'} font-bold">
+                            ${data.used ? 'بەکارهاتووە' : 'نوێ'}
+                        </span>
+                        <button onclick="removeCode('${d.id}')" class="text-red-500 hover:bg-red-50 p-2 rounded"><i class="fa-solid fa-trash"></i></button>
+                    </div>
+                `;
+                list.appendChild(div);
             });
+        }
 
-        } catch (e) {
-            console.error("Firebase Error", e);
+        window.removeCode = async (id) => {
+            if(confirm('دڵنیای؟')) {
+                await deleteDoc(doc(window.db, 'artifacts', window.appId, 'access_codes', id));
+                loadCodes();
+            }
         }
     </script>
-</head>
-<body class="bg-gray-50 font-sans text-gray-800 pb-20">
-
-    <div id="login-screen" class="fixed inset-0 bg-primary-900 flex flex-col items-center justify-center z-50 p-4">
-        <div class="bg-white p-6 rounded-2xl shadow-2xl w-full max-w-sm text-center">
-            <div class="w-16 h-16 bg-primary-50 text-primary-600 rounded-full flex items-center justify-center text-3xl mx-auto mb-4">
-                <i class="fa-solid fa-lock"></i>
-            </div>
-            <h1 class="text-xl font-bold mb-1">پەنێڵی ئەدمین (V12)</h1>
-            <p class="text-gray-400 text-xs mb-6">بەڕێوەبردنی کۆدی خوێندکاران</p>
-            
-            <input type="password" id="admin-pass" class="w-full p-3 border-2 border-gray-200 rounded-xl text-center text-lg mb-4 outline-none focus:border-primary-600 transition" placeholder="پاسۆرد" inputmode="numeric">
-            <button onclick="adminLogin()" class="w-full bg-primary-600 hover:bg-primary-900 text-white font-bold py-3.5 rounded-xl transition shadow-lg">چوونەژوورەوە</button>
-        </div>
-    </div>
-
-    <div id="dashboard" class="hidden min-h-screen">
-        
-        <div class="bg-white shadow-sm sticky top-0 z-40 border-b border-gray-200">
-            <div class="max-w-3xl mx-auto px-4 py-3 flex justify-between items-center">
-                <div class="flex items-center gap-2">
-                    <div id="status-indicator" class="w-2.5 h-2.5 rounded-full bg-red-500 animate-pulse"></div>
-                    <span class="font-bold text-gray-700">کۆدەکان (V12)</span>
-                </div>
-                <div class="flex gap-2">
-                    <button onclick="exportData()" class="bg-blue-50 text-blue-600 p-2 rounded-lg text-xs font-bold border border-blue-100 flex items-center gap-1">
-                        <i class="fa-solid fa-download"></i> <span class="hidden sm:inline">داگرتن</span>
-                    </button>
-                    <button onclick="document.getElementById('import-file').click()" class="bg-green-50 text-green-600 p-2 rounded-lg text-xs font-bold border border-green-100 flex items-center gap-1">
-                        <i class="fa-solid fa-upload"></i> <span class="hidden sm:inline">هێنانەوە</span>
-                    </button>
-                    <input type="file" id="import-file" accept=".json" class="hidden" onchange="importData(this)">
-                    <button onclick="location.reload()" class="bg-red-50 text-red-600 p-2 rounded-lg text-xs"><i class="fa-solid fa-power-off"></i></button>
-                </div>
-            </div>
-        </div>
-
-        <div class="max-w-3xl mx-auto p-4 space-y-4">
-
-            <div class="bg-white p-4 rounded-2xl shadow-sm border border-gray-100">
-                <h2 class="text-sm font-bold text-gray-500 mb-3 uppercase tracking-wider">زیادکردنی کۆد</h2>
-                
-                <div class="flex flex-col gap-3">
-                    <div class="flex gap-2">
-                        <div class="relative flex-1">
-                            <input type="number" id="new-code" class="w-full p-3 bg-gray-50 border border-gray-200 rounded-xl text-left font-mono font-bold text-lg tracking-widest outline-none focus:border-primary-600 focus:bg-white transition" placeholder="کۆد (6+ ژمارە)">
-                            <button onclick="generateRandom()" class="absolute left-2 top-2 bottom-2 px-3 text-gray-400 hover:text-primary-600 transition"><i class="fa-solid fa-shuffle"></i></button>
-                        </div>
-                    </div>
-                    
-                    <input type="text" id="code-note" class="w-full p-3 bg-gray-50 border border-gray-200 rounded-xl text-sm outline-none focus:border-primary-600 focus:bg-white" placeholder="تێبینی (ناوی قوتابی، پۆل...)">
-                    
-                    <div class="flex items-center gap-2 bg-gray-50 p-2 rounded-xl border border-gray-200">
-                        <div class="bg-white p-2 rounded-lg text-gray-500"><i class="fa-regular fa-calendar-xmark"></i></div>
-                        <div class="flex-1">
-                            <label class="block text-[10px] text-gray-400 font-bold mb-0.5">بەرواری بەسەرچوون (ئیختیاری)</label>
-                            <input type="date" id="expiry-date" class="w-full bg-transparent text-sm font-bold text-gray-700 outline-none">
-                        </div>
-                    </div>
-
-                    <button onclick="saveCode()" class="w-full bg-primary-600 hover:bg-primary-700 text-white font-bold py-3 rounded-xl shadow-lg shadow-primary-600/30 transition flex items-center justify-center gap-2">
-                        <i class="fa-solid fa-plus"></i> دروستکردن
-                    </button>
-                </div>
-            </div>
-
-            <div class="flex justify-between items-end px-1">
-                <h2 class="text-sm font-bold text-gray-500 uppercase tracking-wider">لیستی کۆدەکان</h2>
-                <button onclick="loadCodes()" class="text-xs text-primary-600 font-bold bg-primary-50 px-3 py-1 rounded-full"><i class="fa-solid fa-rotate"></i> نوێکردنەوە</button>
-            </div>
-
-            <div id="codes-list" class="space-y-3 pb-10">
-                <div class="text-center py-10 text-gray-400">
-                    <i class="fa-solid fa-spinner fa-spin text-2xl mb-2"></i>
-                    <p class="text-xs">خەریکی هێنانەوە...</p>
-                </div>
-            </div>
-
-        </div>
-    </div>
 
     <script>
-        // --- ADMIN LOGIN ---
-        function adminLogin() {
-            if (document.getElementById('admin-pass').value === '11223344009') {
-                document.getElementById('login-screen').classList.add('hidden');
+        function checkAdmin() {
+            const pass = document.getElementById('admin-pass').value;
+            if(pass === '11223344009') {
+                document.getElementById('login-box').classList.add('hidden');
                 document.getElementById('dashboard').classList.remove('hidden');
-                loadCodes();
+                window.loadCodes();
             } else {
-                alert('پاسۆرد هەڵەیە!');
+                alert('پاسۆرد هەڵەیە');
             }
         }
 
         function generateRandom() {
-            document.getElementById('new-code').value = Math.floor(10000000 + Math.random() * 90000000);
-        }
-
-        // --- CRUD ---
-        async function saveCode() {
-            const code = document.getElementById('new-code').value.trim();
-            const note = document.getElementById('code-note').value.trim() || 'بێ تێبینی';
-            const expiry = document.getElementById('expiry-date').value;
-
-            if (code.length < 6) return alert('کۆد دەبێت ٦ ژمارە زیاتر بێت');
-
-            const btn = event.currentTarget;
-            const originalHTML = btn.innerHTML;
-            btn.innerHTML = '<i class="fa-solid fa-spinner fa-spin"></i>';
-            btn.disabled = true;
-
-            const { db, setDoc, doc, appId } = window.firebaseApp;
-
-            try {
-                // Save to the NEW version path
-                await setDoc(doc(db, 'artifacts', appId, 'access_codes', code), {
-                    active: true,
-                    note: note,
-                    createdAt: new Date().toISOString(),
-                    expiresAt: expiry || null, 
-                    createdBy: 'Admin Panel V12'
-                });
-
-                alert(`کۆدی ${code} بە سەرکەوتوویی زیادکرا بۆ وەشانی V12.`);
-                document.getElementById('new-code').value = '';
-                document.getElementById('code-note').value = '';
-                document.getElementById('expiry-date').value = '';
-                loadCodes();
-
-            } catch (error) {
-                console.error(error);
-                alert('هەڵەیەک ڕوویدا لە کاتی پەیوەستبوون.');
-            } finally {
-                btn.innerHTML = originalHTML;
-                btn.disabled = false;
-            }
-        }
-
-        async function loadCodes() {
-            const { db, collection, getDocs, appId } = window.firebaseApp;
-            const container = document.getElementById('codes-list');
-            
-            try {
-                const snap = await getDocs(collection(db, 'artifacts', appId, 'access_codes'));
-                container.innerHTML = '';
-
-                if (snap.empty) {
-                    container.innerHTML = '<div class="text-center py-10 text-gray-400 bg-white rounded-2xl border border-dashed"><p>هیچ کۆدێک نییە</p></div>';
-                    return;
-                }
-
-                const codes = [];
-                snap.forEach(d => codes.push({ id: d.id, ...d.data() }));
-                codes.sort((a, b) => new Date(b.createdAt) - new Date(a.createdAt));
-
-                const today = new Date().toISOString().split('T')[0];
-
-                codes.forEach(item => {
-                    let isExpired = false;
-                    let expiryText = 'بێ سنوور';
-                    let statusClass = 'bg-green-100 text-green-700';
-                    let icon = 'fa-check';
-
-                    if (item.expiresAt) {
-                        expiryText = item.expiresAt;
-                        if (item.expiresAt < today) {
-                            isExpired = true;
-                            statusClass = 'bg-red-100 text-red-700';
-                            icon = 'fa-ban';
-                            expiryText += ' (بەسەرچوو)';
-                        } else {
-                            statusClass = 'bg-blue-100 text-blue-700';
-                            icon = 'fa-clock';
-                        }
-                    }
-
-                    const div = document.createElement('div');
-                    div.className = `bg-white p-4 rounded-2xl shadow-sm border ${isExpired ? 'border-red-200' : 'border-gray-100'} flex justify-between items-center transition hover:shadow-md`;
-                    div.innerHTML = `
-                        <div class="flex-1 overflow-hidden">
-                            <div class="flex items-center gap-2 mb-1">
-                                <span class="font-mono font-bold text-lg text-gray-800 select-all cursor-pointer" onclick="navigator.clipboard.writeText('${item.id}'); alert('کۆپی کرا')">${item.id}</span>
-                                <span class="text-[10px] px-2 py-0.5 rounded-full ${statusClass} font-bold flex items-center gap-1">
-                                    <i class="fa-solid ${icon}"></i> ${isExpired ? 'ناچالاک' : 'چالاک'}
-                                </span>
-                            </div>
-                            <div class="text-sm text-gray-600 truncate font-medium">${item.note}</div>
-                            <div class="text-[10px] text-gray-400 mt-1 flex gap-3">
-                                <span><i class="fa-regular fa-calendar"></i> ${new Date(item.createdAt).toLocaleDateString('ckb')}</span>
-                                <span><i class="fa-solid fa-hourglass-end"></i> ${expiryText}</span>
-                            </div>
-                        </div>
-                        <button onclick="deleteCode('${item.id}')" class="w-10 h-10 rounded-full bg-red-50 text-red-500 hover:bg-red-500 hover:text-white transition flex items-center justify-center ml-2 shadow-sm">
-                            <i class="fa-solid fa-trash"></i>
-                        </button>
-                    `;
-                    container.appendChild(div);
-                });
-
-            } catch (e) {
-                container.innerHTML = '<p class="text-center text-red-500">هەڵە لە هێنانەوەی داتا</p>';
-            }
-        }
-
-        async function deleteCode(code) {
-            if(!confirm('دڵنیای لە سڕینەوەی ئەم کۆدە؟')) return;
-            const { db, doc, deleteDoc, appId } = window.firebaseApp;
-            await deleteDoc(doc(db, 'artifacts', appId, 'access_codes', code));
-            loadCodes();
-        }
-
-        // --- BACKUP & RESTORE ---
-        async function exportData() {
-            const { db, collection, getDocs, appId } = window.firebaseApp;
-            const snap = await getDocs(collection(db, 'artifacts', appId, 'access_codes'));
-            const data = {};
-            snap.forEach(d => data[d.id] = d.data());
-
-            const blob = new Blob([JSON.stringify(data, null, 2)], { type: 'application/json' });
-            const url = URL.createObjectURL(blob);
-            const a = document.createElement('a');
-            a.href = url;
-            a.download = `codes_v12_backup_${new Date().toISOString().split('T')[0]}.json`;
-            a.click();
-        }
-
-        function importData(input) {
-            const file = input.files[0];
-            if (!file) return;
-
-            const reader = new FileReader();
-            reader.onload = async (e) => {
-                try {
-                    const data = JSON.parse(e.target.result);
-                    const { db, doc, writeBatch, appId } = window.firebaseApp;
-                    const batch = writeBatch(db);
-                    
-                    let count = 0;
-                    for (const [code, info] of Object.entries(data)) {
-                        const ref = doc(db, 'artifacts', appId, 'access_codes', code);
-                        batch.set(ref, info);
-                        count++;
-                    }
-                    
-                    await batch.commit();
-                    alert(`${count} کۆد بە سەرکەوتوویی گەڕێندرانەوە!`);
-                    loadCodes();
-                } catch (err) {
-                    alert('فایلەکە هەڵەیە!');
-                    console.error(err);
-                }
-            };
-            reader.readAsText(file);
+            document.getElementById('new-code').value = Math.floor(100000 + Math.random() * 900000);
         }
     </script>
 </body>
