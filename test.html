@@ -3,7 +3,7 @@
 <head>
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0, maximum-scale=1.0, user-scalable=no">
-    <title>سیستەمی پرسیار - مامۆستا</title>
+    <title>سیستەمی پرسیار - وەشان ١٥</title>
     
     <script src="https://cdn.tailwindcss.com"></script>
     <script src="https://cdnjs.cloudflare.com/ajax/libs/html2pdf.js/0.10.1/html2pdf.bundle.min.js"></script>
@@ -96,19 +96,35 @@
         .header-left { text-align: left; align-items: flex-end; }
         .header-logo-img { width: 90px; height: 90px; object-fit: contain; margin-bottom: 2px; }
         
-        .q-wrapper { margin-bottom: 6px; break-inside: avoid; } 
-        .q-number { background: #000; color: white; width: 22px; height: 22px; border-radius: 50%; display: inline-flex; align-items: center; justify-content: center; font-size: 11px; margin-left: 6px; font-weight: bold; -webkit-print-color-adjust: exact; print-color-adjust: exact; flex-shrink: 0; }
-        .q-sub-label { font-weight: bold; margin-left: 5px; min-width: 20px; display: inline-block; font-size: 14px; }
-        .q-content { font-size: 14px; line-height: 2.2; text-align: justify; direction: rtl !important; display: block; width: 100%; font-weight: bold; }
+        /* Compact Design for 15 Qs per page */
+        .q-wrapper { margin-bottom: 4px; break-inside: avoid; position: relative; } 
+        .q-number { background: #000; color: white; width: 20px; height: 20px; border-radius: 50%; display: inline-flex; align-items: center; justify-content: center; font-size: 11px; margin-left: 6px; font-weight: bold; -webkit-print-color-adjust: exact; print-color-adjust: exact; flex-shrink: 0; }
+        .q-sub-label { font-weight: bold; margin-left: 5px; min-width: 20px; display: inline-block; font-size: 13px; }
+        .q-content { font-size: 13px; line-height: 1.8; text-align: justify; direction: rtl !important; display: block; width: 100%; font-weight: bold; }
         
-        mjx-container { display: inline-block !important; margin: 0 8px !important; vertical-align: middle !important; outline: none !important; }
+        mjx-container { display: inline-block !important; margin: 0 5px !important; vertical-align: middle !important; outline: none !important; }
         
-        .mcq-option-wrapper { display: inline-flex !important; align-items: center !important; margin-left: 20px; margin-bottom: 5px; height: auto; }
-        .mcq-label { font-family: monospace; font-weight: 900; font-size: 16px; margin-left: 5px; flex-shrink: 0; }
+        .mcq-option-wrapper { display: inline-flex !important; align-items: center !important; margin-left: 15px; margin-bottom: 2px; height: auto; }
+        .mcq-label { font-family: monospace; font-weight: 900; font-size: 14px; margin-left: 4px; flex-shrink: 0; }
 
-        .section-title { width: 100%; text-align: center; font-weight: 900; font-size: 16px; padding: 4px; border-top: 2px solid #000; border-bottom: 2px solid #000; margin: 10px 0; background-color: #f3f4f6; -webkit-print-color-adjust: exact; }
-        .page-break-marker { border-top: 2px dashed #cbd5e1; margin: 20px 0; position: relative; text-align: center; color: #94a3b8; font-size: 10px; page-break-after: always; break-after: always; }
+        .section-title { width: 100%; text-align: center; font-weight: 900; font-size: 15px; padding: 3px; border-top: 2px solid #000; border-bottom: 2px solid #000; margin: 5px 0; background-color: #f3f4f6; -webkit-print-color-adjust: exact; }
+        .page-break-marker { border-top: 2px dashed #cbd5e1; margin: 15px 0; position: relative; text-align: center; color: #94a3b8; font-size: 10px; page-break-after: always; break-after: always; }
         .page-break-marker::after { content: 'پەڕەی نوێ (Page Break)'; background: #f8fafc; padding: 0 10px; position: relative; top: -8px; }
+
+        /* Custom Label Styling */
+        .custom-side-label {
+            position: absolute;
+            top: 2px;
+            font-size: 10px;
+            font-weight: bold;
+            padding: 2px 4px;
+            border: 1px solid #333;
+            background: #fff;
+            z-index: 10;
+            line-height: 1;
+        }
+        .pos-left { left: -15px; }
+        .pos-right { right: -15px; }
 
         @media print { 
             @page { size: A4; margin: 0; } 
@@ -206,9 +222,18 @@
                      <input type="number" id="q_score" value="2" class="w-16 text-center border rounded text-sm font-bold p-1" title="نمرە">
                 </div>
 
+                <div class="bg-gray-50 p-2 rounded border flex gap-2 items-center">
+                    <span class="text-xs font-bold">ناسێنەر (Label):</span>
+                    <input type="text" id="q_custom_label" class="flex-1 text-xs p-1 border rounded text-center" placeholder="Q1, P1...">
+                    <select id="q_custom_pos" class="text-xs p-1 border rounded">
+                        <option value="right">ڕاست</option>
+                        <option value="left">چەپ</option>
+                    </select>
+                </div>
+
                 <div class="bg-blue-50 p-2 rounded border border-blue-100 mt-1">
                     <div class="flex justify-between items-center mb-1">
-                        <span class="text-xs font-bold text-gray-600">بۆشایی بۆ وەڵام (cm):</span>
+                        <span class="text-xs font-bold text-gray-600">بۆشایی (cm):</span>
                         <span id="spacing-display" class="text-xs font-bold text-blue-600 bg-white px-2 rounded">0</span>
                     </div>
                     <input type="range" id="q_spacing" min="0" max="15" value="0" step="0.5" class="w-full accent-blue-600 cursor-pointer" oninput="document.getElementById('spacing-display').innerText = this.value">
@@ -292,6 +317,7 @@
                  <div class="bg-white p-3 rounded border shadow-sm">
                     <h3 class="font-bold text-xs text-brand-600 mb-2 border-b pb-1">کردارەکان</h3>
                     <div class="grid grid-cols-2 gap-2">
+                        <button onclick="autoPageBreak(15)" class="bg-purple-100 text-purple-700 py-3 rounded text-xs font-bold">پەڕەبەندی ١٥</button>
                         <button onclick="shuffleQuestions()" class="bg-orange-100 text-orange-700 py-3 rounded text-xs font-bold">تێکەڵکردن</button>
                         <button onclick="generateAnswerKey()" class="bg-yellow-100 text-yellow-700 py-3 rounded text-xs font-bold">وەڵامنامە</button>
                         <button onclick="downloadWord()" class="bg-blue-100 text-blue-700 py-3 rounded text-xs font-bold">Word</button>
@@ -382,7 +408,6 @@
                 img.onload = () => {
                     const canvas = document.createElement('canvas');
                     const ctx = canvas.getContext('2d');
-                    // Resize to max 800px width for A4
                     const maxWidth = 800;
                     let width = img.width;
                     let height = img.height;
@@ -395,7 +420,6 @@
                     canvas.width = width;
                     canvas.height = height;
                     ctx.drawImage(img, 0, 0, width, height);
-                    // Compress quality to 0.7
                     callback(canvas.toDataURL('image/jpeg', 0.7));
                 }
             }
@@ -412,7 +436,6 @@
         }
 
         function loadLocalDraft() {
-            // Always try to load draft if no exam is active
             if(currentExamId) return;
 
             const draftData = localStorage.getItem('exam_draft_data');
@@ -431,7 +454,6 @@
                 updatePaper();
             }
         }
-
 
         // --- SECURE LOGIN LOGIC ---
         async function checkPassword() {
@@ -594,10 +616,43 @@
         // --- ADD ITEMS ---
         function addSectionTitle() {
             const title = prompt("سەردێڕ بنووسە:");
-            if(title) { examData.push({ type: 'title', id: Date.now(), text: title }); renderPaper(); updateList(); saveLocalDraft(); }
+            if(title) { 
+                const spacing = document.getElementById('q_spacing').value || 0;
+                examData.push({ type: 'title', id: Date.now(), text: title, spacing: spacing }); 
+                renderPaper(); updateList(); saveLocalDraft(); 
+            }
         }
 
         function addPageBreak() { examData.push({ type: 'break', id: Date.now() }); renderPaper(); updateList(); saveLocalDraft(); }
+        
+        // --- 15 Questions Auto Break Logic ---
+        function autoPageBreak(limit) {
+             if(!confirm('ئەم کردارە پەڕەی نوێ دادەنێت لە دوای هەموو ١٥ پرسیارێک. بەردەوام بیت؟')) return;
+             
+             // Remove existing breaks
+             examData = examData.filter(item => item.type !== 'break');
+             
+             let qCount = 0;
+             let newData = [];
+             
+             examData.forEach(item => {
+                 if(item.type === 'question') {
+                     qCount++;
+                     newData.push(item);
+                     if(qCount % limit === 0) {
+                         newData.push({ type: 'break', id: Date.now() + Math.random() });
+                     }
+                 } else {
+                     newData.push(item);
+                 }
+             });
+             
+             examData = newData;
+             renderPaper();
+             updateList();
+             saveLocalDraft();
+             alert('پەڕەبەندی ئەنجامدرا!');
+        }
 
         async function addItem() {
             const text = document.getElementById('q_text').value;
@@ -605,6 +660,8 @@
             const type = document.getElementById('q_type').value;
             const spacing = document.getElementById('q_spacing').value;
             const subStyle = document.getElementById('q_sub_style').value;
+            const customLabel = document.getElementById('q_custom_label').value;
+            const customPos = document.getElementById('q_custom_pos').value;
             const file = document.getElementById('q_image').files[0];
             
             if(type !== 'match' && !text && !file) return alert('تکایە دەق یان وێنە دابنێ');
@@ -618,6 +675,8 @@
                 score: score,
                 spacing: spacing,
                 subStyle: subStyle, 
+                customLabel: customLabel,
+                customPos: customPos,
                 options: type === 'mcq' ? JSON.parse(JSON.stringify(mcqOptions)) : null,
                 matchPairs: type === 'match' ? JSON.parse(JSON.stringify(matchPairs)) : null,
                 tfAnswer: type === 'tf' ? tfAnswer : null,
@@ -677,6 +736,9 @@
             document.getElementById('q_spacing').value = item.spacing || 0;
             document.getElementById('spacing-display').innerText = item.spacing || 0;
             document.getElementById('q_sub_style').value = item.subStyle || 'none';
+            document.getElementById('q_custom_label').value = item.customLabel || '';
+            document.getElementById('q_custom_pos').value = item.customPos || 'right';
+            
             if(item.qType === 'mcq') mcqOptions = JSON.parse(JSON.stringify(item.options));
             if(item.qType === 'match') matchPairs = JSON.parse(JSON.stringify(item.matchPairs));
             if(item.qType === 'tf') {
@@ -697,6 +759,7 @@
             document.getElementById('q_text').value = '';
             document.getElementById('q_image').value = '';
             document.getElementById('q_spacing').value = 0;
+            document.getElementById('q_custom_label').value = '';
             document.getElementById('spacing-display').innerText = 0;
             document.getElementById('btn-add').innerText = "زیادکردن";
             document.getElementById('btn-add').classList.replace('bg-green-600', 'bg-brand-600');
@@ -718,7 +781,8 @@
             examData.forEach(item => {
                 if(item.type === 'title') { 
                     qCount = 0; 
-                    container.innerHTML += `<div class="section-title">${item.text}</div>`; 
+                    let titleStyle = item.spacing ? `margin-top: ${item.spacing}cm; margin-bottom: ${item.spacing}cm;` : '';
+                    container.innerHTML += `<div class="section-title" style="${titleStyle}">${item.text}</div>`; 
                     return; 
                 }
                 if(item.type === 'break') { container.innerHTML += `<div class="page-break-marker"></div>`; return; }
@@ -746,22 +810,30 @@
                             mainContent += `
                             <div class="mcq-option-wrapper">
                                 <span class="mcq-label">${labels[i]})</span>
-                                <span style="font-weight:bold; font-size:14px;">${opt.text}</span>
+                                <span style="font-weight:bold; font-size:13px;">${opt.text}</span>
                             </div>`;
                         }
                       });
                 }
                 else if(item.qType === 'match' && item.matchPairs) {
-                      extraContentBelow = `<div class="mt-2 w-full flex justify-center">
+                      extraContentBelow = `<div class="mt-1 w-full flex justify-center">
                         <table class="border-collapse w-auto text-sm mr-0">`; 
                       item.matchPairs.forEach(p => { 
                         extraContentBelow += `<tr><td class="pl-4 py-1 font-bold text-right">${p.right}</td><td class="px-4 py-1 text-center text-gray-300">--</td><td class="pr-4 py-1 text-left font-bold" dir="ltr">${p.left}</td></tr>`; 
                       });
                       extraContentBelow += `</table></div>`;
                 }
+                
+                // Custom Label Logic
+                let customLabelHTML = '';
+                if(item.customLabel) {
+                    let posClass = item.customPos === 'left' ? 'pos-left' : 'pos-right';
+                    customLabelHTML = `<div class="custom-side-label ${posClass}">${item.customLabel}</div>`;
+                }
 
                 let content = `
-                <div class="flex items-start gap-2 w-full q-wrapper relative group mt-2">
+                <div class="flex items-start gap-2 w-full q-wrapper relative group mt-1">
+                    ${customLabelHTML}
                     ${labelHTML}
                     <div class="flex-1 text-right" dir="rtl">
                         <div class="flex justify-between items-start">
@@ -772,10 +844,10 @@
                                 ${extraContentBelow}
                                 ${spacer} 
                             </div>
-                            ${item.img ? `<img src="${item.img}" class="w-24 h-24 object-contain border border-dashed p-1 bg-white flex-none order-first ml-2">` : ''} 
+                            ${item.img ? `<img src="${item.img}" class="w-20 h-20 object-contain border border-dashed p-1 bg-white flex-none order-first ml-2">` : ''} 
                         </div>
                     </div>
-                    ${item.subStyle === 'none' ? `<span class="text-[10px] border px-1 rounded absolute left-0 top-0 bg-white">${item.score} نمرە</span>` : ''}
+                    ${item.subStyle === 'none' ? `<span class="text-[9px] border px-1 rounded absolute left-0 top-0 bg-white z-20">${item.score} نمرە</span>` : ''}
                 </div>
                 `;
                 container.innerHTML += content;
