@@ -3,7 +3,7 @@
 <head>
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0, maximum-scale=1.0, user-scalable=no">
-    <title>سیستەمی پرسیار - وەشان ٢٢</title>
+    <title>سیستەمی پرسیار - وەشان ٢٣ (نمرە + گروپ)</title>
     
     <script src="https://cdn.tailwindcss.com"></script>
     <script src="https://cdnjs.cloudflare.com/ajax/libs/html2pdf.js/0.10.1/html2pdf.bundle.min.js"></script>
@@ -96,12 +96,8 @@
         .header-left { text-align: left; align-items: flex-end; }
         .header-logo-img { width: 90px; height: 90px; object-fit: contain; margin-bottom: 2px; }
         
-        /* Q Wrapper */
         .q-wrapper { margin-bottom: 8px; margin-top: 25px; break-inside: avoid; position: relative; } 
-        
-        /* Number Circle */
         .q-number { background: #000; color: white; width: 24px; height: 24px; border-radius: 50%; display: inline-flex; align-items: center; justify-content: center; font-size: 11px; margin: 0 8px; font-weight: bold; -webkit-print-color-adjust: exact; print-color-adjust: exact; flex-shrink: 0; z-index: 5; }
-        
         .q-sub-label { font-weight: bold; min-width: 20px; display: inline-block; font-size: 13px; margin: 0 5px; } 
         .q-content { font-size: 13px; line-height: 1.8; text-align: justify; display: block; width: 100%; font-weight: bold; }
         
@@ -114,13 +110,12 @@
         .page-break-marker { border-top: 2px dashed #cbd5e1; margin: 15px 0; position: relative; text-align: center; color: #94a3b8; font-size: 10px; page-break-after: always; break-after: always; }
         .page-break-marker::after { content: 'پەڕەی نوێ (Page Break)'; background: #f8fafc; padding: 0 10px; position: relative; top: -8px; }
 
-        /* --- UPDATED LABEL STYLING --- */
         .custom-side-label {
             position: absolute;
-            top: -24px; /* Position */
-            font-size: 11px; /* Font size */
-            font-weight: 900; /* Maximum bold */
-            padding: 0px 6px 8px 6px; /* Pushes text UP */
+            top: -24px; 
+            font-size: 11px; 
+            font-weight: 900; 
+            padding: 0px 6px 8px 6px; 
             background: #1e293b; 
             color: #fff;
             z-index: 10;
@@ -131,7 +126,6 @@
             box-shadow: 0 2px 4px rgba(0,0,0,0.15);
         }
         
-        /* Positioning classes */
         .lbl-pos-right { right: 8px; }
         .lbl-pos-left { left: 8px; }
 
@@ -181,11 +175,19 @@
     </div>
 
     <div class="content-area block lg:flex lg:flex-row">
+        
         <div id="editor-panel" class="w-full lg:w-[400px] bg-white lg:border-l z-20 flex flex-col shadow-xl">
             <div class="p-3 border-b bg-slate-50 flex justify-between items-center sticky top-0 z-10">
-                <div class="font-bold text-brand-900 flex items-center gap-2 text-sm"><i class="fa-solid fa-layer-group"></i> <span id="current-exam-title">تاقیکردنەوەی نوێ</span></div>
+                <div class="font-bold text-brand-900 flex items-center gap-2 text-sm">
+                    <i class="fa-solid fa-layer-group"></i> <span id="current-exam-title">تاقیکردنەوەی نوێ</span>
+                </div>
+                <div id="score-wrapper" class="flex items-center gap-1 bg-gray-100 px-2 py-1 rounded-lg">
+                    <span class="text-[10px] text-gray-500 font-bold">کۆی نمرە:</span>
+                    <span id="live-score" class="font-black text-sm text-red-600">0</span>
+                </div>
                 <button onclick="createNewExam()" class="text-xs bg-green-100 text-green-700 px-2 py-1 rounded">+ نوێ</button>
             </div>
+
             <div class="flex text-xs font-bold border-b bg-white sticky top-[50px] z-10 shadow-sm">
                 <button onclick="setTab('create')" id="tab-create" class="flex-1 py-3 text-brand-600 border-b-2 border-brand-600 bg-blue-50">نووسین</button>
                 <button onclick="setTab('archive')" id="tab-archive" class="flex-1 py-3 text-gray-500">ئەرشیف</button>
@@ -284,9 +286,20 @@
                  </div>
                  
                  <div class="bg-white p-3 rounded border shadow-sm">
+                    <h3 class="font-bold text-xs text-brand-600 mb-2 border-b pb-1">دروستکردنی گروپ (Shuffle)</h3>
+                    <div class="grid grid-cols-4 gap-2 mb-3">
+                        <button onclick="generateGroup('A')" class="bg-gray-100 hover:bg-gray-200 text-gray-800 font-bold py-2 rounded shadow-sm">A</button>
+                        <button onclick="generateGroup('B')" class="bg-gray-100 hover:bg-gray-200 text-gray-800 font-bold py-2 rounded shadow-sm">B</button>
+                        <button onclick="generateGroup('C')" class="bg-gray-100 hover:bg-gray-200 text-gray-800 font-bold py-2 rounded shadow-sm">C</button>
+                        <button onclick="generateGroup('D')" class="bg-gray-100 hover:bg-gray-200 text-gray-800 font-bold py-2 rounded shadow-sm">D</button>
+                    </div>
+                    <p class="text-[10px] text-gray-500">* کلیک لە پیتێک بکە، پرسیارەکان تێکەڵ دەبن و گروپی دیاریکراو لەسەر پەڕەکە دەنووسرێت.</p>
+                 </div>
+
+                 <div class="bg-white p-3 rounded border shadow-sm">
                     <h3 class="font-bold text-xs text-brand-600 mb-2 border-b pb-1">کردارەکان</h3>
                     <div class="grid grid-cols-2 gap-2">
-                        <button onclick="shuffleQuestions()" class="bg-orange-100 text-orange-700 py-3 rounded text-xs font-bold">تێکەڵکردن</button>
+                        <button onclick="shuffleQuestions()" class="bg-orange-100 text-orange-700 py-3 rounded text-xs font-bold">تێکەڵکردنی ئاسایی</button>
                         <button onclick="generateAnswerKey()" class="bg-yellow-100 text-yellow-700 py-3 rounded text-xs font-bold">وەڵامنامە</button>
                         <button onclick="downloadWord()" class="bg-blue-100 text-blue-700 py-3 rounded text-xs font-bold">Word</button>
                         <button onclick="downloadPDF()" class="bg-green-100 text-green-700 py-3 rounded text-xs font-bold">PDF</button>
@@ -336,7 +349,6 @@
             else { ed.classList.add('hidden'); pr.classList.remove('hidden'); pr.classList.add('flex'); }
         }
 
-        // --- AUTH & INIT ---
         let currentExamId = null;
         let examData = [];
         let bankData = [];
@@ -351,7 +363,6 @@
         let deviceId = localStorage.getItem('did') || crypto.randomUUID();
         localStorage.setItem('did', deviceId);
 
-        // --- RICH TEXT ---
         function insertTag(tag) {
             const textarea = document.getElementById('q_text');
             const start = textarea.selectionStart;
@@ -366,7 +377,6 @@
             textarea.selectionEnd = end + tag.length + 2;
         }
 
-        // --- IMAGE COMPRESSION ---
         function compressImage(file, callback) {
             const reader = new FileReader();
             reader.readAsDataURL(file);
@@ -393,7 +403,6 @@
             }
         }
 
-        // --- AUTO SAVE ---
         function saveLocalDraft() {
             localStorage.setItem('exam_draft_data', JSON.stringify(examData));
             const headerData = {};
@@ -405,10 +414,8 @@
 
         function loadLocalDraft() {
             if(currentExamId) return;
-
             const draftData = localStorage.getItem('exam_draft_data');
             const draftHeader = localStorage.getItem('exam_draft_header');
-            
             if(draftData) {
                 examData = JSON.parse(draftData);
                 renderPaper();
@@ -423,36 +430,25 @@
             }
         }
 
-        // --- SECURE LOGIN LOGIC ---
         async function checkPassword() {
             const input = document.getElementById('password-input').value.trim();
             const btn = document.getElementById('login-btn');
             const errorMsg = document.getElementById('login-error-msg');
             const loader = document.getElementById('login-loader');
-            
             errorMsg.classList.add('hidden');
             if(!input) return;
-
-            btn.disabled = true;
-            loader.classList.remove('hidden');
-            
+            btn.disabled = true; loader.classList.remove('hidden');
             try {
                 const { db, doc, getDoc, updateDoc, appId } = window.firebaseApp;
                 const docRef = doc(db, 'artifacts', appId, 'access_codes', input);
                 const docSnap = await getDoc(docRef);
-
                 if (docSnap.exists()) {
                     const codeData = docSnap.data();
-                    
                     const today = new Date().toISOString().split('T')[0];
                     if (codeData.expiryDate && codeData.expiryDate < today) {
                         errorMsg.innerText = "ئەم کۆدە بەسەرچووە!";
-                        errorMsg.classList.remove('hidden');
-                        loader.classList.add('hidden');
-                        btn.disabled = false;
-                        return;
+                        errorMsg.classList.remove('hidden'); loader.classList.add('hidden'); btn.disabled = false; return;
                     }
-
                     if (!codeData.used) {
                         await updateDoc(docRef, { used: true, deviceId: deviceId, usedAt: new Date().toISOString() });
                         grantAccess();
@@ -471,8 +467,7 @@
                 errorMsg.innerText = "کێشەی ئینتەرنێت هەیە";
                 errorMsg.classList.remove('hidden');
             } finally {
-                btn.disabled = false;
-                loader.classList.add('hidden');
+                btn.disabled = false; loader.classList.add('hidden');
             }
         }
 
@@ -482,7 +477,6 @@
             loadExamList();
         }
 
-        // --- MATH UI ---
         const mathSymbols = ['+','-','\\times','\\div','=','\\neq','\\approx','\\pm','\\sqrt{}','\\sqrt[3]{}','\\frac{}{}','x^2','x_2','e^x','<','>','\\leq','\\geq','\\infty','\\pi','\\circ','\\angle','\\triangle','\\alpha','\\beta','\\theta','\\lambda','\\Delta','\\in','\\notin','\\cup','\\cap','\\subset','\\subseteq','\\emptyset','\\rightarrow','\\Rightarrow','\\Leftrightarrow','\\sum','\\int','\\lim','\\log','\\ln','\\sin','\\cos','\\tan'];
         const mainTextArea = document.getElementById('q_text');
         mainTextArea.addEventListener('focus', () => { activeMathInput = mainTextArea; });
@@ -509,7 +503,6 @@
             tb.appendChild(btn);
         });
 
-        // --- INPUT LOGIC ---
         function renderMCQInputs() {
             const container = document.getElementById('mcq-inputs');
             container.innerHTML = '';
@@ -690,6 +683,22 @@
             renderMCQInputs(); renderMatchInputs();
         }
 
+        function calculateScore() {
+            let total = 0;
+            examData.forEach(item => {
+                if(item.type === 'question' && item.score) {
+                    total += parseFloat(item.score);
+                }
+            });
+            const scoreEl = document.getElementById('live-score');
+            scoreEl.innerText = total;
+            if(total === 100) {
+                scoreEl.className = "font-black text-sm text-green-600";
+            } else {
+                scoreEl.className = "font-black text-sm text-red-600";
+            }
+        }
+
         function renderPaper() {
             const container = document.getElementById('paper_questions');
             const numPos = document.getElementById('h_num_pos').value || 'right';
@@ -785,6 +794,7 @@
         }
 
         function updateList() {
+            calculateScore(); // Update Live Score
             const list = document.getElementById('questions-list');
             list.innerHTML = '';
             examData.forEach((item, idx) => {
@@ -810,6 +820,49 @@
             new Sortable(list, { animation: 150, onEnd: (evt) => { const item = examData.splice(evt.oldIndex, 1)[0]; examData.splice(evt.newIndex, 0, item); renderPaper(); updateList(); saveLocalDraft(); }});
         }
 
+        // --- GROUP GENERATOR LOGIC ---
+        function generateGroup(groupLabel) {
+            if(!confirm(`دڵنیای دەتەوێت گروپی (${groupLabel}) دروست بکەیت؟ پرسیارەکان تێکەڵ دەبن.`)) return;
+            
+            // 1. Shuffle main questions array
+            let qIndices = [];
+            examData.forEach((item, index) => {
+                if(item.type === 'question') qIndices.push(index);
+            });
+            
+            let shuffledIndices = [...qIndices];
+            // Fisher-Yates Shuffle for questions
+            for (let i = shuffledIndices.length - 1; i > 0; i--) {
+                const j = Math.floor(Math.random() * (i + 1));
+                [shuffledIndices[i], shuffledIndices[j]] = [shuffledIndices[j], shuffledIndices[i]];
+            }
+            
+            let tempItems = {};
+            qIndices.forEach((oldIdx, i) => {
+                tempItems[oldIdx] = JSON.parse(JSON.stringify(examData[shuffledIndices[i]])); // Deep copy
+            });
+            
+            qIndices.forEach(idx => {
+                examData[idx] = tempItems[idx];
+            });
+
+            // 2. Shuffle MCQ Options within each question
+            examData.forEach(q => {
+                if(q.qType === 'mcq' && q.options) {
+                    for (let i = q.options.length - 1; i > 0; i--) {
+                        const j = Math.floor(Math.random() * (i + 1));
+                        [q.options[i], q.options[j]] = [q.options[j], q.options[i]];
+                    }
+                }
+            });
+
+            // 3. Update Group Label in Header
+            document.getElementById('h_group').value = groupLabel;
+            updatePaper();
+            updateList();
+            alert(`گروپی ${groupLabel} دروستکرا!`);
+        }
+
         function shuffleQuestions() {
             if(!confirm('تەنها پرسیارە هەڵبژاردنەکان تێکەڵ دەکەیت؟')) return;
             examData.forEach(q => {
@@ -819,22 +872,6 @@
                         [q.options[i], q.options[j]] = [q.options[j], q.options[i]];
                     }
                 }
-            });
-            let mcqIndices = [];
-            examData.forEach((item, index) => {
-                if(item.type === 'question' && item.qType === 'mcq') mcqIndices.push(index);
-            });
-            let shuffledIndices = [...mcqIndices];
-            for (let i = shuffledIndices.length - 1; i > 0; i--) {
-                const j = Math.floor(Math.random() * (i + 1));
-                [shuffledIndices[i], shuffledIndices[j]] = [shuffledIndices[j], shuffledIndices[i]];
-            }
-            let tempItems = {};
-            mcqIndices.forEach((oldIdx, i) => {
-                tempItems[oldIdx] = examData[shuffledIndices[i]];
-            });
-            mcqIndices.forEach(idx => {
-                examData[idx] = tempItems[idx];
             });
             renderPaper(); updateList(); saveLocalDraft();
         }
