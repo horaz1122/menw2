@@ -3,7 +3,7 @@
 <head>
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0, maximum-scale=1.0, user-scalable=no">
-    <title>سیستەمی پرسیار - وەشان ١٥</title>
+    <title>سیستەمی پرسیار - وەشان ١٦</title>
     
     <script src="https://cdn.tailwindcss.com"></script>
     <script src="https://cdnjs.cloudflare.com/ajax/libs/html2pdf.js/0.10.1/html2pdf.bundle.min.js"></script>
@@ -96,10 +96,11 @@
         .header-left { text-align: left; align-items: flex-end; }
         .header-logo-img { width: 90px; height: 90px; object-fit: contain; margin-bottom: 2px; }
         
-        /* Compact Design for 15 Qs per page */
-        .q-wrapper { margin-bottom: 4px; break-inside: avoid; position: relative; } 
+        /* Adjusted Q Wrapper for Labels */
+        .q-wrapper { margin-bottom: 4px; margin-top: 16px; break-inside: avoid; position: relative; } 
         .q-number { background: #000; color: white; width: 20px; height: 20px; border-radius: 50%; display: inline-flex; align-items: center; justify-content: center; font-size: 11px; margin-left: 6px; font-weight: bold; -webkit-print-color-adjust: exact; print-color-adjust: exact; flex-shrink: 0; }
-        .q-sub-label { font-weight: bold; margin-left: 5px; min-width: 20px; display: inline-block; font-size: 13px; }
+        /* Margin Left removed from sub-label to handle Left-side logic better if needed */
+        .q-sub-label { font-weight: bold; min-width: 20px; display: inline-block; font-size: 13px; margin: 0 5px; } 
         .q-content { font-size: 13px; line-height: 1.8; text-align: justify; direction: rtl !important; display: block; width: 100%; font-weight: bold; }
         
         mjx-container { display: inline-block !important; margin: 0 5px !important; vertical-align: middle !important; outline: none !important; }
@@ -111,20 +112,22 @@
         .page-break-marker { border-top: 2px dashed #cbd5e1; margin: 15px 0; position: relative; text-align: center; color: #94a3b8; font-size: 10px; page-break-after: always; break-after: always; }
         .page-break-marker::after { content: 'پەڕەی نوێ (Page Break)'; background: #f8fafc; padding: 0 10px; position: relative; top: -8px; }
 
-        /* Custom Label Styling */
+        /* Custom Label Styling - UPDATED */
         .custom-side-label {
             position: absolute;
-            top: 2px;
+            top: -20px; /* Moves it above the number */
             font-size: 10px;
             font-weight: bold;
-            padding: 2px 4px;
+            padding: 1px 4px;
             border: 1px solid #333;
             background: #fff;
             z-index: 10;
             line-height: 1;
+            border-radius: 3px;
         }
-        .pos-left { left: -15px; }
-        .pos-right { right: -15px; }
+        /* Specific positions */
+        .pos-right { right: 0; }
+        .pos-left { left: 0; }
 
         @media print { 
             @page { size: A4; margin: 0; } 
@@ -311,6 +314,14 @@
                         <div><input id="h_year" class="border p-2 rounded w-full" value="2024 - 2025" oninput="updatePaper()"></div>
                         <div><input id="h_date" class="border p-2 rounded w-full" placeholder="بەروار" oninput="updatePaper()"></div>
                         <div><input id="h_group" class="border p-2 rounded w-full bg-yellow-50 font-bold" placeholder="گروپ (A, B...)" oninput="updatePaper()"></div>
+                        
+                        <div class="col-span-2 border-t pt-2 mt-2">
+                             <label class="text-xs font-bold text-gray-600">شوێنی ژمارە:</label>
+                             <select id="h_num_pos" class="border p-2 rounded w-full bg-gray-50" onchange="updatePaper()">
+                                 <option value="right">لای ڕاست (کوردی/عەرەبی)</option>
+                                 <option value="left">لای چەپ (ئینگلیزی)</option>
+                             </select>
+                        </div>
                     </div>
                  </div>
                  
@@ -429,8 +440,8 @@
         function saveLocalDraft() {
             localStorage.setItem('exam_draft_data', JSON.stringify(examData));
             const headerData = {};
-            ['gov','min','dir','school','subject','class','time','type','year','date', 'group'].forEach(id => {
-               headerData[id] = document.getElementById('h_'+id).value;
+            ['gov','min','dir','school','subject','class','time','type','year','date', 'group', 'num_pos'].forEach(id => {
+               if(document.getElementById('h_'+id)) headerData[id] = document.getElementById('h_'+id).value;
             });
             localStorage.setItem('exam_draft_header', JSON.stringify(headerData));
         }
@@ -774,6 +785,7 @@
 
         function renderPaper() {
             const container = document.getElementById('paper_questions');
+            const numPos = document.getElementById('h_num_pos').value || 'right';
             container.innerHTML = '';
             let qCount = 0;
             let subCount = 0;
@@ -792,7 +804,7 @@
                     if (item.subStyle === 'alpha') { subCount++; labelHTML = `<span class="q-sub-label">${String.fromCharCode(64 + subCount)})</span>`; } 
                     else if (item.subStyle === 'number') { subCount++; labelHTML = `<span class="q-sub-label">${subCount}-</span>`; }
                 } else {
-                    qCount++; subCount = 0; labelHTML = `<span class="q-number">${qCount}</span>`;
+                    qCount++; subCount = 0; labelHTML = `<span class="q-number ${numPos === 'left' ? 'order-2' : ''}">${qCount}</span>`;
                 }
 
                 let spacer = item.spacing > 0 ? `<div style="height: ${item.spacing}cm"></div>` : '';
@@ -830,12 +842,17 @@
                     let posClass = item.customPos === 'left' ? 'pos-left' : 'pos-right';
                     customLabelHTML = `<div class="custom-side-label ${posClass}">${item.customLabel}</div>`;
                 }
+                
+                // Logic for English/Left numbers: 
+                // In RTL flexbox: Item1 is Right, Item2 is Left.
+                // If numPos is 'left', we give number 'order-2' (makes it item 2 -> Left side).
+                // Content gets 'order-1' (item 1 -> Right side).
 
                 let content = `
-                <div class="flex items-start gap-2 w-full q-wrapper relative group mt-1">
+                <div class="flex items-start gap-2 w-full q-wrapper relative group">
                     ${customLabelHTML}
                     ${labelHTML}
-                    <div class="flex-1 text-right" dir="rtl">
+                    <div class="flex-1 text-right ${numPos === 'left' ? 'order-1' : ''}" dir="rtl">
                         <div class="flex justify-between items-start">
                             <div class="flex-1 pl-2">
                                 <div class="q-content mb-1">
@@ -931,7 +948,7 @@
             const title = prompt('ناوی تاقیکردنەوە:', document.getElementById('h_subject').value);
             if(!title) return;
             const headerData = {};
-            ['gov','min','dir','school','subject','class','time','type','year','date', 'group'].forEach(id => {
+            ['gov','min','dir','school','subject','class','time','type','year','date', 'group', 'num_pos'].forEach(id => {
                 headerData[id] = document.getElementById('h_'+id).value;
             });
             const payload = { title: title, data: examData, header: headerData, updatedAt: new Date().toISOString() };
@@ -968,8 +985,8 @@
             currentExamId = id;
             examData = data.data || [];
             if(data.header) {
-                ['gov','min','dir','school','subject','class','time','type','year','date', 'group'].forEach(field => {
-                    if(data.header[field]) document.getElementById('h_'+field).value = data.header[field];
+                ['gov','min','dir','school','subject','class','time','type','year','date', 'group', 'num_pos'].forEach(field => {
+                    if(data.header[field] && document.getElementById('h_'+field)) document.getElementById('h_'+field).value = data.header[field];
                 });
                 updatePaper();
             }
@@ -990,8 +1007,8 @@
             currentExamId = null; examData = [];
             document.getElementById('current-exam-title').innerText = "تاقیکردنەوەی نوێ";
             // Clear inputs
-            ['gov','min','dir','school','subject','class','time','type','year','date', 'group'].forEach(id => {
-                document.getElementById('h_'+id).value = '';
+            ['gov','min','dir','school','subject','class','time','type','year','date', 'group', 'num_pos'].forEach(id => {
+               if(document.getElementById('h_'+id)) document.getElementById('h_'+id).value = '';
             });
             renderPaper(); updateList(); setTab('create');
             saveLocalDraft();
@@ -1088,6 +1105,7 @@
                     if(document.getElementById('view_'+id)) document.getElementById('view_'+id).innerText = val;
                 }
             });
+            renderPaper(); // Re-render to apply left/right number changes
             saveLocalDraft();
         }
         
