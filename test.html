@@ -3,7 +3,7 @@
 <head>
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0, maximum-scale=1.0, user-scalable=no">
-    <title>سیستەمی پرسیار - وەشان ١٦</title>
+    <title>سیستەمی پرسیار - وەشان ١٧ (تایبەتمەندی ئینگلیزی)</title>
     
     <script src="https://cdn.tailwindcss.com"></script>
     <script src="https://cdnjs.cloudflare.com/ajax/libs/html2pdf.js/0.10.1/html2pdf.bundle.min.js"></script>
@@ -97,37 +97,50 @@
         .header-logo-img { width: 90px; height: 90px; object-fit: contain; margin-bottom: 2px; }
         
         /* Adjusted Q Wrapper for Labels */
-        .q-wrapper { margin-bottom: 4px; margin-top: 16px; break-inside: avoid; position: relative; } 
-        .q-number { background: #000; color: white; width: 20px; height: 20px; border-radius: 50%; display: inline-flex; align-items: center; justify-content: center; font-size: 11px; margin-left: 6px; font-weight: bold; -webkit-print-color-adjust: exact; print-color-adjust: exact; flex-shrink: 0; }
-        /* Margin Left removed from sub-label to handle Left-side logic better if needed */
+        .q-wrapper { margin-bottom: 8px; margin-top: 25px; break-inside: avoid; position: relative; } 
+        .q-number { background: #000; color: white; width: 22px; height: 22px; border-radius: 50%; display: inline-flex; align-items: center; justify-content: center; font-size: 11px; margin-left: 6px; margin-right: 6px; font-weight: bold; -webkit-print-color-adjust: exact; print-color-adjust: exact; flex-shrink: 0; z-index: 5; }
+        
         .q-sub-label { font-weight: bold; min-width: 20px; display: inline-block; font-size: 13px; margin: 0 5px; } 
-        .q-content { font-size: 13px; line-height: 1.8; text-align: justify; direction: rtl !important; display: block; width: 100%; font-weight: bold; }
+        .q-content { font-size: 13px; line-height: 1.8; text-align: justify; display: block; width: 100%; font-weight: bold; }
         
         mjx-container { display: inline-block !important; margin: 0 5px !important; vertical-align: middle !important; outline: none !important; }
         
-        .mcq-option-wrapper { display: inline-flex !important; align-items: center !important; margin-left: 15px; margin-bottom: 2px; height: auto; }
-        .mcq-label { font-family: monospace; font-weight: 900; font-size: 14px; margin-left: 4px; flex-shrink: 0; }
+        .mcq-option-wrapper { display: inline-flex !important; align-items: center !important; margin: 0 10px; margin-bottom: 2px; height: auto; }
+        .mcq-label { font-family: monospace; font-weight: 900; font-size: 14px; margin: 0 4px; flex-shrink: 0; }
 
         .section-title { width: 100%; text-align: center; font-weight: 900; font-size: 15px; padding: 3px; border-top: 2px solid #000; border-bottom: 2px solid #000; margin: 5px 0; background-color: #f3f4f6; -webkit-print-color-adjust: exact; }
         .page-break-marker { border-top: 2px dashed #cbd5e1; margin: 15px 0; position: relative; text-align: center; color: #94a3b8; font-size: 10px; page-break-after: always; break-after: always; }
         .page-break-marker::after { content: 'پەڕەی نوێ (Page Break)'; background: #f8fafc; padding: 0 10px; position: relative; top: -8px; }
 
-        /* Custom Label Styling - UPDATED */
+        /* IMPROVED LABEL STYLING */
         .custom-side-label {
             position: absolute;
-            top: -20px; /* Moves it above the number */
+            top: -20px;
             font-size: 10px;
-            font-weight: bold;
-            padding: 1px 4px;
+            font-weight: 800;
+            padding: 1px 6px;
             border: 1px solid #333;
             background: #fff;
+            color: #000;
             z-index: 10;
-            line-height: 1;
-            border-radius: 3px;
+            line-height: 1.2;
+            border-radius: 4px;
+            box-shadow: 0 1px 2px rgba(0,0,0,0.1);
+            min-width: 24px;
+            text-align: center;
         }
-        /* Specific positions */
-        .pos-right { right: 0; }
-        .pos-left { left: 0; }
+
+        .score-badge {
+            position: absolute;
+            top: 0;
+            font-size: 9px;
+            border: 1px solid #ccc;
+            padding: 2px 4px;
+            border-radius: 3px;
+            background: white;
+            z-index: 20;
+            font-weight: bold;
+        }
 
         @media print { 
             @page { size: A4; margin: 0; } 
@@ -226,12 +239,8 @@
                 </div>
 
                 <div class="bg-gray-50 p-2 rounded border flex gap-2 items-center">
-                    <span class="text-xs font-bold">ناسێنەر (Label):</span>
-                    <input type="text" id="q_custom_label" class="flex-1 text-xs p-1 border rounded text-center" placeholder="Q1, P1...">
-                    <select id="q_custom_pos" class="text-xs p-1 border rounded">
-                        <option value="right">ڕاست</option>
-                        <option value="left">چەپ</option>
-                    </select>
+                    <span class="text-xs font-bold">ناسێنەر (Q1, P1):</span>
+                    <input type="text" id="q_custom_label" class="flex-1 text-xs p-1 border rounded text-center" placeholder="نموونە: Q1">
                 </div>
 
                 <div class="bg-blue-50 p-2 rounded border border-blue-100 mt-1">
@@ -315,12 +324,13 @@
                         <div><input id="h_date" class="border p-2 rounded w-full" placeholder="بەروار" oninput="updatePaper()"></div>
                         <div><input id="h_group" class="border p-2 rounded w-full bg-yellow-50 font-bold" placeholder="گروپ (A, B...)" oninput="updatePaper()"></div>
                         
-                        <div class="col-span-2 border-t pt-2 mt-2">
-                             <label class="text-xs font-bold text-gray-600">شوێنی ژمارە:</label>
-                             <select id="h_num_pos" class="border p-2 rounded w-full bg-gray-50" onchange="updatePaper()">
-                                 <option value="right">لای ڕاست (کوردی/عەرەبی)</option>
-                                 <option value="left">لای چەپ (ئینگلیزی)</option>
+                        <div class="col-span-2 border-t pt-2 mt-2 bg-blue-50 p-2 rounded">
+                             <label class="text-xs font-bold text-gray-600 mb-1 block">شێوازی نووسین (ئاراستە):</label>
+                             <select id="h_num_pos" class="border p-2 rounded w-full font-bold" onchange="updatePaper()">
+                                 <option value="right">لای ڕاست (کوردی/عەرەبی - RTL)</option>
+                                 <option value="left">لای چەپ (ئینگلیزی - LTR)</option>
                              </select>
+                             <p class="text-[10px] text-gray-500 mt-1">* تێبینی: بە هەڵبژاردنی "لای چەپ"، ژمارەکان دەچنە چەپ و نمرە دەچێتە لای ڕاست.</p>
                         </div>
                     </div>
                  </div>
@@ -672,7 +682,6 @@
             const spacing = document.getElementById('q_spacing').value;
             const subStyle = document.getElementById('q_sub_style').value;
             const customLabel = document.getElementById('q_custom_label').value;
-            const customPos = document.getElementById('q_custom_pos').value;
             const file = document.getElementById('q_image').files[0];
             
             if(type !== 'match' && !text && !file) return alert('تکایە دەق یان وێنە دابنێ');
@@ -687,7 +696,6 @@
                 spacing: spacing,
                 subStyle: subStyle, 
                 customLabel: customLabel,
-                customPos: customPos,
                 options: type === 'mcq' ? JSON.parse(JSON.stringify(mcqOptions)) : null,
                 matchPairs: type === 'match' ? JSON.parse(JSON.stringify(matchPairs)) : null,
                 tfAnswer: type === 'tf' ? tfAnswer : null,
@@ -748,7 +756,6 @@
             document.getElementById('spacing-display').innerText = item.spacing || 0;
             document.getElementById('q_sub_style').value = item.subStyle || 'none';
             document.getElementById('q_custom_label').value = item.customLabel || '';
-            document.getElementById('q_custom_pos').value = item.customPos || 'right';
             
             if(item.qType === 'mcq') mcqOptions = JSON.parse(JSON.stringify(item.options));
             if(item.qType === 'match') matchPairs = JSON.parse(JSON.stringify(item.matchPairs));
@@ -786,6 +793,8 @@
         function renderPaper() {
             const container = document.getElementById('paper_questions');
             const numPos = document.getElementById('h_num_pos').value || 'right';
+            const isEnglish = numPos === 'left';
+            
             container.innerHTML = '';
             let qCount = 0;
             let subCount = 0;
@@ -804,7 +813,7 @@
                     if (item.subStyle === 'alpha') { subCount++; labelHTML = `<span class="q-sub-label">${String.fromCharCode(64 + subCount)})</span>`; } 
                     else if (item.subStyle === 'number') { subCount++; labelHTML = `<span class="q-sub-label">${subCount}-</span>`; }
                 } else {
-                    qCount++; subCount = 0; labelHTML = `<span class="q-number ${numPos === 'left' ? 'order-2' : ''}">${qCount}</span>`;
+                    qCount++; subCount = 0; labelHTML = `<span class="q-number">${qCount}</span>`;
                 }
 
                 let spacer = item.spacing > 0 ? `<div style="height: ${item.spacing}cm"></div>` : '';
@@ -836,35 +845,46 @@
                       extraContentBelow += `</table></div>`;
                 }
                 
-                // Custom Label Logic
+                // --- POSITIONING LOGIC ---
+                // If English (isEnglish = true):
+                // Wrapper uses flex-row-reverse (because body is RTL). This puts first child (number) on Left.
+                // Text should be LTR.
+                // Score should be on Right (Right: 0).
+                
+                let wrapperClass = `flex items-start gap-2 w-full q-wrapper relative group ${isEnglish ? 'flex-row-reverse' : ''}`;
+                let contentDir = isEnglish ? 'ltr' : 'rtl';
+                let contentAlign = isEnglish ? 'text-left' : 'text-right';
+                
+                // Custom Label Position
+                // If English (Number Left) -> Label Left (left: 0). 
+                // If Kurdish (Number Right) -> Label Right (right: 0).
                 let customLabelHTML = '';
                 if(item.customLabel) {
-                    let posClass = item.customPos === 'left' ? 'pos-left' : 'pos-right';
-                    customLabelHTML = `<div class="custom-side-label ${posClass}">${item.customLabel}</div>`;
+                    let lblStyle = isEnglish ? 'left:0; right:auto;' : 'right:0; left:auto;';
+                    customLabelHTML = `<div class="custom-side-label" style="${lblStyle}">${item.customLabel}</div>`;
                 }
-                
-                // Logic for English/Left numbers: 
-                // In RTL flexbox: Item1 is Right, Item2 is Left.
-                // If numPos is 'left', we give number 'order-2' (makes it item 2 -> Left side).
-                // Content gets 'order-1' (item 1 -> Right side).
+
+                // Score Position
+                // If English -> Right side. If Kurdish -> Left side.
+                let scoreStyle = isEnglish ? 'right:0; left:auto;' : 'left:0; right:auto;';
 
                 let content = `
-                <div class="flex items-start gap-2 w-full q-wrapper relative group">
+                <div class="${wrapperClass}">
                     ${customLabelHTML}
                     ${labelHTML}
-                    <div class="flex-1 text-right ${numPos === 'left' ? 'order-1' : ''}" dir="rtl">
-                        <div class="flex justify-between items-start">
-                            <div class="flex-1 pl-2">
+                    <div class="flex-1 ${contentAlign}" dir="${contentDir}">
+                        <div class="flex justify-between items-start ${isEnglish ? 'flex-row-reverse' : ''}">
+                            <div class="flex-1 px-2">
                                 <div class="q-content mb-1">
                                     ${mainContent}
                                 </div>
                                 ${extraContentBelow}
                                 ${spacer} 
                             </div>
-                            ${item.img ? `<img src="${item.img}" class="w-20 h-20 object-contain border border-dashed p-1 bg-white flex-none order-first ml-2">` : ''} 
+                            ${item.img ? `<img src="${item.img}" class="w-20 h-20 object-contain border border-dashed p-1 bg-white flex-none ml-2">` : ''} 
                         </div>
                     </div>
-                    ${item.subStyle === 'none' ? `<span class="text-[9px] border px-1 rounded absolute left-0 top-0 bg-white z-20">${item.score} نمرە</span>` : ''}
+                    ${item.subStyle === 'none' ? `<span class="score-badge" style="${scoreStyle}">${item.score} نمرە</span>` : ''}
                 </div>
                 `;
                 container.innerHTML += content;
