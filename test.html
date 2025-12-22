@@ -3,7 +3,7 @@
 <head>
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0, maximum-scale=1.0, user-scalable=no">
-    <title>سیستەمی پرسیار - وەشان ٢٠ (چاککردنی دیزاینی لەیبڵ)</title>
+    <title>سیستەمی پرسیار - وەشان ٢١ (Final Badge Fix)</title>
     
     <script src="https://cdn.tailwindcss.com"></script>
     <script src="https://cdnjs.cloudflare.com/ajax/libs/html2pdf.js/0.10.1/html2pdf.bundle.min.js"></script>
@@ -114,18 +114,18 @@
         .page-break-marker { border-top: 2px dashed #cbd5e1; margin: 15px 0; position: relative; text-align: center; color: #94a3b8; font-size: 10px; page-break-after: always; break-after: always; }
         .page-break-marker::after { content: 'پەڕەی نوێ (Page Break)'; background: #f8fafc; padding: 0 10px; position: relative; top: -8px; }
 
-        /* --- UPDATED LABEL STYLING --- */
+        /* --- UPDATED LABEL STYLING (Text pushed up) --- */
         .custom-side-label {
             position: absolute;
             top: -24px; /* Position */
             font-size: 11px; /* Font size */
-            font-weight: 900; /* Maximum bold */
-            /* Here is the change: Less padding on top, more on bottom to push text up */
-            padding: 0px 6px 4px 6px; 
+            font-weight: 900; /* Bold */
+            /* TRICK: 0 top padding, 8 bottom padding -> Pushes text UP inside the box */
+            padding: 0px 6px 8px 6px; 
             background: #1e293b; 
             color: #fff;
             z-index: 10;
-            line-height: 1.2;
+            line-height: 1;
             border-radius: 4px;
             min-width: 24px;
             text-align: center;
