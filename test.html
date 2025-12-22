@@ -3,7 +3,7 @@
 <head>
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0, maximum-scale=1.0, user-scalable=no">
-    <title>سیستەمی پرسیار - وەشان ٢١ (Final Badge Fix)</title>
+    <title>سیستەمی پرسیار - وەشان ٢٢</title>
     
     <script src="https://cdn.tailwindcss.com"></script>
     <script src="https://cdnjs.cloudflare.com/ajax/libs/html2pdf.js/0.10.1/html2pdf.bundle.min.js"></script>
@@ -114,14 +114,13 @@
         .page-break-marker { border-top: 2px dashed #cbd5e1; margin: 15px 0; position: relative; text-align: center; color: #94a3b8; font-size: 10px; page-break-after: always; break-after: always; }
         .page-break-marker::after { content: 'پەڕەی نوێ (Page Break)'; background: #f8fafc; padding: 0 10px; position: relative; top: -8px; }
 
-        /* --- UPDATED LABEL STYLING (Text pushed up) --- */
+        /* --- UPDATED LABEL STYLING --- */
         .custom-side-label {
             position: absolute;
             top: -24px; /* Position */
             font-size: 11px; /* Font size */
-            font-weight: 900; /* Bold */
-            /* TRICK: 0 top padding, 8 bottom padding -> Pushes text UP inside the box */
-            padding: 0px 6px 8px 6px; 
+            font-weight: 900; /* Maximum bold */
+            padding: 0px 6px 8px 6px; /* Pushes text UP */
             background: #1e293b; 
             color: #fff;
             z-index: 10;
@@ -287,7 +286,6 @@
                  <div class="bg-white p-3 rounded border shadow-sm">
                     <h3 class="font-bold text-xs text-brand-600 mb-2 border-b pb-1">کردارەکان</h3>
                     <div class="grid grid-cols-2 gap-2">
-                        <button onclick="autoPageBreak(15)" class="bg-purple-100 text-purple-700 py-3 rounded text-xs font-bold">پەڕەبەندی ١٥</button>
                         <button onclick="shuffleQuestions()" class="bg-orange-100 text-orange-700 py-3 rounded text-xs font-bold">تێکەڵکردن</button>
                         <button onclick="generateAnswerKey()" class="bg-yellow-100 text-yellow-700 py-3 rounded text-xs font-bold">وەڵامنامە</button>
                         <button onclick="downloadWord()" class="bg-blue-100 text-blue-700 py-3 rounded text-xs font-bold">Word</button>
@@ -591,26 +589,6 @@
 
         function addPageBreak() { examData.push({ type: 'break', id: Date.now() }); renderPaper(); updateList(); saveLocalDraft(); }
         
-        function autoPageBreak(limit) {
-             if(!confirm('ئەم کردارە پەڕەی نوێ دادەنێت لە دوای هەموو ١٥ پرسیارێک. بەردەوام بیت؟')) return;
-             examData = examData.filter(item => item.type !== 'break');
-             let qCount = 0;
-             let newData = [];
-             examData.forEach(item => {
-                 if(item.type === 'question') {
-                     qCount++;
-                     newData.push(item);
-                     if(qCount % limit === 0) {
-                         newData.push({ type: 'break', id: Date.now() + Math.random() });
-                     }
-                 } else {
-                     newData.push(item);
-                 }
-             });
-             examData = newData;
-             renderPaper(); updateList(); saveLocalDraft(); alert('پەڕەبەندی ئەنجامدرا!');
-        }
-
         async function addItem() {
             const text = document.getElementById('q_text').value;
             const score = document.getElementById('q_score').value;
