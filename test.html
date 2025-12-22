@@ -3,7 +3,7 @@
 <head>
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0, maximum-scale=1.0, user-scalable=no">
-    <title>سیستەمی پرسیار - وەشان ٢٤ (تێکەڵکردنی زیرەکانە)</title>
+    <title>سیستەمی پرسیار - وەشان ٢٥ (وەڵامنامەی گروپەکان)</title>
     
     <script src="https://cdn.tailwindcss.com"></script>
     <script src="https://cdnjs.cloudflare.com/ajax/libs/html2pdf.js/0.10.1/html2pdf.bundle.min.js"></script>
@@ -293,14 +293,15 @@
                         <button onclick="generateGroup('C')" class="bg-gray-100 hover:bg-gray-200 text-gray-800 font-bold py-2 rounded shadow-sm">C</button>
                         <button onclick="generateGroup('D')" class="bg-gray-100 hover:bg-gray-200 text-gray-800 font-bold py-2 rounded shadow-sm">D</button>
                     </div>
-                    <p class="text-[10px] text-gray-500">* تێبینی: بە لێدان لە پیتەکان، تەنها پرسیارە هەڵبژاردنەکان (MCQ) تێکەڵ دەبن.</p>
+                    <p class="text-[10px] text-gray-500">* تێبینی: بە لێدان لە پیتەکان، تەنها پرسیارە هەڵبژاردنەکان (MCQ) تێکەڵ دەبن و پاشکەوت دەکرێن.</p>
                  </div>
 
                  <div class="bg-white p-3 rounded border shadow-sm">
                     <h3 class="font-bold text-xs text-brand-600 mb-2 border-b pb-1">کردارەکان</h3>
                     <div class="grid grid-cols-2 gap-2">
+                        <button onclick="generateGroupKeys()" class="bg-purple-100 text-purple-700 py-3 rounded text-xs font-bold col-span-2">وەڵامنامەی گروپەکان</button>
                         <button onclick="shuffleQuestions()" class="bg-orange-100 text-orange-700 py-3 rounded text-xs font-bold">تێکەڵکردنی هەمووی</button>
-                        <button onclick="generateAnswerKey()" class="bg-yellow-100 text-yellow-700 py-3 rounded text-xs font-bold">وەڵامنامە</button>
+                        <button onclick="generateAnswerKey()" class="bg-yellow-100 text-yellow-700 py-3 rounded text-xs font-bold">وەڵامنامە (ئێستا)</button>
                         <button onclick="downloadWord()" class="bg-blue-100 text-blue-700 py-3 rounded text-xs font-bold">Word</button>
                         <button onclick="downloadPDF()" class="bg-green-100 text-green-700 py-3 rounded text-xs font-bold">PDF</button>
                     </div>
@@ -352,6 +353,7 @@
         let currentExamId = null;
         let examData = [];
         let bankData = [];
+        let groupSnapshots = {}; // MEMORY FOR GROUPS
         let editIndex = -1;
         let activeMathInput = null; 
         let bankEditMode = false;
@@ -814,7 +816,6 @@
         function generateGroup(groupLabel) {
             if(!confirm(`دڵنیای دەتەوێت گروپی (${groupLabel}) دروست بکەیت؟ تەنها پرسیارە هەڵبژاردنەکان تێکەڵ دەبن.`)) return;
 
-            // 1. Identify indices of MCQs
             let mcqIndices = [];
             examData.forEach((item, index) => {
                 if(item.type === 'question' && item.qType === 'mcq') {
@@ -822,16 +823,13 @@
                 }
             });
 
-            // 2. Extract MCQ items
-            let mcqItems = mcqIndices.map(i => JSON.parse(JSON.stringify(examData[i]))); // Deep copy
+            let mcqItems = mcqIndices.map(i => JSON.parse(JSON.stringify(examData[i]))); 
 
-            // 3. Shuffle the Array of MCQ items (The questions themselves)
             for (let i = mcqItems.length - 1; i > 0; i--) {
                 const j = Math.floor(Math.random() * (i + 1));
                 [mcqItems[i], mcqItems[j]] = [mcqItems[j], mcqItems[i]];
             }
 
-            // 4. Shuffle options within each MCQ item
             mcqItems.forEach(q => {
                 if(q.options) {
                     for (let i = q.options.length - 1; i > 0; i--) {
@@ -841,18 +839,54 @@
                 }
             });
 
-            // 5. Put them back into the main examData at the original MCQ positions
             mcqIndices.forEach((originalIndex, i) => {
                 examData[originalIndex] = mcqItems[i];
             });
 
-            // 6. Update Header and UI
             if(document.getElementById('h_group')) {
                 document.getElementById('h_group').value = groupLabel;
             }
             updatePaper();
             updateList();
-            alert(`گروپی ${groupLabel} دروستکرا! (تەنها هەڵبژاردنەکان تێکەڵ کران)`);
+            
+            // SAVE SNAPSHOT TO MEMORY
+            groupSnapshots[groupLabel] = JSON.parse(JSON.stringify(examData));
+            
+            alert(`گروپی ${groupLabel} دروستکرا و لە میمۆری هەڵگیرا!`);
+        }
+        
+        // --- NEW: GENERATE ANSWER KEY FOR ALL GROUPS ---
+        function generateGroupKeys() {
+            const keys = Object.keys(groupSnapshots);
+            if(keys.length === 0) return alert('هیچ گروپێک دروست نەکراوە! سەرەتا گروپەکان (A, B...) دروست بکە.');
+            
+            const labels = ['A','B','C','D','E'];
+            let html = `<html dir="rtl"><head><style>body { font-family: 'Vazirmatn', sans-serif; padding: 20px; } table { border-collapse: collapse; width: 100%; margin-bottom: 20px; } th, td { border: 1px solid black; padding: 5px; text-align: center; } .container { display: flex; gap: 20px; flex-wrap: wrap; } .group-box { flex: 1; min-width: 200px; }</style></head><body><h2>وەڵامنامەی گشت گروپەکان</h2><div class="container">`;
+            
+            keys.sort().forEach(groupName => {
+                const gData = groupSnapshots[groupName];
+                let tableRows = '';
+                let count = 0;
+                
+                gData.forEach(q => {
+                    if(q.type === 'break' || q.type === 'title') return;
+                    count++;
+                    let ans = '-';
+                    if(q.qType === 'mcq' && q.options) {
+                        const idx = q.options.findIndex(o => o.correct);
+                        if(idx > -1) ans = labels[idx];
+                    } else if(q.qType === 'tf') {
+                        ans = q.tfAnswer === 'true' ? 'ڕاست' : 'هەڵە';
+                    }
+                    tableRows += `<tr><td>${count}</td><td>${ans}</td></tr>`;
+                });
+                
+                html += `<div class="group-box"><h3>گروپی ${groupName}</h3><table><tr><th>پرسیار</th><th>وەڵام</th></tr>${tableRows}</table></div>`;
+            });
+            
+            html += `</div></body></html>`;
+            const win = window.open('','_blank');
+            win.document.write(html);
         }
 
         function shuffleQuestions() {
@@ -941,6 +975,7 @@
 
         function createNewExam() {
             currentExamId = null; examData = [];
+            groupSnapshots = {}; // Clear Group Memory
             document.getElementById('current-exam-title').innerText = "تاقیکردنەوەی نوێ";
             ['gov','min','dir','school','subject','class','time','type','year','date', 'group', 'num_pos'].forEach(id => {
                if(document.getElementById('h_'+id)) document.getElementById('h_'+id).value = '';
