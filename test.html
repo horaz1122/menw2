@@ -3,7 +3,7 @@
 <head>
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0, maximum-scale=1.0, user-scalable=no">
-    <title>سیستەمی پرسیار - وەشان ١٧ (تایبەتمەندی ئینگلیزی)</title>
+    <title>سیستەمی پرسیار - وەشان ١٨ (تایبەتمەندی تەواوی ئینگلیزی)</title>
     
     <script src="https://cdn.tailwindcss.com"></script>
     <script src="https://cdnjs.cloudflare.com/ajax/libs/html2pdf.js/0.10.1/html2pdf.bundle.min.js"></script>
@@ -330,7 +330,7 @@
                                  <option value="right">لای ڕاست (کوردی/عەرەبی - RTL)</option>
                                  <option value="left">لای چەپ (ئینگلیزی - LTR)</option>
                              </select>
-                             <p class="text-[10px] text-gray-500 mt-1">* تێبینی: بە هەڵبژاردنی "لای چەپ"، ژمارەکان دەچنە چەپ و نمرە دەچێتە لای ڕاست.</p>
+                             <p class="text-[10px] text-gray-500 mt-1">* تێبینی: بە هەڵبژاردنی "لای چەپ"، ژمارەکان دەچنە چەپ، نمرە دەچێتە ڕاست، True/False دەگۆڕێت.</p>
                         </div>
                     </div>
                  </div>
@@ -821,7 +821,10 @@
                 let extraContentBelow = '';
 
                 if (item.qType === 'tf') {
-                    mainContent += `<span style="display:inline-block; margin-right: 30px; font-weight:bold; white-space: nowrap;">( ڕاست &nbsp;&nbsp;&nbsp;&nbsp;&nbsp;/&nbsp;&nbsp;&nbsp;&nbsp;&nbsp; هەڵە )</span>`;
+                    // --- NEW LOGIC FOR TRUE/FALSE ---
+                    const tfText = isEnglish ? '( True &nbsp;&nbsp;/&nbsp;&nbsp; False )' : '( ڕاست &nbsp;&nbsp;/&nbsp;&nbsp; هەڵە )';
+                    const marginStyle = isEnglish ? 'margin-left: 30px;' : 'margin-right: 30px;';
+                    mainContent += `<span style="display:inline-block; ${marginStyle} font-weight:bold; white-space: nowrap;">${tfText}</span>`;
                 } 
                 else if (item.qType === 'mcq' && item.options) {
                       const labels = ['A','B','C','D','E'];
@@ -845,27 +848,16 @@
                       extraContentBelow += `</table></div>`;
                 }
                 
-                // --- POSITIONING LOGIC ---
-                // If English (isEnglish = true):
-                // Wrapper uses flex-row-reverse (because body is RTL). This puts first child (number) on Left.
-                // Text should be LTR.
-                // Score should be on Right (Right: 0).
-                
                 let wrapperClass = `flex items-start gap-2 w-full q-wrapper relative group ${isEnglish ? 'flex-row-reverse' : ''}`;
                 let contentDir = isEnglish ? 'ltr' : 'rtl';
                 let contentAlign = isEnglish ? 'text-left' : 'text-right';
                 
-                // Custom Label Position
-                // If English (Number Left) -> Label Left (left: 0). 
-                // If Kurdish (Number Right) -> Label Right (right: 0).
                 let customLabelHTML = '';
                 if(item.customLabel) {
                     let lblStyle = isEnglish ? 'left:0; right:auto;' : 'right:0; left:auto;';
                     customLabelHTML = `<div class="custom-side-label" style="${lblStyle}">${item.customLabel}</div>`;
                 }
 
-                // Score Position
-                // If English -> Right side. If Kurdish -> Left side.
                 let scoreStyle = isEnglish ? 'right:0; left:auto;' : 'left:0; right:auto;';
 
                 let content = `
