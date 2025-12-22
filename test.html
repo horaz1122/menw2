@@ -3,7 +3,7 @@
 <head>
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0, maximum-scale=1.0, user-scalable=no">
-    <title>سیستەمی پرسیار - وەشان ٢٣ (نمرە + گروپ)</title>
+    <title>سیستەمی پرسیار - وەشان ٢٤ (تێکەڵکردنی زیرەکانە)</title>
     
     <script src="https://cdn.tailwindcss.com"></script>
     <script src="https://cdnjs.cloudflare.com/ajax/libs/html2pdf.js/0.10.1/html2pdf.bundle.min.js"></script>
@@ -293,13 +293,13 @@
                         <button onclick="generateGroup('C')" class="bg-gray-100 hover:bg-gray-200 text-gray-800 font-bold py-2 rounded shadow-sm">C</button>
                         <button onclick="generateGroup('D')" class="bg-gray-100 hover:bg-gray-200 text-gray-800 font-bold py-2 rounded shadow-sm">D</button>
                     </div>
-                    <p class="text-[10px] text-gray-500">* کلیک لە پیتێک بکە، پرسیارەکان تێکەڵ دەبن و گروپی دیاریکراو لەسەر پەڕەکە دەنووسرێت.</p>
+                    <p class="text-[10px] text-gray-500">* تێبینی: بە لێدان لە پیتەکان، تەنها پرسیارە هەڵبژاردنەکان (MCQ) تێکەڵ دەبن.</p>
                  </div>
 
                  <div class="bg-white p-3 rounded border shadow-sm">
                     <h3 class="font-bold text-xs text-brand-600 mb-2 border-b pb-1">کردارەکان</h3>
                     <div class="grid grid-cols-2 gap-2">
-                        <button onclick="shuffleQuestions()" class="bg-orange-100 text-orange-700 py-3 rounded text-xs font-bold">تێکەڵکردنی ئاسایی</button>
+                        <button onclick="shuffleQuestions()" class="bg-orange-100 text-orange-700 py-3 rounded text-xs font-bold">تێکەڵکردنی هەمووی</button>
                         <button onclick="generateAnswerKey()" class="bg-yellow-100 text-yellow-700 py-3 rounded text-xs font-bold">وەڵامنامە</button>
                         <button onclick="downloadWord()" class="bg-blue-100 text-blue-700 py-3 rounded text-xs font-bold">Word</button>
                         <button onclick="downloadPDF()" class="bg-green-100 text-green-700 py-3 rounded text-xs font-bold">PDF</button>
@@ -389,14 +389,8 @@
                     const maxWidth = 800;
                     let width = img.width;
                     let height = img.height;
-                    
-                    if (width > maxWidth) {
-                        height *= maxWidth / width;
-                        width = maxWidth;
-                    }
-                    
-                    canvas.width = width;
-                    canvas.height = height;
+                    if (width > maxWidth) { height *= maxWidth / width; width = maxWidth; }
+                    canvas.width = width; canvas.height = height;
                     ctx.drawImage(img, 0, 0, width, height);
                     callback(canvas.toDataURL('image/jpeg', 0.7));
                 }
@@ -416,11 +410,7 @@
             if(currentExamId) return;
             const draftData = localStorage.getItem('exam_draft_data');
             const draftHeader = localStorage.getItem('exam_draft_header');
-            if(draftData) {
-                examData = JSON.parse(draftData);
-                renderPaper();
-                updateList();
-            }
+            if(draftData) { examData = JSON.parse(draftData); renderPaper(); updateList(); }
             if(draftHeader) {
                 const header = JSON.parse(draftHeader);
                 for(let key in header) {
@@ -820,35 +810,30 @@
             new Sortable(list, { animation: 150, onEnd: (evt) => { const item = examData.splice(evt.oldIndex, 1)[0]; examData.splice(evt.newIndex, 0, item); renderPaper(); updateList(); saveLocalDraft(); }});
         }
 
-        // --- GROUP GENERATOR LOGIC ---
+        // --- IMPROVED GROUP GENERATOR (MCQ ONLY) ---
         function generateGroup(groupLabel) {
-            if(!confirm(`دڵنیای دەتەوێت گروپی (${groupLabel}) دروست بکەیت؟ پرسیارەکان تێکەڵ دەبن.`)) return;
-            
-            // 1. Shuffle main questions array
-            let qIndices = [];
+            if(!confirm(`دڵنیای دەتەوێت گروپی (${groupLabel}) دروست بکەیت؟ تەنها پرسیارە هەڵبژاردنەکان تێکەڵ دەبن.`)) return;
+
+            // 1. Identify indices of MCQs
+            let mcqIndices = [];
             examData.forEach((item, index) => {
-                if(item.type === 'question') qIndices.push(index);
-            });
-            
-            let shuffledIndices = [...qIndices];
-            // Fisher-Yates Shuffle for questions
-            for (let i = shuffledIndices.length - 1; i > 0; i--) {
-                const j = Math.floor(Math.random() * (i + 1));
-                [shuffledIndices[i], shuffledIndices[j]] = [shuffledIndices[j], shuffledIndices[i]];
-            }
-            
-            let tempItems = {};
-            qIndices.forEach((oldIdx, i) => {
-                tempItems[oldIdx] = JSON.parse(JSON.stringify(examData[shuffledIndices[i]])); // Deep copy
-            });
-            
-            qIndices.forEach(idx => {
-                examData[idx] = tempItems[idx];
+                if(item.type === 'question' && item.qType === 'mcq') {
+                    mcqIndices.push(index);
+                }
             });
 
-            // 2. Shuffle MCQ Options within each question
-            examData.forEach(q => {
-                if(q.qType === 'mcq' && q.options) {
+            // 2. Extract MCQ items
+            let mcqItems = mcqIndices.map(i => JSON.parse(JSON.stringify(examData[i]))); // Deep copy
+
+            // 3. Shuffle the Array of MCQ items (The questions themselves)
+            for (let i = mcqItems.length - 1; i > 0; i--) {
+                const j = Math.floor(Math.random() * (i + 1));
+                [mcqItems[i], mcqItems[j]] = [mcqItems[j], mcqItems[i]];
+            }
+
+            // 4. Shuffle options within each MCQ item
+            mcqItems.forEach(q => {
+                if(q.options) {
                     for (let i = q.options.length - 1; i > 0; i--) {
                         const j = Math.floor(Math.random() * (i + 1));
                         [q.options[i], q.options[j]] = [q.options[j], q.options[i]];
@@ -856,11 +841,18 @@
                 }
             });
 
-            // 3. Update Group Label in Header
-            document.getElementById('h_group').value = groupLabel;
+            // 5. Put them back into the main examData at the original MCQ positions
+            mcqIndices.forEach((originalIndex, i) => {
+                examData[originalIndex] = mcqItems[i];
+            });
+
+            // 6. Update Header and UI
+            if(document.getElementById('h_group')) {
+                document.getElementById('h_group').value = groupLabel;
+            }
             updatePaper();
             updateList();
-            alert(`گروپی ${groupLabel} دروستکرا!`);
+            alert(`گروپی ${groupLabel} دروستکرا! (تەنها هەڵبژاردنەکان تێکەڵ کران)`);
         }
 
         function shuffleQuestions() {
