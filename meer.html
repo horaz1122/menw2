@@ -1,288 +1,309 @@
-import React, { useState, useRef, useEffect } from 'react';
-import { Send, Leaf, Sprout, Sun, Droplets, Info, User, Bot, MapPin, Clock, Heart, Sparkles, Phone, AlertTriangle } from 'lucide-react';
-
-// پێکهاتەی وێنەی بۆت
-const BotAvatar = () => {
-  const [imgError, setImgError] = useState(false);
-
-  if (imgError) {
-    return (
-      <div className="w-full h-full bg-gradient-to-br from-emerald-100 to-emerald-200 flex items-center justify-center">
-        <Bot size={20} className="text-emerald-700" />
-      </div>
-    );
-  }
-
-  return (
-    <img 
-      src="mer.jpg" 
-      alt="Bot" 
-      className="w-full h-full object-cover" 
-      onError={() => setImgError(true)} 
-    />
-  );
-};
-
-// بنکەی زانیاری ڕوەکەکان و نەخۆشییەکان
-const knowledgeBase = {
-  plants: {
-    'مەتات': '🌿 **ڕوەکی مەتات (Rubber Plant):**\n• **ڕووناکی:** حەزی بە ڕووناکی زۆرە بەڵام ناڕاستەوخۆ.\n• **ئاو:** کاتێک ٢ سم لە خاکەکەی وشک بوو ئاوی بدە.\n• **تێبینی:** گەڵاکانی بە پەڕۆی نەم بسڕەوە تا هەناسە بدات.',
-    'پەتۆس': '🌿 **پەتۆس (Pothos):**\n• **خزمەت:** ئاسانترین ڕوەکە، لە کەم ڕووناکیش دەژی.\n• **ئاو:** بەرگەی وشکی دەگرێت، هەفتەی جارێک ئاوی بدە.\n• **زیادکردن:** دەتوانیت لقێکی ببڕیت و لە ئاودا ڕەگ دەکات.',
-    'زامفۆلیا': '🌿 **زامفۆلیا (ZZ Plant):**\n• **تایبەتمەندی:** "ڕوەکی پۆڵایین"ـی پێ دەوترێت، زۆر بەهێزە.\n• **ئاو:** مانگی ١-٢ جار ئاوی دەوێت (زۆر ئاو دەیکوژێت).\n• **ڕووناکی:** لە تاریکیش دەژی.',
-    'سانسێڤێریا': '🌿 **سانسێڤێریا (Sansevieria):**\n• **سوود:** هەوا پاک دەکاتەوە و ئۆکسجین دەردەدات لە شەودا.\n• **ئاو:** کەمترین ئاوی دەوێت، با خاکەکەی تەواو وشک بێتەوە.',
-    'کاکتوس': '🌵 **کاکتوس و سابیرە:**\n• **شوێن:** حەزیان بە خۆری ڕاستەوخۆیە.\n• **ئاو:** ١٠-١٥ ڕۆژ جارێک لە هاویندا، زستان مانگی جارێک.',
-    'شەمعە': '🌿 **گوڵی شەمعە (Spathiphyllum):**\n• **نیشانە:** کاتێک تینوویەتی گەڵاکانی شۆڕ دەکاتەوە.\n• **گوڵ:** پێویستی بە ڕووناکی باشە بۆ ئەوەی گوڵی سپی دەربکات.',
-  },
-  diseases: {
-    'زەرد': '🍂 **زەردبوونی گەڵا:**\n١. زۆر ئاودان (باوترین هۆکار).\n٢. کەمی ماددە خۆراکییەکان (پەین).\n٣. گۆڕانی لەناکاوی پلەی گەرمی.\n✅ **چارەسەر:** پشکنین بۆ تەڕی خاکەکە بکە و دڵنیابە لە کونەکانی ژێر گۆزەکە.',
-    'کەڕوو': '🍄 **کەڕوو و فتریات:**\nئەگەر پەڵەی قاوەیی یان سپی لەسەر خاک یان گەڵا هەبوو.\n✅ **چارەسەر:** بەکارهێنانی دەرمانی دژە-کەڕوو (Fungicide) کە لە شەتڵگەی میر دەست دەکەوێت.',
-    'مێروو': '🐞 **مێروو و سپێ:**\nئەگەر خاڵی سپی یان مێرووی بچووکت بینی.\n✅ **چارەسەر:** شتنی گەڵاکان بە ئاو و سابوونی ڕوەکی، یان قرقێنە.',
-    'ڕزین': '🥀 **ڕزینی ڕەگ (Root Rot):**\nبەهۆی مانەوەی ئاوی زۆر لە ژێر گۆزەکە دروست دەبێت.\n✅ **چارەسەر:** دەرهێنانی ڕوەکەکە، بڕینی ڕەگە ڕزیوەکان و گۆڕینی خاکەکەی.',
-  }
-};
-
-const PlantApp = () => {
-  const [messages, setMessages] = useState([
-    {
-      id: 1,
-      text: "سڵاو! بەخێربێن بۆ شەتڵگەی میر 🌿. \n\nمن لێرەم بۆ وەڵامدانەوەی هەموو پرسیارەکانت دەربارەی:\n• جۆرەکانی ڕوەک و چۆنیەتی بەخێوکردن 🌱\n• چارەسەری نەخۆشییەکان 💊\n• نرخ و ناونیشان 📍\n\nتکایە ناوی ڕوەکەکە یان کێشەکەت بنووسە...",
-      sender: 'bot',
-      time: new Date().toLocaleTimeString('ckb-IQ', { hour: '2-digit', minute: '2-digit' })
-    }
-  ]);
-  const [inputText, setInputText] = useState("");
-  const [isLoading, setIsLoading] = useState(false);
-  const [headerImgError, setHeaderImgError] = useState(false);
-  const messagesEndRef = useRef(null);
-
-  const scrollToBottom = () => {
-    messagesEndRef.current?.scrollIntoView({ behavior: "smooth" });
-  };
-
-  useEffect(() => {
-    scrollToBottom();
-  }, [messages]);
-
-  const generateResponse = (text) => {
-    const lowerText = text.toLowerCase();
+<!DOCTYPE html>
+<html lang="ckb" dir="rtl">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>شەتڵگەی میر - ڕاوێژکاری زیرەک</title>
     
-    // Check for specific plants in knowledge base
-    for (const [plant, info] of Object.entries(knowledgeBase.plants)) {
-      if (lowerText.includes(plant)) return info;
-    }
+    <!-- Tailwind CSS -->
+    <script src="https://cdn.tailwindcss.com"></script>
+    
+    <!-- Lucide Icons -->
+    <script src="https://unpkg.com/lucide@latest"></script>
+    
+    <!-- Fonts -->
+    <link href="https://fonts.googleapis.com/css2?family=Vazirmatn:wght@300;400;500;700&display=swap" rel="stylesheet">
 
-    // Check for specific diseases
-    if (lowerText.includes('کەڕوو') || lowerText.includes('ftryat')) return knowledgeBase.diseases['کەڕوو'];
-    if (lowerText.includes('مێروو') || lowerText.includes('پێ')) return knowledgeBase.diseases['مێروو'];
-    if (lowerText.includes('ڕزین') || lowerText.includes('ڕەگ')) return knowledgeBase.diseases['ڕزین'];
-    if (lowerText.includes('زەرد')) return knowledgeBase.diseases['زەرد'];
-
-    // General Responses
-    if (lowerText.includes('ئاو') || lowerText.includes('water')) {
-      return "💧 **یاسای ئاودان:**\nباشترین پێوەر 'پەنجە'یە. پەنجەت بخە ناو خاکەکە:\n• ئەگەر تەڕ بوو: ئاوی مەدە.\n• ئەگەر وشک بوو: ئاوی بدە.\n• زۆربەی ڕوەکەکان بە 'زۆر ئاودان' دەمرن نەک تینوێتی.";
-    } else if (lowerText.includes('پەین') || lowerText.includes('سماد') || lowerText.includes('خۆراک')) {
-      return "🧪 **پەین (سماد):**\n• بەهار و هاوین: هەموو ٢ هەفتە جارێک NPK بەکاربهێنە.\n• پایز و زستان: ڕوەک دەچێتە پشووەوە، پێویست ناکات.\n• بۆ گوڵکردن: پەینی فسفۆڕ بەرز بەکاربهێنە.";
-    } else if (lowerText.includes('ناونیشان') || lowerText.includes('شوێن')) {
-      return "📍 **ناونیشانی شەتڵگەی میر:** \nسەرەتای شەقامی سەرەکی، تەنیشت باخچەی گشتی. \n\nچاوەڕێی هاتنتانین بۆ ڕاوێژی ڕاستەوخۆ!";
-    } else if (lowerText.includes('نرخ') || lowerText.includes('price')) {
-      return "💰 **نرخەکانمان:**\n• ڕوەکی بچووک: ٣,٠٠٠ - ٥,٠٠٠ دینار\n• ڕوەکی مامناوەند: ١٠,٠٠٠ - ١٥,٠٠٠ دینار\n• ڕوەکی گەورە: ٢٥,٠٠٠+ دینار\nبۆ نرخی ورد، تکایە وێنەی ڕوەکەکە بنێرە یان سەردانمان بکە.";
-    } else if (lowerText.includes('سڵاو') || lowerText.includes('hello')) {
-      return "سڵاو لە تۆ! 🌸 چۆن دەتوانم ئەمڕۆ یارمەتیت بدەم؟ دەتوانیت ناوی هەر ڕوەکێک بپرسیت.";
-    } else {
-      return "پرسیارێکی باشە! 🤔\nبۆ ئەوەی وەڵامێکی وردترت بدەمێ، دەتوانیت:\n١. ناوی ڕوەکەکە بنووسیت.\n٢. نیشانەکانی نەخۆشییەکە باس بکەیت.\n\nیان سەردانی شەتڵگەی میر بکە بۆ پشکنینی ڕوەکەکەت.";
-    }
-  };
-
-  const handleSend = (e) => {
-    e.preventDefault();
-    if (!inputText.trim()) return;
-
-    const userMessage = {
-      id: messages.length + 1,
-      text: inputText,
-      sender: 'user',
-      time: new Date().toLocaleTimeString('ckb-IQ', { hour: '2-digit', minute: '2-digit' })
-    };
-
-    setMessages(prev => [...prev, userMessage]);
-    setInputText("");
-    setIsLoading(true);
-
-    setTimeout(() => {
-      const botResponse = {
-        id: messages.length + 2,
-        text: generateResponse(userMessage.text),
-        sender: 'bot',
-        time: new Date().toLocaleTimeString('ckb-IQ', { hour: '2-digit', minute: '2-digit' })
-      };
-      setMessages(prev => [...prev, botResponse]);
-      setIsLoading(false);
-    }, 1200);
-  };
-
-  return (
-    // Main Wrapper
-    <div className="min-h-screen bg-slate-100 flex items-center justify-center p-0 sm:p-6 font-sans text-slate-800" dir="rtl">
-      
-      {/* Mobile Frame Container */}
-      <div className="w-full max-w-[420px] bg-white sm:rounded-[40px] shadow-2xl overflow-hidden h-[100dvh] sm:h-[850px] flex flex-col relative border-[6px] border-slate-900/5 ring-1 ring-slate-900/10">
+    <style>
+        body {
+            font-family: 'Vazirmatn', sans-serif;
+        }
+        .scrollbar-hide::-webkit-scrollbar {
+            display: none;
+        }
+        .scrollbar-hide {
+            -ms-overflow-style: none;
+            scrollbar-width: none;
+        }
         
-        {/* Header - Glassmorphism Style */}
-        <header className="bg-emerald-600/95 backdrop-blur-md text-white p-4 pt-6 pb-4 shadow-lg z-20 relative">
-          <div className="absolute inset-0 bg-gradient-to-r from-emerald-600 to-teal-600 opacity-90"></div>
-          
-          {/* Decorative Pattern */}
-          <div className="absolute top-0 right-0 p-4 opacity-10">
-             <Leaf size={64} />
-          </div>
+        .glass-header {
+            background: rgba(5, 150, 105, 0.95);
+            backdrop-filter: blur(12px);
+            -webkit-backdrop-filter: blur(12px);
+        }
+        
+        .message-anim {
+            animation: slideIn 0.3s ease-out forwards;
+        }
+        
+        @keyframes slideIn {
+            from { opacity: 0; transform: translateY(10px); }
+            to { opacity: 1; transform: translateY(0); }
+        }
 
-          <div className="relative flex items-center gap-3">
-            <div className="relative">
-              <div className="w-12 h-12 rounded-full border-2 border-white/30 p-0.5 shadow-sm">
-                <div className="w-full h-full rounded-full overflow-hidden bg-white">
-                  {!headerImgError ? (
-                    <img 
-                      src="mer.jpg" 
-                      alt="Mer Logo" 
-                      className="w-full h-full object-cover"
-                      onError={() => setHeaderImgError(true)}
-                    />
-                  ) : (
-                    <div className="w-full h-full bg-emerald-50 flex items-center justify-center">
-                       <Leaf size={20} className="text-emerald-600" />
+        .typing-dot {
+            animation: bounce 1.4s infinite ease-in-out both;
+        }
+        
+        .typing-dot:nth-child(1) { animation-delay: -0.32s; }
+        .typing-dot:nth-child(2) { animation-delay: -0.16s; }
+        
+        @keyframes bounce {
+            0%, 80%, 100% { transform: scale(0); }
+            40% { transform: scale(1); }
+        }
+    </style>
+</head>
+<body class="bg-slate-100 min-h-screen flex items-center justify-center p-0 sm:p-6 text-slate-800">
+
+    <!-- Mobile Frame Container -->
+    <div class="w-full max-w-[420px] bg-white sm:rounded-[40px] shadow-2xl overflow-hidden h-[100dvh] sm:h-[850px] flex flex-col relative border-[6px] border-slate-900/5 ring-1 ring-slate-900/10">
+        
+        <!-- Header -->
+        <header class="glass-header text-white p-4 pt-6 pb-4 shadow-lg z-20 relative transition-all">
+            <div class="absolute inset-0 bg-gradient-to-r from-emerald-600 to-teal-600 opacity-90 -z-10"></div>
+            
+            <div class="absolute top-0 right-0 p-4 opacity-10 pointer-events-none">
+                <i data-lucide="leaf" width="64" height="64"></i>
+            </div>
+
+            <div class="relative flex items-center gap-3">
+                <div class="relative">
+                    <div class="w-12 h-12 rounded-full border-2 border-white/30 p-0.5 shadow-sm bg-white overflow-hidden flex items-center justify-center">
+                        <img id="bot-avatar" src="mer.jpg" alt="Logo" class="w-full h-full object-cover" onerror="this.style.display='none'; document.getElementById('fallback-avatar').style.display='flex'">
+                        <div id="fallback-avatar" class="hidden w-full h-full bg-emerald-50 items-center justify-center">
+                            <i data-lucide="leaf" class="text-emerald-600" width="20"></i>
+                        </div>
                     </div>
-                  )}
+                    <span class="absolute bottom-0 right-0 block w-3.5 h-3.5 bg-green-400 border-2 border-emerald-600 rounded-full animate-pulse"></span>
                 </div>
-              </div>
-              <span className="absolute bottom-0 right-0 block w-3.5 h-3.5 bg-green-400 border-2 border-emerald-600 rounded-full animate-pulse"></span>
+                
+                <div class="flex-1">
+                    <h1 class="text-lg font-bold flex items-center gap-1">
+                        شەتڵگەی میر
+                        <i data-lucide="sparkles" class="text-yellow-300" width="14"></i>
+                    </h1>
+                    <p class="text-emerald-100 text-xs opacity-90">بەستراوە بە Gemini AI 🤖</p>
+                </div>
+                
+                <button class="bg-white/10 hover:bg-white/20 p-2 rounded-full transition-colors backdrop-blur-sm">
+                    <i data-lucide="wifi" class="text-white" width="18"></i>
+                </button>
             </div>
-            
-            <div className="flex-1">
-              <h1 className="text-lg font-bold flex items-center gap-1">
-                شەتڵگەی میر
-                <Sparkles size={14} className="text-yellow-300" />
-              </h1>
-              <p className="text-emerald-100 text-xs opacity-90 flex items-center gap-1">
-                پسپۆڕی چارەسەر و خزمەتی ڕوەک
-              </p>
-            </div>
-            
-            <button className="bg-white/10 hover:bg-white/20 p-2 rounded-full transition-colors backdrop-blur-sm">
-              <Phone size={18} className="text-white" />
-            </button>
-          </div>
         </header>
 
-        {/* Chat Area */}
-        <div className="flex-1 overflow-y-auto p-4 space-y-6 bg-[#f0f4f8] relative scroll-smooth">
-          {/* Background Pattern */}
-          <div className="absolute inset-0 opacity-[0.03]" 
-               style={{backgroundImage: `url("data:image/svg+xml,%3Csvg width='60' height='60' viewBox='0 0 60 60' xmlns='http://www.w3.org/2000/svg'%3E%3Cg fill='none' fill-rule='evenodd'%3E%3Cg fill='%23065f46' fill-opacity='1'%3E%3Cpath d='M36 34v-4h-2v4h-4v2h4v4h2v-4h4v-2h-4zm0-30V0h-2v4h-4v2h4v4h2V6h4V4h-4zM6 34v-4H4v4H0v2h4v4h2v-4h4v-2H6zM6 4V0H4v4H0v2h4v4h2V6h4V4H6z'/%3E%3C/g%3E%3C/g%3E%3C/svg%3E")`}}>
-          </div>
+        <!-- Chat Area -->
+        <div id="chat-box" class="flex-1 overflow-y-auto p-4 space-y-6 bg-[#f0f4f8] relative scroll-smooth">
+            <div class="absolute inset-0 opacity-[0.03] pointer-events-none" 
+                 style="background-image: url('data:image/svg+xml,%3Csvg width=\'60\' height=\'60\' viewBox=\'0 0 60 60\' xmlns=\'http://www.w3.org/2000/svg\'%3E%3Cg fill=\'none\' fill-rule=\'evenodd\'%3E%3Cg fill=\'%23065f46\' fill-opacity=\'1\'%3E%3Cpath d=\'M36 34v-4h-2v4h-4v2h4v4h2v-4h4v-2h-4zm0-30V0h-2v4h-4v2h4v4h2V6h4V4h-4zM6 34v-4H4v4H0v2h4v4h2v-4h4v-2H6zM6 4V0H4v4H0v2h4v4h2V6h4V4H6z\'/%3E%3C/g%3E%3C/g%3E%3C/svg%3E')">
+            </div>
+        </div>
 
-          {messages.map((msg) => (
-            <div
-              key={msg.id}
-              className={`flex items-end gap-2 group animate-in slide-in-from-bottom-2 duration-500 fade-in ${
-                msg.sender === 'user' ? 'flex-row-reverse' : 'flex-row'
-              }`}
-            >
-              {/* Avatar */}
-              <div className={`w-8 h-8 rounded-full flex items-center justify-center shrink-0 shadow-sm overflow-hidden border border-white ${
-                msg.sender === 'user' ? 'bg-indigo-500 hidden' : 'bg-white'
-              }`}>
-                {msg.sender === 'bot' && <BotAvatar />}
-              </div>
-              
-              {/* Message Bubble */}
-              <div className={`max-w-[85%] flex flex-col ${
-                  msg.sender === 'user' ? 'items-end' : 'items-start'
-                }`}
-              >
-                <div
-                  className={`px-4 py-2.5 text-[15px] shadow-sm relative ${
-                    msg.sender === 'user'
-                      ? 'bg-emerald-600 text-white rounded-2xl rounded-br-none'
-                      : 'bg-white text-slate-700 rounded-2xl rounded-bl-none border border-slate-100'
-                  }`}
-                >
-                  <div className="whitespace-pre-line leading-relaxed">
-                    {msg.text}
-                  </div>
+        <!-- Input Area -->
+        <div class="bg-white p-3 border-t border-slate-100 shadow-[0_-10px_40px_-15px_rgba(0,0,0,0.1)] z-20">
+            <div class="flex gap-2 mb-3 overflow-x-auto pb-1 scrollbar-hide px-1" id="quick-chips"></div>
+            <form id="chat-form" class="flex gap-2 items-end">
+                <div class="flex-1 bg-slate-100 rounded-[24px] border border-transparent focus-within:border-emerald-500 focus-within:bg-white focus-within:ring-2 focus-within:ring-emerald-100 transition-all flex items-center">
+                    <input type="text" id="user-input" placeholder="پرسیار لە Gemini بکە..." class="w-full bg-transparent px-5 py-3.5 focus:outline-none text-slate-700 placeholder-slate-400 text-base" autocomplete="off" />
                 </div>
-                {/* Time */}
-                <span className="text-[10px] text-slate-400 mt-1 px-1">
-                  {msg.time}
-                </span>
-              </div>
-            </div>
-          ))}
-          
-          {isLoading && (
-            <div className="flex items-center gap-2">
-              <div className="w-8 h-8 rounded-full bg-white border border-slate-100 flex items-center justify-center shadow-sm">
-                <Bot size={16} className="text-emerald-600" />
-              </div>
-              <div className="bg-white px-4 py-3 rounded-2xl rounded-bl-none shadow-sm border border-slate-100 flex gap-1.5 items-center">
-                <span className="text-xs text-slate-400 ml-2">دەنووسێت</span>
-                <span className="w-1.5 h-1.5 bg-emerald-400 rounded-full animate-bounce"></span>
-                <span className="w-1.5 h-1.5 bg-emerald-400 rounded-full animate-bounce delay-100"></span>
-                <span className="w-1.5 h-1.5 bg-emerald-400 rounded-full animate-bounce delay-200"></span>
-              </div>
-            </div>
-          )}
-          <div ref={messagesEndRef} className="h-4" />
+                <button type="submit" id="send-btn" class="w-12 h-12 rounded-full flex items-center justify-center transition-all duration-300 shadow-lg bg-emerald-600 hover:bg-emerald-700 text-white transform hover:scale-105 active:scale-90">
+                    <i data-lucide="send" class="transform rotate-180" width="20"></i>
+                </button>
+            </form>
         </div>
-
-        {/* Input Area */}
-        <div className="bg-white p-3 border-t border-slate-100 shadow-[0_-10px_40px_-15px_rgba(0,0,0,0.1)] z-20">
-          
-          {/* Quick Chips */}
-          <div className="flex gap-2 mb-3 overflow-x-auto pb-1 scrollbar-hide px-1">
-             {[
-               { icon: <AlertTriangle size={14} />, text: "زەردبوونی گەڵا", color: "bg-amber-50 text-amber-600 border-amber-100" },
-               { icon: <Leaf size={14} />, text: "مەتات", color: "bg-emerald-50 text-emerald-600 border-emerald-100" },
-               { icon: <Info size={14} />, text: "پەتۆس", color: "bg-blue-50 text-blue-600 border-blue-100" },
-               { icon: <Sun size={14} />, text: "کاکتوس", color: "bg-orange-50 text-orange-600 border-orange-100" },
-               { icon: <Droplets size={14} />, text: "ئاودان", color: "bg-cyan-50 text-cyan-600 border-cyan-100" },
-             ].map((chip, idx) => (
-               <button 
-                key={idx}
-                onClick={() => setInputText(chip.text)} 
-                className={`flex items-center gap-1.5 text-xs font-semibold px-3 py-1.5 rounded-full transition-transform active:scale-95 border ${chip.color} shrink-0`}
-               >
-                 {chip.icon} {chip.text}
-               </button>
-             ))}
-          </div>
-
-          <form onSubmit={handleSend} className="flex gap-2 items-end">
-            <div className="flex-1 bg-slate-100 rounded-[24px] border border-transparent focus-within:border-emerald-500 focus-within:bg-white focus-within:ring-2 focus-within:ring-emerald-100 transition-all flex items-center">
-              <input
-                type="text"
-                value={inputText}
-                onChange={(e) => setInputText(e.target.value)}
-                placeholder="پرسیارەکەت بنووسە (مەتات، زەردبوون...)"
-                className="w-full bg-transparent px-5 py-3.5 focus:outline-none text-slate-700 placeholder-slate-400 text-base"
-              />
-            </div>
-            
-            <button
-              type="submit"
-              disabled={!inputText.trim() || isLoading}
-              className={`w-12 h-12 rounded-full flex items-center justify-center transition-all duration-300 shadow-lg ${
-                inputText.trim() 
-                  ? 'bg-emerald-600 hover:bg-emerald-700 text-white transform hover:scale-105 active:scale-90 rotate-0' 
-                  : 'bg-slate-200 text-slate-400 rotate-90 cursor-not-allowed'
-              }`}
-            >
-              <Send size={20} className={document.dir === 'rtl' ? 'rotate-180' : ''} />
-            </button>
-          </form>
-        </div>
-      </div>
     </div>
-  );
-};
 
-export default PlantApp;
+    <!-- JavaScript Logic -->
+    <script>
+        // ⚠️ گرنگ: کلیلی API خۆت لێرە بنووسە
+        // لەم لینکەوە وەریدەگریت: https://aistudio.google.com/app/apikey
+        const API_KEY = "AIzaSyC5g7bMyg21TNgXCY7XaucHtLJbqFp8uFA"; 
+
+        const SYSTEM_PROMPT = `
+            تۆ یاریدەدەرێکی زیرەک و بەتوانای بۆ 'شەتڵگەی میر'. 
+            پسپۆڕی لە هەموو جۆرە ڕوەکێک، گوڵ، دار، سەوزەوات و چارەسەری نەخۆشییەکانیان.
+            
+            ڕێنماییەکانت:
+            ١. هەمیشە بە کوردی (سۆرانی) وەڵام بدەرەوە.
+            ٢. وەڵامەکانت با کورت، پوخت و بەسوود بن.
+            ٣. ئیمۆجی گونجاو بەکاربهێنە (🌿, 🌸, 💧).
+            ٤. ئەگەر پرسیاری ناونیشانیان کرد: "سەرەتای شەقامی سەرەکی، تەنیشت باخچەی گشتی".
+            ٥. ئەگەر پرسیاری نرخیان کرد: نرخەکانمان لە ٣٠٠٠ دینارەوە دەست پێدەکات، بۆ زانیاری وردتر سەردانمان بکەن.
+            ٦. هەمیشە بە ڕێزەوە مامەڵە بکە و وەک شارەزایەک قسە بکە.
+        `;
+
+        const chatBox = document.getElementById('chat-box');
+        const chatForm = document.getElementById('chat-form');
+        const userInput = document.getElementById('user-input');
+        const quickChipsContainer = document.getElementById('quick-chips');
+
+        // Initial Message
+        const initialMessage = {
+            id: 1,
+            text: "سڵاو! من زیرەکی دەستکردی شەتڵگەی میرم 🤖.\n\nبەستراومەتەوە بە Geminiـەوە بۆ ئەوەی وەڵامی وردی هەموو پرسیارەکانت بدەمەوە.\n\nفەرموو پرسیار لە هەر ڕوەکێک بکە...",
+            sender: 'bot',
+            time: new Date().toLocaleTimeString('ckb-IQ', { hour: '2-digit', minute: '2-digit' })
+        };
+
+        const chips = [
+            { icon: 'leaf', text: "مەتات چۆن بەخێو دەکرێت؟", color: "bg-emerald-50 text-emerald-600 border-emerald-100" },
+            { icon: 'alert-triangle', text: "گەڵای گوڵەکەم زەرد بووە", color: "bg-amber-50 text-amber-600 border-amber-100" },
+            { icon: 'sun', text: "گوڵی بەر خۆر", color: "bg-orange-50 text-orange-600 border-orange-100" },
+        ];
+
+        function init() {
+            renderChips();
+            addMessageToDOM(initialMessage);
+            lucide.createIcons();
+        }
+
+        function renderChips() {
+            chips.forEach(chip => {
+                const btn = document.createElement('button');
+                btn.className = `flex items-center gap-1.5 text-xs font-semibold px-3 py-1.5 rounded-full transition-transform active:scale-95 border ${chip.color} shrink-0`;
+                btn.innerHTML = `<i data-lucide="${chip.icon}" width="14"></i> ${chip.text}`;
+                btn.onclick = () => {
+                    userInput.value = chip.text;
+                    handleSend(new Event('submit'));
+                };
+                quickChipsContainer.appendChild(btn);
+            });
+        }
+
+        function scrollToBottom() {
+            chatBox.scrollTo({ top: chatBox.scrollHeight, behavior: 'smooth' });
+        }
+
+        function addMessageToDOM(msg) {
+            const isUser = msg.sender === 'user';
+            const div = document.createElement('div');
+            div.className = `flex items-end gap-2 group message-anim ${isUser ? 'flex-row-reverse' : 'flex-row'}`;
+            
+            let avatarHtml = !isUser ? `
+                <div class="w-8 h-8 rounded-full flex items-center justify-center shrink-0 shadow-sm overflow-hidden border border-white bg-white">
+                    <div class="w-full h-full bg-gradient-to-br from-emerald-100 to-emerald-200 flex items-center justify-center">
+                        <i data-lucide="bot" class="text-emerald-700" width="16"></i>
+                    </div>
+                </div>` : `<div class="w-8 h-8"></div>`;
+
+            const bubbleClass = isUser 
+                ? 'bg-emerald-600 text-white rounded-2xl rounded-br-none' 
+                : 'bg-white text-slate-700 rounded-2xl rounded-bl-none border border-slate-100';
+
+            // Convert markdown-style bold to HTML strong tags for better display
+            let formattedText = msg.text
+                .replace(/\*\*(.*?)\*\*/g, '<strong>$1</strong>') // Bold
+                .replace(/\n/g, '<br/>'); // New lines
+
+            div.innerHTML = `
+                ${!isUser ? avatarHtml : ''}
+                <div class="max-w-[85%] flex flex-col ${isUser ? 'items-end' : 'items-start'}">
+                    <div class="${bubbleClass} px-4 py-2.5 text-[15px] shadow-sm relative text-right" dir="rtl">
+                        <div class="whitespace-pre-line leading-relaxed">${formattedText}</div>
+                    </div>
+                    <span class="text-[10px] text-slate-400 mt-1 px-1">${msg.time}</span>
+                </div>
+            `;
+            chatBox.appendChild(div);
+            lucide.createIcons();
+            scrollToBottom();
+        }
+
+        function showLoading() {
+            const loadingDiv = document.createElement('div');
+            loadingDiv.id = 'loading-indicator';
+            loadingDiv.className = 'flex items-center gap-2 message-anim';
+            loadingDiv.innerHTML = `
+                <div class="w-8 h-8 rounded-full bg-white border border-slate-100 flex items-center justify-center shadow-sm">
+                    <i data-lucide="bot" class="text-emerald-600" width="16"></i>
+                </div>
+                <div class="bg-white px-4 py-3 rounded-2xl rounded-bl-none shadow-sm border border-slate-100 flex gap-1.5 items-center">
+                    <span class="text-xs text-slate-400 ml-2">لە Gemini دەپرسێت</span>
+                    <span class="w-1.5 h-1.5 bg-emerald-400 rounded-full typing-dot"></span>
+                    <span class="w-1.5 h-1.5 bg-emerald-400 rounded-full typing-dot"></span>
+                    <span class="w-1.5 h-1.5 bg-emerald-400 rounded-full typing-dot"></span>
+                </div>
+            `;
+            chatBox.appendChild(loadingDiv);
+            scrollToBottom();
+        }
+
+        function removeLoading() {
+            const loadingDiv = document.getElementById('loading-indicator');
+            if (loadingDiv) loadingDiv.remove();
+        }
+
+        // --- Gemini API Call ---
+        async function fetchGeminiResponse(userMessage) {
+            // Check if API key is set
+            if (API_KEY === "YOUR_API_KEY_HERE" || API_KEY === "") {
+                return "⚠️ تکایە سەرەتا API Key زیاد بکە لە ناو کۆدی JavaScriptـەکەدا بۆ ئەوەی کار بکات.";
+            }
+
+            const url = `https://generativelanguage.googleapis.com/v1beta/models/gemini-1.5-flash:generateContent?key=${API_KEY}`;
+            
+            const payload = {
+                contents: [{
+                    parts: [{ text: userMessage }]
+                }],
+                systemInstruction: {
+                    parts: [{ text: SYSTEM_PROMPT }]
+                }
+            };
+
+            try {
+                const response = await fetch(url, {
+                    method: 'POST',
+                    headers: {
+                        'Content-Type': 'application/json'
+                    },
+                    body: JSON.stringify(payload)
+                });
+
+                const data = await response.json();
+
+                if (data.error) {
+                    console.error("Gemini API Error:", data.error);
+                    return "ببورە، کێشەیەک هەیە لە پەیوەندیکردن بە سێرڤەرەوە. تکایە دواتر هەوڵ بدەرەوە.";
+                }
+
+                // Extracting text from response
+                const text = data.candidates?.[0]?.content?.parts?.[0]?.text;
+                return text || "ببورە، نەمتوانی وەڵام بدەمەوە.";
+
+            } catch (error) {
+                console.error("Fetch Error:", error);
+                return "کێشەیەک لە هێڵی ئینتەرنێت هەیە یان API Key هەڵەیە.";
+            }
+        }
+
+        async function handleSend(e) {
+            e.preventDefault();
+            const text = userInput.value.trim();
+            if (!text) return;
+
+            addMessageToDOM({
+                text: text,
+                sender: 'user',
+                time: new Date().toLocaleTimeString('ckb-IQ', { hour: '2-digit', minute: '2-digit' })
+            });
+
+            userInput.value = '';
+            showLoading();
+
+            // Call Gemini API
+            const aiResponse = await fetchGeminiResponse(text);
+            
+            removeLoading();
+            addMessageToDOM({
+                text: aiResponse,
+                sender: 'bot',
+                time: new Date().toLocaleTimeString('ckb-IQ', { hour: '2-digit', minute: '2-digit' })
+            });
+        }
+
+        chatForm.addEventListener('submit', handleSend);
+        init();
+    </script>
+</body>
+</html>
