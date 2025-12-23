@@ -1,259 +1,652 @@
-import React, { useState, useRef, useEffect } from 'react';
-import { Send, Leaf, Sprout, Sun, Droplets, Info, User, Bot, MapPin, Clock, Heart } from 'lucide-react';
-
-// پێکهاتەی وێنەی بۆت
-const BotAvatar = () => {
-  const [imgError, setImgError] = useState(false);
-
-  if (imgError) {
-    return (
-      <div className="w-full h-full bg-emerald-100 flex items-center justify-center">
-        <Bot size={24} className="text-emerald-600" />
-      </div>
-    );
-  }
-
-  return (
-    <img 
-      src="mer.jpg" 
-      alt="Bot" 
-      className="w-full h-full object-cover" 
-      onError={() => setImgError(true)} 
-    />
-  );
-};
-
-const PlantApp = () => {
-  const [messages, setMessages] = useState([
-    {
-      id: 1,
-      text: "سڵاو! بەخێربێن بۆ شەتڵگەی میر 🌿. \nمن لێرەم بۆ یارمەتیدانت. دەتوانیت پرسیار بکەیت دەربارەی:\n• نرخی گوڵەکان 🏷️\n• چۆنیەتی ئاودان 💧\n• کێشە و نەخۆشییەکان 🍂",
-      sender: 'bot',
-      time: new Date().toLocaleTimeString('ckb-IQ', { hour: '2-digit', minute: '2-digit' })
-    }
-  ]);
-  const [inputText, setInputText] = useState("");
-  const [isLoading, setIsLoading] = useState(false);
-  const [headerImgError, setHeaderImgError] = useState(false);
-  const messagesEndRef = useRef(null);
-
-  const scrollToBottom = () => {
-    messagesEndRef.current?.scrollIntoView({ behavior: "smooth" });
-  };
-
-  useEffect(() => {
-    scrollToBottom();
-  }, [messages]);
-
-  const generateResponse = (text) => {
-    const lowerText = text.toLowerCase();
+<!DOCTYPE html>
+<html lang="ku" dir="rtl">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Horaz IT | Solutions</title>
+    <!-- Tailwind CSS -->
+    <script src="https://cdn.tailwindcss.com"></script>
+    <!-- Google Fonts (Vazirmatn & IBM Plex Sans Arabic) -->
+    <link href="https://fonts.googleapis.com/css2?family=Vazirmatn:wght@200;300;400;500;600;700;800;900&family=IBM+Plex+Sans+Arabic:wght@300;400;500;600;700&display=swap" rel="stylesheet">
+    <!-- Icons -->
+    <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.4.0/css/all.min.css">
     
-    if (lowerText.includes('ئاو') || lowerText.includes('water')) {
-      return "بۆ ئاودان، باشترین ڕێسا ئەوەیە پەنجەت بخەیتە ناو خاکەکەوە (نزیکەی ٢-٣ سم). ئەگەر وشک بوو، ئاوی بدە. لە شەتڵگەی میر ئامێری پێوانی شێی خاکمان هەیە کە کارەکەت ئاسان دەکات.";
-    } else if (lowerText.includes('خۆر') || lowerText.includes('ڕووناکی')) {
-      return "زۆربەی ڕوەکەکان حەزیان بە ڕووناکی ناڕاستەوخۆیە. ئەگەر شوێنەکەت تاریکە، ئێمە لە شەتڵگەی میر ڕوەکی وەک 'زامفۆلیا' و 'سانسێڤێریا'مان هەیە کە بەرگەی کەم ڕووناکی دەگرن.";
-    } else if (lowerText.includes('زەرد') || lowerText.includes('نەخۆشی')) {
-      return "زەردبوونی گەڵا زۆرجار بەهۆی زۆر ئاودانەوەیە 💧. هەروەها دەکرێت بەهۆی کەمی ئاسن بێت. ئێمە باشترین جۆری پەین و دەرمانی چارەسەری کەڕوومان هەیە.";
-    } else if (lowerText.includes('ناونیشان') || lowerText.includes('شوێن')) {
-      return "📍 ناونیشانی شەتڵگەی میر: \nسەرەتای شەقامی سەرەکی، تەنیشت باخچەی گشتی. \nچاوەڕێی هاتنتانین!";
-    } else if (lowerText.includes('نرخ') || lowerText.includes('price')) {
-      return "نرخەکانمان زۆر گونجاون! 🏷️\n• کاکتوس: ٣,٠٠٠ دینار\n• پەتۆس: ٥,٠٠٠ دینار\n• مەتات: ١٥,٠٠٠ دینار\nسەردانمان بکە بۆ بینینی هەموو ئۆفەرەکان.";
-    } else if (lowerText.includes('کاتی دەوام') || lowerText.includes('کراوە')) {
-      return "🕒 کاتی دەوام:\nهەموو ڕۆژێک لە کاتژمێر ٨ی بەیانی تا ١٠ی شەو کراوەیە.";
-    } else {
-      return "پرسیارێکی باشە! 🤔 تکایە دەتوانیت سەردانی شەتڵگەی میر بکەیت بۆ ڕاوێژی ڕاستەوخۆ، یان پرسیارەکەت ڕوونتر بکەیتەوە؟";
-    }
-  };
+    <script>
+        tailwind.config = {
+            theme: {
+                extend: {
+                    fontFamily: {
+                        sans: ['IBM Plex Sans Arabic', 'Vazirmatn', 'sans-serif'],
+                        display: ['Vazirmatn', 'sans-serif'],
+                    },
+                    colors: {
+                        dark: {
+                            800: '#1e293b',
+                            900: '#0f172a',
+                            950: '#020617', // Deeper black
+                        },
+                        primary: {
+                            500: '#3b82f6', // Blue
+                            600: '#2563eb',
+                        },
+                        accent: {
+                            500: '#8b5cf6', // Violet
+                        }
+                    },
+                    animation: {
+                        'float': 'float 6s ease-in-out infinite',
+                        'pulse-glow': 'pulseGlow 3s cubic-bezier(0.4, 0, 0.6, 1) infinite',
+                        'blob': 'blob 7s infinite',
+                    },
+                    keyframes: {
+                        float: {
+                            '0%, 100%': { transform: 'translateY(0)' },
+                            '50%': { transform: 'translateY(-20px)' },
+                        },
+                        pulseGlow: {
+                            '0%, 100%': { opacity: 1, transform: 'scale(1)' },
+                            '50%': { opacity: .5, transform: 'scale(1.05)' },
+                        },
+                        blob: {
+                            '0%': { transform: 'translate(0px, 0px) scale(1)' },
+                            '33%': { transform: 'translate(30px, -50px) scale(1.1)' },
+                            '66%': { transform: 'translate(-20px, 20px) scale(0.9)' },
+                            '100%': { transform: 'translate(0px, 0px) scale(1)' },
+                        }
+                    }
+                }
+            }
+        }
+    </script>
+    <style>
+        body {
+            font-family: 'IBM Plex Sans Arabic', sans-serif;
+            background-color: #020617;
+            overflow-x: hidden;
+        }
 
-  const handleSend = (e) => {
-    e.preventDefault();
-    if (!inputText.trim()) return;
+        h1, h2, h3, .font-display {
+            font-family: 'Vazirmatn', sans-serif;
+        }
 
-    const userMessage = {
-      id: messages.length + 1,
-      text: inputText,
-      sender: 'user',
-      time: new Date().toLocaleTimeString('ckb-IQ', { hour: '2-digit', minute: '2-digit' })
-    };
+        /* Custom Scrollbar */
+        ::-webkit-scrollbar {
+            width: 8px;
+        }
+        ::-webkit-scrollbar-track {
+            background: #020617;
+        }
+        ::-webkit-scrollbar-thumb {
+            background: #334155;
+            border-radius: 4px;
+        }
+        ::-webkit-scrollbar-thumb:hover {
+            background: #475569;
+        }
 
-    setMessages(prev => [...prev, userMessage]);
-    setInputText("");
-    setIsLoading(true);
+        /* Gradient Text */
+        .text-gradient {
+            background: linear-gradient(to right, #60a5fa, #c084fc);
+            -webkit-background-clip: text;
+            -webkit-text-fill-color: transparent;
+        }
 
-    setTimeout(() => {
-      const botResponse = {
-        id: messages.length + 2,
-        text: generateResponse(userMessage.text),
-        sender: 'bot',
-        time: new Date().toLocaleTimeString('ckb-IQ', { hour: '2-digit', minute: '2-digit' })
-      };
-      setMessages(prev => [...prev, botResponse]);
-      setIsLoading(false);
-    }, 1500);
-  };
-
-  return (
-    // Background wrapper
-    <div className="min-h-screen bg-gray-100 flex items-center justify-center p-0 sm:p-4 font-sans text-slate-800" dir="rtl">
-      
-      {/* Main App Container - Mobile sized on desktop */}
-      <div className="w-full max-w-md bg-white sm:rounded-[30px] shadow-2xl overflow-hidden h-[100dvh] sm:h-[85vh] flex flex-col relative border-4 border-white/50 ring-1 ring-black/5">
+        /* Glassmorphism */
+        .glass {
+            background: rgba(15, 23, 42, 0.6);
+            backdrop-filter: blur(16px);
+            -webkit-backdrop-filter: blur(16px);
+            border: 1px solid rgba(255, 255, 255, 0.08);
+        }
         
-        {/* Header with Gradient */}
-        <header className="bg-gradient-to-r from-emerald-600 via-emerald-500 to-teal-500 text-white p-4 pt-6 pb-6 shadow-lg z-10 relative overflow-hidden">
-          {/* Decorative circles */}
-          <div className="absolute top-0 left-0 w-32 h-32 bg-white/10 rounded-full -translate-x-10 -translate-y-10 blur-xl"></div>
-          <div className="absolute bottom-0 right-0 w-24 h-24 bg-teal-900/10 rounded-full translate-x-8 translate-y-8 blur-lg"></div>
+        .glass-card {
+            background: rgba(30, 41, 59, 0.3);
+            backdrop-filter: blur(12px);
+            border: 1px solid rgba(255, 255, 255, 0.05);
+            transition: all 0.4s cubic-bezier(0.175, 0.885, 0.32, 1.275);
+        }
 
-          <div className="relative flex items-center gap-4">
-            <div className="relative group cursor-pointer">
-              <div className="w-14 h-14 rounded-full bg-white p-1 shadow-md transition-transform transform group-hover:scale-105">
-                <div className="w-full h-full rounded-full overflow-hidden relative">
-                  {!headerImgError ? (
-                    <img 
-                      src="mer.jpg" 
-                      alt="Mer Logo" 
-                      className="w-full h-full object-cover"
-                      onError={() => setHeaderImgError(true)}
-                    />
-                  ) : (
-                    <div className="w-full h-full bg-emerald-50 flex items-center justify-center">
-                       <Leaf size={24} className="text-emerald-500" />
-                    </div>
-                  )}
-                </div>
-              </div>
-              <div className="absolute bottom-0 right-0 w-4 h-4 bg-green-400 border-2 border-emerald-600 rounded-full"></div>
-            </div>
-            
-            <div className="flex-1">
-              <h1 className="text-xl font-bold flex items-center gap-2">
-                شەتڵگەی میر
-                <Heart size={16} className="text-pink-300 fill-pink-300 animate-pulse" />
-              </h1>
-              <div className="flex items-center gap-2 text-emerald-50 text-xs font-medium mt-1">
-                <span className="flex items-center gap-1 bg-white/20 px-2 py-0.5 rounded-full backdrop-blur-sm">
-                  <span className="w-1.5 h-1.5 rounded-full bg-green-300 animate-pulse"></span>
-                  ئۆنڵاین
-                </span>
-                <span className="opacity-90">وەڵامدانەوەی خێرا</span>
-              </div>
-            </div>
-          </div>
-        </header>
+        /* Scroll Reveal */
+        .reveal {
+            opacity: 0;
+            transform: translateY(30px);
+            transition: all 0.8s ease-out;
+        }
+        .reveal.active {
+            opacity: 1;
+            transform: translateY(0);
+        }
 
-        {/* Chat Area */}
-        <div className="flex-1 overflow-y-auto p-4 space-y-6 bg-slate-50 relative scroll-smooth">
-          {/* Subtle Background Pattern */}
-          <div className="absolute inset-0 opacity-5 pointer-events-none" 
-               style={{backgroundImage: 'radial-gradient(#059669 1px, transparent 1px)', backgroundSize: '20px 20px'}}>
-          </div>
+        /* Typing Cursor */
+        .typing-cursor::after {
+            content: '|';
+            animation: blink 1s step-end infinite;
+        }
+        @keyframes blink { 50% { opacity: 0; } }
 
-          {messages.map((msg, index) => (
-            <div
-              key={msg.id}
-              className={`flex items-end gap-3 group animate-in slide-in-from-bottom-2 duration-500 fade-in ${
-                msg.sender === 'user' ? 'flex-row-reverse' : 'flex-row'
-              }`}
-            >
-              {/* Avatar */}
-              <div className={`w-9 h-9 rounded-full flex items-center justify-center shrink-0 shadow-sm transition-transform hover:scale-110 ${
-                msg.sender === 'user' 
-                  ? 'bg-gradient-to-br from-emerald-600 to-teal-700 text-white' 
-                  : 'bg-white border border-gray-100 overflow-hidden'
-              }`}>
-                {msg.sender === 'user' ? <User size={18} /> : <BotAvatar />}
-              </div>
-              
-              {/* Message Bubble */}
-              <div className={`max-w-[75%] relative shadow-md ${
-                  msg.sender === 'user' ? 'text-white' : 'text-gray-700'
-                }`}
-              >
-                <div
-                  className={`p-3.5 text-sm leading-relaxed whitespace-pre-line ${
-                    msg.sender === 'user'
-                      ? 'bg-gradient-to-br from-emerald-500 to-emerald-600 rounded-2xl rounded-br-none'
-                      : 'bg-white rounded-2xl rounded-bl-none border border-gray-100'
-                  }`}
-                >
-                  {msg.text}
-                </div>
-                {/* Time Stamp */}
-                <span className={`text-[10px] absolute -bottom-5 w-20 opacity-0 group-hover:opacity-60 transition-opacity ${
-                  msg.sender === 'user' ? 'left-0 text-left' : 'right-0 text-right'
-                }`}>
-                  {msg.time}
-                </span>
-              </div>
-            </div>
-          ))}
-          
-          {isLoading && (
-            <div className="flex items-center gap-3 animate-in fade-in duration-300">
-              <div className="w-9 h-9 rounded-full bg-white border border-gray-100 flex items-center justify-center shadow-sm">
-                <Bot size={18} className="text-emerald-600" />
-              </div>
-              <div className="bg-white px-4 py-3 rounded-2xl rounded-bl-none shadow-sm border border-gray-100">
-                <div className="flex gap-1.5">
-                  <span className="w-2 h-2 bg-emerald-400 rounded-full animate-bounce"></span>
-                  <span className="w-2 h-2 bg-emerald-400 rounded-full animate-bounce delay-100"></span>
-                  <span className="w-2 h-2 bg-emerald-400 rounded-full animate-bounce delay-200"></span>
-                </div>
-              </div>
-            </div>
-          )}
-          <div ref={messagesEndRef} className="h-2" />
-        </div>
+        /* Tilt Effect Class (handled by JS/CSS hover) */
+        .tilt-card:hover {
+            transform: translateY(-10px) scale(1.02);
+            box-shadow: 0 20px 40px -10px rgba(59, 130, 246, 0.2);
+            border-color: rgba(59, 130, 246, 0.3);
+        }
+    </style>
+</head>
+<body class="text-slate-300 selection:bg-blue-500 selection:text-white">
 
-        {/* Footer / Input Area */}
-        <div className="bg-white p-3 sm:p-4 border-t border-gray-100 shadow-[0_-5px_20px_rgba(0,0,0,0.03)] z-10">
-          
-          {/* Quick Actions (Scrollable) */}
-          <div className="flex gap-2 mb-3 overflow-x-auto pb-2 scrollbar-none mask-fade-sides">
-             <button onClick={() => setInputText("ناونیشان؟")} className="flex items-center gap-1.5 text-xs font-semibold bg-emerald-50 hover:bg-emerald-100 text-emerald-700 px-3 py-2 rounded-xl transition-colors border border-emerald-100 shrink-0">
-               <MapPin size={14} /> ناونیشان
-             </button>
-             <button onClick={() => setInputText("نرخی گوڵەکان")} className="flex items-center gap-1.5 text-xs font-semibold bg-blue-50 hover:bg-blue-100 text-blue-700 px-3 py-2 rounded-xl transition-colors border border-blue-100 shrink-0">
-               <Info size={14} /> نرخەکان
-             </button>
-             <button onClick={() => setInputText("چۆن ئاوی بدەم؟")} className="flex items-center gap-1.5 text-xs font-semibold bg-orange-50 hover:bg-orange-100 text-orange-700 px-3 py-2 rounded-xl transition-colors border border-orange-100 shrink-0">
-               <Droplets size={14} /> ئاودان
-             </button>
-             <button onClick={() => setInputText("کاتی دەوام")} className="flex items-center gap-1.5 text-xs font-semibold bg-purple-50 hover:bg-purple-100 text-purple-700 px-3 py-2 rounded-xl transition-colors border border-purple-100 shrink-0">
-               <Clock size={14} /> کات
-             </button>
-          </div>
-
-          {/* Input Form */}
-          <form onSubmit={handleSend} className="flex gap-2 items-center bg-gray-50 p-1.5 rounded-[20px] border border-gray-200 focus-within:border-emerald-400 focus-within:ring-2 focus-within:ring-emerald-100 transition-all shadow-inner">
-            <input
-              type="text"
-              value={inputText}
-              onChange={(e) => setInputText(e.target.value)}
-              placeholder="نوسین..."
-              className="flex-1 bg-transparent px-4 py-3 focus:outline-none text-gray-700 placeholder-gray-400 font-medium"
-            />
-            <button
-              type="submit"
-              disabled={!inputText.trim() || isLoading}
-              className={`p-3 rounded-2xl transition-all duration-300 flex items-center justify-center shadow-md ${
-                inputText.trim() 
-                  ? 'bg-gradient-to-tr from-emerald-600 to-teal-500 text-white transform hover:scale-105 active:scale-95' 
-                  : 'bg-gray-200 text-gray-400 cursor-not-allowed'
-              }`}
-            >
-              <Send size={20} className={document.dir === 'rtl' ? 'rotate-180' : ''} />
-            </button>
-          </form>
-          
-          <div className="text-center mt-2">
-            <p className="text-[10px] text-gray-400">Powered by Mir Garden AI</p>
-          </div>
-        </div>
-      </div>
+    <!-- Background Blobs -->
+    <div class="fixed inset-0 pointer-events-none overflow-hidden -z-10">
+        <div class="absolute top-0 left-1/4 w-96 h-96 bg-blue-600/20 rounded-full mix-blend-screen filter blur-[100px] opacity-30 animate-blob"></div>
+        <div class="absolute top-0 right-1/4 w-96 h-96 bg-purple-600/20 rounded-full mix-blend-screen filter blur-[100px] opacity-30 animate-blob" style="animation-delay: 2s"></div>
+        <div class="absolute -bottom-32 left-1/3 w-96 h-96 bg-indigo-600/20 rounded-full mix-blend-screen filter blur-[100px] opacity-30 animate-blob" style="animation-delay: 4s"></div>
+        <div class="absolute inset-0 bg-[url('https://grainy-gradients.vercel.app/noise.svg')] opacity-[0.03]"></div>
     </div>
-  );
-};
 
-export default PlantApp;
+    <!-- Navigation -->
+    <nav class="fixed w-full z-50 glass transition-all duration-300 border-b-0" id="navbar">
+        <div class="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8">
+            <div class="flex items-center justify-between h-20">
+                <a href="#" class="flex items-center gap-3 group">
+                    <div class="relative w-10 h-10 overflow-hidden rounded-lg bg-gradient-to-br from-blue-600 to-purple-600 flex items-center justify-center text-white font-bold text-xl shadow-lg group-hover:shadow-blue-500/50 transition-all duration-300">
+                        <div class="absolute inset-0 bg-white/20 translate-y-full group-hover:translate-y-0 transition-transform duration-300"></div>
+                        H
+                    </div>
+                    <span class="text-2xl font-bold text-white tracking-wide font-display">Horaz <span class="text-blue-500">IT</span></span>
+                </a>
+                
+                <!-- Desktop Menu -->
+                <div class="hidden md:flex items-center gap-8">
+                    <a href="#home" class="text-sm font-medium hover:text-white transition-colors relative group py-2">
+                        سەرەکی
+                        <span class="absolute bottom-0 left-0 w-0 h-0.5 bg-blue-500 transition-all duration-300 group-hover:w-full"></span>
+                    </a>
+                    <a href="#about" class="text-sm font-medium hover:text-white transition-colors relative group py-2">
+                        دەربارە
+                        <span class="absolute bottom-0 left-0 w-0 h-0.5 bg-blue-500 transition-all duration-300 group-hover:w-full"></span>
+                    </a>
+                    <a href="#projects" class="text-sm font-medium hover:text-white transition-colors relative group py-2">
+                        سیستەمەکان
+                        <span class="absolute bottom-0 left-0 w-0 h-0.5 bg-blue-500 transition-all duration-300 group-hover:w-full"></span>
+                    </a>
+                    <a href="#contact" class="px-6 py-2.5 bg-blue-600 hover:bg-blue-500 text-white rounded-lg font-medium transition-all shadow-lg shadow-blue-500/20 hover:shadow-blue-500/40 transform hover:-translate-y-0.5">
+                        پەیوەندی
+                    </a>
+                </div>
+
+                <!-- Mobile Menu Button -->
+                <button id="mobile-menu-btn" class="md:hidden text-slate-300 hover:text-white p-2">
+                    <i class="fas fa-bars text-2xl"></i>
+                </button>
+            </div>
+        </div>
+        
+        <!-- Mobile Menu -->
+        <div id="mobile-menu" class="hidden md:hidden absolute w-full glass border-t border-white/5">
+            <div class="px-4 pt-2 pb-6 space-y-2">
+                <a href="#home" class="block p-3 rounded-lg hover:bg-white/5 text-center">سەرەکی</a>
+                <a href="#about" class="block p-3 rounded-lg hover:bg-white/5 text-center">دەربارە</a>
+                <a href="#projects" class="block p-3 rounded-lg hover:bg-white/5 text-center">سیستەمەکان</a>
+                <a href="#contact" class="block p-3 rounded-lg bg-blue-600/20 text-blue-400 text-center mt-2 border border-blue-500/20">پەیوەندی</a>
+            </div>
+        </div>
+    </nav>
+
+    <!-- Hero Section -->
+    <section id="home" class="relative pt-32 pb-20 lg:pt-48 lg:pb-32 min-h-screen flex items-center">
+        <div class="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8 w-full">
+            <div class="flex flex-col-reverse lg:flex-row items-center gap-12 lg:gap-20">
+                <!-- Text Content -->
+                <div class="w-full lg:w-1/2 text-center lg:text-right z-10">
+                    <div class="reveal inline-flex items-center gap-2 px-4 py-2 mb-6 rounded-full bg-slate-800/50 border border-slate-700/50 backdrop-blur-md text-blue-400 text-xs font-bold tracking-wider uppercase">
+                        <span class="w-2 h-2 rounded-full bg-green-500 animate-pulse"></span>
+                        بەردەستم بۆ پڕۆژەی نوێ
+                    </div>
+                    
+                    <h1 class="reveal delay-100 text-5xl lg:text-7xl font-black mb-6 leading-tight text-white">
+                        دروستکردنی <br>
+                        <span class="text-gradient" id="typewriter"></span><span class="typing-cursor text-blue-500"></span>
+                    </h1>
+                    
+                    <p class="reveal delay-200 text-lg text-slate-400 mb-10 leading-relaxed max-w-xl mx-auto lg:mx-0">
+                        من لە <strong class="text-white">Horaz IT</strong> یارمەتیت دەدەم لە گۆڕینی بیرۆکەکانت بۆ واقیعێکی دیجیتاڵی بە بەکارهێنانی نوێترین تەکنەلۆژیای جیهانی.
+                    </p>
+                    
+                    <div class="reveal delay-300 flex flex-col sm:flex-row gap-4 justify-center lg:justify-start">
+                        <a href="#projects" class="group relative px-8 py-4 bg-blue-600 text-white font-bold rounded-xl overflow-hidden shadow-lg shadow-blue-500/25 transition-all hover:-translate-y-1">
+                            <div class="absolute inset-0 w-full h-full bg-gradient-to-r from-transparent via-white/20 to-transparent -translate-x-full group-hover:animate-[shimmer_1.5s_infinite]"></div>
+                            <span class="relative flex items-center justify-center gap-2">
+                                بینینی پڕۆژەکان <i class="fas fa-arrow-left group-hover:translate-x-1 transition-transform"></i>
+                            </span>
+                        </a>
+                        <a href="#contact" class="px-8 py-4 bg-slate-800 text-white font-bold rounded-xl border border-slate-700 hover:border-slate-500 hover:bg-slate-700 transition-all flex items-center justify-center gap-2">
+                            <i class="far fa-envelope"></i> داواکردنی نرخ
+                        </a>
+                    </div>
+
+                    <!-- Trust Indicators -->
+                    <div class="reveal delay-300 mt-12 flex items-center justify-center lg:justify-start gap-6 text-slate-500 text-sm font-medium">
+                        <div class="flex items-center gap-2">
+                            <i class="fas fa-check-circle text-blue-500"></i> خێرایی بەرز
+                        </div>
+                        <div class="flex items-center gap-2">
+                            <i class="fas fa-check-circle text-blue-500"></i> کوالێتی کۆد
+                        </div>
+                        <div class="flex items-center gap-2">
+                            <i class="fas fa-check-circle text-blue-500"></i> پشتگیری ٢٤/٧
+                        </div>
+                    </div>
+                </div>
+                
+                <!-- Visual Content -->
+                <div class="w-full lg:w-1/2 flex justify-center lg:justify-end reveal delay-200">
+                    <div class="relative w-full max-w-lg aspect-square">
+                        <!-- 3D Elements Container -->
+                        <div class="relative w-full h-full animate-float">
+                            <!-- Main Abstract Shape -->
+                            <svg viewBox="0 0 200 200" xmlns="http://www.w3.org/2000/svg" class="w-full h-full drop-shadow-[0_20px_50px_rgba(59,130,246,0.3)]">
+                                <defs>
+                                    <linearGradient id="gradMain" x1="0%" y1="0%" x2="100%" y2="100%">
+                                        <stop offset="0%" style="stop-color:#2563eb" />
+                                        <stop offset="100%" style="stop-color:#9333ea" />
+                                    </linearGradient>
+                                </defs>
+                                <path fill="url(#gradMain)" d="M47.5,-73.2C61.3,-66.4,72.2,-54.6,79.8,-41.3C87.4,-28,91.7,-13.2,88.9,0.3C86.1,13.8,76.2,26,65.8,36.2C55.4,46.4,44.5,54.6,32.6,60.8C20.7,67,7.8,71.2,-3.8,76.4C-15.4,81.6,-25.7,87.8,-36.4,84.1C-47.1,80.4,-58.2,66.8,-66.4,53.2C-74.6,39.6,-79.9,26,-80.7,12.3C-81.5,-1.4,-77.8,-15.2,-70.7,-27.4C-63.6,-39.6,-53.1,-50.2,-41.3,-57.8C-29.5,-65.4,-16.4,-70, -1.8,-67.5C12.8,-65,25.6,-55.4,33.7,-80" transform="translate(100 100)" opacity="0.9" />
+                            </svg>
+                            
+                            <!-- Floating Cards -->
+                            <div class="absolute top-[10%] -right-4 glass-card p-4 rounded-xl border-r-4 border-r-green-500 animate-[bounce_3s_infinite] shadow-2xl">
+                                <div class="flex items-center gap-3">
+                                    <div class="w-10 h-10 rounded-full bg-green-500/20 flex items-center justify-center text-green-400">
+                                        <i class="fas fa-code-branch"></i>
+                                    </div>
+                                    <div>
+                                        <div class="text-xs text-slate-400">Status</div>
+                                        <div class="font-bold text-white text-sm">Active Project</div>
+                                    </div>
+                                </div>
+                            </div>
+
+                            <div class="absolute bottom-[20%] -left-4 glass-card p-4 rounded-xl border-r-4 border-r-blue-500 animate-[bounce_4s_infinite] shadow-2xl z-20">
+                                <div class="flex items-center gap-3">
+                                    <div class="w-10 h-10 rounded-full bg-blue-500/20 flex items-center justify-center text-blue-400">
+                                        <i class="fas fa-database"></i>
+                                    </div>
+                                    <div class="text-xs font-mono text-blue-200">
+                                        SELECT * FROM users<br>WHERE active = 1;
+                                    </div>
+                                </div>
+                            </div>
+                        </div>
+                    </div>
+                </div>
+            </div>
+        </div>
+        
+        <!-- Scroll Indicator -->
+        <a href="#stats" class="absolute bottom-10 left-1/2 -translate-x-1/2 text-slate-500 hover:text-white transition-colors animate-bounce">
+            <i class="fas fa-chevron-down text-xl"></i>
+        </a>
+    </section>
+
+    <!-- Stats Section -->
+    <section id="stats" class="py-10 border-y border-white/5 bg-dark-900/50 backdrop-blur-sm relative z-20">
+        <div class="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8">
+            <div class="grid grid-cols-2 md:grid-cols-4 gap-8 text-center divide-x divide-x-reverse divide-white/5">
+                <div class="reveal">
+                    <div class="text-3xl lg:text-4xl font-black text-white mb-1 counter" data-target="3">0</div>
+                    <div class="text-sm text-slate-400 font-medium">ساڵ ئەزموون</div>
+                </div>
+                <div class="reveal delay-100">
+                    <div class="text-3xl lg:text-4xl font-black text-white mb-1 counter" data-target="15">0</div>
+                    <div class="text-sm text-slate-400 font-medium">پڕۆژەی تەواوکراو</div>
+                </div>
+                <div class="reveal delay-200">
+                    <div class="text-3xl lg:text-4xl font-black text-white mb-1 counter" data-target="10">0</div>
+                    <div class="text-sm text-slate-400 font-medium">موشتەری دڵخۆش</div>
+                </div>
+                <div class="reveal delay-300">
+                    <div class="text-3xl lg:text-4xl font-black text-white mb-1 counter" data-target="100">0</div>
+                    <div class="text-sm text-slate-400 font-medium">% کوالێتی</div>
+                </div>
+            </div>
+        </div>
+    </section>
+
+    <!-- Services Section -->
+    <section id="about" class="py-24 relative">
+        <div class="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8">
+            <div class="text-center mb-16 reveal">
+                <span class="text-blue-500 font-bold tracking-wider text-sm uppercase bg-blue-500/10 px-3 py-1 rounded-full border border-blue-500/20">خزمەتگوزارییەکان</span>
+                <h2 class="text-3xl lg:text-5xl font-black mt-4 mb-6 text-white font-display">چارەسەری گونجاو بۆ تۆ</h2>
+                <div class="w-20 h-1 bg-blue-600 mx-auto rounded-full"></div>
+            </div>
+
+            <div class="grid grid-cols-1 md:grid-cols-3 gap-8">
+                <!-- Service 1 -->
+                <div class="reveal glass-card p-8 rounded-2xl tilt-card group relative overflow-hidden">
+                    <div class="absolute -right-10 -top-10 w-32 h-32 bg-blue-600/10 rounded-full blur-2xl group-hover:bg-blue-600/20 transition-all"></div>
+                    <i class="fas fa-laptop-code text-4xl text-blue-500 mb-6 group-hover:scale-110 transition-transform block"></i>
+                    <h3 class="text-xl font-bold text-white mb-3">پەرەپێدانی وێب</h3>
+                    <p class="text-slate-400 text-sm leading-relaxed mb-4">
+                        وێبسایتی مۆدێرن بە بەکارهێنانی React و Next.js، خێرا و ئاسان بۆ Google (SEO Friendly).
+                    </p>
+                    <ul class="text-xs text-slate-500 space-y-2">
+                        <li class="flex items-center gap-2"><i class="fas fa-check text-blue-500"></i> ڕیسپۆنسیڤ</li>
+                        <li class="flex items-center gap-2"><i class="fas fa-check text-blue-500"></i> خێرایی بەرز</li>
+                    </ul>
+                </div>
+
+                <!-- Service 2 -->
+                <div class="reveal delay-100 glass-card p-8 rounded-2xl tilt-card group relative overflow-hidden">
+                    <div class="absolute -right-10 -top-10 w-32 h-32 bg-purple-600/10 rounded-full blur-2xl group-hover:bg-purple-600/20 transition-all"></div>
+                    <i class="fas fa-server text-4xl text-purple-500 mb-6 group-hover:scale-110 transition-transform block"></i>
+                    <h3 class="text-xl font-bold text-white mb-3">سیستەمی بەڕێوەبردن</h3>
+                    <p class="text-slate-400 text-sm leading-relaxed mb-4">
+                        سیستەمی تایبەت (Custom ERP) بۆ کۆمپانیاکان، کۆگا، قوتابخانە و نەخۆشخانەکان.
+                    </p>
+                    <ul class="text-xs text-slate-500 space-y-2">
+                        <li class="flex items-center gap-2"><i class="fas fa-check text-purple-500"></i> داتابەیسی پارێزراو</li>
+                        <li class="flex items-center gap-2"><i class="fas fa-check text-purple-500"></i> ڕاپۆرتی ورد</li>
+                    </ul>
+                </div>
+
+                <!-- Service 3 -->
+                <div class="reveal delay-200 glass-card p-8 rounded-2xl tilt-card group relative overflow-hidden">
+                    <div class="absolute -right-10 -top-10 w-32 h-32 bg-green-600/10 rounded-full blur-2xl group-hover:bg-green-600/20 transition-all"></div>
+                    <i class="fas fa-mobile-screen-button text-4xl text-green-500 mb-6 group-hover:scale-110 transition-transform block"></i>
+                    <h3 class="text-xl font-bold text-white mb-3">مۆبایل ئەپ</h3>
+                    <p class="text-slate-400 text-sm leading-relaxed mb-4">
+                        ئەپڵیکەیشنی (Android & iOS) بە بەکارهێنانی Flutter یان React Native.
+                    </p>
+                    <ul class="text-xs text-slate-500 space-y-2">
+                        <li class="flex items-center gap-2"><i class="fas fa-check text-green-500"></i> UI/UX مۆدێرن</li>
+                        <li class="flex items-center gap-2"><i class="fas fa-check text-green-500"></i> نۆتیفیکەیشن</li>
+                    </ul>
+                </div>
+            </div>
+        </div>
+    </section>
+
+    <!-- Projects Showcase -->
+    <section id="projects" class="py-24 bg-dark-900/30 relative">
+        <div class="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8">
+            <div class="flex flex-col md:flex-row justify-between items-end mb-12 reveal">
+                <div>
+                    <span class="text-purple-500 font-bold tracking-wider text-sm uppercase">پۆرتفۆلیۆ</span>
+                    <h2 class="text-3xl lg:text-5xl font-black mt-2 mb-4 text-white font-display">دوایین کارەکانم</h2>
+                </div>
+                <a href="#contact" class="hidden md:flex items-center gap-2 text-slate-400 hover:text-white transition-colors group">
+                    بینینی هەمووی <i class="fas fa-arrow-left group-hover:-translate-x-1 transition-transform"></i>
+                </a>
+            </div>
+
+            <div class="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 gap-8">
+                <!-- Project 1 -->
+                <div class="reveal group rounded-2xl bg-dark-800 border border-white/5 hover:border-blue-500/30 overflow-hidden transition-all duration-300 hover:shadow-2xl hover:-translate-y-2">
+                    <div class="h-60 bg-gradient-to-br from-slate-800 to-slate-900 relative overflow-hidden">
+                        <div class="absolute inset-0 bg-blue-600/20 mix-blend-overlay opacity-0 group-hover:opacity-100 transition-opacity duration-500"></div>
+                        <div class="absolute inset-0 flex items-center justify-center">
+                            <i class="fas fa-shopping-basket text-6xl text-slate-700 group-hover:text-blue-500 transition-colors duration-300 group-hover:scale-110 transform"></i>
+                        </div>
+                        <div class="absolute inset-x-0 bottom-0 p-4 bg-gradient-to-t from-dark-900 to-transparent translate-y-full group-hover:translate-y-0 transition-transform duration-300 flex justify-between items-center">
+                           <span class="text-white text-sm font-bold">POS System</span>
+                           <i class="fas fa-arrow-up-right-from-square text-white"></i>
+                        </div>
+                    </div>
+                    <div class="p-6">
+                        <h3 class="text-xl font-bold text-white mb-2">سیستەمی مارکێت</h3>
+                        <p class="text-slate-400 text-sm mb-4 line-clamp-2">سیستەمی فرۆشتن و بەڕێوەبردنی کۆگا بە پشتگیری بارکۆد.</p>
+                        <div class="flex flex-wrap gap-2">
+                            <span class="px-2 py-1 bg-slate-700/50 rounded text-xs text-slate-300 border border-slate-700">Laravel</span>
+                            <span class="px-2 py-1 bg-slate-700/50 rounded text-xs text-slate-300 border border-slate-700">Vue.js</span>
+                            <span class="px-2 py-1 bg-slate-700/50 rounded text-xs text-slate-300 border border-slate-700">MySQL</span>
+                        </div>
+                    </div>
+                </div>
+
+                <!-- Project 2 -->
+                <div class="reveal delay-100 group rounded-2xl bg-dark-800 border border-white/5 hover:border-purple-500/30 overflow-hidden transition-all duration-300 hover:shadow-2xl hover:-translate-y-2">
+                    <div class="h-60 bg-gradient-to-br from-slate-800 to-slate-900 relative overflow-hidden">
+                        <div class="absolute inset-0 bg-purple-600/20 mix-blend-overlay opacity-0 group-hover:opacity-100 transition-opacity duration-500"></div>
+                        <div class="absolute inset-0 flex items-center justify-center">
+                            <i class="fas fa-graduation-cap text-6xl text-slate-700 group-hover:text-purple-500 transition-colors duration-300 group-hover:scale-110 transform"></i>
+                        </div>
+                         <div class="absolute inset-x-0 bottom-0 p-4 bg-gradient-to-t from-dark-900 to-transparent translate-y-full group-hover:translate-y-0 transition-transform duration-300 flex justify-between items-center">
+                           <span class="text-white text-sm font-bold">School System</span>
+                           <i class="fas fa-arrow-up-right-from-square text-white"></i>
+                        </div>
+                    </div>
+                    <div class="p-6">
+                        <h3 class="text-xl font-bold text-white mb-2">بەڕێوەبردنی قوتابخانە</h3>
+                        <p class="text-slate-400 text-sm mb-4 line-clamp-2">تۆمارکردنی نمرە و پەیوەندی نێوان مامۆستا و دایک و باوک.</p>
+                        <div class="flex flex-wrap gap-2">
+                            <span class="px-2 py-1 bg-slate-700/50 rounded text-xs text-slate-300 border border-slate-700">PHP</span>
+                            <span class="px-2 py-1 bg-slate-700/50 rounded text-xs text-slate-300 border border-slate-700">jQuery</span>
+                        </div>
+                    </div>
+                </div>
+
+                <!-- Project 3 -->
+                <div class="reveal delay-200 group rounded-2xl bg-dark-800 border border-white/5 hover:border-green-500/30 overflow-hidden transition-all duration-300 hover:shadow-2xl hover:-translate-y-2">
+                    <div class="h-60 bg-gradient-to-br from-slate-800 to-slate-900 relative overflow-hidden">
+                        <div class="absolute inset-0 bg-green-600/20 mix-blend-overlay opacity-0 group-hover:opacity-100 transition-opacity duration-500"></div>
+                        <div class="absolute inset-0 flex items-center justify-center">
+                            <i class="fas fa-utensils text-6xl text-slate-700 group-hover:text-green-500 transition-colors duration-300 group-hover:scale-110 transform"></i>
+                        </div>
+                         <div class="absolute inset-x-0 bottom-0 p-4 bg-gradient-to-t from-dark-900 to-transparent translate-y-full group-hover:translate-y-0 transition-transform duration-300 flex justify-between items-center">
+                           <span class="text-white text-sm font-bold">Smart Menu</span>
+                           <i class="fas fa-arrow-up-right-from-square text-white"></i>
+                        </div>
+                    </div>
+                    <div class="p-6">
+                        <h3 class="text-xl font-bold text-white mb-2">مێنیوی دیجیتاڵی</h3>
+                        <p class="text-slate-400 text-sm mb-4 line-clamp-2">داواکردنی خواردن بە QR Code بەبێ وەیتەر.</p>
+                        <div class="flex flex-wrap gap-2">
+                            <span class="px-2 py-1 bg-slate-700/50 rounded text-xs text-slate-300 border border-slate-700">React</span>
+                            <span class="px-2 py-1 bg-slate-700/50 rounded text-xs text-slate-300 border border-slate-700">Firebase</span>
+                        </div>
+                    </div>
+                </div>
+            </div>
+        </div>
+    </section>
+
+    <!-- Contact Section -->
+    <section id="contact" class="py-24 relative overflow-hidden">
+        <div class="max-w-5xl mx-auto px-4 sm:px-6 lg:px-8">
+            <div class="glass border border-white/10 rounded-3xl p-8 md:p-14 shadow-2xl relative z-10 reveal">
+                <!-- Grid Decoration -->
+                <div class="absolute inset-0 bg-[url('https://grainy-gradients.vercel.app/noise.svg')] opacity-[0.05] pointer-events-none rounded-3xl"></div>
+                
+                <div class="grid grid-cols-1 lg:grid-cols-2 gap-12 relative z-10">
+                    <div>
+                        <h2 class="text-3xl font-black text-white mb-6 font-display">با پێکەوە کار بکەین</h2>
+                        <p class="text-slate-400 mb-8 leading-relaxed">
+                            ئامادەیت بۆ دەستپێکردنی پڕۆژەکەت؟ یان تەنها پرسیارێکت هەیە؟ ئێمە لێرەین بۆ یارمەتیدانت.
+                        </p>
+                        
+                        <div class="space-y-6">
+                            <a href="mailto:contact@horaz-it.com" class="flex items-center gap-4 p-4 rounded-xl bg-white/5 hover:bg-white/10 transition-colors group border border-white/5">
+                                <div class="w-10 h-10 rounded-full bg-blue-500/20 flex items-center justify-center text-blue-400 group-hover:scale-110 transition-transform">
+                                    <i class="fas fa-envelope"></i>
+                                </div>
+                                <div>
+                                    <p class="text-xs text-slate-500">ئیمەیڵ</p>
+                                    <p class="font-bold text-white">contact@horaz-it.com</p>
+                                </div>
+                            </a>
+                            
+                            <a href="tel:07500000000" class="flex items-center gap-4 p-4 rounded-xl bg-white/5 hover:bg-white/10 transition-colors group border border-white/5">
+                                <div class="w-10 h-10 rounded-full bg-green-500/20 flex items-center justify-center text-green-400 group-hover:scale-110 transition-transform">
+                                    <i class="fas fa-phone"></i>
+                                </div>
+                                <div>
+                                    <p class="text-xs text-slate-500">مۆبایل</p>
+                                    <p class="font-bold text-white">0750 000 00 00</p>
+                                </div>
+                            </a>
+                        </div>
+                    </div>
+
+                    <form class="space-y-4" onsubmit="event.preventDefault();">
+                        <div class="grid grid-cols-2 gap-4">
+                            <div>
+                                <label class="block text-xs font-medium text-slate-400 mb-2">ناو</label>
+                                <input type="text" class="w-full bg-dark-900/50 border border-slate-700 rounded-lg px-4 py-3 text-white focus:border-blue-500 focus:ring-1 focus:ring-blue-500 outline-none transition-all placeholder-slate-600" placeholder="ناوی تۆ">
+                            </div>
+                            <div>
+                                <label class="block text-xs font-medium text-slate-400 mb-2">مۆبایل</label>
+                                <input type="text" class="w-full bg-dark-900/50 border border-slate-700 rounded-lg px-4 py-3 text-white focus:border-blue-500 focus:ring-1 focus:ring-blue-500 outline-none transition-all placeholder-slate-600" placeholder="0750...">
+                            </div>
+                        </div>
+                        <div>
+                            <label class="block text-xs font-medium text-slate-400 mb-2">جۆری پڕۆژە</label>
+                            <select class="w-full bg-dark-900/50 border border-slate-700 rounded-lg px-4 py-3 text-slate-300 focus:border-blue-500 focus:ring-1 focus:ring-blue-500 outline-none transition-all">
+                                <option>وێبسایت</option>
+                                <option>سیستەمی مارکێت</option>
+                                <option>مۆبایل ئەپ</option>
+                                <option>ڕاوێژکاری</option>
+                            </select>
+                        </div>
+                        <div>
+                            <label class="block text-xs font-medium text-slate-400 mb-2">نامەکەت</label>
+                            <textarea rows="4" class="w-full bg-dark-900/50 border border-slate-700 rounded-lg px-4 py-3 text-white focus:border-blue-500 focus:ring-1 focus:ring-blue-500 outline-none transition-all placeholder-slate-600" placeholder="چۆن دەتوانین یارمەتیت بدەین؟"></textarea>
+                        </div>
+                        <button type="submit" class="w-full py-4 bg-gradient-to-r from-blue-600 to-purple-600 text-white font-bold rounded-lg hover:shadow-lg hover:shadow-blue-600/30 transition-all transform hover:-translate-y-1">
+                            ناردن <i class="fas fa-paper-plane mr-2"></i>
+                        </button>
+                    </form>
+                </div>
+            </div>
+        </div>
+    </section>
+
+    <!-- Footer -->
+    <footer class="bg-dark-950 py-12 border-t border-white/5">
+        <div class="max-w-7xl mx-auto px-4 text-center">
+            <div class="flex items-center justify-center gap-2 mb-6">
+                 <div class="w-8 h-8 bg-gradient-to-br from-blue-600 to-purple-600 rounded flex items-center justify-center text-white font-bold">H</div>
+                 <span class="text-xl font-bold text-white font-display">Horaz IT</span>
+            </div>
+            <div class="flex justify-center gap-6 mb-8">
+                <a href="#" class="w-10 h-10 rounded-full bg-white/5 flex items-center justify-center text-slate-400 hover:bg-blue-600 hover:text-white transition-all"><i class="fab fa-facebook-f"></i></a>
+                <a href="#" class="w-10 h-10 rounded-full bg-white/5 flex items-center justify-center text-slate-400 hover:bg-pink-600 hover:text-white transition-all"><i class="fab fa-instagram"></i></a>
+                <a href="#" class="w-10 h-10 rounded-full bg-white/5 flex items-center justify-center text-slate-400 hover:bg-black hover:text-white transition-all"><i class="fab fa-github"></i></a>
+            </div>
+            <p class="text-slate-600 text-sm">© 2024 هەموو مافەکان پارێزراوە بۆ Horaz IT.</p>
+        </div>
+    </footer>
+
+    <!-- Back to Top Button -->
+    <button id="backToTop" class="fixed bottom-8 right-8 bg-blue-600 text-white w-12 h-12 rounded-full shadow-lg shadow-blue-600/40 flex items-center justify-center translate-y-20 opacity-0 transition-all duration-300 hover:-translate-y-1 hover:bg-blue-500 z-50">
+        <i class="fas fa-arrow-up"></i>
+    </button>
+
+    <script>
+        // Typewriter Effect
+        const words = ["وێبسایتی مۆدێرن", "سیستەمی زیرەک", "ئەپڵیکەیشنی خێرا"];
+        let i = 0;
+        let timer;
+        
+        function typeWriter() {
+            const heading = document.getElementById("typewriter");
+            let word = words[i];
+            let n = 0;
+            let isDeleting = false;
+
+            function type() {
+                const current = isDeleting ? word.substring(0, n - 1) : word.substring(0, n + 1);
+                heading.innerHTML = current;
+                n = isDeleting ? n - 1 : n + 1;
+
+                let speed = isDeleting ? 100 : 200;
+
+                if (!isDeleting && n === word.length) {
+                    speed = 2000;
+                    isDeleting = true;
+                } else if (isDeleting && n === 0) {
+                    isDeleting = false;
+                    i = (i + 1) % words.length;
+                    word = words[i];
+                    speed = 500;
+                }
+
+                timer = setTimeout(type, speed);
+            }
+            type();
+        }
+
+        document.addEventListener('DOMContentLoaded', typeWriter);
+
+        // Mobile Menu
+        const btn = document.getElementById('mobile-menu-btn');
+        const menu = document.getElementById('mobile-menu');
+        btn.addEventListener('click', () => {
+            menu.classList.toggle('hidden');
+        });
+        menu.querySelectorAll('a').forEach(l => l.addEventListener('click', () => menu.classList.add('hidden')));
+
+        // Scroll Reveal
+        const observer = new IntersectionObserver((entries) => {
+            entries.forEach(entry => {
+                if(entry.isIntersecting) {
+                    entry.target.classList.add('active');
+                    
+                    // Trigger counters if Stats section
+                    if(entry.target.querySelector('.counter')) {
+                        startCounters();
+                    }
+                }
+            });
+        }, { threshold: 0.1 });
+
+        document.querySelectorAll('.reveal').forEach(el => observer.observe(el));
+
+        // Number Counter
+        let counted = false;
+        function startCounters() {
+            if(counted) return;
+            counted = true;
+            document.querySelectorAll('.counter').forEach(counter => {
+                const target = +counter.getAttribute('data-target');
+                const duration = 2000; 
+                const inc = target / (duration / 16); 
+                
+                let count = 0;
+                const update = () => {
+                    count += inc;
+                    if(count < target) {
+                        counter.innerText = Math.ceil(count);
+                        requestAnimationFrame(update);
+                    } else {
+                        counter.innerText = target + "+";
+                    }
+                };
+                update();
+            });
+        }
+
+        // Back to Top Logic
+        const backToTop = document.getElementById('backToTop');
+        window.addEventListener('scroll', () => {
+            if(window.scrollY > 300) {
+                backToTop.classList.remove('translate-y-20', 'opacity-0');
+            } else {
+                backToTop.classList.add('translate-y-20', 'opacity-0');
+            }
+            
+            // Navbar Glass Effect
+            const nav = document.getElementById('navbar');
+            if(window.scrollY > 20) {
+                nav.classList.add('bg-dark-900/90', 'shadow-lg');
+            } else {
+                nav.classList.remove('bg-dark-900/90', 'shadow-lg');
+            }
+        });
+
+        backToTop.addEventListener('click', () => {
+            window.scrollTo({ top: 0, behavior: 'smooth' });
+        });
+    </script>
+</body>
+</html>
