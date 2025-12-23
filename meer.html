@@ -1,8 +1,7 @@
 import React, { useState, useRef, useEffect } from 'react';
 import { Send, Leaf, Sprout, Sun, Droplets, Info, User, Bot, MapPin, Clock } from 'lucide-react';
 
-// پێکهاتەیەکی بچووک بۆ مامەڵەکردن بە وێنەی بۆتەکە بەشێوەیەکی سەلامەت
-// ئەگەر وێنەکە کێشەی هەبوو، ئایکۆنێک نیشان دەدات
+// پێکهاتەی وێنەی بۆت - ئەگەر وێنەکە نەبوو، ئایکۆن نیشان دەدات
 const BotAvatar = () => {
   const [imgError, setImgError] = useState(false);
 
@@ -30,7 +29,10 @@ const PlantApp = () => {
   ]);
   const [inputText, setInputText] = useState("");
   const [isLoading, setIsLoading] = useState(false);
-  const [headerImgError, setHeaderImgError] = useState(false); // بۆ چارەسەری کێشەی وێنەی سەرەکی
+  
+  // بۆ چارەسەری کێشەی وێنەی سەرەکی (لۆگۆ)
+  const [headerImgError, setHeaderImgError] = useState(false); 
+  
   const messagesEndRef = useRef(null);
 
   const scrollToBottom = () => {
@@ -101,7 +103,7 @@ const PlantApp = () => {
                 onError={() => setHeaderImgError(true)}
               />
             ) : (
-              // Fallback Icon
+              // Fallback Icon if image fails
               <Leaf size={32} className="text-emerald-600" />
             )}
           </div>
