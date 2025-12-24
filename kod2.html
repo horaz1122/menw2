@@ -3,7 +3,7 @@
 <head>
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0, maximum-scale=1.0, user-scalable=no">
-    <title>ئەدمین - وەشانی وەتسئەپ</title>
+    <title>ئەدمین - وەشانی وەتسئەپ + باکەپ</title>
     <script src="https://cdn.tailwindcss.com"></script>
     <link href="https://fonts.googleapis.com/css2?family=Vazirmatn:wght@300;400;700;900&display=swap" rel="stylesheet">
     <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.4.0/css/all.min.css">
@@ -30,7 +30,7 @@
         window.appId = appId;
         window.doc = doc;
         window.setDoc = setDoc;
-        window.updateDoc = updateDoc; // Added updateDoc
+        window.updateDoc = updateDoc;
         window.deleteDoc = deleteDoc;
         window.collection = collection;
         window.getDocs = getDocs;
@@ -68,6 +68,21 @@
             </button>
         </div>
 
+        <div class="bg-indigo-50 p-4 rounded-2xl border border-indigo-100 mb-6 flex justify-between items-center shadow-sm">
+            <div>
+                <h3 class="font-bold text-indigo-900 text-sm"><i class="fa-solid fa-database mr-1"></i> داتا و باکەپ</h3>
+                <p class="text-[10px] text-indigo-600">پاراستن و گەڕاندنەوەی زانیارییەکان</p>
+            </div>
+            <div class="flex gap-2">
+                <button onclick="backupData()" class="bg-green-600 text-white px-3 py-2 rounded-lg text-xs font-bold shadow active:scale-95 transition">
+                    <i class="fa-solid fa-download"></i> داگرتن
+                </button>
+                <button onclick="document.getElementById('restore-input').click()" class="bg-blue-600 text-white px-3 py-2 rounded-lg text-xs font-bold shadow active:scale-95 transition">
+                    <i class="fa-solid fa-upload"></i> گەڕاندنەوە
+                </button>
+                <input type="file" id="restore-input" class="hidden" accept=".json" onchange="restoreData(this)">
+            </div>
+        </div>
         <div class="bg-white p-5 rounded-2xl shadow-sm border border-gray-100 mb-6">
             <div class="flex justify-between items-center mb-4">
                 <h3 class="font-bold text-purple-700 flex items-center gap-2">
@@ -126,6 +141,76 @@
         
         let allCodes = [];
         let currentTab = 'active';
+
+        // --- BACKUP FUNCTION ---
+        window.backupData = async () => {
+            if(!confirm('دەتەوێت هەموو داتاکان دابەزێنیت؟')) return;
+            
+            try {
+                const q = query(collection(window.db, 'artifacts', window.appId, 'access_codes'));
+                const snap = await getDocs(q);
+                const data = [];
+                snap.forEach(d => {
+                    // Include the ID inside the object for restoration later
+                    data.push({ _id: d.id, ...d.data() });
+                });
+
+                if(data.length === 0) return alert('هیچ داتایەک نییە بۆ داگرتن');
+
+                const dataStr = JSON.stringify(data, null, 2);
+                const blob = new Blob([dataStr], { type: "application/json" });
+                const url = URL.createObjectURL(blob);
+                const a = document.createElement('a');
+                a.href = url;
+                a.download = `backup_codes_${new Date().toISOString().slice(0,10)}.json`;
+                document.body.appendChild(a);
+                a.click();
+                document.body.removeChild(a);
+                URL.revokeObjectURL(url);
+                
+                alert('داونلۆد کرا ✅');
+            } catch (e) {
+                console.error(e);
+                alert('هەڵە لە داونلۆدکردن');
+            }
+        }
+
+        // --- RESTORE FUNCTION ---
+        window.restoreData = async (input) => {
+            const file = input.files[0];
+            if (!file) return;
+
+            const reader = new FileReader();
+            reader.onload = async (e) => {
+                try {
+                    const data = JSON.parse(e.target.result);
+                    if (!Array.isArray(data)) return alert('فایلەکە هەڵەیە');
+
+                    if (!confirm(`دڵنیای لە گەڕاندنەوەی ${data.length} کۆد؟ داتاکانی ئێستا نوێ دەبنەوە.`)) return;
+
+                    let count = 0;
+                    // Using loop to ensure order (optional) and error handling per item
+                    for (const item of data) {
+                        if (item._id) {
+                            const id = item._id;
+                            const docData = { ...item };
+                            delete docData._id; // Remove the ID from the body before saving
+                            
+                            await setDoc(doc(window.db, 'artifacts', window.appId, 'access_codes', id), docData);
+                            count++;
+                        }
+                    }
+                    
+                    alert(`${count} کۆد بە سەرکەوتوویی گەڕێندرانەوە ✅`);
+                    input.value = ''; // Reset input
+                    loadCodes(); // Refresh list
+                } catch (err) {
+                    console.error(err);
+                    alert('هەڵە: فۆرماتی فایلەکە تەواو نییە');
+                }
+            };
+            reader.readAsText(file);
+        }
 
         window.createCode = async () => {
             const code = document.getElementById('new-code').value.trim();
@@ -193,10 +278,8 @@
                 const isUsed = item.used;
                 const isExpired = item.expiryDate < today;
                 
-                // --- WhatsApp Button Logic ---
                 let whatsappBtn = '';
                 if(item.teacherPhone) {
-                    // Normalize phone (remove 0, add 964)
                     let p = item.teacherPhone.toString().trim();
                     if(p.startsWith('07')) p = '964' + p.substring(1);
                     else if(p.startsWith('7')) p = '964' + p;
@@ -205,13 +288,9 @@
                     whatsappBtn = `<a href="https://wa.me/${p}?text=${msg}" target="_blank" class="w-8 h-8 flex items-center justify-center rounded-lg bg-green-50 text-green-600 active:bg-green-500 active:text-white transition shadow-sm"><i class="fa-brands fa-whatsapp text-lg"></i></a>`;
                 }
 
-                // --- Renew Button Logic (Only if expired) ---
                 let actionBtn = '';
                 if(isExpired) {
                     actionBtn = `<button onclick="renewCode('${item.id}')" class="px-3 h-8 flex items-center justify-center rounded-lg bg-blue-50 text-blue-600 text-xs font-bold active:bg-blue-500 active:text-white transition shadow-sm">نوێکردنەوە <i class="fa-solid fa-rotate ml-1"></i></button>`;
-                } else {
-                    // Regular delete if not handling renewals in active tab
-                    // (You can allow delete in both tabs)
                 }
 
                 const deleteBtn = `<button onclick="removeCode('${item.id}')" class="w-8 h-8 flex items-center justify-center rounded-lg bg-red-50 text-red-500 active:bg-red-500 active:text-white transition shadow-sm"><i class="fa-solid fa-trash"></i></button>`;
@@ -254,7 +333,6 @@
             });
         }
 
-        // --- NEW: RENEW FUNCTION ---
         window.renewCode = async (id) => {
             const newDate = prompt("بەرواری نوێی بەسەرچوون دیاری بکە (YYYY-MM-DD):", new Date(new Date().setFullYear(new Date().getFullYear() + 1)).toISOString().split('T')[0]);
             
@@ -264,7 +342,6 @@
                         expiryDate: newDate
                     });
                     alert('کۆدەکە نوێکرایەوە!');
-                    // Force switch to active tab because it's no longer expired
                     switchTab('active');
                 } catch(e) {
                     console.error(e);
