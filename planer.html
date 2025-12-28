@@ -39,18 +39,23 @@
             border-color: #ef4444;
         }
         /* Custom Scrollbar for modal */
-        textarea::-webkit-scrollbar {
-            width: 8px;
+        textarea::-webkit-scrollbar, ul::-webkit-scrollbar {
+            width: 6px;
         }
-        textarea::-webkit-scrollbar-track {
+        textarea::-webkit-scrollbar-track, ul::-webkit-scrollbar-track {
             background: #f1f1f1; 
         }
-        textarea::-webkit-scrollbar-thumb {
-            background: #888; 
+        textarea::-webkit-scrollbar-thumb, ul::-webkit-scrollbar-thumb {
+            background: #cbd5e1; 
             border-radius: 4px;
         }
-        textarea::-webkit-scrollbar-thumb:hover {
-            background: #555; 
+        textarea::-webkit-scrollbar-thumb:hover, ul::-webkit-scrollbar-thumb:hover {
+            background: #94a3b8; 
+        }
+        
+        .task-done {
+            text-decoration: line-through;
+            color: #9ca3af;
         }
     </style>
 </head>
@@ -123,8 +128,8 @@
 
     <!-- Event Modal (Hidden by default) -->
     <div id="eventModal" class="fixed inset-0 bg-black bg-opacity-60 hidden flex justify-center items-center z-50 backdrop-blur-sm transition-opacity">
-        <div class="bg-white rounded-xl shadow-2xl w-full max-w-md mx-4 overflow-hidden transform transition-all scale-100">
-            <div id="modalHeader" class="bg-indigo-600 p-4 flex justify-between items-center text-white transition-colors duration-300">
+        <div class="bg-white rounded-xl shadow-2xl w-full max-w-md mx-4 overflow-hidden transform transition-all scale-100 flex flex-col max-h-[90vh]">
+            <div id="modalHeader" class="bg-indigo-600 p-4 flex justify-between items-center text-white transition-colors duration-300 flex-shrink-0">
                 <h3 class="text-lg font-bold flex items-center gap-2">
                     <i class="fas fa-edit"></i>
                     پلانی ڕۆژی <span id="modalDateDisplay" class="underline decoration-dotted underline-offset-4 font-serif"></span>
@@ -134,12 +139,16 @@
                 </button>
             </div>
             
-            <div class="p-6">
-                <label class="block text-gray-800 font-bold mb-2 text-base">تێبینی یان پلانەکەت بنوسە:</label>
-                <textarea id="eventText" class="w-full border-2 border-gray-200 rounded-lg p-3 h-32 focus:outline-none focus:border-indigo-500 focus:ring-4 focus:ring-indigo-100 transition resize-none text-gray-700 font-medium text-lg leading-relaxed" placeholder="نموونە: کۆبوونەوە لەگەڵ تیم کاتژمێر ١٠:٠٠..."></textarea>
-            
+            <div class="p-6 overflow-y-auto custom-scrollbar">
+                
+                <!-- Main Note Section -->
+                <div class="mb-4">
+                    <label class="block text-gray-800 font-bold mb-2 text-base">تێبینی سەرەکی:</label>
+                    <textarea id="eventText" class="w-full border-2 border-gray-200 rounded-lg p-3 h-24 focus:outline-none focus:border-indigo-500 focus:ring-4 focus:ring-indigo-100 transition resize-none text-gray-700 font-medium text-lg leading-relaxed" placeholder="نموونە: پشووی فەرمی..."></textarea>
+                </div>
+
                 <!-- Checkbox for Important -->
-                <div class="mt-4 flex items-center gap-3 bg-red-50 p-3 rounded-lg border border-red-100 cursor-pointer" onclick="document.getElementById('urgentCheckbox').click()">
+                <div class="mb-6 flex items-center gap-3 bg-red-50 p-3 rounded-lg border border-red-100 cursor-pointer" onclick="document.getElementById('urgentCheckbox').click()">
                     <div class="relative flex items-center">
                         <input type="checkbox" id="urgentCheckbox" class="peer w-6 h-6 border-2 border-gray-300 rounded text-red-600 focus:ring-red-500 cursor-pointer transition-colors" onclick="event.stopPropagation()">
                     </div>
@@ -149,7 +158,27 @@
                     </label>
                 </div>
 
-                <div class="flex justify-between items-center mt-6 pt-4 border-t border-gray-100">
+                <!-- NEW: To-Do List Section -->
+                <div class="border-t border-gray-100 pt-4 mb-4">
+                    <h4 class="font-bold text-gray-800 mb-3 flex items-center gap-2">
+                        <i class="fas fa-list-check text-indigo-500"></i>
+                        لیستی کارەکان (To-Do List)
+                    </h4>
+                    
+                    <div class="flex gap-2 mb-3">
+                        <input type="text" id="newTaskInput" class="flex-1 border-2 border-gray-200 rounded-lg px-3 py-2 focus:outline-none focus:border-indigo-500 transition" placeholder="کارێک بنوسە..." onkeypress="handleEnter(event)">
+                        <button onclick="addTask()" class="bg-indigo-100 text-indigo-700 hover:bg-indigo-200 px-4 py-2 rounded-lg font-bold transition">
+                            <i class="fas fa-plus"></i>
+                        </button>
+                    </div>
+
+                    <ul id="taskList" class="space-y-2 max-h-40 overflow-y-auto pr-1">
+                        <!-- Tasks will be injected here via JS -->
+                    </ul>
+                </div>
+
+                <!-- Action Buttons -->
+                <div class="flex justify-between items-center mt-2 pt-4 border-t border-gray-100">
                     <button id="deleteButton" onclick="deleteEvent()" class="text-red-500 hover:bg-red-50 px-4 py-2 rounded-lg transition flex items-center gap-2 font-bold">
                         <i class="fas fa-trash-alt"></i> سڕینەوە
                     </button>
@@ -165,6 +194,7 @@
         let nav = 0;
         let clicked = null;
         let events = [];
+        let currentTasks = []; // Temporary array to hold tasks for the open modal
 
         try {
             events = localStorage.getItem('events') ? JSON.parse(localStorage.getItem('events')) : [];
@@ -181,7 +211,10 @@
         const urgentCheckbox = document.getElementById('urgentCheckbox');
         const modalHeader = document.getElementById('modalHeader');
         
-        // Month names in Kurdish
+        // Task List Elements
+        const newTaskInput = document.getElementById('newTaskInput');
+        const taskListElement = document.getElementById('taskList');
+
         const monthNames = [
             "کانوونی دووەم", "شوبات", "ئازار", "نیسان", "ئایار", "حوزەیران",
             "تەمموز", "ئاب", "ئەیلول", "تشرینی یەکەم", "تشرینی دووەم", "کانوونی یەکەم"
@@ -207,21 +240,18 @@
 
             calendar.innerHTML = '';
 
-            // Generate padding days
             for(let i = 0; i < paddingDays; i++) {
                 const paddingSquare = document.createElement('div');
                 paddingSquare.classList.add('bg-gray-100', 'opacity-50');
                 calendar.appendChild(paddingSquare);
             }
 
-            // Generate actual days
             for(let i = 1; i <= daysInMonth; i++) {
                 const daySquare = document.createElement('div');
                 daySquare.classList.add('day-cell', 'bg-white', 'p-2', 'flex', 'flex-col', 'justify-between', 'relative');
 
                 const dayString = `${year}/${month + 1}/${i}`;
                 
-                // Date Number
                 const dayHeader = document.createElement('div');
                 dayHeader.classList.add('flex', 'justify-between', 'items-start');
                 
@@ -232,24 +262,34 @@
                 dayHeader.appendChild(dayNumberElem);
                 daySquare.appendChild(dayHeader);
 
-                // Check for Event
                 const eventForDay = events.find(e => e.date === dayString);
                 if (eventForDay) {
                     const eventDiv = document.createElement('div');
                     
-                    // Style based on urgency
                     if (eventForDay.isUrgent) {
                         eventDiv.classList.add('bg-red-100', 'text-red-900', 'border-red-500');
                     } else {
                         eventDiv.classList.add('bg-indigo-100', 'text-indigo-900', 'border-indigo-500');
                     }
 
-                    eventDiv.classList.add('text-xs', 'md:text-sm', 'p-1.5', 'rounded-md', 'mt-1', 'font-semibold', 'border-r-4', 'truncate', 'shadow-sm');
-                    eventDiv.innerText = eventForDay.title;
+                    eventDiv.classList.add('text-xs', 'md:text-sm', 'p-1.5', 'rounded-md', 'mt-1', 'font-semibold', 'border-r-4', 'truncate', 'shadow-sm', 'flex', 'items-center', 'justify-between');
+                    
+                    // Show title
+                    const titleSpan = document.createElement('span');
+                    titleSpan.innerText = eventForDay.title || (eventForDay.tasks && eventForDay.tasks.length > 0 ? "تێبینی لیستی کارەکان" : "");
+                    titleSpan.classList.add('truncate');
+                    eventDiv.appendChild(titleSpan);
+
+                    // Show small indicator if there are tasks
+                    if (eventForDay.tasks && eventForDay.tasks.length > 0) {
+                        const taskIcon = document.createElement('i');
+                        taskIcon.classList.add('fas', 'fa-list-check', 'ml-1', 'opacity-70', 'text-[10px]');
+                        eventDiv.appendChild(taskIcon);
+                    }
+
                     daySquare.appendChild(eventDiv);
                 }
 
-                // Highlight Current Day (Today)
                 const today = new Date();
                 if (i === today.getDate() && month === today.getMonth() && year === today.getFullYear()) {
                     daySquare.classList.add('bg-blue-50');
@@ -261,6 +301,73 @@
             }
         }
 
+        // --- Task List Logic ---
+
+        function renderTasks() {
+            taskListElement.innerHTML = '';
+            if (currentTasks.length === 0) {
+                const emptyMsg = document.createElement('div');
+                emptyMsg.classList.add('text-gray-400', 'text-sm', 'text-center', 'py-2');
+                emptyMsg.innerText = 'هیچ کارێک تۆمار نەکراوە';
+                taskListElement.appendChild(emptyMsg);
+                return;
+            }
+
+            currentTasks.forEach((task, index) => {
+                const li = document.createElement('li');
+                li.classList.add('flex', 'items-center', 'gap-2', 'bg-gray-50', 'p-2', 'rounded-md', 'border', 'border-gray-200');
+
+                // Checkbox
+                const checkbox = document.createElement('input');
+                checkbox.type = 'checkbox';
+                checkbox.checked = task.completed;
+                checkbox.classList.add('w-5', 'h-5', 'rounded', 'border-gray-300', 'text-indigo-600', 'focus:ring-indigo-500', 'cursor-pointer');
+                checkbox.onchange = () => toggleTask(index);
+                
+                // Text
+                const span = document.createElement('span');
+                span.innerText = task.text;
+                span.classList.add('flex-1', 'text-gray-700', 'font-medium', 'text-sm');
+                if (task.completed) span.classList.add('task-done');
+
+                // Delete Button
+                const delBtn = document.createElement('button');
+                delBtn.innerHTML = '<i class="fas fa-times"></i>';
+                delBtn.classList.add('text-gray-400', 'hover:text-red-500', 'transition', 'px-2');
+                delBtn.onclick = () => removeTask(index);
+
+                li.appendChild(checkbox);
+                li.appendChild(span);
+                li.appendChild(delBtn);
+                taskListElement.appendChild(li);
+            });
+        }
+
+        function addTask() {
+            const text = newTaskInput.value.trim();
+            if (text) {
+                currentTasks.push({ text: text, completed: false });
+                newTaskInput.value = '';
+                renderTasks();
+            }
+        }
+
+        function removeTask(index) {
+            currentTasks.splice(index, 1);
+            renderTasks();
+        }
+
+        function toggleTask(index) {
+            currentTasks[index].completed = !currentTasks[index].completed;
+            renderTasks();
+        }
+
+        function handleEnter(e) {
+            if (e.key === 'Enter') addTask();
+        }
+
+        // --- Main Functions ---
+
         function openModal(date) {
             clicked = date;
             const eventForDay = events.find(e => e.date === clicked);
@@ -269,21 +376,26 @@
 
             if (eventForDay) {
                 eventText.value = eventForDay.title;
-                urgentCheckbox.checked = eventForDay.isUrgent || false; // Set checkbox state
+                urgentCheckbox.checked = eventForDay.isUrgent || false;
+                // Load tasks
+                currentTasks = eventForDay.tasks ? [...eventForDay.tasks] : [];
+                
                 deleteButton.style.visibility = 'visible';
-                updateModalColor(); // Update header color based on existing state
+                updateModalColor();
             } else {
                 eventText.value = '';
                 urgentCheckbox.checked = false;
+                currentTasks = []; // Reset tasks
+                
                 deleteButton.style.visibility = 'hidden';
                 modalHeader.classList.remove('bg-red-600');
                 modalHeader.classList.add('bg-indigo-600');
             }
 
+            renderTasks(); // Render initial state
             eventModal.classList.remove('hidden');
         }
 
-        // Change modal header color when checkbox changes
         urgentCheckbox.addEventListener('change', updateModalColor);
 
         function updateModalColor() {
@@ -299,19 +411,22 @@
         function closeModal() {
             eventModal.classList.add('hidden');
             eventText.value = '';
+            newTaskInput.value = '';
             urgentCheckbox.checked = false;
             clicked = null;
             load();
         }
 
         function saveEvent() {
-            if (eventText.value.trim()) {
+            // Allow saving if there is text OR tasks
+            if (eventText.value.trim() || currentTasks.length > 0) {
                 events = events.filter(e => e.date !== clicked);
                 
                 events.push({
                     date: clicked,
                     title: eventText.value.trim(),
-                    isUrgent: urgentCheckbox.checked // Save the urgency state
+                    isUrgent: urgentCheckbox.checked,
+                    tasks: currentTasks // Save the tasks array
                 });
 
                 try {
@@ -321,7 +436,6 @@
                 }
                 closeModal();
             } else {
-                // If empty, treat as delete
                 deleteEvent();
             }
         }
@@ -344,17 +458,13 @@
             load();
         }
 
-        // Close modal when clicking outside
         window.onclick = function(event) {
             if (event.target == eventModal) {
                 closeModal();
             }
         }
 
-        // Init
         load();
     </script>
 </body>
 </html>
-
-
