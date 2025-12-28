@@ -1,364 +1,218 @@
 <!DOCTYPE html>
-<html lang="ckb" dir="rtl">
+<html lang="ku" dir="rtl">
 <head>
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
-    <title>بینینی باکئەپ (Offline Viewer)</title>
+    <title>پلانەری ساڵانە</title>
     <script src="https://cdn.tailwindcss.com"></script>
-    <link href="https://fonts.googleapis.com/css2?family=Rudaw&display=swap" rel="stylesheet">
-    <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.4.0/css/all.min.css">
+    <link href="https://fonts.googleapis.com/css2?family=Vazirmatn:wght@400;700&display=swap" rel="stylesheet">
+    
     <style>
-        body { font-family: 'Rudaw', 'Segoe UI', sans-serif; }
-        ::-webkit-scrollbar { width: 8px; height: 8px; }
-        ::-webkit-scrollbar-thumb { background: #cbd5e1; border-radius: 4px; }
-        ::-webkit-scrollbar-track { background: #f1f5f9; }
+        body {
+            font-family: 'Vazirmatn', sans-serif;
+            background-color: #f3f4f6;
+        }
+        .day-cell {
+            min-height: 100px;
+            transition: all 0.2s;
+        }
+        .day-cell:hover {
+            background-color: #e5e7eb;
+            cursor: pointer;
+        }
+        .active-day {
+            background-color: #dbeafe;
+            border: 2px solid #3b82f6;
+        }
     </style>
 </head>
-<body class="bg-gray-50 min-h-screen flex flex-col">
+<body class="p-6">
 
-    <header class="bg-green-700 text-white shadow-md p-4 sticky top-0 z-50">
-        <div class="container mx-auto flex justify-between items-center">
-            <h1 class="text-lg md:text-2xl font-bold flex items-center gap-2">
-                <i class="fa-solid fa-file-invoice-dollar"></i>
-                چاوخشێنی باکئەپ
-            </h1>
-            <div class="flex gap-2">
-                <button id="clearDataBtn" onclick="clearStoredData()" class="hidden bg-red-600 hover:bg-red-500 px-3 py-1 rounded text-xs transition border border-red-400">
-                    <i class="fa-solid fa-trash"></i> سڕینەوەی داتا
-                </button>
-                <button onclick="window.location.reload()" class="bg-green-800 hover:bg-green-600 px-3 py-1 rounded text-xs transition border border-green-600">
-                    <i class="fa-solid fa-rotate-right"></i>
-                </button>
+    <div class="max-w-6xl mx-auto bg-white rounded-lg shadow-xl overflow-hidden">
+        
+        <div class="bg-indigo-600 p-6 text-white flex justify-between items-center">
+            <h1 class="text-3xl font-bold">پلانەری ساڵانە</h1>
+            <div class="flex items-center gap-4">
+                <button onclick="changeMonth(-1)" class="bg-indigo-500 hover:bg-indigo-700 px-4 py-2 rounded text-lg font-bold">&lt; پێشوو</button>
+                <h2 id="currentDateDisplay" class="text-2xl font-semibold w-48 text-center"></h2>
+                <button onclick="changeMonth(1)" class="bg-indigo-500 hover:bg-indigo-700 px-4 py-2 rounded text-lg font-bold">داهاتوو &gt;</button>
             </div>
         </div>
-    </header>
 
-    <main class="container mx-auto p-4 flex-grow flex flex-col gap-6">
-
-        <div id="storage-notice" class="hidden bg-blue-50 text-blue-700 p-3 rounded-lg border border-blue-200 text-center text-sm">
-            <i class="fa-solid fa-circle-info"></i>
-            ئەم داتایانە لە سەردانی پێشووەوە پاشەکەوت کراون (<span id="storage-date" class="font-bold"></span>)
+        <div class="grid grid-cols-7 bg-gray-100 border-b border-gray-200 text-center py-2 font-bold text-gray-700">
+            <div>شەممە</div>
+            <div>یەکشەممە</div>
+            <div>دووشەممە</div>
+            <div>سێشەممە</div>
+            <div>چوارشەممە</div>
+            <div>پێنجشەممە</div>
+            <div>هەینی</div>
         </div>
 
-        <div id="upload-section" class="flex flex-col items-center justify-center min-h-[60vh] bg-white p-8 rounded-2xl shadow-xl border-4 border-dashed border-gray-200 hover:border-green-500 transition-all cursor-pointer group animate-fade-in">
-            <div class="group-hover:scale-110 transition-transform duration-300 bg-green-50 p-6 rounded-full mb-6">
-                <i class="fa-solid fa-cloud-arrow-up text-6xl text-green-600"></i>
+        <div id="calendarGrid" class="grid grid-cols-7 border-l border-t border-gray-200">
             </div>
-            <h2 class="text-2xl md:text-3xl font-bold text-gray-800 mb-3 text-center">فایلی باکئەپ دابنێ</h2>
+
+    </div>
+
+    <div id="eventModal" class="fixed inset-0 bg-black bg-opacity-50 hidden flex justify-center items-center z-50">
+        <div class="bg-white rounded-lg shadow-2xl w-full max-w-md p-6 mx-4">
+            <div class="flex justify-between items-center mb-4 border-b pb-2">
+                <h3 class="text-xl font-bold text-indigo-600">پلانی ڕۆژی <span id="modalDateDisplay"></span></h3>
+                <button onclick="closeModal()" class="text-gray-500 hover:text-red-500 text-2xl">&times;</button>
+            </div>
             
-            <div class="text-gray-500 text-sm md:text-base text-center mb-8 bg-gray-50 p-4 rounded-lg border border-gray-200">
-                <p class="mb-1"><span class="font-bold text-green-700">١.</span> فایلەکە (.sql) لە ئیمەیڵ دابەزێنە.</p>
-                <p><span class="font-bold text-green-700">٢.</span> لێرە دایبنێ (داتاکان دەمێننەوە تا خۆت دەیانسڕیتەوە).</p>
+            <div class="mb-4">
+                <label class="block text-gray-700 mb-2">تێبینی یان پلانەکەت بنوسە:</label>
+                <textarea id="eventText" class="w-full border border-gray-300 rounded p-2 h-32 focus:outline-none focus:border-indigo-500" placeholder="نموونە: کۆبوونەوە لەگەڵ تیم..."></textarea>
             </div>
 
-            <input type="file" id="fileInput" accept=".sql" class="hidden">
-            <button onclick="document.getElementById('fileInput').click()" class="bg-green-600 text-white px-10 py-4 rounded-full font-bold text-lg hover:bg-green-700 shadow-lg shadow-green-200 transition transform hover:-translate-y-1 active:translate-y-0 flex items-center gap-3">
-                <i class="fa-solid fa-folder-open"></i>
-                هەڵبژاردنی فایل
-            </button>
-        </div>
-
-        <div id="dashboard" class="hidden grid grid-cols-1 lg:grid-cols-4 gap-6">
-            
-            <div class="lg:col-span-1 space-y-4">
-                
-                <button onclick="showDebtReport()" class="w-full bg-white p-5 rounded-xl shadow-md border-r-4 border-red-500 hover:bg-red-50 transition text-right group transform hover:scale-[1.02]" id="btn-debt-report">
-                    <div class="flex justify-between items-center">
-                        <div>
-                            <h3 class="font-bold text-lg text-red-600">پوختەی قەرزەکان</h3>
-                            <p class="text-xs text-gray-500 mt-1">بینینی حیسابی گشتی</p>
-                        </div>
-                        <div class="bg-red-100 p-3 rounded-full group-hover:bg-red-200 transition">
-                            <i class="fa-solid fa-chart-line text-xl text-red-600"></i>
-                        </div>
-                    </div>
-                </button>
-
-                <div class="bg-white rounded-xl shadow-md p-4 border border-gray-100">
-                    <h3 class="font-bold text-gray-700 border-b pb-3 mb-3 text-sm flex items-center gap-2">
-                        <i class="fa-solid fa-list-ul text-green-600"></i>
-                        لیستی خشتەکان
-                    </h3>
-                    <ul id="tables-list" class="space-y-2"></ul>
-                </div>
-            </div>
-
-            <div class="lg:col-span-3 bg-white rounded-xl shadow-md p-4 md:p-6 overflow-hidden min-h-[500px] border border-gray-100">
-                
-                <div class="flex flex-col md:flex-row justify-between items-center mb-6 border-b pb-4 gap-4">
-                    <h3 id="current-view-title" class="font-bold text-2xl text-gray-800 self-start md:self-center">سەرەتا</h3>
-                    <div class="relative w-full md:w-auto">
-                        <i class="fa-solid fa-search absolute right-3 top-3.5 text-gray-400"></i>
-                        <input type="text" id="searchBox" onkeyup="filterTable()" placeholder="گەڕان..." class="border bg-gray-50 p-3 pr-10 rounded-xl text-sm w-full md:w-72 focus:outline-none focus:ring-2 focus:ring-green-500 transition">
-                    </div>
-                </div>
-
-                <div id="debt-stats" class="hidden grid grid-cols-1 md:grid-cols-3 gap-4 mb-6 text-center">
-                    <div class="bg-blue-50 p-4 rounded-xl border border-blue-200">
-                        <p class="text-xs text-blue-600 font-bold mb-1">کۆی گشتی فرۆش</p>
-                        <p class="text-xl font-bold text-blue-800" id="stat-total-sell">0</p>
-                    </div>
-                    <div class="bg-green-50 p-4 rounded-xl border border-green-200">
-                        <p class="text-xs text-green-600 font-bold mb-1">کۆی وەرگیراو</p>
-                        <p class="text-xl font-bold text-green-800" id="stat-total-paid">0</p>
-                    </div>
-                    <div class="bg-red-50 p-4 rounded-xl border border-red-200">
-                        <p class="text-xs text-red-600 font-bold mb-1">کۆی قەرز لای خەڵک</p>
-                        <p class="text-2xl font-black text-red-700" id="stat-total-debt">0</p>
-                    </div>
-                </div>
-                
-                <div class="overflow-x-auto rounded-lg border border-gray-100">
-                    <table class="w-full text-right text-sm whitespace-nowrap">
-                        <thead id="table-head" class="bg-gray-100 text-gray-700 font-bold uppercase tracking-wider"></thead>
-                        <tbody id="table-body" class="divide-y divide-gray-200 bg-white"></tbody>
-                    </table>
-                    <div id="empty-msg" class="text-center text-gray-400 py-20 hidden flex flex-col items-center">
-                        <div class="bg-gray-100 p-6 rounded-full mb-4">
-                            <i class="fa-regular fa-folder-open text-4xl text-gray-400"></i>
-                        </div>
-                        <p>هیچ داتایەک نییە</p>
-                    </div>
-                </div>
+            <div class="flex justify-end gap-2">
+                <button onclick="deleteEvent()" class="bg-red-500 hover:bg-red-600 text-white px-4 py-2 rounded">سڕینەوە</button>
+                <button onclick="saveEvent()" class="bg-indigo-600 hover:bg-indigo-700 text-white px-4 py-2 rounded">پاشەکەوتکردن</button>
             </div>
         </div>
-
-    </main>
+    </div>
 
     <script>
-        const schemaMap = {
-            'orders': ['ID', 'ناوی جوتیار', 'مۆبایل', 'جۆر', 'ژمارە', 'نرخ (1000)', 'شوێنی فلینە', 'سەرچاوە', 'بەروار'],
-            'deliveries': ['ID', 'Order ID', 'ژمارەی بردن', 'بەرواری بردن'],
-            'payments': ['ID', 'مۆبایل', 'بڕی پارە', 'بەروار'],
-            'expenses': ['ID', 'بابەت', 'جۆر', 'بڕی پارە', 'بەروار', 'تێبینی'],
-            'users': ['ID', 'Username', 'Password', 'Permissions', 'Created At']
-        };
+        let nav = 0;
+        let clicked = null;
+        let events = localStorage.getItem('events') ? JSON.parse(localStorage.getItem('events')) : [];
 
-        const fileInput = document.getElementById('fileInput');
-        const uploadSection = document.getElementById('upload-section');
-        const dashboard = document.getElementById('dashboard');
+        const calendar = document.getElementById('calendarGrid');
+        const eventModal = document.getElementById('eventModal');
+        const modalDateDisplay = document.getElementById('modalDateDisplay');
+        const eventText = document.getElementById('eventText');
         
-        let parsedData = {};
-        let farmersDebtReport = [];
+        // Month names in Kurdish
+        const monthNames = [
+            "کانوونی دووەم", "شوبات", "ئازار", "نیسان", "ئایار", "حوزەیران",
+            "تەمموز", "ئاب", "ئەیلول", "تشرینی یەکەم", "تشرینی دووەم", "کانوونی یەکەم"
+        ];
 
-        // --- بارکردنی داتا لە کاتی کردنەوەی پەڕە ---
-        window.addEventListener('DOMContentLoaded', () => {
-            const storedData = localStorage.getItem('nurseryData');
-            const storedDate = localStorage.getItem('nurseryDate');
+        function load() {
+            const dt = new Date();
 
-            if (storedData) {
-                try {
-                    parsedData = JSON.parse(storedData);
-                    if (Object.keys(parsedData).length > 0) {
-                        calculateDebts();
-                        renderSidebar();
-                        showDashboard();
-                        showDebtReport();
-                        document.getElementById('clearDataBtn').classList.remove('hidden');
-                        
-                        if (storedDate) {
-                            document.getElementById('storage-notice').classList.remove('hidden');
-                            document.getElementById('storage-date').innerText = storedDate;
-                        }
-                    }
-                } catch (e) {
-                    console.error("Data corrupted", e);
-                    localStorage.removeItem('nurseryData');
-                }
+            if (nav !== 0) {
+                dt.setMonth(new Date().getMonth() + nav);
             }
-        });
 
-        function clearStoredData() {
-            if(confirm("دڵنیایت؟ هەموو داتاکانی ناو ئەم بەرنامەیە دەسڕێنەوە.")) {
-                localStorage.removeItem('nurseryData');
-                localStorage.removeItem('nurseryDate');
-                window.location.reload();
-            }
-        }
+            const day = dt.getDate();
+            const month = dt.getMonth();
+            const year = dt.getFullYear();
 
-        // Drag & Drop
-        uploadSection.addEventListener('dragover', (e) => { e.preventDefault(); uploadSection.classList.add('bg-green-50', 'border-green-400'); });
-        uploadSection.addEventListener('dragleave', (e) => { e.preventDefault(); uploadSection.classList.remove('bg-green-50', 'border-green-400'); });
-        uploadSection.addEventListener('drop', (e) => {
-            e.preventDefault();
-            uploadSection.classList.remove('bg-green-50', 'border-green-400');
-            if(e.dataTransfer.files.length) handleFile(e.dataTransfer.files[0]);
-        });
-
-        fileInput.addEventListener('change', (e) => {
-            if(e.target.files.length) handleFile(e.target.files[0]);
-        });
-
-        function handleFile(file) {
-            if (!file.name.endsWith('.sql')) { alert('تکایە تەنها فایلی (.sql) دیاری بکە!'); return; }
-
-            const reader = new FileReader();
-            reader.onload = function(e) {
-                const content = e.target.result;
-                parseSQL(content);
-                calculateDebts(); 
-                
-                // Save to LocalStorage
-                try {
-                    localStorage.setItem('nurseryData', JSON.stringify(parsedData));
-                    localStorage.setItem('nurseryDate', new Date().toLocaleString('en-US')); // بەرواری ئەمڕۆ
-                    document.getElementById('clearDataBtn').classList.remove('hidden');
-                } catch (e) {
-                    alert("ببورە، فایلەکە زۆر گەورەیە و لەوانەیە پاشەکەوت نەکرێت، بەڵام ئێستا دەتوانیت بیبینیت.");
-                }
-
-                showDashboard();
-                showDebtReport();
-            };
-            reader.readAsText(file);
-        }
-
-        function parseSQL(sql) {
-            parsedData = {};
-            const lines = sql.split('\n');
-            lines.forEach(line => {
-                const insertMatch = line.match(/INSERT INTO\s+[`"]?(\w+)[`"]?\s+VALUES\s*\((.*)\);/i);
-                if (insertMatch) {
-                    const tableName = insertMatch[1];
-                    const valuesStr = insertMatch[2];
-                    if (!parsedData[tableName]) parsedData[tableName] = [];
-                    parsedData[tableName].push(parseValues(valuesStr));
-                }
-            });
-            renderSidebar();
-        }
-
-        function parseValues(str) {
-            let result = [];
-            let current = '';
-            let inQuotes = false;
-            for (let i = 0; i < str.length; i++) {
-                const char = str[i];
-                if (char === "'" || char === '"') inQuotes = !inQuotes;
-                else if (char === ',' && !inQuotes) { result.push(cleanValue(current)); current = ''; } 
-                else current += char;
-            }
-            result.push(cleanValue(current));
-            return result;
-        }
-
-        function cleanValue(val) { return val.trim().replace(/^['"]|['"]$/g, ''); }
-
-        function calculateDebts() {
-            let report = {};
-            if (parsedData['orders']) {
-                parsedData['orders'].forEach(row => {
-                    let phone = row[2];
-                    let name = row[1];
-                    let qty = parseFloat(row[4]) || 0;
-                    let price = parseFloat(row[5]) || 0;
-                    let cost = (qty / 1000) * price;
-                    if (!report[phone]) report[phone] = { name: name, total_cost: 0, total_paid: 0 };
-                    report[phone].total_cost += cost;
-                    if (name && name.length > report[phone].name.length) report[phone].name = name;
-                });
-            }
-            if (parsedData['payments']) {
-                parsedData['payments'].forEach(row => {
-                    let phone = row[1];
-                    let amount = parseFloat(row[2]) || 0;
-                    if (!report[phone]) report[phone] = { name: 'نەزانراو', total_cost: 0, total_paid: 0 };
-                    report[phone].total_paid += amount;
-                });
-            }
-            farmersDebtReport = Object.keys(report).map(phone => {
-                let data = report[phone];
-                return { name: data.name, phone: phone, total_cost: data.total_cost, total_paid: data.total_paid, debt: data.total_cost - data.total_paid };
-            });
-            farmersDebtReport.sort((a, b) => b.debt - a.debt);
-        }
-
-        function showDebtReport() {
-            resetActiveButtons();
-            document.getElementById('btn-debt-report').classList.add('bg-red-50', 'border-l-4', 'border-r-0', 'border-l-red-500'); 
-            document.getElementById('current-view-title').innerHTML = '<span class="text-red-600 flex items-center gap-2"><i class="fa-solid fa-chart-pie"></i> پوختەی قەرزەکان</span>';
-            document.getElementById('debt-stats').classList.remove('hidden');
-            const thead = document.getElementById('table-head');
-            const tbody = document.getElementById('table-body');
-            let sumSell = 0, sumPaid = 0, sumDebt = 0;
-
-            thead.innerHTML = `<tr><th class="px-4 py-3 text-gray-500">#</th><th class="px-4 py-3">ناوی جوتیار</th><th class="px-4 py-3">مۆبایل</th><th class="px-4 py-3 text-blue-600">کۆی حیساب</th><th class="px-4 py-3 text-green-600">کۆی پارەدان</th><th class="px-4 py-3 text-red-600">ماوە (قەرز)</th><th class="px-4 py-3">دۆخ</th></tr>`;
-            tbody.innerHTML = '';
+            const firstDayOfMonth = new Date(year, month, 1);
+            const daysInMonth = new Date(year, month + 1, 0).getDate();
             
-            if (farmersDebtReport.length === 0) { document.getElementById('empty-msg').classList.remove('hidden'); } else {
-                document.getElementById('empty-msg').classList.add('hidden');
-                farmersDebtReport.forEach((item, index) => {
-                    sumSell += item.total_cost; sumPaid += item.total_paid; sumDebt += item.debt;
-                    let statusBadge = item.debt > 0 ? `<span class="bg-red-100 text-red-700 px-3 py-1 rounded-full text-xs font-bold shadow-sm">قەرزار</span>` : `<span class="bg-green-100 text-green-700 px-3 py-1 rounded-full text-xs font-bold shadow-sm">پاک</span>`;
-                    let row = `<tr class="hover:bg-gray-50 border-b group transition"><td class="px-4 py-3 text-gray-400 text-xs">${index + 1}</td><td class="px-4 py-3 font-bold text-gray-800 text-base">${item.name}</td><td class="px-4 py-3 text-gray-500 font-mono text-sm" dir="ltr">${item.phone}</td><td class="px-4 py-3 font-bold text-blue-700">${item.total_cost.toLocaleString()}</td><td class="px-4 py-3 font-bold text-green-700">${item.total_paid.toLocaleString()}</td><td class="px-4 py-3 font-black text-red-600 text-lg">${item.debt.toLocaleString()}</td><td class="px-4 py-3">${statusBadge}</td></tr>`;
-                    tbody.innerHTML += row;
-                });
+            const dateString = firstDayOfMonth.toLocaleDateString('en-us', {
+                weekday: 'long',
+                year: 'numeric',
+                month: 'numeric',
+                day: 'numeric',
+            });
+            
+            // Calculate padding days (to start from Saturday/Sunday correctly)
+            // Adjusting for Saturday start (Saturday = 0 in our logic roughly)
+            const paddingDays = (firstDayOfMonth.getDay() + 1) % 7; 
+
+            document.getElementById('currentDateDisplay').innerText = `${monthNames[month]} ${year}`;
+
+            calendar.innerHTML = '';
+
+            for(let i = 1; i <= paddingDays + daysInMonth; i++) {
+                const daySquare = document.createElement('div');
+                daySquare.classList.add('day-cell', 'border-b', 'border-r', 'border-gray-200', 'p-2', 'flex', 'flex-col', 'justify-between');
+
+                if (i > paddingDays) {
+                    const dayNum = i - paddingDays;
+                    const dayString = `${year}/${month + 1}/${dayNum}`;
+                    
+                    // Display Day Number
+                    const dayNumberElem = document.createElement('div');
+                    dayNumberElem.innerText = dayNum;
+                    dayNumberElem.classList.add('font-bold', 'text-gray-700');
+                    daySquare.appendChild(dayNumberElem);
+
+                    // Check for Event
+                    const eventForDay = events.find(e => e.date === dayString);
+                    if (eventForDay) {
+                        const eventDiv = document.createElement('div');
+                        eventDiv.innerText = eventForDay.title;
+                        eventDiv.classList.add('bg-indigo-100', 'text-indigo-800', 'text-sm', 'p-1', 'rounded', 'mt-1', 'truncate');
+                        daySquare.appendChild(eventDiv);
+                    }
+
+                    // Highlight Current Day
+                    if (dayNum === day && nav === 0) {
+                        daySquare.classList.add('bg-blue-50');
+                        dayNumberElem.classList.add('text-blue-600');
+                    }
+
+                    daySquare.addEventListener('click', () => openModal(dayString));
+                } else {
+                    daySquare.classList.add('bg-gray-50'); // Empty padding days
+                }
+
+                calendar.appendChild(daySquare);
             }
-            document.getElementById('stat-total-sell').innerText = sumSell.toLocaleString();
-            document.getElementById('stat-total-paid').innerText = sumPaid.toLocaleString();
-            document.getElementById('stat-total-debt').innerText = sumDebt.toLocaleString();
         }
 
-        function renderSidebar() {
-            const list = document.getElementById('tables-list');
-            list.innerHTML = '';
-            Object.keys(parsedData).forEach(table => {
-                const li = document.createElement('li');
-                li.innerHTML = `<button onclick="switchTable('${table}')" class="w-full text-right px-4 py-3 rounded-lg hover:bg-green-50 hover:text-green-700 transition text-sm text-gray-600 flex justify-between items-center group" id="btn-${table}"><span class="font-medium group-hover:translate-x-[-2px] transition-transform">${translateTable(table)}</span><span class="text-xs bg-gray-100 text-gray-500 px-2 py-1 rounded-md group-hover:bg-white group-hover:shadow-sm">${parsedData[table].length}</span></button>`;
-                list.appendChild(li);
-            });
+        function openModal(date) {
+            clicked = date;
+            const eventForDay = events.find(e => e.date === clicked);
+
+            modalDateDisplay.innerText = clicked;
+
+            if (eventForDay) {
+                eventText.value = eventForDay.title;
+            } else {
+                eventText.value = '';
+            }
+
+            eventModal.classList.remove('hidden');
         }
 
-        function switchTable(table) {
-            resetActiveButtons();
-            document.getElementById(`btn-${table}`).classList.add('bg-green-100', 'text-green-800', 'font-bold', 'border-r-4', 'border-green-600');
-            document.getElementById('current-view-title').innerText = translateTable(table);
-            document.getElementById('debt-stats').classList.add('hidden'); 
-            renderTableData(table);
+        function closeModal() {
+            eventModal.classList.add('hidden');
+            eventText.value = '';
+            clicked = null;
+            load();
         }
 
-        function renderTableData(table) {
-            const thead = document.getElementById('table-head');
-            const tbody = document.getElementById('table-body');
-            tbody.innerHTML = ''; thead.innerHTML = '';
-            const data = parsedData[table];
-            if (!data || data.length === 0) { document.getElementById('empty-msg').classList.remove('hidden'); return; }
-            document.getElementById('empty-msg').classList.add('hidden');
-            let headers = schemaMap[table] || data[0].map((_, i) => `Col ${i+1}`);
-            let headerHTML = '<tr>'; headers.forEach(h => headerHTML += `<th class="px-4 py-3 text-right text-xs font-bold text-gray-500 uppercase tracking-wider">${h}</th>`); headerHTML += '</tr>';
-            thead.innerHTML = headerHTML;
-            data.forEach(row => {
-                let rowHTML = '<tr class="hover:bg-gray-50 border-b transition">';
-                row.forEach((cell, index) => {
-                    let displayCell = cell;
-                    if (!isNaN(cell) && cell.length > 0 && ((table === 'orders' && index===5) || (table === 'payments' && index===2) || (table === 'expenses' && index===3))) { displayCell = Number(cell).toLocaleString(); }
-                    rowHTML += `<td class="px-4 py-3 text-sm text-gray-700">${displayCell}</td>`;
+        function saveEvent() {
+            if (eventText.value) {
+                // Remove existing event if any to overwrite
+                events = events.filter(e => e.date !== clicked);
+                
+                events.push({
+                    date: clicked,
+                    title: eventText.value,
                 });
-                rowHTML += '</tr>'; tbody.innerHTML += rowHTML;
-            });
+
+                localStorage.setItem('events', JSON.stringify(events));
+                closeModal();
+            }
         }
 
-        function resetActiveButtons() {
-            document.querySelectorAll('#tables-list button').forEach(b => b.classList.remove('bg-green-100', 'text-green-800', 'font-bold', 'border-r-4', 'border-green-600'));
-            document.getElementById('btn-debt-report').classList.remove('bg-red-50', 'border-l-4', 'border-r-0', 'border-l-red-500');
+        function deleteEvent() {
+            events = events.filter(e => e.date !== clicked);
+            localStorage.setItem('events', JSON.stringify(events));
+            closeModal();
         }
 
-        function translateTable(name) {
-            const map = { 'orders': 'وردەکاری شەتڵەکان', 'payments': 'وردەکاری پارەدان', 'expenses': 'مەسروفات', 'deliveries': 'بردنەکان', 'users': 'بەکارهێنەران' };
-            return map[name] || name;
+        function changeMonth(direction) {
+            nav += direction;
+            load();
         }
 
-        function filterTable() {
-            const filter = document.getElementById('searchBox').value.toLowerCase();
-            const rows = document.getElementById('table-body').getElementsByTagName('tr');
-            for (let i = 0; i < rows.length; i++) { rows[i].style.display = rows[i].textContent.toLowerCase().includes(filter) ? "" : "none"; }
+        // Close modal when clicking outside
+        window.onclick = function(event) {
+            if (event.target == eventModal) {
+                closeModal();
+            }
         }
 
-        function showDashboard() {
-            uploadSection.classList.add('hidden');
-            dashboard.classList.remove('hidden');
-            dashboard.classList.add('animate-fade-in');
-        }
+        // Init
+        load();
     </script>
 </body>
 </html>
