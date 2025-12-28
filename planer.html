@@ -38,6 +38,12 @@
             background-color: #ef4444;
             border-color: #ef4444;
         }
+        /* Task Checkbox Green Styling */
+        input.task-checkbox:checked {
+            background-color: #16a34a !important; /* Green-600 */
+            border-color: #16a34a !important;
+        }
+        
         /* Custom Scrollbar for modal */
         textarea::-webkit-scrollbar, ul::-webkit-scrollbar {
             width: 6px;
@@ -55,7 +61,7 @@
         
         .task-done {
             text-decoration: line-through;
-            color: #9ca3af;
+            color: #15803d; /* Green-700 */
         }
     </style>
 </head>
@@ -315,20 +321,32 @@
 
             currentTasks.forEach((task, index) => {
                 const li = document.createElement('li');
-                li.classList.add('flex', 'items-center', 'gap-2', 'bg-gray-50', 'p-2', 'rounded-md', 'border', 'border-gray-200');
+                // Dynamic styling for li based on completion
+                li.classList.add('flex', 'items-center', 'gap-2', 'p-2', 'rounded-md', 'border', 'transition-colors', 'duration-200');
+                
+                if (task.completed) {
+                    li.classList.add('bg-green-50', 'border-green-200');
+                } else {
+                    li.classList.add('bg-gray-50', 'border-gray-200');
+                }
 
                 // Checkbox
                 const checkbox = document.createElement('input');
                 checkbox.type = 'checkbox';
                 checkbox.checked = task.completed;
-                checkbox.classList.add('w-5', 'h-5', 'rounded', 'border-gray-300', 'text-indigo-600', 'focus:ring-indigo-500', 'cursor-pointer');
+                checkbox.classList.add('w-5', 'h-5', 'rounded', 'border-gray-300', 'text-indigo-600', 'focus:ring-indigo-500', 'cursor-pointer', 'task-checkbox');
                 checkbox.onchange = () => toggleTask(index);
                 
                 // Text
                 const span = document.createElement('span');
                 span.innerText = task.text;
-                span.classList.add('flex-1', 'text-gray-700', 'font-medium', 'text-sm');
-                if (task.completed) span.classList.add('task-done');
+                span.classList.add('flex-1', 'font-medium', 'text-sm', 'transition-colors');
+                
+                if (task.completed) {
+                    span.classList.add('task-done');
+                } else {
+                    span.classList.add('text-gray-700');
+                }
 
                 // Delete Button
                 const delBtn = document.createElement('button');
