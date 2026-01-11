@@ -1,0 +1,492 @@
+<!DOCTYPE html>
+<html lang="ckb" dir="rtl">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>٣٠٠ پرسیار و وەڵامی تەکنەلۆژیا</title>
+    <script src="https://cdn.tailwindcss.com"></script>
+    <link href="https://fonts.googleapis.com/css2?family=Vazirmatn:wght@300;400;700&display=swap" rel="stylesheet">
+    <style>
+        body {
+            font-family: 'Vazirmatn', sans-serif;
+        }
+        .card-hover:hover {
+            transform: translateY(-2px);
+            box-shadow: 0 10px 15px -3px rgba(0, 0, 0, 0.1), 0 4px 6px -2px rgba(0, 0, 0, 0.05);
+        }
+    </style>
+</head>
+<body class="bg-gray-50 text-gray-800">
+
+    <header class="bg-indigo-600 text-white sticky top-0 z-50 shadow-lg">
+        <div class="container mx-auto px-4 py-4">
+            <div class="flex flex-col md:flex-row justify-between items-center gap-4">
+                <div>
+                    <h1 class="text-2xl font-bold">٣٠٠ پرسیار و وەڵامی کۆمپیوتەر</h1>
+                    <p class="text-indigo-200 text-sm">بەشەکانی: ڕەقەواڵە، نەرمەواڵە، تۆڕ، ئاسایش، کۆدینگ</p>
+                </div>
+                
+                <div class="relative w-full md:w-1/3">
+                    <input type="text" id="searchInput" placeholder="گەڕان بەدوای پرسیاردا..." 
+                           class="w-full px-4 py-2 rounded-lg text-gray-800 focus:outline-none focus:ring-2 focus:ring-indigo-300 shadow-sm transition-all"
+                           onkeyup="filterQuestions()">
+                    <span class="absolute left-3 top-2.5 text-gray-400">
+                        <svg xmlns="http://www.w3.org/2000/svg" class="h-5 w-5" fill="none" viewBox="0 0 24 24" stroke="currentColor">
+                            <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M21 21l-6-6m2-5a7 7 0 11-14 0 7 7 0 0114 0z" />
+                        </svg>
+                    </span>
+                </div>
+            </div>
+            
+            <div class="mt-4 flex justify-between text-xs md:text-sm font-light text-indigo-100 border-t border-indigo-500 pt-2">
+                <span id="totalCount">٣٠٠ پرسیار</span>
+                <span id="showingCount">پێشاندانی ٣٠٠</span>
+            </div>
+        </div>
+    </header>
+
+    <main class="container mx-auto px-4 py-8">
+        
+        <div class="flex flex-wrap gap-2 mb-6 justify-center" id="categoryFilters">
+            <button onclick="filterByCategory('all')" class="bg-indigo-600 text-white px-3 py-1 rounded-full text-sm hover:bg-indigo-700 transition">هەمووی</button>
+            <button onclick="filterByCategory('Hardware')" class="bg-white text-gray-600 border border-gray-200 px-3 py-1 rounded-full text-sm hover:bg-gray-100 transition">ڕەقەواڵە</button>
+            <button onclick="filterByCategory('Software')" class="bg-white text-gray-600 border border-gray-200 px-3 py-1 rounded-full text-sm hover:bg-gray-100 transition">نەرمەواڵە</button>
+            <button onclick="filterByCategory('Network')" class="bg-white text-gray-600 border border-gray-200 px-3 py-1 rounded-full text-sm hover:bg-gray-100 transition">تۆڕ</button>
+            <button onclick="filterByCategory('Web')" class="bg-white text-gray-600 border border-gray-200 px-3 py-1 rounded-full text-sm hover:bg-gray-100 transition">وێب</button>
+            <button onclick="filterByCategory('Security')" class="bg-white text-gray-600 border border-gray-200 px-3 py-1 rounded-full text-sm hover:bg-gray-100 transition">ئاسایش</button>
+            <button onclick="filterByCategory('Coding')" class="bg-white text-gray-600 border border-gray-200 px-3 py-1 rounded-full text-sm hover:bg-gray-100 transition">پرۆگرامسازی</button>
+        </div>
+
+        <div id="questionsContainer" class="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 gap-6">
+            </div>
+
+        <div id="noResults" class="hidden text-center py-20">
+            <p class="text-xl text-gray-500">هیچ ئەنجامێک نەدۆزرایەوە!</p>
+        </div>
+    </main>
+
+    <footer class="bg-gray-800 text-gray-400 py-6 text-center mt-12">
+        <p>&copy; 2024 - ٣٠٠ پرسیاری تەکنەلۆژیا</p>
+    </footer>
+
+    <script>
+        // داتابەیسی پرسیارەکان (٣٠٠ پرسیار)
+        const questionsData = [
+            // --- بەشی ١: ١٠٠ پرسیاری یەکەم ---
+            { c: "Hardware", q: "CPU چییە؟", a: "کورتکراوەی Central Processing Unitـە، بە مێشکی کۆمپیوتەر دادەنرێت و هەموو فەرمانەکان جێبەجێ دەکات." },
+            { c: "Hardware", q: "RAM چییە؟", a: "Random Access Memoryـیە، بیرگەی کاتییە کە داتاكان هەڵدەگرێت تا ئەو کاتەی کۆمپیوتەرەکە ئیش دەکات." },
+            { c: "Hardware", q: "جیاوازی HDD و SSD؟", a: "HDD میکانیکییە و خاوترە، SSD ئەلیکترۆنییە و زۆر خێراترە." },
+            { c: "Hardware", q: "GPU چییە؟", a: "یەکەی چارەسەرکردنی گرافیکە (کارتی شاشە)، بۆ پیشاندانی وێنە و ڤیدیۆ و یاری." },
+            { c: "Hardware", q: "Motherboard چییە؟", a: "تەختەی سەرەکییە کە هەموو پارچەکانی کۆمپیوتەر بەیەکەوە دەبەستێتەوە." },
+            { c: "Hardware", q: "PSU چییە؟", a: "Power Supply Unitـە، کارەبا دابەش دەکات بەسەر پارچەکانی کۆمپیوتەردا." },
+            { c: "Hardware", q: "BIOS چییە؟", a: "بەرنامەیەکی سەرەتاییە لەسەر مەزەربۆرد کۆمپیوتەر ئامادە دەکات پێش ویندۆز." },
+            { c: "Hardware", q: "Input Devices چین؟", a: "ئامێرەکانی تێکردن وەک کیبۆرد و ماوس." },
+            { c: "Hardware", q: "Output Devices چین؟", a: "ئامێرەکانی دەرکردن وەک شاشە و پرینتەر." },
+            { c: "Hardware", q: "Cache Memory چییە؟", a: "بیرگەیەکی زۆر خێرایە لەناو CPU بۆ داتا زۆر بەکارهاتووەکان." },
+            
+            { c: "Software", q: "OS چییە؟", a: "سیستەمی کارپێکردنە، پردێکە لە نێوان بەکارهێنەر و ڕەقەواڵە وەک Windows." },
+            { c: "Software", q: "Kernel چییە؟", a: "بەشی سەرەکی سیستەمی کارپێکردنە کە کۆنتڕۆڵی ڕەقەواڵە دەکات." },
+            { c: "Software", q: "Open Source چییە؟", a: "نەرمەواڵەیەکە کۆدەکەی کراوەیە و دەستکاری دەکرێت وەک Linux." },
+            { c: "Software", q: "GUI چییە؟", a: "ڕووکاری وێنەیی بەکارهێنەرە (ئایکۆن و وێنە)." },
+            { c: "Software", q: "جیاوازی 32bit و 64bit؟", a: "64bit ڕامی زیاتر لە 4GB وەردەگرێت و خێراترە." },
+            { c: "Software", q: "Driver چییە؟", a: "بەرنامەیەکە وا دەکات سیستەم پارچەیەکی دیاریکراو بناسێتەوە." },
+            { c: "Software", q: "Booting چییە؟", a: "پڕۆسەی هەڵبوونی کۆمپیوتەرە." },
+            { c: "Software", q: "File Extension چییە؟", a: "پاشگرێکە جۆری فایل دیاری دەکات وەک .jpg." },
+            { c: "Software", q: "Task Manager چییە؟", a: "بۆ بینینی بەرنامە کارپێکراوەکان و کۆنتڕۆڵی CPU/RAM." },
+            { c: "Software", q: "Virtual Machine چییە؟", a: "کۆمپیوتەرێکی وەهمییە لەناو کۆمپیوتەری ڕاستەقینەدا." },
+
+            { c: "Network", q: "IP Address چییە؟", a: "ناونیشانێکی تایبەتە بۆ هەر ئامێرێک لەناو تۆڕدا." },
+            { c: "Network", q: "DNS چییە؟", a: "سیستەمێکە ناوەکان (google.com) دەگۆڕێت بۆ IP." },
+            { c: "Network", q: "LAN چییە؟", a: "تۆڕێکی بچووکە وەک ماڵ یان ئۆفیس." },
+            { c: "Network", q: "WAN چییە؟", a: "تۆڕێکی بەرفراوانە وەک ئینتەرنێت." },
+            { c: "Network", q: "Router چییە؟", a: "ئامێرێکە تۆڕە جیاوازەکان دەبەستێتەوە و داتا ئاڕاستە دەکات." },
+            { c: "Network", q: "Switch چییە؟", a: "کۆمپیوتەرەکانی ناو یەک تۆڕ بەیەکەوە دەبەستێتەوە." },
+            { c: "Network", q: "DHCP چییە؟", a: "پڕۆتۆکۆڵێکە IP ئۆتۆماتیکی دەدات بە ئامێرەکان." },
+            { c: "Network", q: "MAC Address چییە؟", a: "ناونیشانێکی فیزیایی نەگۆڕە بۆ کارتی تۆڕ." },
+            { c: "Network", q: "Ping چییە؟", a: "پشکنینی پەیوەندی نێوان دوو ئامێر و پێوانی کات." },
+            { c: "Network", q: "Bandwidth چییە؟", a: "بڕی ئەو داتایەیە کە دەگوازرێتەوە لە یەک کاتدا." },
+
+            { c: "Web", q: "HTTP چییە؟", a: "پڕۆتۆکۆڵی گواستنەوەی پەڕەکانی وێبە." },
+            { c: "Web", q: "HTTPS چییە؟", a: "هەمان HTTPـیە بەڵام پارێزراوە (Secure)." },
+            { c: "Web", q: "HTML چییە؟", a: "زمانی دروستکردنی پەیکەری پەڕەکانی وێبە." },
+            { c: "Web", q: "URL چییە؟", a: "ناونیشانی تەواوی وێبسایتێکە." },
+            { c: "Web", q: "Browser چییە؟", a: "وێبگەڕ، بەرنامەیە بۆ کردنەوەی سایت وەک Chrome." },
+            { c: "Web", q: "Cookie چییە؟", a: "فایلێکی بچووکە سایتەکان بۆ ناسینەوەی تۆ هەڵیدەگرن." },
+            { c: "Web", q: "Server چییە؟", a: "کۆمپیوتەرێکی بەهێزە خزمەتگوزاری دەدات بەوانی تر." },
+            { c: "Web", q: "Cloud Computing چییە؟", a: "بەکارهێنانی سێرڤەری ئینتەرنێتە بۆ هەڵگرتنی داتا." },
+            { c: "Web", q: "ISP چییە؟", a: "کۆمپانیای دابینکەری ئینتەرنێت." },
+            { c: "Web", q: "404 Error چییە؟", a: "واتە پەڕەکە نەدۆزرایەوە." },
+
+            { c: "Coding", q: "Database چییە؟", a: "کۆمەڵێک داتای ڕێکخراوە بۆ بەکارهێنان و دەستکاری." },
+            { c: "Coding", q: "SQL چییە؟", a: "زمانێکە بۆ مامەڵەکردن لەگەڵ داتابەیس." },
+            { c: "Coding", q: "DBMS چییە؟", a: "سیستەمی بەڕێوەبردنی داتابەیسە وەک MySQL." },
+            { c: "Coding", q: "Primary Key چییە؟", a: "ستوونێکە لە داتابەیس کە بەهاکەی دووبارە نابێتەوە." },
+            { c: "Coding", q: "Query چییە؟", a: "داواکارییەکە دەنێردرێت بۆ داتابەیس." },
+            { c: "Coding", q: "Table چییە؟", a: "یەکەی هەڵگرتنی داتایە (ڕیز و ستوون)." },
+            { c: "Coding", q: "Relational Database چییە؟", a: "داتابەیسێکە خشتەکانی پەیوەندییان بەیەکەوە هەیە." },
+            { c: "Coding", q: "Backup چییە؟", a: "کۆپی یەدەگی داتا." },
+            { c: "Coding", q: "NoSQL چییە؟", a: "داتابەیسێکە پشت بە خشتە نابەستێت." },
+            { c: "Coding", q: "Redundancy چییە؟", a: "دووبارەبوونەوەی داتایە." },
+
+            { c: "Security", q: "Malware چییە؟", a: "نەرمەواڵەی زیانبەخشە." },
+            { c: "Security", q: "Virus چییە؟", a: "کۆدێکە خۆی کۆپی دەکات بۆ تێکدان." },
+            { c: "Security", q: "Firewall چییە؟", a: "دیوارێکی ئاگرینە چاودێری هاتن و چوونی داتا دەکات." },
+            { c: "Security", q: "Phishing چییە؟", a: "فریودانی بەکارهێنەرە بۆ دزینی نهێنی." },
+            { c: "Security", q: "Encryption چییە؟", a: "تشفیرکردنی داتایە بۆ نهێنی بوون." },
+            { c: "Security", q: "VPN چییە؟", a: "تۆڕێکی مەجازییە ناسنامە دەشارێتەوە." },
+            { c: "Security", q: "Hacker کێیە؟", a: "کەسێکە شارەزایە لە دۆزینەوەی کەلێنی سیستەم." },
+            { c: "Security", q: "DDoS Attack چییە؟", a: "هێرشێکە بۆ خستنی سێرڤەر بە ترافیکی زۆر." },
+            { c: "Security", q: "2FA چییە؟", a: "پاراستنی دوو قۆناغی (پاسۆرد + کۆد)." },
+            { c: "Security", q: "Ransomware چییە؟", a: "ڤایرۆسی فیزیە، فایل قوفڵ دەکات بەرامبەر پارە." },
+
+            { c: "Coding", q: "Algorithm چییە؟", a: "هەنگاوەکانی چارەسەرکردنی کێشەیەکە." },
+            { c: "Coding", q: "Source Code چییە؟", a: "ئەو دەقەیە پڕۆگرامەر دەینووسێت." },
+            { c: "Coding", q: "Compiler چییە؟", a: "کۆد دەگۆڕێت بۆ زمانی ئامێر." },
+            { c: "Coding", q: "Variable چییە؟", a: "شوێنێکە لە بیرگە بۆ هەڵگرتنی بەها." },
+            { c: "Coding", q: "Loop چییە؟", a: "دووبارەکردنەوەی کۆد." },
+            { c: "Coding", q: "Bug چییە؟", a: "هەڵەیەکە لە پڕۆگرامدا." },
+            { c: "Coding", q: "OOP چییە؟", a: "شێوازێکی پڕۆگرامسازییە پشت بە تەن دەبەستێت." },
+            { c: "Coding", q: "IDE چییە؟", a: "ژینگەی پەرەپێدانە بۆ کۆد نووسین." },
+            { c: "Coding", q: "Syntax چییە؟", a: "ڕێزمان و یاساکانی نووسینی کۆد." },
+            { c: "Coding", q: "Python چییە؟", a: "زمانێکی پڕۆگرامسازی بەهێزە." },
+
+            { c: "Hardware", q: "Bit چییە؟", a: "بچووکترین یەکەی داتایە (0 یان 1)." },
+            { c: "Hardware", q: "Byte چییە؟", a: "٨ بیتە." },
+            { c: "Hardware", q: "KB چییە؟", a: "١٠٢٤ بایت." },
+            { c: "Hardware", q: "MB چییە؟", a: "١٠٢٤ کیلۆبایت." },
+            { c: "Hardware", q: "GB چییە؟", a: "١٠٢٤ مێگابایت." },
+            { c: "Hardware", q: "TB چییە؟", a: "١٠٢٤ گێگابایت." },
+            { c: "Hardware", q: "Hertz (Hz)؟", a: "پێوانەی خێرایی CPUـیە." },
+            { c: "Hardware", q: "Pixel چییە؟", a: "بچووکترین خاڵی وێنەی دیجیتاڵییە." },
+            { c: "Hardware", q: "Resolution چییە؟", a: "ژمارەی پیکسڵەکانی شاشە." },
+            { c: "Network", q: "Mbps چییە؟", a: "یەکەی پێوانەی خێرایی ئینتەرنێت." },
+
+            { c: "Software", q: "Ctrl + C", a: "Copy." },
+            { c: "Software", q: "Ctrl + V", a: "Paste." },
+            { c: "Software", q: "Ctrl + Z", a: "Undo." },
+            { c: "Software", q: "Alt + F4", a: "داخستنی بەرنامە." },
+            { c: "Coding", q: "Binary System", a: "سیستەمی دووانی (٠ و ١)." },
+            { c: "Software", q: "Zip File", a: "فایلی پەستێوراو." },
+            { c: "Software", q: "PDF", a: "فایلێکی بەڵگەنامەییە فۆرماتی تێکناچێت." },
+            { c: "Software", q: "Open Source", a: "کۆدی کراوە." },
+            { c: "Hardware", q: "Hardware vs Software", a: "ڕەقەواڵە دەست لێدەدرێت، نەرمەواڵە بەرنامەیە." },
+            { c: "Software", q: "Troubleshooting", a: "دۆزینەوە و چارەسەری کێشە." },
+
+            { c: "Software", q: "AI چییە؟", a: "زیرەکی دەستکرد." },
+            { c: "Software", q: "Machine Learning", a: "فێربوونی ئامێر لە داتاوە." },
+            { c: "Software", q: "Blockchain", a: "تەکنەلۆژیای تۆمارکردنی داتای زنجیرەیی." },
+            { c: "Hardware", q: "IoT", a: "Internet of Things، بەستنەوەی ئامێرەکان بە ئینتەرنێت." },
+            { c: "Hardware", q: "VR", a: "واقیعی مەجازی." },
+            { c: "Hardware", q: "AR", a: "واقیعی زیادکراو." },
+            { c: "Software", q: "Big Data", a: "داتای زۆر گەورە و ئاڵۆز." },
+            { c: "Network", q: "5G", a: "نەوەی پێنجەمی مۆبایل." },
+            { c: "Software", q: "Deep Learning", a: "لاساییکردنەوەی مێشکی مرۆڤ." },
+            { c: "Hardware", q: "Quantum Computing", a: "کۆمپیوتەری کوانتەم (زۆر بەهێز)." },
+
+            // --- بەشی ٢: ١٠٠ پرسیاری دووەم ---
+            { c: "Hardware", q: "Heatsink چییە؟", a: "پارچە کانزایەکە گەرمی CPU هەڵدەمژێت." },
+            { c: "Hardware", q: "Thermal Paste چییە؟", a: "مەعجونی نێوان CPU و Heatsinkـە." },
+            { c: "Hardware", q: "Overclocking چییە؟", a: "زیادکردنی خێرایی CPU لە ڕادەی خۆی." },
+            { c: "Hardware", q: "UPS چییە؟", a: "خەزنی کارەبایە بۆ کاتی بڕانی کارەبا." },
+            { c: "Hardware", q: "CMOS Battery", a: "پاترییەکە کاتژمێر و BIOS دەپارێزێت." },
+            { c: "Hardware", q: "HDMI چییە؟", a: "کێبڵی گواستنەوەی دەنگ و ڕەنگی کوالێتی بەرز." },
+            { c: "Hardware", q: "Port چییە؟", a: "دەرچەی بەستنی ئامێری دەرەکی." },
+            { c: "Hardware", q: "VGA چییە؟", a: "کێبڵی کۆنی شاشە (تەنها وێنە)." },
+            { c: "Hardware", q: "Peripheral چییە؟", a: "ئامێری دەرەکی وەک پرینتەر." },
+            { c: "Hardware", q: "Webcam چییە؟", a: "کامێرا بۆ پەیوەندی ڤیدیۆیی." },
+            
+            { c: "Software", q: "Firmware چییە؟", a: "نەرمەواڵەی جێگیر لەناو ڕەقەواڵەدا." },
+            { c: "Software", q: "Freeware چییە؟", a: "نەرمەواڵەی بەخۆڕایی." },
+            { c: "Software", q: "Shareware چییە؟", a: "نەرمەواڵەی تاقیکاری (کاتی)." },
+            { c: "Software", q: "Bloatware چییە؟", a: "بەرنامە زیادەکانی سەر ئامێری نوێ." },
+            { c: "Software", q: "Beta Version", a: "وەشانی تاقیکاری." },
+            { c: "Software", q: "Compression", a: "پەستاندنی فایل بۆ کەمکردنی قەبارە." },
+            { c: "Software", q: "Spreadsheet", a: "بەرنامەی خشتە وەک Excel." },
+            { c: "Software", q: "Word Processor", a: "بەرنامەی نووسین وەک Word." },
+            { c: "Software", q: "Defragmentation", a: "ڕێکخستنەوەی فایلەکانی سەر HDD." },
+            { c: "Software", q: "Clipboard", a: "شوێنی کاتی بۆ Copy/Cut." },
+
+            { c: "Network", q: "Modem چییە؟", a: "گۆڕینی سیگناڵی ئەنالۆگ بۆ دیجیتاڵ." },
+            { c: "Network", q: "Wi-Fi چییە؟", a: "ئینتەرنێتی بێتەل." },
+            { c: "Network", q: "Bluetooth", a: "پەیوەندی بێتەلی مەودا کورت." },
+            { c: "Network", q: "Fiber Optic", a: "کێبڵی ڕیشاڵی تیشکی (زۆر خێرا)." },
+            { c: "Network", q: "FTP چییە؟", a: "پڕۆتۆکۆڵی گواستنەوەی فایل." },
+            { c: "Network", q: "SMTP چییە؟", a: "پڕۆتۆکۆڵی ناردنی ئیمەیڵ." },
+            { c: "Network", q: "Latency", a: "کاتی گەیشتنی داتا (Ping)." },
+            { c: "Network", q: "Intranet", a: "تۆڕی ناوخۆیی داخراو." },
+            { c: "Network", q: "Packet Loss", a: "ونبوونی داتا لە ڕێگا." },
+            { c: "Network", q: "Hotspot", a: "دابەشکردنی ئینتەرنێت لە مۆبایلەوە." },
+
+            { c: "Web", q: "WWW چییە؟", a: "تۆڕی جیهانی وێب." },
+            { c: "Web", q: "Domain Name", a: "ناوی وێبسایت وەک google.com." },
+            { c: "Web", q: "Hosting چییە؟", a: "شوێنی هەڵگرتنی فایلەکانی وێبسایت." },
+            { c: "Web", q: "SEO چییە؟", a: "باشکردنی سایت بۆ گەڕان (Google)." },
+            { c: "Web", q: "Hyperlink", a: "لینک بۆ پەڕەیەکی تر." },
+            { c: "Web", q: "Refresh", a: "نوێکردنەوەی پەڕە." },
+            { c: "Web", q: "Download/Upload", a: "دابەزاندن vs بەرزکردنەوە." },
+            { c: "Web", q: "Incognito", a: "گەڕانی نهێنی (بێ History)." },
+            { c: "Web", q: "Bookmark", a: "هەڵگرتنی سایتی دڵخواز." },
+            { c: "Web", q: "Pop-up", a: "پەنجەرەی کتوپڕ (ڕیکلام)." },
+
+            { c: "Security", q: "Spyware", a: "بەرنامەی سیخوڕی." },
+            { c: "Security", q: "Adware", a: "نەرمەواڵەی ڕیکلامی بێزارکەر." },
+            { c: "Security", q: "Keylogger", a: "تۆمارکردنی دگمەکانی کیبۆرد (هک)." },
+            { c: "Security", q: "Spam", a: "نامەی نەخوازراو." },
+            { c: "Security", q: "Patch", a: "پینە بۆ چاککردنی کەلێن." },
+            { c: "Security", q: "White Hat Hacker", a: "هاکەری باش." },
+            { c: "Security", q: "Black Hat Hacker", a: "هاکەری خراپ." },
+            { c: "Security", q: "Biometrics", a: "ناسینەوە بە جەستە (پەنجەمۆر)." },
+            { c: "Security", q: "Copyright", a: "مافی چاپ و بڵاوکردنەوە." },
+            { c: "Security", q: "Digital Footprint", a: "شوێنپێی دیجیتاڵی." },
+
+            { c: "Software", q: "Babbage", a: "باوکی کۆمپیوتەر." },
+            { c: "Software", q: "Ada Lovelace", a: "یەکەم پڕۆگرامەر." },
+            { c: "Software", q: "Bill Gates", a: "دامەزرێنەری مایکرۆسۆفت." },
+            { c: "Software", q: "Steve Jobs", a: "دامەزرێنەری ئەپڵ." },
+            { c: "Software", q: "Silicon Valley", a: "مەڵبەندی تەکنەلۆژیا." },
+            { c: "Hardware", q: "ENIAC", a: "یەکەم کۆمپیوتەری گەورە." },
+            { c: "Web", q: "Google (1998)", a: "ساڵی دامەزراندنی گووگڵ." },
+            { c: "Hardware", q: "Floppy Disk", a: "هاردێکی کۆنی بچووک." },
+            { c: "Software", q: "Y2K Bug", a: "کێشەی ساڵی ٢٠٠٠." },
+            { c: "Web", q: "Facebook (2004)", a: "ساڵی دروستکردنی فەیسبووک." },
+
+            { c: "Coding", q: "Frontend", a: "ڕووکاری وێبسایت." },
+            { c: "Coding", q: "Backend", a: "پشتی وێبسایت (سێرڤەر)." },
+            { c: "Coding", q: "Full Stack", a: "شارەزا لە Frontend و Backend." },
+            { c: "Coding", q: "Framework", a: "چوارچێوەی ئامادەکراوی کۆد." },
+            { c: "Coding", q: "API", a: "پردی پەیوەندی نێوان بەرنامەکان." },
+            { c: "Coding", q: "Git", a: "سیستەمی کۆنتڕۆڵی وەشان (Version Control)." },
+            { c: "Coding", q: "Debugging", a: "چاککردنی هەڵەی کۆد." },
+            { c: "Coding", q: "Java", a: "زمانێکی پڕۆگرامسازی." },
+            { c: "Coding", q: "C++", a: "زمانێکی پڕۆگرامسازی خێرا." },
+            { c: "Coding", q: "CSS", a: "زمانی دیزاینی وێب." },
+
+            { c: "Software", q: "NTFS", a: "سیستەمی فایلی ویندۆز." },
+            { c: "Software", q: "FAT32", a: "سیستەمی فایلی کۆن." },
+            { c: "Software", q: "JPEG vs PNG", a: "PNG شەفاف دەبێت." },
+            { c: "Software", q: "GIF", a: "وێنەی جوڵاو." },
+            { c: "Software", q: "MP4", a: "فۆرماتی ڤیدیۆ." },
+            { c: "Software", q: "MP3", a: "فۆرماتی دەنگ." },
+            { c: "Software", q: "EXE", a: "بەرنامەی ویندۆز." },
+            { c: "Software", q: "APK", a: "بەرنامەی ئەندرۆید." },
+            { c: "Software", q: "ISO", a: "کۆپی تەواوی CD." },
+            { c: "Software", q: "Shortcut", a: "ڕێگەی کورت بۆ فایل." },
+
+            { c: "Software", q: "Restart", a: "کوژاندنەوە و هەڵبوونەوە." },
+            { c: "Software", q: "Sleep Mode", a: "دۆخی خەوتن (وزەی کەم)." },
+            { c: "Software", q: "Hibernate", a: "خەوتنی قوڵ (سەیڤ لەسەر هارد)." },
+            { c: "Software", q: "Control Panel", a: "بەشی ڕێکخستنەکان." },
+            { c: "Software", q: "Recycle Bin", a: "سەبەتەی خۆڵ." },
+            { c: "Software", q: "Screenshot", a: "وێنەی شاشە." },
+            { c: "Software", q: "F1 Key", a: "یارمەتی (Help)." },
+            { c: "Software", q: "F5 Key", a: "Refresh." },
+            { c: "Software", q: "Esc Key", a: "دەرچوون." },
+            { c: "Software", q: "Caps Lock", a: "گەورەکردنی پیت." },
+
+            { c: "Hardware", q: "Robotics", a: "زانستی ڕۆبۆت." },
+            { c: "Hardware", q: "Nanotechnology", a: "تەکنەلۆژیای زۆر ورد." },
+            { c: "Hardware", q: "Smart Home", a: "ماڵی زیرەک." },
+            { c: "Web", q: "E-commerce", a: "بازرگانی ئەلیکترۆنی." },
+            { c: "Web", q: "Blog", a: "وێبسایتی نووسین." },
+            { c: "Web", q: "Avatar", a: "کارەکتەری دیجیتاڵی." },
+            { c: "Web", q: "Streaming", a: "پەخشی ڕاستەوخۆ (YouTube)." },
+            { c: "Software", q: "Lag", a: "خاوبوونەوە." },
+            { c: "Software", q: "Glitch", a: "تێکچوونی کاتی." },
+            { c: "Web", q: "Troll", a: "کەسێکی بێزارکەر لە ئینتەرنێت." },
+
+            // --- بەشی ٣: ١٠٠ پرسیاری سێیەم ---
+            { c: "Hardware", q: "LCD", a: "شاشەی شل (Liquid Crystal)." },
+            { c: "Hardware", q: "OLED", a: "شاشەیەک هەموو پیکسڵێک ڕووناکی دەدات." },
+            { c: "Hardware", q: "Refresh Rate", a: "ژمارەی نوێبوونەوەی وێنە (Hz)." },
+            { c: "Hardware", q: "4K Resolution", a: "وێنەی زۆر ورد (٤٠٠٠ پیکسڵ)." },
+            { c: "Hardware", q: "Aspect Ratio", a: "ڕێژەی پانی بۆ بەرزی (16:9)." },
+            { c: "Hardware", q: "Dead Pixel", a: "خاڵی سوتاوی شاشە." },
+            { c: "Hardware", q: "PPI", a: "چڕی پیکسڵ لە ئینجێکدا." },
+            { c: "Hardware", q: "Blue Light Filter", a: "کەمکردنەوەی ڕووناکی شینی شاشە." },
+            { c: "Software", q: "FPS", a: "ژمارەی وێنە لە چرکەیەکدا (یاری)." },
+            { c: "Software", q: "Anti-Aliasing", a: "سافکردنی لێوارەکان لە گرافیک." },
+
+            { c: "Software", q: "Root (Android)", a: "شکاندنی قوفڵی سیستەمی ئەندرۆید." },
+            { c: "Software", q: "Jailbreak", a: "شکاندنی قوفڵی ئایفۆن." },
+            { c: "Hardware", q: "NFC", a: "گواستنەوەی نزیک (بۆ پارەدان)." },
+            { c: "Hardware", q: "GPS", a: "سیستەمی شوێن دیاریکردن." },
+            { c: "Hardware", q: "SIM Card", a: "ناسنامەی بەکارهێنەر (چیپ)." },
+            { c: "Hardware", q: "eSIM", a: "سیمکارتی دیجیتاڵی ناوەکی." },
+            { c: "Software", q: "Airplane Mode", a: "کوژاندنەوەی پەیوەندییەکان." },
+            { c: "Software", q: "Factory Reset", a: "گەڕانەوە بۆ دۆخی کارگە." },
+            { c: "Hardware", q: "Bezel", a: "چوارچێوەی دەوری شاشە." },
+            { c: "Hardware", q: "USB Type-C", a: "دەرچەی نوێی خێرا." },
+
+            { c: "Web", q: "Dark Web", a: "بەشی شاراوە و مەترسیداری ئینتەرنێت." },
+            { c: "Web", q: "Deep Web", a: "بەشی نەبینراو (وەک ئیمەیڵ)." },
+            { c: "Web", q: "Tor Browser", a: "وێبگەڕی نەناسراو (بۆ Dark Web)." },
+            { c: "Web", q: "Proxy", a: "نێوەندگیر بۆ شاردنەوەی IP." },
+            { c: "Web", q: "Captcha", a: "پشکنین بۆ زانینی مرۆڤ بوون." },
+            { c: "Web", q: "QR Code", a: "کۆدی چوارگۆشە (سکان دەکرێت)." },
+            { c: "Web", q: "Wiki", a: "سایتی کراوە بۆ دەستکاری (Wikipedia)." },
+            { c: "Web", q: "Torrent", a: "دابەزاندن لە خەڵکەوە (P2P)." },
+            { c: "Web", q: "Seed", a: "بەخشینی فایل لە تۆرێنت." },
+            { c: "Web", q: "Leech", a: "وەرگرتن بەبێ بەخشین (تۆرێنت)." },
+
+            { c: "Software", q: "CMD", a: "Command Prompt (شاشەی ڕەش)." },
+            { c: "Software", q: "Terminal", a: "هاوشێوەی CMD لە Linux/Mac." },
+            { c: "Software", q: "Sudo", a: "فەرمانی بەڕێوەبەر لە Linux." },
+            { c: "Software", q: "Registry", a: "داتابەیسی ڕێکخستنەکانی ویندۆز." },
+            { c: "Software", q: "Safe Mode", a: "دۆخی سەلامەت (بۆ چاککردنەوە)." },
+            { c: "Software", q: "Partition", a: "بەشکردنی هارد (C, D)." },
+            { c: "Software", q: "Format", a: "سڕینەوەی تەواوەتی." },
+            { c: "Software", q: "Drag and Drop", a: "ڕاکێشان و بەردان." },
+            { c: "Hardware", q: "Plug and Play", a: "کارکردنی ڕاستەوخۆی ئامێر." },
+            { c: "Software", q: "EULA", a: "ڕێککەوتنامەی بەکارهێنان." },
+
+            { c: "Software", q: "Metadata", a: "زانیاری لەسەر فایل (کات/شوێن)." },
+            { c: "Software", q: "CSV", a: "فایلی داتا (Comma Separated)." },
+            { c: "Software", q: "RAW Image", a: "وێنەی خاو و دەستکارینەکراو." },
+            { c: "Coding", q: "JSON", a: "فۆرماتی گواستنەوەی داتا." },
+            { c: "Coding", q: "XML", a: "زمانێکی هەڵگرتنی داتایە." },
+            { c: "Software", q: "Log File", a: "فایلی تۆماری ڕووداوەکان." },
+            { c: "Software", q: "Watermark", a: "مۆر/لۆگۆ لەسەر وێنە." },
+            { c: "Software", q: "Thumbnail", a: "وێنەی بچووککراوە." },
+            { c: "Security", q: "Encryption Key", a: "کۆدی کردنەوەی تشفیر." },
+            { c: "Software", q: "Bitrate", a: "بڕی داتا لە چرکەیەکدا (کوالێتی)." },
+
+            { c: "Coding", q: "Array", a: "لیستێک بۆ هەڵگرتنی چەند بەهایەک." },
+            { c: "Coding", q: "Function", a: "فەرمانێکە چەند جارێک بەکاردێت." },
+            { c: "Coding", q: "If Statement", a: "مەرج (ئەگەر...)." },
+            { c: "Coding", q: "Boolean", a: "ڕاست یان هەڵە (True/False)." },
+            { c: "Coding", q: "Infinite Loop", a: "لوبی بێکۆتا (هەڵە)." },
+            { c: "Coding", q: "Syntax Error", a: "هەڵەی ڕێزمانی کۆد." },
+            { c: "Coding", q: "UI", a: "دیزاینی ڕووکار." },
+            { c: "Coding", q: "UX", a: "ئەزموونی بەکارهێنەر." },
+            { c: "Coding", q: "Responsive", a: "گونجانی دیزاین لەگەڵ مۆبایل." },
+            { c: "Coding", q: "GitHub", a: "تۆڕی کۆمەڵایەتی کۆدەران." },
+
+            { c: "Security", q: "Brute Force", a: "تاقیکردنەوەی هەموو پاسۆردەکان." },
+            { c: "Security", q: "Social Engineering", a: "هەڵخەڵەتاندنی مرۆڤ." },
+            { c: "Security", q: "Zero-day Exploit", a: "کەلێنێک پێش چارەسەر دۆزراوەتەوە." },
+            { c: "Security", q: "Botnet", a: "تۆڕی کۆمپیوتەری هاککراو." },
+            { c: "Security", q: "Trojan Horse", a: "ڤایرۆس لە بەرگی بەرنامەی چاک." },
+            { c: "Security", q: "Antivirus", a: "بەرنامەی دژە ڤایرۆس." },
+            { c: "Web", q: "Private Window", a: "پەنجەرەی نهێنی." },
+            { c: "Security", q: "Biometric Auth", a: "چوونەژوورەوە بە پەنجە/ڕووخسار." },
+            { c: "Security", q: "SQL Injection", a: "هاککردنی داتابەیس." },
+            { c: "Security", q: "White/Black List", a: "لیستی ڕێپێدراو vs قەدەغە." },
+
+            { c: "Network", q: "Mesh WiFi", a: "سیستەمی وایفای فرە ئامێر." },
+            { c: "Network", q: "Ethernet Cable", a: "کێبڵی ئینتەرنێت (LAN)." },
+            { c: "Network", q: "Cat6", a: "جۆرە کێبڵێکی خێرایە." },
+            { c: "Network", q: "Static IP", a: "IPـی جێگیر (ناگۆڕێت)." },
+            { c: "Network", q: "Localhost", a: "کۆمپیوتەرەکەی خۆت (127.0.0.1)." },
+            { c: "Network", q: "Gateway", a: "دەروازەی تۆڕ (ڕاوتەر)." },
+            { c: "Network", q: "Packet", a: "پارچە داتای گوازراوە." },
+            { c: "Network", q: "P2P", a: "پەیوەندی ڕاستەوخۆی دوو کۆمپیوتەر." },
+            { c: "Network", q: "SSID", a: "ناوی تۆڕی وایفای." },
+            { c: "Network", q: "Broadband", a: "ئینتەرنێتی خێرا." },
+
+            { c: "Software", q: "IT", a: "Information Technology." },
+            { c: "Software", q: "SysAdmin", a: "بەڕێوەبەری سیستەم." },
+            { c: "Security", q: "Bug Bounty", a: "پارەدان بۆ دۆزینەوەی هەڵە." },
+            { c: "Web", q: "SaaS", a: "نەرمەواڵە وەک خزمەتگوزاری (Online)." },
+            { c: "Software", q: "Closed Source", a: "کۆدی داخراو (نهێنی)." },
+            { c: "Software", q: "Legacy System", a: "سیستەمی کۆن." },
+            { c: "Software", q: "Beta Tester", a: "تاقیکەرەوەی بەرنامە." },
+            { c: "Software", q: "FAQ", a: "پرسیارە دووبارەکان." },
+            { c: "Hardware", q: "DIY", a: "خۆت دروستی بکە." },
+            { c: "Hardware", q: "RMA", a: "گەڕاندنەوەی کاڵا بۆ گۆڕین." },
+
+            { c: "Hardware", q: "Thunderbolt", a: "دەرچەی زۆر خێرا." },
+            { c: "Hardware", q: "Surge Protector", a: "پارێزەری ڤۆڵتییە." },
+            { c: "Hardware", q: "Optical Drive", a: "شوێنی CD/DVD." },
+            { c: "Hardware", q: "Stylus", a: "قەڵەمی زیرەک." },
+            { c: "Hardware", q: "Projector", a: "ئامێری پیشاندان لەسەر دیوار." },
+            { c: "Web", q: "Web Server", a: "سێرڤەری وێبسایت." },
+            { c: "Hardware", q: "Drone", a: "فڕۆکەی بێفڕۆکەوان." },
+            { c: "Hardware", q: "Raspberry Pi", a: "کۆمپیوتەرێکی بچووک." },
+            { c: "Hardware", q: "Mechanical KB", a: "کیبۆردی میکانیکی." },
+            { c: "Hardware", q: "Touchpad", a: "ماوسی لاپتۆپ." }
+        ];
+
+        const container = document.getElementById('questionsContainer');
+        const searchInput = document.getElementById('searchInput');
+        const totalCountSpan = document.getElementById('totalCount');
+        const showingCountSpan = document.getElementById('showingCount');
+        const noResults = document.getElementById('noResults');
+        const filterButtons = document.querySelectorAll('#categoryFilters button');
+
+        let currentFilter = 'all';
+
+        // Function to render cards
+        function renderQuestions(data) {
+            container.innerHTML = '';
+            
+            if (data.length === 0) {
+                noResults.classList.remove('hidden');
+            } else {
+                noResults.classList.add('hidden');
+                data.forEach((item, index) => {
+                    const card = document.createElement('div');
+                    card.className = 'bg-white p-6 rounded-xl shadow-sm border border-gray-100 card-hover transition-all duration-300';
+                    card.innerHTML = `
+                        <div class="flex justify-between items-start mb-4">
+                            <span class="bg-indigo-50 text-indigo-600 text-xs px-2 py-1 rounded font-semibold border border-indigo-100">${item.c}</span>
+                            <span class="text-gray-300 text-xs">#${index + 1}</span>
+                        </div>
+                        <h3 class="text-lg font-bold text-gray-800 mb-2 leading-snug">${item.q}</h3>
+                        <p class="text-gray-600 text-sm leading-relaxed bg-gray-50 p-3 rounded-lg border border-gray-100">${item.a}</p>
+                    `;
+                    container.appendChild(card);
+                });
+            }
+            showingCountSpan.textContent = `پێشاندانی ${data.length}`;
+        }
+
+        // Filter Logic
+        function filterQuestions() {
+            const query = searchInput.value.toLowerCase();
+            
+            const filtered = questionsData.filter(item => {
+                const matchQuery = item.q.toLowerCase().includes(query) || item.a.toLowerCase().includes(query);
+                const matchCategory = currentFilter === 'all' || item.c === currentFilter;
+                return matchQuery && matchCategory;
+            });
+
+            renderQuestions(filtered);
+        }
+
+        // Category Filter Logic
+        function filterByCategory(category) {
+            currentFilter = category;
+            
+            // Update button styles
+            filterButtons.forEach(btn => {
+                if (btn.textContent.includes(translateCategory(category)) || (category === 'all' && btn.textContent === 'هەمووی')) {
+                    btn.className = "bg-indigo-600 text-white px-3 py-1 rounded-full text-sm hover:bg-indigo-700 transition";
+                } else {
+                    btn.className = "bg-white text-gray-600 border border-gray-200 px-3 py-1 rounded-full text-sm hover:bg-gray-100 transition";
+                }
+            });
+
+            filterQuestions();
+        }
+
+        function translateCategory(cat) {
+            const map = {
+                'Hardware': 'ڕەقەواڵە',
+                'Software': 'نەرمەواڵە',
+                'Network': 'تۆڕ',
+                'Web': 'وێب',
+                'Security': 'ئاسایش',
+                'Coding': 'پرۆگرامسازی'
+            };
+            return map[cat] || cat;
+        }
+
+        // Initialize
+        document.addEventListener('DOMContentLoaded', () => {
+            totalCountSpan.textContent = `کۆی گشتی: ${questionsData.length} پرسیار`;
+            renderQuestions(questionsData);
+        });
+
+    </script>
+</body>
+</html>
