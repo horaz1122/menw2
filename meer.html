@@ -10,8 +10,8 @@
     <!-- Firebase Imports -->
     <script type="module">
         import { initializeApp } from "https://www.gstatic.com/firebasejs/11.6.1/firebase-app.js";
-        import { getAuth, signInAnonymously, onAuthStateChanged } from "https://www.gstatic.com/firebasejs/11.6.1/firebase-auth.js";
-        import { getFirestore, collection, addDoc, onSnapshot, deleteDoc, doc, query, where, orderBy, serverTimestamp } from "https://www.gstatic.com/firebasejs/11.6.1/firebase-firestore.js";
+        import { getAuth, signInAnonymously, signInWithCustomToken, onAuthStateChanged } from "https://www.gstatic.com/firebasejs/11.6.1/firebase-auth.js";
+        import { getFirestore, collection, addDoc, onSnapshot, deleteDoc, doc, serverTimestamp } from "https://www.gstatic.com/firebasejs/11.6.1/firebase-firestore.js";
         import { getStorage, ref, uploadBytesResumable, getDownloadURL, deleteObject } from "https://www.gstatic.com/firebasejs/11.6.1/firebase-storage.js";
 
         // Global Variables
@@ -30,15 +30,21 @@
             window.db = getFirestore(app);
             window.storage = getStorage(app);
 
-            // Authentication
-            if (typeof __initial_auth_token !== 'undefined' && __initial_auth_token) {
-                 // Custom token login if available (skipped for simplicity in this specific flow, relying on anon)
-                 // usually signInWithCustomToken(auth, __initial_auth_token);
-                 // Fallback to anonymous for public sharing simplicity
-                 await signInAnonymously(window.auth);
-            } else {
-                await signInAnonymously(window.auth);
-            }
+            // Authentication Logic (Updated to be more robust)
+            const initAuth = async () => {
+                try {
+                    if (typeof __initial_auth_token !== 'undefined' && __initial_auth_token) {
+                        await signInWithCustomToken(window.auth, __initial_auth_token);
+                    } else {
+                        await signInAnonymously(window.auth);
+                    }
+                } catch (error) {
+                    console.error("Auth Error:", error);
+                    alert("کێشە لە پەیوەستبوون بە هەژمار: " + error.message);
+                }
+            };
+            
+            await initAuth();
 
             onAuthStateChanged(window.auth, (user) => {
                 if (user) {
@@ -68,7 +74,7 @@
             if (newCode && newCode.length > 0) {
                 localStorage.setItem('share_room_id', newCode);
                 connectToRoom(newCode);
-                alert('پەیوەست بوویت بە ژووری: ' + newCode);
+                // Removed alert to be less annoying
             }
         }
 
@@ -79,20 +85,22 @@
             }
 
             const filesRef = collection(window.db, 'artifacts', window.appId, 'public', 'data', 'shared_files');
-            // Using a simple query. Note: Compound queries might require index, keeping it simple.
-            // Filtering by roomId effectively creates "rooms"
-            const q = query(filesRef, where("roomId", "==", roomId));
-
+            
+            // FIX: Removed query/where. Fetching all and filtering in JS to avoid index issues.
             document.getElementById('loader').classList.remove('hidden');
 
-            window.unsubscribeFiles = onSnapshot(q, (snapshot) => {
+            window.unsubscribeFiles = onSnapshot(filesRef, (snapshot) => {
                 document.getElementById('loader').classList.add('hidden');
                 const files = [];
                 snapshot.forEach((doc) => {
-                    files.push({ id: doc.id, ...doc.data() });
+                    const data = doc.data();
+                    // Client-side filtering
+                    if (data.roomId === roomId) {
+                        files.push({ id: doc.id, ...data });
+                    }
                 });
                 
-                // Sort by timestamp client-side to avoid index requirement errors
+                // Sort by timestamp client-side
                 files.sort((a, b) => (b.createdAt?.seconds || 0) - (a.createdAt?.seconds || 0));
 
                 renderFiles(files);
@@ -108,6 +116,11 @@
             const files = [...fileList];
             const roomId = document.getElementById('room-code-input').value;
             
+            if (!window.auth.currentUser) {
+                alert("تكایە چاوەڕێ بە تا پەیوەست دەبێت بە ئینتەرنێتەوە...");
+                return;
+            }
+
             for (const file of files) {
                 uploadSingleFile(file, roomId);
             }
@@ -121,7 +134,8 @@
             showUploadingState(file.name, progressId);
 
             try {
-                const storageRef = ref(window.storage, `uploads/${window.appId}/${roomId}/${Date.now()}_${file.name}`);
+                // Simplified path to ensure permissions usually work
+                const storageRef = ref(window.storage, `artifacts/${window.appId}/public/${roomId}/${Date.now()}_${file.name}`);
                 const uploadTask = uploadBytesResumable(storageRef, file);
 
                 uploadTask.on('state_changed', 
@@ -135,26 +149,33 @@
                         alert("هەڵە لە بارکردن: " + error.message);
                     }, 
                     async () => {
-                        // Upload complete
-                        const downloadURL = await getDownloadURL(uploadTask.snapshot.ref);
-                        
-                        // Save to Firestore
-                        await addDoc(collection(window.db, 'artifacts', window.appId, 'public', 'data', 'shared_files'), {
-                            name: file.name,
-                            type: file.type,
-                            size: file.size,
-                            url: downloadURL,
-                            roomId: roomId,
-                            createdAt: serverTimestamp(),
-                            storagePath: uploadTask.snapshot.ref.fullPath
-                        });
-                        
-                        removeProgress(progressId);
+                        try {
+                            // Upload complete
+                            const downloadURL = await getDownloadURL(uploadTask.snapshot.ref);
+                            
+                            // Save to Firestore
+                            await addDoc(collection(window.db, 'artifacts', window.appId, 'public', 'data', 'shared_files'), {
+                                name: file.name,
+                                type: file.type,
+                                size: file.size,
+                                url: downloadURL,
+                                roomId: roomId,
+                                createdAt: serverTimestamp(),
+                                storagePath: uploadTask.snapshot.ref.fullPath
+                            });
+                            
+                            removeProgress(progressId);
+                        } catch (firestoreError) {
+                            console.error("Firestore Error:", firestoreError);
+                            alert("فایلەکە بارکرا بەڵام نەتوانرا تۆمار بکرێت: " + firestoreError.message);
+                            removeProgress(progressId);
+                        }
                     }
                 );
             } catch (err) {
                 console.error(err);
                 removeProgress(progressId);
+                alert("هەڵەیەکی نەزانراو: " + err.message);
             }
         }
 
