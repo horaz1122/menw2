@@ -1,218 +1,352 @@
 <!DOCTYPE html>
-<html lang="ku" dir="rtl">
+<html lang="ckb" dir="rtl">
 <head>
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
-    <title>پلانەری ساڵانە</title>
+    <title>هاوبەشکردنی پەڕگەکان</title>
     <script src="https://cdn.tailwindcss.com"></script>
-    <link href="https://fonts.googleapis.com/css2?family=Vazirmatn:wght@400;700&display=swap" rel="stylesheet">
-    
+    <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.4.0/css/all.min.css">
     <style>
+        @import url('https://fonts.googleapis.com/css2?family=Rudaw&family=NRT+Reg&family=Vazirmatn:wght@300;400;700&display=swap');
+        
         body {
             font-family: 'Vazirmatn', sans-serif;
             background-color: #f3f4f6;
         }
-        .day-cell {
-            min-height: 100px;
-            transition: all 0.2s;
+
+        /* Custom Scrollbar */
+        ::-webkit-scrollbar {
+            width: 8px;
         }
-        .day-cell:hover {
-            background-color: #e5e7eb;
-            cursor: pointer;
+        ::-webkit-scrollbar-track {
+            background: #f1f1f1; 
         }
-        .active-day {
-            background-color: #dbeafe;
-            border: 2px solid #3b82f6;
+        ::-webkit-scrollbar-thumb {
+            background: #888; 
+            border-radius: 4px;
+        }
+        ::-webkit-scrollbar-thumb:hover {
+            background: #555; 
+        }
+
+        .drop-zone {
+            border: 2px dashed #3b82f6;
+            transition: all 0.3s ease;
+        }
+        .drop-zone:hover, .drop-zone.dragover {
+            background-color: #eff6ff;
+            border-color: #2563eb;
+        }
+
+        .file-card {
+            transition: all 0.2s ease;
+        }
+        .file-card:hover {
+            transform: translateY(-2px);
+            box-shadow: 0 4px 6px -1px rgba(0, 0, 0, 0.1), 0 2px 4px -1px rgba(0, 0, 0, 0.06);
         }
     </style>
 </head>
-<body class="p-6">
+<body class="bg-slate-100 min-h-screen text-slate-800">
 
-    <div class="max-w-6xl mx-auto bg-white rounded-lg shadow-xl overflow-hidden">
-        
-        <div class="bg-indigo-600 p-6 text-white flex justify-between items-center">
-            <h1 class="text-3xl font-bold">پلانەری ساڵانە</h1>
-            <div class="flex items-center gap-4">
-                <button onclick="changeMonth(-1)" class="bg-indigo-500 hover:bg-indigo-700 px-4 py-2 rounded text-lg font-bold">&lt; پێشوو</button>
-                <h2 id="currentDateDisplay" class="text-2xl font-semibold w-48 text-center"></h2>
-                <button onclick="changeMonth(1)" class="bg-indigo-500 hover:bg-indigo-700 px-4 py-2 rounded text-lg font-bold">داهاتوو &gt;</button>
-            </div>
-        </div>
-
-        <div class="grid grid-cols-7 bg-gray-100 border-b border-gray-200 text-center py-2 font-bold text-gray-700">
-            <div>شەممە</div>
-            <div>یەکشەممە</div>
-            <div>دووشەممە</div>
-            <div>سێشەممە</div>
-            <div>چوارشەممە</div>
-            <div>پێنجشەممە</div>
-            <div>هەینی</div>
-        </div>
-
-        <div id="calendarGrid" class="grid grid-cols-7 border-l border-t border-gray-200">
-            </div>
-
-    </div>
-
-    <div id="eventModal" class="fixed inset-0 bg-black bg-opacity-50 hidden flex justify-center items-center z-50">
-        <div class="bg-white rounded-lg shadow-2xl w-full max-w-md p-6 mx-4">
-            <div class="flex justify-between items-center mb-4 border-b pb-2">
-                <h3 class="text-xl font-bold text-indigo-600">پلانی ڕۆژی <span id="modalDateDisplay"></span></h3>
-                <button onclick="closeModal()" class="text-gray-500 hover:text-red-500 text-2xl">&times;</button>
+    <!-- سەرپەڕ (Header) -->
+    <header class="bg-white shadow-sm sticky top-0 z-50">
+        <div class="container mx-auto px-4 py-4 flex justify-between items-center">
+            <div class="flex items-center space-x-3 space-x-reverse">
+                <div class="bg-blue-600 text-white p-2 rounded-lg">
+                    <i class="fa-solid fa-network-wired text-xl"></i>
+                </div>
+                <div>
+                    <h1 class="text-xl font-bold text-slate-800">کورد شێیەر</h1>
+                    <p class="text-xs text-slate-500">هاوبەشکردنی ناوخۆیی</p>
+                </div>
             </div>
             
-            <div class="mb-4">
-                <label class="block text-gray-700 mb-2">تێبینی یان پلانەکەت بنوسە:</label>
-                <textarea id="eventText" class="w-full border border-gray-300 rounded p-2 h-32 focus:outline-none focus:border-indigo-500" placeholder="نموونە: کۆبوونەوە لەگەڵ تیم..."></textarea>
+            <div class="hidden md:flex items-center space-x-4 space-x-reverse bg-slate-100 px-3 py-1 rounded-full text-sm">
+                <span class="flex items-center text-green-600">
+                    <i class="fa-solid fa-circle text-[10px] ml-2"></i>
+                    پەیوەستە بە وای-فای
+                </span>
+                <span class="text-slate-400">|</span>
+                <span class="text-slate-600" id="ip-address">192.168.1.104</span>
             </div>
 
-            <div class="flex justify-end gap-2">
-                <button onclick="deleteEvent()" class="bg-red-500 hover:bg-red-600 text-white px-4 py-2 rounded">سڕینەوە</button>
-                <button onclick="saveEvent()" class="bg-indigo-600 hover:bg-indigo-700 text-white px-4 py-2 rounded">پاشەکەوتکردن</button>
+            <button onclick="toggleMobileMenu()" class="md:hidden text-slate-600 text-xl">
+                <i class="fa-solid fa-bars"></i>
+            </button>
+        </div>
+    </header>
+
+    <!-- ناوەڕۆکی سەرەکی -->
+    <main class="container mx-auto px-4 py-8 max-w-5xl">
+        
+        <!-- بەشی بارکردن (Upload Section) -->
+        <div class="bg-white rounded-2xl p-8 shadow-sm mb-8 text-center">
+            <div id="drop-area" class="drop-zone rounded-xl p-10 cursor-pointer" onclick="document.getElementById('fileElem').click()">
+                <input type="file" id="fileElem" multiple accept="*/*" class="hidden" onchange="handleFiles(this.files)">
+                
+                <div class="flex flex-col items-center justify-center space-y-4">
+                    <div class="w-16 h-16 bg-blue-100 text-blue-600 rounded-full flex items-center justify-center text-3xl mb-2">
+                        <i class="fa-solid fa-cloud-arrow-up"></i>
+                    </div>
+                    <h3 class="text-xl font-bold text-slate-700">پەڕگەکان لێرە دابنێ یان کلیک بکە</h3>
+                    <p class="text-slate-500 text-sm max-w-md mx-auto leading-relaxed">
+                        دەتوانیت وێنە، ڤیدیۆ، یان هەر جۆرە پەڕگەیەک لە مۆبایلەکەت یان کۆمپیوتەرەکەتەوە دیاری بکەیت بۆ نیشاندان.
+                    </p>
+                    <button class="bg-blue-600 hover:bg-blue-700 text-white px-6 py-2 rounded-lg transition shadow-md mt-4">
+                        دیاریکردنی پەڕگە
+                    </button>
+                </div>
+            </div>
+        </div>
+
+        <!-- ئامارەکان -->
+        <div class="grid grid-cols-2 md:grid-cols-4 gap-4 mb-8">
+            <div class="bg-white p-4 rounded-xl shadow-sm border-r-4 border-blue-500">
+                <p class="text-slate-500 text-xs">کۆی گشتی</p>
+                <p class="text-2xl font-bold" id="total-count">0</p>
+            </div>
+            <div class="bg-white p-4 rounded-xl shadow-sm border-r-4 border-purple-500">
+                <p class="text-slate-500 text-xs">وێنەکان</p>
+                <p class="text-2xl font-bold" id="image-count">0</p>
+            </div>
+            <div class="bg-white p-4 rounded-xl shadow-sm border-r-4 border-orange-500">
+                <p class="text-slate-500 text-xs">ڤیدیۆکان</p>
+                <p class="text-2xl font-bold" id="video-count">0</p>
+            </div>
+            <div class="bg-white p-4 rounded-xl shadow-sm border-r-4 border-emerald-500">
+                <p class="text-slate-500 text-xs">قەبارەی بەکارهاتوو</p>
+                <p class="text-2xl font-bold" id="total-size">0 MB</p>
+            </div>
+        </div>
+
+        <!-- لیستی پەڕگەکان -->
+        <div class="flex justify-between items-center mb-4">
+            <h2 class="text-lg font-bold text-slate-800 flex items-center">
+                <i class="fa-regular fa-folder-open ml-2 text-yellow-500"></i>
+                پەڕگە زیادکراوەکان
+            </h2>
+            <button onclick="clearAll()" class="text-red-500 hover:text-red-700 text-sm font-medium">
+                سڕینەوەی هەمووی
+            </button>
+        </div>
+
+        <div id="file-list" class="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 gap-4">
+            <!-- پەڕگەکان لێرە زیاد دەکرێن بە شێوەی داینامیک -->
+            <div id="empty-state" class="col-span-full py-12 text-center text-slate-400 bg-white rounded-xl border border-slate-200 border-dashed">
+                <i class="fa-regular fa-folder-open text-4xl mb-3 opacity-50"></i>
+                <p>هیچ پەڕگەیەک زیاد نەکراوە</p>
+            </div>
+        </div>
+
+    </main>
+
+    <!-- مۆبایل مێنیو (Mobile Menu) -->
+    <div id="mobile-menu" class="fixed inset-0 bg-slate-900 bg-opacity-50 z-40 hidden" onclick="toggleMobileMenu()"></div>
+    <div id="mobile-sidebar" class="fixed top-0 right-0 h-full w-64 bg-white shadow-2xl transform translate-x-full transition-transform duration-300 z-50 p-6">
+        <div class="flex justify-between items-center mb-8">
+            <h2 class="font-bold text-xl">مێنیو</h2>
+            <button onclick="toggleMobileMenu()" class="text-slate-500"><i class="fa-solid fa-times text-xl"></i></button>
+        </div>
+        <div class="space-y-4">
+            <div class="bg-slate-50 p-3 rounded-lg text-sm">
+                <p class="text-slate-500 mb-1">ناونیشانی IP</p>
+                <p class="font-mono font-bold">192.168.1.104</p>
+            </div>
+            <div class="bg-slate-50 p-3 rounded-lg text-sm">
+                <p class="text-slate-500 mb-1">دۆخی تۆڕ</p>
+                <p class="text-green-600 font-bold">پەیوەستە</p>
             </div>
         </div>
     </div>
 
     <script>
-        let nav = 0;
-        let clicked = null;
-        let events = localStorage.getItem('events') ? JSON.parse(localStorage.getItem('events')) : [];
+        // Data Store
+        let filesData = [];
 
-        const calendar = document.getElementById('calendarGrid');
-        const eventModal = document.getElementById('eventModal');
-        const modalDateDisplay = document.getElementById('modalDateDisplay');
-        const eventText = document.getElementById('eventText');
-        
-        // Month names in Kurdish
-        const monthNames = [
-            "کانوونی دووەم", "شوبات", "ئازار", "نیسان", "ئایار", "حوزەیران",
-            "تەمموز", "ئاب", "ئەیلول", "تشرینی یەکەم", "تشرینی دووەم", "کانوونی یەکەم"
-        ];
+        // DOM Elements
+        const dropArea = document.getElementById('drop-area');
+        const fileList = document.getElementById('file-list');
+        const emptyState = document.getElementById('empty-state');
+        const mobileSidebar = document.getElementById('mobile-sidebar');
+        const mobileMenuBg = document.getElementById('mobile-menu');
 
-        function load() {
-            const dt = new Date();
+        // Counters
+        const countTotal = document.getElementById('total-count');
+        const countImages = document.getElementById('image-count');
+        const countVideos = document.getElementById('video-count');
+        const sizeTotal = document.getElementById('total-size');
 
-            if (nav !== 0) {
-                dt.setMonth(new Date().getMonth() + nav);
-            }
+        // Drag & Drop Events
+        ['dragenter', 'dragover', 'dragleave', 'drop'].forEach(eventName => {
+            dropArea.addEventListener(eventName, preventDefaults, false);
+        });
 
-            const day = dt.getDate();
-            const month = dt.getMonth();
-            const year = dt.getFullYear();
+        function preventDefaults(e) {
+            e.preventDefault();
+            e.stopPropagation();
+        }
 
-            const firstDayOfMonth = new Date(year, month, 1);
-            const daysInMonth = new Date(year, month + 1, 0).getDate();
+        ['dragenter', 'dragover'].forEach(eventName => {
+            dropArea.addEventListener(eventName, () => dropArea.classList.add('bg-blue-50', 'border-blue-400'), false);
+        });
+
+        ['dragleave', 'drop'].forEach(eventName => {
+            dropArea.addEventListener(eventName, () => dropArea.classList.remove('bg-blue-50', 'border-blue-400'), false);
+        });
+
+        dropArea.addEventListener('drop', handleDrop, false);
+
+        function handleDrop(e) {
+            const dt = e.dataTransfer;
+            const files = dt.files;
+            handleFiles(files);
+        }
+
+        // Main File Handling Function
+        function handleFiles(files) {
+            files = [...files];
             
-            const dateString = firstDayOfMonth.toLocaleDateString('en-us', {
-                weekday: 'long',
-                year: 'numeric',
-                month: 'numeric',
-                day: 'numeric',
+            // Add to data store
+            files.forEach(file => {
+                filesData.push(file);
             });
-            
-            // Calculate padding days (to start from Saturday/Sunday correctly)
-            // Adjusting for Saturday start (Saturday = 0 in our logic roughly)
-            const paddingDays = (firstDayOfMonth.getDay() + 1) % 7; 
 
-            document.getElementById('currentDateDisplay').innerText = `${monthNames[month]} ${year}`;
-
-            calendar.innerHTML = '';
-
-            for(let i = 1; i <= paddingDays + daysInMonth; i++) {
-                const daySquare = document.createElement('div');
-                daySquare.classList.add('day-cell', 'border-b', 'border-r', 'border-gray-200', 'p-2', 'flex', 'flex-col', 'justify-between');
-
-                if (i > paddingDays) {
-                    const dayNum = i - paddingDays;
-                    const dayString = `${year}/${month + 1}/${dayNum}`;
-                    
-                    // Display Day Number
-                    const dayNumberElem = document.createElement('div');
-                    dayNumberElem.innerText = dayNum;
-                    dayNumberElem.classList.add('font-bold', 'text-gray-700');
-                    daySquare.appendChild(dayNumberElem);
-
-                    // Check for Event
-                    const eventForDay = events.find(e => e.date === dayString);
-                    if (eventForDay) {
-                        const eventDiv = document.createElement('div');
-                        eventDiv.innerText = eventForDay.title;
-                        eventDiv.classList.add('bg-indigo-100', 'text-indigo-800', 'text-sm', 'p-1', 'rounded', 'mt-1', 'truncate');
-                        daySquare.appendChild(eventDiv);
-                    }
-
-                    // Highlight Current Day
-                    if (dayNum === day && nav === 0) {
-                        daySquare.classList.add('bg-blue-50');
-                        dayNumberElem.classList.add('text-blue-600');
-                    }
-
-                    daySquare.addEventListener('click', () => openModal(dayString));
-                } else {
-                    daySquare.classList.add('bg-gray-50'); // Empty padding days
-                }
-
-                calendar.appendChild(daySquare);
-            }
+            renderFiles();
+            updateStats();
         }
 
-        function openModal(date) {
-            clicked = date;
-            const eventForDay = events.find(e => e.date === clicked);
-
-            modalDateDisplay.innerText = clicked;
-
-            if (eventForDay) {
-                eventText.value = eventForDay.title;
+        // Render File Cards
+        function renderFiles() {
+            if (filesData.length > 0) {
+                emptyState.style.display = 'none';
             } else {
-                eventText.value = '';
+                emptyState.style.display = 'block';
+                // Remove all other children
+                while (fileList.lastElementChild && fileList.lastElementChild !== emptyState) {
+                    fileList.removeChild(fileList.lastElementChild);
+                }
+                return;
             }
 
-            eventModal.classList.remove('hidden');
-        }
+            // Clear list but keep empty state hidden
+            fileList.innerHTML = '';
+            fileList.appendChild(emptyState);
 
-        function closeModal() {
-            eventModal.classList.add('hidden');
-            eventText.value = '';
-            clicked = null;
-            load();
-        }
+            filesData.forEach((file, index) => {
+                const fileType = getFileType(file.type);
+                const fileSize = formatBytes(file.size);
+                const fileIcon = getFileIcon(fileType);
+                const iconColor = getIconColor(fileType);
 
-        function saveEvent() {
-            if (eventText.value) {
-                // Remove existing event if any to overwrite
-                events = events.filter(e => e.date !== clicked);
+                const div = document.createElement('div');
+                div.className = 'file-card bg-white p-4 rounded-xl border border-slate-100 shadow-sm flex items-center justify-between group';
                 
-                events.push({
-                    date: clicked,
-                    title: eventText.value,
-                });
+                div.innerHTML = `
+                    <div class="flex items-center space-x-3 space-x-reverse overflow-hidden">
+                        <div class="w-12 h-12 ${iconColor} bg-opacity-10 rounded-lg flex items-center justify-center flex-shrink-0 text-xl">
+                            <i class="${fileIcon}"></i>
+                        </div>
+                        <div class="min-w-0">
+                            <p class="text-sm font-bold text-slate-800 truncate" title="${file.name}">${file.name}</p>
+                            <p class="text-xs text-slate-500 mt-1">${fileSize} • ${getDate()}</p>
+                        </div>
+                    </div>
+                    <button onclick="removeFile(${index})" class="text-slate-300 hover:text-red-500 transition px-2">
+                        <i class="fa-solid fa-trash-can"></i>
+                    </button>
+                `;
+                fileList.appendChild(div);
+            });
+        }
 
-                localStorage.setItem('events', JSON.stringify(events));
-                closeModal();
+        function removeFile(index) {
+            filesData.splice(index, 1);
+            renderFiles();
+            updateStats();
+        }
+
+        function clearAll() {
+            if(confirm('دڵنیایت لە سڕینەوەی هەموو پەڕگەکان؟')) {
+                filesData = [];
+                renderFiles();
+                updateStats();
             }
         }
 
-        function deleteEvent() {
-            events = events.filter(e => e.date !== clicked);
-            localStorage.setItem('events', JSON.stringify(events));
-            closeModal();
+        // Statistics Update
+        function updateStats() {
+            countTotal.innerText = filesData.length;
+            
+            const images = filesData.filter(f => f.type.startsWith('image/')).length;
+            countImages.innerText = images;
+
+            const videos = filesData.filter(f => f.type.startsWith('video/')).length;
+            countVideos.innerText = videos;
+
+            const totalBytes = filesData.reduce((acc, file) => acc + file.size, 0);
+            sizeTotal.innerText = formatBytes(totalBytes);
         }
 
-        function changeMonth(direction) {
-            nav += direction;
-            load();
+        // Helper Functions
+        function formatBytes(bytes, decimals = 2) {
+            if (!+bytes) return '0 Bytes';
+            const k = 1024;
+            const dm = decimals < 0 ? 0 : decimals;
+            const sizes = ['Bytes', 'KB', 'MB', 'GB', 'TB'];
+            const i = Math.floor(Math.log(bytes) / Math.log(k));
+            return `${parseFloat((bytes / Math.pow(k, i)).toFixed(dm))} ${sizes[i]}`;
         }
 
-        // Close modal when clicking outside
-        window.onclick = function(event) {
-            if (event.target == eventModal) {
-                closeModal();
+        function getFileType(mime) {
+            if (mime.startsWith('image/')) return 'image';
+            if (mime.startsWith('video/')) return 'video';
+            if (mime.startsWith('audio/')) return 'audio';
+            if (mime.includes('pdf')) return 'pdf';
+            return 'other';
+        }
+
+        function getFileIcon(type) {
+            switch(type) {
+                case 'image': return 'fa-regular fa-image text-purple-600';
+                case 'video': return 'fa-solid fa-video text-orange-600';
+                case 'audio': return 'fa-solid fa-music text-pink-600';
+                case 'pdf': return 'fa-regular fa-file-pdf text-red-600';
+                default: return 'fa-regular fa-file text-blue-600';
             }
         }
 
-        // Init
-        load();
+        function getIconColor(type) {
+            switch(type) {
+                case 'image': return 'bg-purple-500 text-purple-600';
+                case 'video': return 'bg-orange-500 text-orange-600';
+                case 'audio': return 'bg-pink-500 text-pink-600';
+                case 'pdf': return 'bg-red-500 text-red-600';
+                default: return 'bg-blue-500 text-blue-600';
+            }
+        }
+
+        function getDate() {
+            const now = new Date();
+            return now.toLocaleTimeString('ckb-IQ', { hour: '2-digit', minute: '2-digit' });
+        }
+
+        function toggleMobileMenu() {
+            const isOpen = !mobileSidebar.classList.contains('translate-x-full');
+            if (isOpen) {
+                mobileSidebar.classList.add('translate-x-full');
+                mobileMenuBg.classList.add('hidden');
+            } else {
+                mobileSidebar.classList.remove('translate-x-full');
+                mobileMenuBg.classList.remove('hidden');
+            }
+        }
+
+        // Simulated IP generation for realism
+        window.onload = function() {
+            const rand = Math.floor(Math.random() * 255);
+            document.getElementById('ip-address').innerText = `192.168.1.${rand}`;
+        }
     </script>
 </body>
 </html>
