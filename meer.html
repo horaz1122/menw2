@@ -30,7 +30,7 @@
             window.db = getFirestore(app);
             window.storage = getStorage(app);
 
-            // Authentication Logic (Updated to be more robust)
+            // Authentication Logic
             const initAuth = async () => {
                 try {
                     if (typeof __initial_auth_token !== 'undefined' && __initial_auth_token) {
@@ -40,7 +40,7 @@
                     }
                 } catch (error) {
                     console.error("Auth Error:", error);
-                    alert("کێشە لە پەیوەستبوون بە هەژمار: " + error.message);
+                    // Silent fail handled by retry logic usually, or alert if persistent
                 }
             };
             
@@ -70,11 +70,15 @@
         }
 
         window.updateRoom = function() {
-            const newCode = document.getElementById('room-code-input').value;
+            const newCode = document.getElementById('room-code-input').value.trim();
             if (newCode && newCode.length > 0) {
                 localStorage.setItem('share_room_id', newCode);
                 connectToRoom(newCode);
-                // Removed alert to be less annoying
+                
+                // Visual feedback
+                const btn = document.getElementById('refresh-btn');
+                btn.classList.add('text-green-600');
+                setTimeout(() => btn.classList.remove('text-green-600'), 1000);
             }
         }
 
@@ -86,7 +90,6 @@
 
             const filesRef = collection(window.db, 'artifacts', window.appId, 'public', 'data', 'shared_files');
             
-            // FIX: Removed query/where. Fetching all and filtering in JS to avoid index issues.
             document.getElementById('loader').classList.remove('hidden');
 
             window.unsubscribeFiles = onSnapshot(filesRef, (snapshot) => {
@@ -94,8 +97,8 @@
                 const files = [];
                 snapshot.forEach((doc) => {
                     const data = doc.data();
-                    // Client-side filtering
-                    if (data.roomId === roomId) {
+                    // Improved Filtering: Trim strings to avoid mismatch
+                    if (String(data.roomId).trim() === String(roomId).trim()) {
                         files.push({ id: doc.id, ...data });
                     }
                 });
@@ -108,13 +111,27 @@
             }, (error) => {
                 console.error("Error fetching files:", error);
                 document.getElementById('loader').classList.add('hidden');
+                if (error.code === 'permission-denied') {
+                    alert("تکایە دڵنیابە لە ئینتەرنێتەکەت و ڕیفرێشی پەڕەکە بکەرەوە.");
+                }
             });
         }
 
         // Upload Logic
         window.handleFiles = async function(fileList) {
             const files = [...fileList];
-            const roomId = document.getElementById('room-code-input').value;
+            
+            // CRITICAL FIX: Ensure we use the CURRENT input value, and sync it
+            const inputCode = document.getElementById('room-code-input').value.trim();
+            const activeRoom = localStorage.getItem('share_room_id');
+
+            // If user typed a new code but didn't hit refresh, we force switch to it
+            if (inputCode !== activeRoom) {
+                localStorage.setItem('share_room_id', inputCode);
+                connectToRoom(inputCode);
+            }
+            
+            const roomId = inputCode;
             
             if (!window.auth.currentUser) {
                 alert("تكایە چاوەڕێ بە تا پەیوەست دەبێت بە ئینتەرنێتەوە...");
@@ -134,7 +151,7 @@
             showUploadingState(file.name, progressId);
 
             try {
-                // Simplified path to ensure permissions usually work
+                // Simplified path
                 const storageRef = ref(window.storage, `artifacts/${window.appId}/public/${roomId}/${Date.now()}_${file.name}`);
                 const uploadTask = uploadBytesResumable(storageRef, file);
 
@@ -159,7 +176,7 @@
                                 type: file.type,
                                 size: file.size,
                                 url: downloadURL,
-                                roomId: roomId,
+                                roomId: String(roomId).trim(), // Ensure stored as string
                                 createdAt: serverTimestamp(),
                                 storagePath: uploadTask.snapshot.ref.fullPath
                             });
@@ -167,7 +184,6 @@
                             removeProgress(progressId);
                         } catch (firestoreError) {
                             console.error("Firestore Error:", firestoreError);
-                            alert("فایلەکە بارکرا بەڵام نەتوانرا تۆمار بکرێت: " + firestoreError.message);
                             removeProgress(progressId);
                         }
                     }
@@ -408,7 +424,7 @@
             <div class="flex items-center bg-slate-100 rounded-lg p-1 pr-3 border border-slate-200">
                 <span class="text-xs text-slate-500 ml-2 hidden sm:inline">کۆدی ژوور:</span>
                 <input type="text" id="room-code-input" class="bg-transparent w-16 text-center font-mono font-bold text-slate-700 focus:outline-none" value="...">
-                <button onclick="updateRoom()" class="bg-white hover:bg-blue-50 text-blue-600 p-1.5 rounded-md shadow-sm transition">
+                <button id="refresh-btn" onclick="updateRoom()" class="bg-white hover:bg-blue-50 text-blue-600 p-1.5 rounded-md shadow-sm transition">
                     <i class="fa-solid fa-arrows-rotate text-xs"></i>
                 </button>
             </div>
