@@ -15,10 +15,10 @@
         import { getStorage, ref, uploadBytesResumable, getDownloadURL, deleteObject } from "https://www.gstatic.com/firebasejs/11.6.1/firebase-storage.js";
 
         // ==========================================
-        //  بەشی ڕێکخستنی فایەربەیس (بۆ کاتی دابەزاندن)
+        //  بەشی ڕێکخستنی فایەربەیس
         // ==========================================
-        // ئەگەر فایلەکە دابەزێنیت، زانیارییەکانی خۆت لێرە دابنێ:
-        // تێبینی: ناوی ئەم گۆڕاوە دەبێت MANUAL_CONFIG بێت نەک firebaseConfig
+        // زانیارییەکانی خۆت لێرە جێگیر کراون
+        // تێبینی: تکایە دەستکاری ناوی ئەم گۆڕاوە (MANUAL_CONFIG) مەکە
         const MANUAL_CONFIG = {
             apiKey: "AIzaSyBHxuOA6uuX1EZGse5_JOHc3WMjvPywLD4",
             authDomain: "prsyar-c93dd.firebaseapp.com",
@@ -46,13 +46,13 @@
                 firebaseConfig = JSON.parse(__firebase_config);
             } 
             // 2. Fallback to Manual Config (For when you download the file)
-            // لێرەدا کۆدەکە سەیری MANUAL_CONFIG دەکات
+            // لێرەدا کۆدەکە سەیری MANUAL_CONFIG دەکات - دەبێت ناوەکان وەک یەک بن
             else if (typeof MANUAL_CONFIG !== 'undefined' && MANUAL_CONFIG.apiKey !== "YOUR_API_KEY_HERE") {
                 firebaseConfig = MANUAL_CONFIG;
             } 
             else {
                 console.warn("No Firebase config found.");
-                alert("تێبینی: بۆ ئەوەی ئەم فایلە لەسەر مۆبایلەکەت کار بکات، دەبێت زانیاری Firebaseـی خۆت لە ناو کۆدەکەدا دابنێیت.");
+                alert("تێبینی: زانیاری فایەربەیس نەدۆزرایەوە.");
                 return;
             }
 
@@ -71,6 +71,7 @@
                         }
                     } catch (error) {
                         console.error("Auth Error:", error);
+                        alert("کێشە لە پەیوەستبوون: " + error.message);
                     }
                 };
                 
@@ -382,6 +383,189 @@
                 case 'pdf': return 'bg-red-500 text-red-600';
                 default: return 'bg-blue-500 text-blue-600';
             }
+        }
+    </script>
+    <style>
+        @import url('https://fonts.googleapis.com/css2?family=Rudaw&family=NRT+Reg&family=Vazirmatn:wght@300;400;700&display=swap');
+        
+        body {
+            font-family: 'Vazirmatn', sans-serif;
+            background-color: #f8fafc;
+        }
+
+        /* Custom Scrollbar */
+        ::-webkit-scrollbar {
+            width: 6px;
+        }
+        ::-webkit-scrollbar-track {
+            background: #f1f1f1; 
+        }
+        ::-webkit-scrollbar-thumb {
+            background: #cbd5e1; 
+            border-radius: 4px;
+        }
+
+        .drop-zone {
+            border: 2px dashed #cbd5e1;
+            transition: all 0.3s ease;
+            background-image: url("data:image/svg+xml,%3csvg width='100%25' height='100%25' xmlns='http://www.w3.org/2000/svg'%3e%3crect width='100%25' height='100%25' fill='none' rx='16' ry='16' stroke='%233B82F6FF' stroke-width='2' stroke-dasharray='12%2c 12' stroke-dashoffset='0' stroke-linecap='square'/%3e%3c/svg%3e");
+            border: none;
+        }
+        .drop-zone:hover {
+            background-color: #f0f9ff;
+            transform: scale(1.01);
+        }
+
+        .file-card {
+            transition: all 0.2s ease;
+        }
+        .file-card:hover {
+            transform: translateY(-2px);
+            box-shadow: 0 10px 15px -3px rgba(0, 0, 0, 0.1);
+        }
+        
+        .loader {
+            border: 3px solid #f3f3f3;
+            border-radius: 50%;
+            border-top: 3px solid #3498db;
+            width: 20px;
+            height: 20px;
+            -webkit-animation: spin 1s linear infinite; /* Safari */
+            animation: spin 1s linear infinite;
+        }
+
+        @keyframes spin {
+            0% { transform: rotate(0deg); }
+            100% { transform: rotate(360deg); }
+        }
+    </style>
+</head>
+<body class="bg-slate-50 min-h-screen text-slate-800 pb-20">
+
+    <!-- سەرپەڕ (Header) -->
+    <header class="bg-white shadow-sm sticky top-0 z-50 backdrop-blur-md bg-opacity-90">
+        <div class="container mx-auto px-4 py-3 flex justify-between items-center">
+            <div class="flex items-center space-x-3 space-x-reverse">
+                <div class="bg-gradient-to-br from-blue-600 to-indigo-600 text-white p-2.5 rounded-xl shadow-lg shadow-blue-200">
+                    <i class="fa-solid fa-share-nodes text-lg"></i>
+                </div>
+                <div>
+                    <h1 class="text-lg font-bold text-slate-800 leading-tight">کورد شێیەر</h1>
+                    <div class="flex items-center gap-1">
+                        <div id="loader" class="loader hidden"></div>
+                        <p class="text-[10px] text-green-600 font-medium">بە هێڵەوەیە</p>
+                    </div>
+                </div>
+            </div>
+            
+            <!-- Room Code Display -->
+            <div class="flex items-center bg-slate-100 rounded-lg p-1 pr-3 border border-slate-200">
+                <span class="text-xs text-slate-500 ml-2 hidden sm:inline">کۆدی ژوور:</span>
+                <input type="text" id="room-code-input" class="bg-transparent w-16 text-center font-mono font-bold text-slate-700 focus:outline-none" value="...">
+                <button id="refresh-btn" onclick="updateRoom()" class="bg-white hover:bg-blue-50 text-blue-600 p-1.5 rounded-md shadow-sm transition">
+                    <i class="fa-solid fa-arrows-rotate text-xs"></i>
+                </button>
+            </div>
+        </div>
+    </header>
+
+    <!-- ناوەڕۆکی سەرەکی -->
+    <main class="container mx-auto px-4 py-6 max-w-4xl">
+        
+        <!-- Info Banner -->
+        <div class="bg-blue-50 border border-blue-100 rounded-xl p-4 mb-6 flex items-start gap-3">
+            <i class="fa-solid fa-circle-info text-blue-500 mt-1"></i>
+            <div class="text-sm text-blue-800">
+                <p class="font-bold mb-1">تێبینی گرنگ:</p>
+                <p>هەر فایلێک داونلۆد بکرێت، <span class="font-bold text-red-600">ڕاستەوخۆ دەسڕێتەوە</span>. دڵنیابە لە کاتی گونجاودا دایدەگریت.</p>
+            </div>
+        </div>
+
+        <!-- بەشی بارکردن (Upload Section) -->
+        <div class="bg-white rounded-2xl p-6 shadow-sm mb-6 text-center relative overflow-hidden">
+            <div id="drop-area" class="drop-zone rounded-xl p-8 cursor-pointer group" onclick="document.getElementById('fileElem').click()">
+                <input type="file" id="fileElem" multiple accept="*/*" class="hidden" onchange="handleFiles(this.files)">
+                
+                <div class="flex flex-col items-center justify-center space-y-3 relative z-10">
+                    <div class="w-14 h-14 bg-blue-50 text-blue-600 rounded-2xl flex items-center justify-center text-2xl mb-1 group-hover:scale-110 transition duration-300 shadow-sm">
+                        <i class="fa-solid fa-cloud-arrow-up"></i>
+                    </div>
+                    <h3 class="text-lg font-bold text-slate-700">پەڕگەکان لێرە دابنێ</h3>
+                    <p class="text-slate-400 text-xs max-w-xs mx-auto">
+                        وێنە، ڤیدیۆ یان هەر فایلێک هەڵبژێرە بۆ ناردن
+                    </p>
+                </div>
+            </div>
+
+            <!-- Upload Progress Area -->
+            <div id="upload-progress-container" class="mt-4 hidden text-left dir-ltr">
+                <!-- Dynamic progress bars -->
+            </div>
+        </div>
+
+        <!-- ئامارەکان -->
+        <div class="grid grid-cols-4 gap-2 mb-6">
+            <div class="bg-white p-3 rounded-xl shadow-sm border-b-2 border-blue-500 text-center">
+                <p class="text-slate-400 text-[10px]">کۆی گشتی</p>
+                <p class="text-lg font-bold text-slate-700" id="total-count">0</p>
+            </div>
+            <div class="bg-white p-3 rounded-xl shadow-sm border-b-2 border-purple-500 text-center">
+                <p class="text-slate-400 text-[10px]">وێنە</p>
+                <p class="text-lg font-bold text-slate-700" id="image-count">0</p>
+            </div>
+            <div class="bg-white p-3 rounded-xl shadow-sm border-b-2 border-orange-500 text-center">
+                <p class="text-slate-400 text-[10px]">ڤیدیۆ</p>
+                <p class="text-lg font-bold text-slate-700" id="video-count">0</p>
+            </div>
+            <div class="bg-white p-3 rounded-xl shadow-sm border-b-2 border-emerald-500 text-center">
+                <p class="text-slate-400 text-[10px]">قەبارە</p>
+                <p class="text-sm font-bold text-slate-700 mt-1 dir-ltr" id="total-size">0 MB</p>
+            </div>
+        </div>
+
+        <!-- لیستی پەڕگەکان -->
+        <div class="flex justify-between items-center mb-4 px-1">
+            <h2 class="text-base font-bold text-slate-800 flex items-center">
+                <span class="w-2 h-6 bg-yellow-400 rounded-full ml-2"></span>
+                پەڕگە هاوبەش کراوەکان
+            </h2>
+        </div>
+
+        <div id="file-list" class="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-3 gap-3">
+            <!-- Empty State -->
+            <div id="empty-state" class="col-span-full py-12 text-center text-slate-400 bg-white rounded-xl border border-slate-100 border-dashed">
+                <div class="w-16 h-16 bg-slate-50 rounded-full flex items-center justify-center mx-auto mb-3">
+                    <i class="fa-regular fa-folder-open text-2xl opacity-50"></i>
+                </div>
+                <p class="text-sm">هێشتا هیچ فایلێک لەم ژوورە نییە</p>
+                <p class="text-xs opacity-60 mt-1">فایلێک بار بکە بۆ ئەوەی لێرە دەربکەوێت</p>
+            </div>
+        </div>
+
+    </main>
+
+    <script>
+        // UI Drag & Drop Events (Visuals Only)
+        const dropArea = document.getElementById('drop-area');
+        
+        ['dragenter', 'dragover', 'dragleave', 'drop'].forEach(eventName => {
+            dropArea.addEventListener(eventName, preventDefaults, false);
+        });
+
+        function preventDefaults(e) { e.preventDefault(); e.stopPropagation(); }
+
+        ['dragenter', 'dragover'].forEach(eventName => {
+            dropArea.addEventListener(eventName, () => dropArea.classList.add('bg-blue-50', 'border-blue-300'), false);
+        });
+
+        ['dragleave', 'drop'].forEach(eventName => {
+            dropArea.addEventListener(eventName, () => dropArea.classList.remove('bg-blue-50', 'border-blue-300'), false);
+        });
+
+        dropArea.addEventListener('drop', handleDrop, false);
+        function handleDrop(e) {
+            const dt = e.dataTransfer;
+            window.handleFiles(dt.files);
         }
     </script>
 </body>
