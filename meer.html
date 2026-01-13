@@ -14,6 +14,21 @@
         import { getFirestore, collection, addDoc, onSnapshot, deleteDoc, doc, serverTimestamp } from "https://www.gstatic.com/firebasejs/11.6.1/firebase-firestore.js";
         import { getStorage, ref, uploadBytesResumable, getDownloadURL, deleteObject } from "https://www.gstatic.com/firebasejs/11.6.1/firebase-storage.js";
 
+        // ==========================================
+        //  بەشی ڕێکخستنی فایەربەیس (بۆ کاتی دابەزاندن)
+        // ==========================================
+        // ئەگەر فایلەکە دابەزێنیت، زانیارییەکانی خۆت لێرە دابنێ:
+        const firebaseConfig = {
+            apiKey: "AIzaSyBHxuOA6uuX1EZGse5_JOHc3WMjvPywLD4",
+            authDomain: "prsyar-c93dd.firebaseapp.com",
+            projectId: "prsyar-c93dd",
+            storageBucket: "prsyar-c93dd.firebasestorage.app",
+            messagingSenderId: "623772510800",
+            appId: "1:623772510800:web:cc49fc9bbd9ed9c170ff55",
+            measurementId: "G-7KLKMNVFHC"
+        };
+        // ==========================================
+
         // Global Variables
         window.db = null;
         window.storage = null;
@@ -23,42 +38,54 @@
 
         // Initialize Firebase
         const initFirebase = async () => {
-            if (typeof __firebase_config === 'undefined') return;
-            const firebaseConfig = JSON.parse(__firebase_config);
-            const app = initializeApp(firebaseConfig);
-            window.auth = getAuth(app);
-            window.db = getFirestore(app);
-            window.storage = getStorage(app);
+            let firebaseConfig;
 
-            // Authentication Logic
-            const initAuth = async () => {
-                try {
-                    if (typeof __initial_auth_token !== 'undefined' && __initial_auth_token) {
-                        await signInWithCustomToken(window.auth, __initial_auth_token);
-                    } else {
-                        await signInAnonymously(window.auth);
+            if (typeof __firebase_config !== 'undefined') {
+                firebaseConfig = JSON.parse(__firebase_config);
+            } 
+            else if (MANUAL_CONFIG.apiKey !== "YOUR_API_KEY_HERE") {
+                firebaseConfig = MANUAL_CONFIG;
+            } 
+            else {
+                console.warn("No Firebase config found.");
+                alert("تێبینی: بۆ ئەوەی ئەم فایلە لەسەر مۆبایلەکەت کار بکات، دەبێت زانیاری Firebaseـی خۆت لە ناو کۆدەکەدا دابنێیت.");
+                return;
+            }
+
+            try {
+                const app = initializeApp(firebaseConfig);
+                window.auth = getAuth(app);
+                window.db = getFirestore(app);
+                window.storage = getStorage(app);
+
+                const initAuth = async () => {
+                    try {
+                        if (typeof __initial_auth_token !== 'undefined' && __initial_auth_token) {
+                            await signInWithCustomToken(window.auth, __initial_auth_token);
+                        } else {
+                            await signInAnonymously(window.auth);
+                        }
+                    } catch (error) {
+                        console.error("Auth Error:", error);
                     }
-                } catch (error) {
-                    console.error("Auth Error:", error);
-                    // Silent fail handled by retry logic usually, or alert if persistent
-                }
-            };
-            
-            await initAuth();
+                };
+                
+                await initAuth();
 
-            onAuthStateChanged(window.auth, (user) => {
-                if (user) {
-                    console.log("Logged in as:", user.uid);
-                    initRoom();
-                }
-            });
+                onAuthStateChanged(window.auth, (user) => {
+                    if (user) {
+                        initRoom();
+                    }
+                });
+            } catch (err) {
+                console.error("Firebase Init Error:", err);
+            }
         };
 
         initFirebase();
 
         // --- Logic Functions ---
 
-        // Room Management
         function initRoom() {
             let savedRoom = localStorage.getItem('share_room_id');
             if (!savedRoom) {
@@ -75,7 +102,6 @@
                 localStorage.setItem('share_room_id', newCode);
                 connectToRoom(newCode);
                 
-                // Visual feedback
                 const btn = document.getElementById('refresh-btn');
                 btn.classList.add('text-green-600');
                 setTimeout(() => btn.classList.remove('text-green-600'), 1000);
@@ -83,7 +109,6 @@
         }
 
         function connectToRoom(roomId) {
-            // Unsubscribe previous listener if exists
             if (window.unsubscribeFiles) {
                 window.unsubscribeFiles();
             }
@@ -97,13 +122,11 @@
                 const files = [];
                 snapshot.forEach((doc) => {
                     const data = doc.data();
-                    // Improved Filtering: Trim strings to avoid mismatch
                     if (String(data.roomId).trim() === String(roomId).trim()) {
                         files.push({ id: doc.id, ...data });
                     }
                 });
                 
-                // Sort by timestamp client-side
                 files.sort((a, b) => (b.createdAt?.seconds || 0) - (a.createdAt?.seconds || 0));
 
                 renderFiles(files);
@@ -111,21 +134,15 @@
             }, (error) => {
                 console.error("Error fetching files:", error);
                 document.getElementById('loader').classList.add('hidden');
-                if (error.code === 'permission-denied') {
-                    alert("تکایە دڵنیابە لە ئینتەرنێتەکەت و ڕیفرێشی پەڕەکە بکەرەوە.");
-                }
             });
         }
 
-        // Upload Logic
         window.handleFiles = async function(fileList) {
             const files = [...fileList];
             
-            // CRITICAL FIX: Ensure we use the CURRENT input value, and sync it
             const inputCode = document.getElementById('room-code-input').value.trim();
             const activeRoom = localStorage.getItem('share_room_id');
 
-            // If user typed a new code but didn't hit refresh, we force switch to it
             if (inputCode !== activeRoom) {
                 localStorage.setItem('share_room_id', inputCode);
                 connectToRoom(inputCode);
@@ -133,7 +150,7 @@
             
             const roomId = inputCode;
             
-            if (!window.auth.currentUser) {
+            if (!window.auth || !window.auth.currentUser) {
                 alert("تكایە چاوەڕێ بە تا پەیوەست دەبێت بە ئینتەرنێتەوە...");
                 return;
             }
@@ -146,12 +163,10 @@
         async function uploadSingleFile(file, roomId) {
             if (!window.storage) return;
 
-            // Create a progress element
             const progressId = 'prog-' + Math.random().toString(36).substr(2, 9);
             showUploadingState(file.name, progressId);
 
             try {
-                // Simplified path
                 const storageRef = ref(window.storage, `artifacts/${window.appId}/public/${roomId}/${Date.now()}_${file.name}`);
                 const uploadTask = uploadBytesResumable(storageRef, file);
 
@@ -167,16 +182,14 @@
                     }, 
                     async () => {
                         try {
-                            // Upload complete
                             const downloadURL = await getDownloadURL(uploadTask.snapshot.ref);
                             
-                            // Save to Firestore
                             await addDoc(collection(window.db, 'artifacts', window.appId, 'public', 'data', 'shared_files'), {
                                 name: file.name,
                                 type: file.type,
                                 size: file.size,
                                 url: downloadURL,
-                                roomId: String(roomId).trim(), // Ensure stored as string
+                                roomId: String(roomId).trim(),
                                 createdAt: serverTimestamp(),
                                 storagePath: uploadTask.snapshot.ref.fullPath
                             });
@@ -195,23 +208,47 @@
             }
         }
 
-        // Delete Logic
-        window.deleteFile = async function(id, storagePath) {
-            if(!confirm('دڵنیایت لە سڕینەوەی ئەم پەڕگەیە؟')) return;
-
+        // --- Delete Functions ---
+        
+        // Internal function to perform deletion
+        const performDelete = async (id, storagePath) => {
             try {
                 // 1. Delete from Firestore
                 await deleteDoc(doc(window.db, 'artifacts', window.appId, 'public', 'data', 'shared_files', id));
                 
-                // 2. Delete from Storage (if path exists)
+                // 2. Delete from Storage
                 if (storagePath) {
                     const fileRef = ref(window.storage, storagePath);
                     await deleteObject(fileRef).catch(e => console.log("Storage delete error (might already be gone):", e));
                 }
             } catch (e) {
                 console.error("Error deleting:", e);
-                alert("نەتوانرا بسڕێتەوە");
             }
+        }
+
+        // Manual Delete
+        window.deleteFile = async function(id, storagePath) {
+            if(!confirm('دڵنیایت لە سڕینەوەی ئەم پەڕگەیە؟')) return;
+            await performDelete(id, storagePath);
+        }
+
+        // Download AND Delete
+        window.downloadAndDelete = function(url, id, storagePath) {
+            // 1. Trigger Download
+            // We use window.open to force a new tab/download
+            window.open(url, '_blank');
+
+            // 2. Show small notification
+            const notification = document.createElement('div');
+            notification.className = "fixed bottom-4 right-4 bg-slate-800 text-white px-4 py-2 rounded-lg shadow-lg z-50 text-sm animate-bounce";
+            notification.innerHTML = '<i class="fa-solid fa-trash-can ml-2"></i> فایلەکە سڕایەوە';
+            document.body.appendChild(notification);
+            setTimeout(() => notification.remove(), 3000);
+
+            // 3. Delete Immediately (after a minimal delay to ensure request sent)
+            setTimeout(() => {
+                performDelete(id, storagePath);
+            }, 1000);
         }
 
         // --- UI Functions ---
@@ -252,7 +289,6 @@
             const fileList = document.getElementById('file-list');
             const emptyState = document.getElementById('empty-state');
 
-            // Clear current list except empty state
             Array.from(fileList.children).forEach(child => {
                 if (child.id !== 'empty-state') child.remove();
             });
@@ -288,11 +324,8 @@
                     </div>
                     
                     <div class="flex items-center gap-2 mt-1 border-t border-slate-50 pt-3">
-                        <a href="${file.url}" target="_blank" class="flex-1 bg-blue-50 hover:bg-blue-100 text-blue-600 text-xs font-bold py-2 rounded-lg text-center transition flex items-center justify-center gap-2">
-                            <i class="fa-solid fa-download"></i> داگرتن
-                        </a>
-                        <button onclick="deleteFile('${file.id}', '${file.storagePath}')" class="w-8 h-8 flex items-center justify-center text-slate-400 hover:text-red-500 hover:bg-red-50 rounded-lg transition">
-                            <i class="fa-solid fa-trash-can"></i>
+                        <button onclick="downloadAndDelete('${file.url}', '${file.id}', '${file.storagePath}')" class="flex-1 bg-red-50 hover:bg-red-100 text-red-600 text-xs font-bold py-2 rounded-lg text-center transition flex items-center justify-center gap-2 border border-red-200">
+                            <i class="fa-solid fa-download"></i> داگرتن و سڕینەوە
                         </button>
                     </div>
                 `;
@@ -438,8 +471,8 @@
         <div class="bg-blue-50 border border-blue-100 rounded-xl p-4 mb-6 flex items-start gap-3">
             <i class="fa-solid fa-circle-info text-blue-500 mt-1"></i>
             <div class="text-sm text-blue-800">
-                <p class="font-bold mb-1">چۆنێتی بەکارهێنان:</p>
-                <p>دڵنیابە هەمان <span class="font-bold bg-white px-1 rounded">کۆدی ژوور</span> لەسەر مۆبایل و کۆمپیوتەرەکەت نووسراوە بۆ ئەوەی فایلەکان ببینیت.</p>
+                <p class="font-bold mb-1">تێبینی گرنگ:</p>
+                <p>هەر فایلێک داونلۆد بکرێت، <span class="font-bold text-red-600">ڕاستەوخۆ دەسڕێتەوە</span>. دڵنیابە لە کاتی گونجاودا دایدەگریت.</p>
             </div>
         </div>
 
