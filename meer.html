@@ -3,7 +3,7 @@
 <head>
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
-    <title>هاوبەشکردنی پەڕگەکان - کوردی (خێرا)</title>
+    <title>هاوبەشکردنی پەڕگەکان - کوردی (جێگیر)</title>
     <script src="https://cdn.tailwindcss.com"></script>
     <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.4.0/css/all.min.css">
     
@@ -34,6 +34,7 @@
         window.auth = null;
         window.appId = typeof __app_id !== 'undefined' ? __app_id : 'default-share-app';
         window.unsubscribeFiles = null;
+        window.currentUser = null;
 
         // Initialize Firebase
         const initFirebase = async () => {
@@ -47,7 +48,7 @@
             } 
             else {
                 console.warn("No Firebase config found.");
-                alert("تێبینی: زانیاری فایەربەیس نەدۆزرایەوە.");
+                document.getElementById('status-msg').innerText = "تکایە زانیاری Firebase دابنێ";
                 return;
             }
 
@@ -66,7 +67,9 @@
                         }
                     } catch (error) {
                         console.error("Auth Error:", error);
-                        // alert("کێشە لە پەیوەستبوون: " + error.message);
+                        document.getElementById('status-msg').innerText = "کێشەی پەیوەستبوون: " + error.code;
+                        document.getElementById('status-dot').classList.remove('text-green-600');
+                        document.getElementById('status-dot').classList.add('text-red-600');
                     }
                 };
                 
@@ -74,7 +77,14 @@
 
                 onAuthStateChanged(window.auth, (user) => {
                     if (user) {
+                        window.currentUser = user;
+                        document.getElementById('status-msg').innerText = "بە هێڵەوەیە";
+                        document.getElementById('status-dot').classList.add('text-green-600');
+                        document.getElementById('status-dot').classList.remove('text-red-600');
                         initRoom();
+                    } else {
+                        window.currentUser = null;
+                        document.getElementById('status-msg').innerText = "پەیوەست نییە";
                     }
                 });
             } catch (err) {
@@ -135,59 +145,92 @@
             }, (error) => {
                 console.error("Error fetching files:", error);
                 document.getElementById('loader').classList.add('hidden');
+                if (error.code === 'permission-denied') {
+                    // Usually implies rules issue or auth drop
+                }
             });
         }
 
-        // --- Image Compression Logic ---
+        // --- Image Compression Logic (Safe Mode) ---
         async function compressImage(file) {
-            // Only compress images
             if (!file.type.startsWith('image/')) return file;
-            // Don't compress small images (< 1MB)
-            if (file.size < 1024 * 1024) return file;
+            if (file.size < 1024 * 1024) return file; // Don't compress < 1MB
 
-            return new Promise((resolve) => {
+            // Create a timeout promise to prevent hanging
+            const timeoutPromise = new Promise((resolve) => {
+                setTimeout(() => resolve(file), 3000); // If > 3s, return original
+            });
+
+            const compressionPromise = new Promise((resolve) => {
                 const img = new Image();
                 img.src = URL.createObjectURL(file);
                 img.onload = () => {
-                    const canvas = document.createElement('canvas');
-                    const ctx = canvas.getContext('2d');
-                    
-                    // Max dimension limit (e.g., 1920px)
-                    const MAX_WIDTH = 1920;
-                    const MAX_HEIGHT = 1920;
-                    let width = img.width;
-                    let height = img.height;
+                    try {
+                        const canvas = document.createElement('canvas');
+                        const ctx = canvas.getContext('2d');
+                        
+                        const MAX_WIDTH = 1920;
+                        const MAX_HEIGHT = 1920;
+                        let width = img.width;
+                        let height = img.height;
 
-                    if (width > height) {
-                        if (width > MAX_WIDTH) {
-                            height *= MAX_WIDTH / width;
-                            width = MAX_WIDTH;
-                        }
-                    } else {
-                        if (height > MAX_HEIGHT) {
-                            width *= MAX_HEIGHT / height;
-                            height = MAX_HEIGHT;
-                        }
-                    }
-
-                    canvas.width = width;
-                    canvas.height = height;
-                    ctx.drawImage(img, 0, 0, width, height);
-
-                    // Compress to JPEG with 0.7 quality
-                    canvas.toBlob((blob) => {
-                        if (blob) {
-                            const compressedFile = new File([blob], file.name, {
-                                type: 'image/jpeg',
-                                lastModified: Date.now(),
-                            });
-                            resolve(compressedFile);
+                        if (width > height) {
+                            if (width > MAX_WIDTH) {
+                                height *= MAX_WIDTH / width;
+                                width = MAX_WIDTH;
+                            }
                         } else {
-                            resolve(file); // Fallback to original
+                            if (height > MAX_HEIGHT) {
+                                width *= MAX_HEIGHT / height;
+                                height = MAX_HEIGHT;
+                            }
                         }
-                    }, 'image/jpeg', 0.7);
+
+                        canvas.width = width;
+                        canvas.height = height;
+                        ctx.drawImage(img, 0, 0, width, height);
+
+                        canvas.toBlob((blob) => {
+                            if (blob) {
+                                const compressedFile = new File([blob], file.name, {
+                                    type: 'image/jpeg',
+                                    lastModified: Date.now(),
+                                });
+                                resolve(compressedFile);
+                            } else {
+                                resolve(file);
+                            }
+                        }, 'image/jpeg', 0.8);
+                    } catch (e) {
+                        console.error("Compression error:", e);
+                        resolve(file);
+                    }
                 };
-                img.onerror = () => resolve(file); // Fallback on error
+                img.onerror = () => resolve(file);
+            });
+
+            // Race: whichever finishes first (compression or 3s timeout)
+            return Promise.race([compressionPromise, timeoutPromise]);
+        }
+
+        // --- Upload Logic ---
+
+        // Helper to wait for auth
+        function waitForAuth() {
+            return new Promise((resolve, reject) => {
+                if (window.currentUser) return resolve(window.currentUser);
+                let attempts = 0;
+                const check = setInterval(() => {
+                    attempts++;
+                    if (window.currentUser) {
+                        clearInterval(check);
+                        resolve(window.currentUser);
+                    }
+                    if (attempts > 20) { // 10 seconds timeout
+                        clearInterval(check);
+                        reject("کات بەسەرچوو بۆ پەیوەستبوون");
+                    }
+                }, 500);
             });
         }
 
@@ -204,9 +247,22 @@
             
             const roomId = inputCode;
             
-            if (!window.auth || !window.auth.currentUser) {
-                alert("تكایە چاوەڕێ بە تا پەیوەست دەبێت بە ئینتەرنێتەوە...");
-                return;
+            // Check auth first
+            if (!window.currentUser) {
+                // Show temporary toast
+                const toast = document.createElement('div');
+                toast.className = "fixed top-4 left-1/2 transform -translate-x-1/2 bg-yellow-100 text-yellow-800 px-4 py-2 rounded shadow z-50";
+                toast.innerText = "چاوەڕێی پەیوەستبوون...";
+                document.body.appendChild(toast);
+                
+                try {
+                    await waitForAuth();
+                    toast.remove();
+                } catch (e) {
+                    toast.innerText = "پەیوەستبوون سەرکەوتوو نەبوو. تکایە ئینتەرنێت پشکنین بکە.";
+                    setTimeout(() => toast.remove(), 3000);
+                    return;
+                }
             }
 
             for (const file of files) {
@@ -218,19 +274,27 @@
             if (!window.storage) return;
 
             const progressId = 'prog-' + Math.random().toString(36).substr(2, 9);
-            // Initial state
             showUploadingState(file.name, progressId, "ئامادەکردن...");
 
             try {
-                // Try compression
+                // Try compression with safe fallback
                 let uploadFile = file;
                 if (file.type.startsWith('image/')) {
-                     // Update text to show optimizing
                      updateStatusText(progressId, "پچووککردنەوە...");
-                     uploadFile = await compressImage(file);
+                     try {
+                         uploadFile = await compressImage(file);
+                     } catch (e) {
+                         console.log("Compression failed, using original");
+                         uploadFile = file;
+                     }
                 }
 
-                const storageRef = ref(window.storage, `artifacts/${window.appId}/public/${roomId}/${Date.now()}_${uploadFile.name}`);
+                updateStatusText(progressId, "دەستپێکردنی ناردن...");
+                
+                // Construct path
+                const storagePath = `artifacts/${window.appId}/public/${roomId}/${Date.now()}_${uploadFile.name.replace(/[^a-zA-Z0-9.-]/g, '_')}`;
+                const storageRef = ref(window.storage, storagePath);
+                
                 const uploadTask = uploadBytesResumable(storageRef, uploadFile);
 
                 uploadTask.on('state_changed', 
@@ -242,16 +306,19 @@
                     (error) => {
                         console.error("Upload failed", error);
                         removeProgress(progressId);
-                        alert("هەڵە لە بارکردن: " + error.message);
+                        let msg = "هەڵە: " + error.code;
+                        if (error.code === 'storage/unauthorized') msg = "هەڵە: ڕێگەپێدان نییە (CORS یان Rules)";
+                        if (error.code === 'storage/retry-limit-exceeded') msg = "هەڵە: ئینتەرنێت زۆر خاوە";
+                        alert(msg);
                     }, 
                     async () => {
                         try {
                             const downloadURL = await getDownloadURL(uploadTask.snapshot.ref);
                             
                             await addDoc(collection(window.db, 'artifacts', window.appId, 'public', 'data', 'shared_files'), {
-                                name: file.name, // Use original name
+                                name: file.name,
                                 type: uploadFile.type,
-                                size: uploadFile.size, // Use compressed size
+                                size: uploadFile.size,
                                 url: downloadURL,
                                 roomId: String(roomId).trim(),
                                 createdAt: serverTimestamp(),
@@ -261,7 +328,9 @@
                             removeProgress(progressId);
                         } catch (firestoreError) {
                             console.error("Firestore Error:", firestoreError);
+                            // Even if firestore fails, file is uploaded. 
                             removeProgress(progressId);
+                            alert("فایلەکە نێردرا بەڵام تۆمار نەکرا: " + firestoreError.message);
                         }
                     }
                 );
@@ -276,10 +345,7 @@
         
         const performDelete = async (id, storagePath) => {
             try {
-                // 1. Delete from Firestore
                 await deleteDoc(doc(window.db, 'artifacts', window.appId, 'public', 'data', 'shared_files', id));
-                
-                // 2. Delete from Storage
                 if (storagePath) {
                     const fileRef = ref(window.storage, storagePath);
                     await deleteObject(fileRef).catch(e => console.log("Storage delete error:", e));
@@ -296,7 +362,6 @@
 
         window.downloadAndDelete = function(url, id, storagePath) {
             window.open(url, '_blank');
-
             const notification = document.createElement('div');
             notification.className = "fixed bottom-4 right-4 bg-slate-800 text-white px-4 py-2 rounded-lg shadow-lg z-50 text-sm animate-bounce";
             notification.innerHTML = '<i class="fa-solid fa-trash-can ml-2"></i> فایلەکە سڕایەوە';
@@ -400,12 +465,10 @@
             });
         }
 
-        // Helper Logic
         function updateStats(files) {
             document.getElementById('total-count').innerText = files.length;
             document.getElementById('image-count').innerText = files.filter(f => (f.type || '').startsWith('image/')).length;
             document.getElementById('video-count').innerText = files.filter(f => (f.type || '').startsWith('video/')).length;
-            
             const totalBytes = files.reduce((acc, file) => acc + (file.size || 0), 0);
             document.getElementById('total-size').innerText = formatBytes(totalBytes);
         }
@@ -455,17 +518,9 @@
             background-color: #f8fafc;
         }
 
-        /* Custom Scrollbar */
-        ::-webkit-scrollbar {
-            width: 6px;
-        }
-        ::-webkit-scrollbar-track {
-            background: #f1f1f1; 
-        }
-        ::-webkit-scrollbar-thumb {
-            background: #cbd5e1; 
-            border-radius: 4px;
-        }
+        ::-webkit-scrollbar { width: 6px; }
+        ::-webkit-scrollbar-track { background: #f1f1f1; }
+        ::-webkit-scrollbar-thumb { background: #cbd5e1; border-radius: 4px; }
 
         .drop-zone {
             border: 2px dashed #cbd5e1;
@@ -478,13 +533,8 @@
             transform: scale(1.01);
         }
 
-        .file-card {
-            transition: all 0.2s ease;
-        }
-        .file-card:hover {
-            transform: translateY(-2px);
-            box-shadow: 0 10px 15px -3px rgba(0, 0, 0, 0.1);
-        }
+        .file-card { transition: all 0.2s ease; }
+        .file-card:hover { transform: translateY(-2px); box-shadow: 0 10px 15px -3px rgba(0, 0, 0, 0.1); }
         
         .loader {
             border: 3px solid #f3f3f3;
@@ -492,7 +542,7 @@
             border-top: 3px solid #3498db;
             width: 20px;
             height: 20px;
-            -webkit-animation: spin 1s linear infinite; /* Safari */
+            -webkit-animation: spin 1s linear infinite;
             animation: spin 1s linear infinite;
         }
 
@@ -504,7 +554,7 @@
 </head>
 <body class="bg-slate-50 min-h-screen text-slate-800 pb-20">
 
-    <!-- سەرپەڕ (Header) -->
+    <!-- Header -->
     <header class="bg-white shadow-sm sticky top-0 z-50 backdrop-blur-md bg-opacity-90">
         <div class="container mx-auto px-4 py-3 flex justify-between items-center">
             <div class="flex items-center space-x-3 space-x-reverse">
@@ -515,12 +565,12 @@
                     <h1 class="text-lg font-bold text-slate-800 leading-tight">کورد شێیەر</h1>
                     <div class="flex items-center gap-1">
                         <div id="loader" class="loader hidden"></div>
-                        <p class="text-[10px] text-green-600 font-medium">بە هێڵەوەیە</p>
+                        <i id="status-dot" class="fa-solid fa-circle text-[8px] text-gray-400"></i>
+                        <p id="status-msg" class="text-[10px] text-gray-500 font-medium">پەیوەستکردن...</p>
                     </div>
                 </div>
             </div>
             
-            <!-- Room Code Display -->
             <div class="flex items-center bg-slate-100 rounded-lg p-1 pr-3 border border-slate-200">
                 <span class="text-xs text-slate-500 ml-2 hidden sm:inline">کۆدی ژوور:</span>
                 <input type="text" id="room-code-input" class="bg-transparent w-16 text-center font-mono font-bold text-slate-700 focus:outline-none" value="...">
@@ -531,10 +581,9 @@
         </div>
     </header>
 
-    <!-- ناوەڕۆکی سەرەکی -->
+    <!-- Main Content -->
     <main class="container mx-auto px-4 py-6 max-w-4xl">
         
-        <!-- Info Banner -->
         <div class="bg-blue-50 border border-blue-100 rounded-xl p-4 mb-6 flex items-start gap-3">
             <i class="fa-solid fa-circle-info text-blue-500 mt-1"></i>
             <div class="text-sm text-blue-800">
@@ -543,7 +592,6 @@
             </div>
         </div>
 
-        <!-- بەشی بارکردن (Upload Section) -->
         <div class="bg-white rounded-2xl p-6 shadow-sm mb-6 text-center relative overflow-hidden">
             <div id="drop-area" class="drop-zone rounded-xl p-8 cursor-pointer group" onclick="document.getElementById('fileElem').click()">
                 <input type="file" id="fileElem" multiple accept="*/*" class="hidden" onchange="handleFiles(this.files)">
@@ -559,13 +607,11 @@
                 </div>
             </div>
 
-            <!-- Upload Progress Area -->
             <div id="upload-progress-container" class="mt-4 hidden text-left dir-ltr">
                 <!-- Dynamic progress bars -->
             </div>
         </div>
 
-        <!-- ئامارەکان -->
         <div class="grid grid-cols-4 gap-2 mb-6">
             <div class="bg-white p-3 rounded-xl shadow-sm border-b-2 border-blue-500 text-center">
                 <p class="text-slate-400 text-[10px]">کۆی گشتی</p>
@@ -585,7 +631,6 @@
             </div>
         </div>
 
-        <!-- لیستی پەڕگەکان -->
         <div class="flex justify-between items-center mb-4 px-1">
             <h2 class="text-base font-bold text-slate-800 flex items-center">
                 <span class="w-2 h-6 bg-yellow-400 rounded-full ml-2"></span>
@@ -594,7 +639,6 @@
         </div>
 
         <div id="file-list" class="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-3 gap-3">
-            <!-- Empty State -->
             <div id="empty-state" class="col-span-full py-12 text-center text-slate-400 bg-white rounded-xl border border-slate-100 border-dashed">
                 <div class="w-16 h-16 bg-slate-50 rounded-full flex items-center justify-center mx-auto mb-3">
                     <i class="fa-regular fa-folder-open text-2xl opacity-50"></i>
@@ -607,7 +651,6 @@
     </main>
 
     <script>
-        // UI Drag & Drop Events (Visuals Only)
         const dropArea = document.getElementById('drop-area');
         
         ['dragenter', 'dragover', 'dragleave', 'drop'].forEach(eventName => {
