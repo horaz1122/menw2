@@ -8,43 +8,22 @@
     <link href="https://fonts.googleapis.com/css2?family=Vazirmatn:wght@300;400;700;900&display=swap" rel="stylesheet">
     <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.4.0/css/all.min.css">
     
-    <script type="module">
-        import { initializeApp } from "https://www.gstatic.com/firebasejs/11.6.1/firebase-app.js";
-        import { getFirestore, doc, getDoc, setDoc, deleteDoc, updateDoc, collection, getDocs, query, orderBy } from "https://www.gstatic.com/firebasejs/11.6.1/firebase-firestore.js";
-
-        const firebaseConfig = {
-            apiKey: "AIzaSyBHxuOA6uuX1EZGse5_JOHc3WMjvPywLD4",
-            authDomain: "prsyar-c93dd.firebaseapp.com",
-            projectId: "prsyar-c93dd",
-            storageBucket: "prsyar-c93dd.firebasestorage.app",
-            messagingSenderId: "623772510800",
-            appId: "1:623772510800:web:cc49fc9bbd9ed9c170ff55",
-            measurementId: "G-7KLKMNVFHC"
-        };
-
-        const app = initializeApp(firebaseConfig);
-        const db = getFirestore(app);
-        const appId = 'exam-system-v12-locked';
-
-        window.db = db;
-        window.appId = appId;
-        window.doc = doc;
-        window.setDoc = setDoc;
-        window.updateDoc = updateDoc;
-        window.deleteDoc = deleteDoc;
-        window.collection = collection;
-        window.getDocs = getDocs;
-        window.query = query;
-        window.orderBy = orderBy;
-    </script>
-
     <style>
         body { font-family: 'Vazirmatn', sans-serif; background-color: #f3f4f6; }
         .tap-highlight-transparent { -webkit-tap-highlight-color: transparent; }
+        /* Loading overlay */
+        #loader {
+            position: fixed; inset: 0; background: rgba(255,255,255,0.8);
+            z-index: 100; display: none; align-items: center; justify-content: center;
+        }
     </style>
 </head>
 <body class="pb-24 tap-highlight-transparent">
 
+    <!-- Loader -->
+    <div id="loader"><i class="fa-solid fa-spinner fa-spin text-4xl text-purple-600"></i></div>
+
+    <!-- Login Box -->
     <div id="login-box" class="fixed inset-0 flex items-center justify-center bg-gray-900/90 z-50 p-4">
         <div class="bg-white p-6 rounded-2xl shadow-2xl w-full max-w-sm text-center">
             <div class="bg-purple-100 w-16 h-16 rounded-full flex items-center justify-center mx-auto mb-4">
@@ -56,6 +35,7 @@
         </div>
     </div>
 
+    <!-- Dashboard -->
     <div id="dashboard" class="hidden container mx-auto p-4 max-w-2xl">
         
         <div class="flex justify-between items-center mb-6">
@@ -68,6 +48,7 @@
             </button>
         </div>
 
+        <!-- Backup Section -->
         <div class="bg-indigo-50 p-4 rounded-2xl border border-indigo-100 mb-6 flex justify-between items-center shadow-sm">
             <div>
                 <h3 class="font-bold text-indigo-900 text-sm"><i class="fa-solid fa-database mr-1"></i> داتا و باکەپ</h3>
@@ -83,6 +64,8 @@
                 <input type="file" id="restore-input" class="hidden" accept=".json" onchange="restoreData(this)">
             </div>
         </div>
+
+        <!-- New Code Form -->
         <div class="bg-white p-5 rounded-2xl shadow-sm border border-gray-100 mb-6">
             <div class="flex justify-between items-center mb-4">
                 <h3 class="font-bold text-purple-700 flex items-center gap-2">
@@ -116,6 +99,7 @@
             </div>
         </div>
 
+        <!-- Search & Filter -->
         <div class="sticky top-2 z-10 space-y-2 mb-4">
             <div class="bg-white p-2 rounded-xl shadow-sm border border-gray-100 flex items-center gap-2">
                 <i class="fa-solid fa-magnifying-glass text-gray-400 mr-2"></i>
@@ -128,6 +112,7 @@
             </div>
         </div>
 
+        <!-- Code List -->
         <div id="code-list-container" class="space-y-3">
             <div class="text-center text-gray-400 mt-10">
                 <i class="fa-solid fa-spinner fa-spin text-2xl"></i>
@@ -136,82 +121,62 @@
 
     </div>
 
+    <!-- MAIN SCRIPT (MODULE) -->
     <script type="module">
-        import { doc, setDoc, updateDoc, collection, query, orderBy, getDocs, deleteDoc } from "https://www.gstatic.com/firebasejs/11.6.1/firebase-firestore.js";
+        // Import Auth and Firestore
+        import { initializeApp } from "https://www.gstatic.com/firebasejs/11.6.1/firebase-app.js";
+        import { getAuth, signInAnonymously } from "https://www.gstatic.com/firebasejs/11.6.1/firebase-auth.js";
+        import { getFirestore, doc, getDoc, setDoc, deleteDoc, updateDoc, collection, getDocs, query, orderBy } from "https://www.gstatic.com/firebasejs/11.6.1/firebase-firestore.js";
+
+        // CONFIGURATION
+        const firebaseConfig = {
+            apiKey: "AIzaSyBHxuOA6uuX1EZGse5_JOHc3WMjvPywLD4",
+            authDomain: "prsyar-c93dd.firebaseapp.com",
+            projectId: "prsyar-c93dd",
+            storageBucket: "prsyar-c93dd.firebasestorage.app",
+            messagingSenderId: "623772510800",
+            appId: "1:623772510800:web:cc49fc9bbd9ed9c170ff55",
+            measurementId: "G-7KLKMNVFHC"
+        };
+
+        // Initialize Firebase
+        const app = initializeApp(firebaseConfig);
+        const auth = getAuth(app); // Get Auth Service
+        const db = getFirestore(app);
         
+        // This ID seems to be your collection/doc path root
+        const appId = 'exam-system-v12-locked';
+
         let allCodes = [];
         let currentTab = 'active';
 
-        // --- BACKUP FUNCTION ---
-        window.backupData = async () => {
-            if(!confirm('دەتەوێت هەموو داتاکان دابەزێنیت؟')) return;
-            
+        // --- AUTHENTICATION (CRITICAL FIX) ---
+        // We must sign in before we can read/write
+        async function initApp() {
             try {
-                const q = query(collection(window.db, 'artifacts', window.appId, 'access_codes'));
-                const snap = await getDocs(q);
-                const data = [];
-                snap.forEach(d => {
-                    // Include the ID inside the object for restoration later
-                    data.push({ _id: d.id, ...d.data() });
-                });
-
-                if(data.length === 0) return alert('هیچ داتایەک نییە بۆ داگرتن');
-
-                const dataStr = JSON.stringify(data, null, 2);
-                const blob = new Blob([dataStr], { type: "application/json" });
-                const url = URL.createObjectURL(blob);
-                const a = document.createElement('a');
-                a.href = url;
-                a.download = `backup_codes_${new Date().toISOString().slice(0,10)}.json`;
-                document.body.appendChild(a);
-                a.click();
-                document.body.removeChild(a);
-                URL.revokeObjectURL(url);
-                
-                alert('داونلۆد کرا ✅');
-            } catch (e) {
-                console.error(e);
-                alert('هەڵە لە داونلۆدکردن');
+                // If checking in a special environment, use custom token, otherwise anonymous
+                if (typeof __initial_auth_token !== 'undefined' && __initial_auth_token) {
+                    await signInWithCustomToken(auth, __initial_auth_token);
+                } else {
+                    await signInAnonymously(auth);
+                }
+                console.log("Connected to Firebase successfully");
+            } catch (error) {
+                console.error("Auth Error:", error);
+                alert("کێشە لە پەیوەستبوون بە سێرڤەر (Auth Error)");
             }
         }
+        
+        // Start Auth immediately
+        initApp();
 
-        // --- RESTORE FUNCTION ---
-        window.restoreData = async (input) => {
-            const file = input.files[0];
-            if (!file) return;
+        // --- HELPER FUNCTIONS ---
+        function showLoader() { document.getElementById('loader').style.display = 'flex'; }
+        function hideLoader() { document.getElementById('loader').style.display = 'none'; }
 
-            const reader = new FileReader();
-            reader.onload = async (e) => {
-                try {
-                    const data = JSON.parse(e.target.result);
-                    if (!Array.isArray(data)) return alert('فایلەکە هەڵەیە');
+        // --- GLOBAL FUNCTIONS (Attached to Window for HTML OnClick) ---
 
-                    if (!confirm(`دڵنیای لە گەڕاندنەوەی ${data.length} کۆد؟ داتاکانی ئێستا نوێ دەبنەوە.`)) return;
-
-                    let count = 0;
-                    // Using loop to ensure order (optional) and error handling per item
-                    for (const item of data) {
-                        if (item._id) {
-                            const id = item._id;
-                            const docData = { ...item };
-                            delete docData._id; // Remove the ID from the body before saving
-                            
-                            await setDoc(doc(window.db, 'artifacts', window.appId, 'access_codes', id), docData);
-                            count++;
-                        }
-                    }
-                    
-                    alert(`${count} کۆد بە سەرکەوتوویی گەڕێندرانەوە ✅`);
-                    input.value = ''; // Reset input
-                    loadCodes(); // Refresh list
-                } catch (err) {
-                    console.error(err);
-                    alert('هەڵە: فۆرماتی فایلەکە تەواو نییە');
-                }
-            };
-            reader.readAsText(file);
-        }
-
+        // 1. Create New Code
         window.createCode = async () => {
             const code = document.getElementById('new-code').value.trim();
             const name = document.getElementById('t-name').value.trim();
@@ -220,8 +185,14 @@
 
             if(!code || !name || !date) return alert('تکایە هەموو خانەکان پڕبکەرەوە');
 
+            showLoader();
             try {
-                await setDoc(doc(window.db, 'artifacts', window.appId, 'access_codes', code), {
+                // Check if user is signed in
+                if (!auth.currentUser) {
+                    await signInAnonymously(auth);
+                }
+
+                await setDoc(doc(db, 'artifacts', appId, 'access_codes', code), {
                     used: false,
                     deviceId: null,
                     createdAt: new Date().toISOString(),
@@ -229,28 +200,43 @@
                     teacherPhone: phone,
                     expiryDate: date
                 });
+
+                // Clear inputs
                 document.getElementById('new-code').value = '';
                 document.getElementById('t-name').value = '';
                 document.getElementById('t-phone').value = '';
-                loadCodes();
+                
+                // Refresh
+                await window.loadCodes();
                 alert('زیادکرا ✅');
-            } catch(e) { console.error(e); alert('هەڵە!'); }
-        }
-
-        window.loadCodes = async () => {
-            const container = document.getElementById('code-list-container');
-            try {
-                const q = query(collection(window.db, 'artifacts', window.appId, 'access_codes'), orderBy('createdAt', 'desc'));
-                const snap = await getDocs(q);
-                allCodes = [];
-                snap.forEach(d => allCodes.push({id: d.id, ...d.data()}));
-                renderCards();
-            } catch(e) {
-                console.error(e);
-                container.innerHTML = '<div class="text-red-500 text-center">کێشە لە هێڵ هەیە</div>';
+            } catch(e) { 
+                console.error(e); 
+                alert('هەڵە ڕوویدا! دڵنیابەرەوە ئینتەرنێت هەیە.'); 
+            } finally {
+                hideLoader();
             }
         }
 
+        // 2. Load Codes
+        window.loadCodes = async () => {
+            const container = document.getElementById('code-list-container');
+            container.innerHTML = '<div class="text-center text-gray-400 mt-10"><i class="fa-solid fa-spinner fa-spin text-2xl"></i></div>';
+            
+            try {
+                 if (!auth.currentUser) await signInAnonymously(auth);
+
+                const q = query(collection(db, 'artifacts', appId, 'access_codes'), orderBy('createdAt', 'desc'));
+                const snap = await getDocs(q);
+                allCodes = [];
+                snap.forEach(d => allCodes.push({id: d.id, ...d.data()}));
+                window.renderCards();
+            } catch(e) {
+                console.error(e);
+                container.innerHTML = '<div class="text-red-500 text-center mt-10 font-bold">کێشە لە هێڵ هەیە یان مۆڵەت نییە</div>';
+            }
+        }
+
+        // 3. Render Cards
         window.renderCards = () => {
             const container = document.getElementById('code-list-container');
             container.innerHTML = '';
@@ -333,36 +319,139 @@
             });
         }
 
+        // 4. Renew Code
         window.renewCode = async (id) => {
             const newDate = prompt("بەرواری نوێی بەسەرچوون دیاری بکە (YYYY-MM-DD):", new Date(new Date().setFullYear(new Date().getFullYear() + 1)).toISOString().split('T')[0]);
             
             if(newDate) {
+                showLoader();
                 try {
-                    await updateDoc(doc(window.db, 'artifacts', window.appId, 'access_codes', id), {
+                    await updateDoc(doc(db, 'artifacts', appId, 'access_codes', id), {
                         expiryDate: newDate
                     });
+                    await window.loadCodes();
                     alert('کۆدەکە نوێکرایەوە!');
-                    switchTab('active');
+                    window.switchTab('active');
                 } catch(e) {
                     console.error(e);
                     alert('هەڵە لە نوێکردنەوە');
+                } finally {
+                    hideLoader();
                 }
             }
         }
 
+        // 5. Remove Code
         window.removeCode = async (id) => {
             if(confirm('سڕینەوەی ئەم کۆدە؟')) {
-                await deleteDoc(doc(window.db, 'artifacts', window.appId, 'access_codes', id));
-                loadCodes();
+                showLoader();
+                try {
+                    await deleteDoc(doc(db, 'artifacts', appId, 'access_codes', id));
+                    await window.loadCodes();
+                } catch(e) {
+                    console.error(e);
+                    alert('هەڵە لە سڕینەوە');
+                } finally {
+                    hideLoader();
+                }
             }
         }
 
-        window.copyCode = (text) => {
-            navigator.clipboard.writeText(text);
-            alert('کۆپی کرا: ' + text);
+        // 6. Backup Data
+        window.backupData = async () => {
+            if(!confirm('دەتەوێت هەموو داتاکان دابەزێنیت؟')) return;
+            showLoader();
+            try {
+                const q = query(collection(db, 'artifacts', appId, 'access_codes'));
+                const snap = await getDocs(q);
+                const data = [];
+                snap.forEach(d => {
+                    data.push({ _id: d.id, ...d.data() });
+                });
+
+                if(data.length === 0) {
+                    hideLoader();
+                    return alert('هیچ داتایەک نییە بۆ داگرتن');
+                }
+
+                const dataStr = JSON.stringify(data, null, 2);
+                const blob = new Blob([dataStr], { type: "application/json" });
+                const url = URL.createObjectURL(blob);
+                const a = document.createElement('a');
+                a.href = url;
+                a.download = `backup_codes_${new Date().toISOString().slice(0,10)}.json`;
+                document.body.appendChild(a);
+                a.click();
+                document.body.removeChild(a);
+                URL.revokeObjectURL(url);
+                
+                alert('داونلۆد کرا ✅');
+            } catch (e) {
+                console.error(e);
+                alert('هەڵە لە داونلۆدکردن');
+            } finally {
+                hideLoader();
+            }
         }
 
-        window.filterCodes = renderCards;
+        // 7. Restore Data
+        window.restoreData = async (input) => {
+            const file = input.files[0];
+            if (!file) return;
+
+            showLoader();
+            const reader = new FileReader();
+            reader.onload = async (e) => {
+                try {
+                    const data = JSON.parse(e.target.result);
+                    if (!Array.isArray(data)) throw new Error("Invalid format");
+
+                    if (!confirm(`دڵنیای لە گەڕاندنەوەی ${data.length} کۆد؟ داتاکانی ئێستا نوێ دەبنەوە.`)) {
+                        hideLoader();
+                        return;
+                    }
+
+                    let count = 0;
+                    for (const item of data) {
+                        if (item._id) {
+                            const id = item._id;
+                            const docData = { ...item };
+                            delete docData._id;
+                            await setDoc(doc(db, 'artifacts', appId, 'access_codes', id), docData);
+                            count++;
+                        }
+                    }
+                    
+                    alert(`${count} کۆد بە سەرکەوتوویی گەڕێندرانەوە ✅`);
+                    input.value = '';
+                    await window.loadCodes();
+                } catch (err) {
+                    console.error(err);
+                    alert('هەڵە: فۆرماتی فایلەکە تەواو نییە');
+                } finally {
+                    hideLoader();
+                }
+            };
+            reader.readAsText(file);
+        }
+
+        // 8. UI Helpers
+        window.copyCode = (text) => {
+            // Using execCommand for better iframe compatibility if needed, fallback to clipboard API
+            const textArea = document.createElement("textarea");
+            textArea.value = text;
+            document.body.appendChild(textArea);
+            textArea.select();
+            try {
+                document.execCommand('copy');
+                alert('کۆپی کرا: ' + text);
+            } catch (err) {
+                console.error('Fallback: Oops, unable to copy', err);
+            }
+            document.body.removeChild(textArea);
+        }
+
+        window.filterCodes = window.renderCards;
 
         window.switchTab = (tab) => {
             currentTab = tab;
@@ -376,12 +465,11 @@
                 btnActive.className = "flex-1 py-2 rounded-lg text-sm font-bold text-gray-500 transition-all";
                 btnExpired.className = "flex-1 py-2 rounded-lg text-sm font-bold shadow bg-white text-red-500 transition-all";
             }
-            renderCards();
+            window.renderCards();
         }
-    </script>
 
-    <script>
-        function checkAdmin() {
+        // 9. Admin Login Logic
+        window.checkAdmin = () => {
             const pass = document.getElementById('admin-pass').value;
             if(pass === '11223344009') {
                 document.getElementById('login-box').classList.add('hidden');
@@ -392,9 +480,10 @@
             }
         }
 
-        function generateRandom() {
+        window.generateRandom = () => {
             document.getElementById('new-code').value = Math.floor(100000 + Math.random() * 900000);
         }
+
     </script>
 </body>
 </html>
