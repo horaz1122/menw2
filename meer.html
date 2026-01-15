@@ -37,19 +37,19 @@
             }
             .a4-page {
                 width: 210mm;
-                height: 297mm; /* Fixed height to visualize A4 */
+                height: 297mm;
                 margin: 0 auto;
-                padding: 10mm 15mm; /* Tight padding to fit content */
+                padding: 10mm 15mm;
                 box-shadow: 0 4px 15px rgba(0, 0, 0, 0.1);
                 border-radius: 4px;
-                overflow: hidden; /* Ensure it stays within A4 visual on screen */
+                overflow: hidden;
             }
         }
 
         .table-responsive {
             width: 100%;
             overflow-x: auto;
-            margin-bottom: 10px; /* Reduced margin */
+            margin-bottom: 10px;
             -webkit-overflow-scrolling: touch;
         }
 
@@ -62,10 +62,10 @@
 
         td {
             border: 1px solid #000;
-            padding: 2px 4px; /* Reduced padding */
+            padding: 2px 4px;
             text-align: center;
-            height: 26px; /* Reduced height to fit all rows */
-            font-size: 12px; /* Slightly smaller font */
+            height: 26px;
+            font-size: 12px;
             line-height: 1.2;
         }
         
@@ -77,7 +77,7 @@
             font-size: 11px;
         }
 
-        td[contenteditable="true"]:focus {
+        td[contenteditable="true"]:focus, div[contenteditable="true"]:focus, h1[contenteditable="true"]:focus, h3[contenteditable="true"]:focus {
             background-color: #f0f9ff;
             outline: 2px solid #3b82f6;
             outline-offset: -2px;
@@ -95,7 +95,7 @@
                 height: 100%;
                 box-shadow: none;
                 margin: 0;
-                padding: 10mm; /* Safe print padding */
+                padding: 10mm;
                 border-radius: 0;
             }
             .no-print {
@@ -111,7 +111,7 @@
                 width: 100%;
             }
             td {
-                font-size: 11px; /* Ensure fit on print */
+                font-size: 11px;
                 height: 24px;
             }
         }
@@ -119,28 +119,38 @@
 </head>
 <body>
 
-    <!-- Print Button -->
-    <div class="no-print fixed bottom-6 right-6 z-50 md:top-6 md:left-6 md:bottom-auto md:right-auto">
-        <button onclick="window.print()" class="bg-indigo-600 hover:bg-indigo-700 text-white font-bold py-2 px-4 rounded-full shadow-xl flex items-center gap-2 transition-all transform hover:scale-105 active:scale-95 text-sm">
+    <!-- Action Buttons (Print & Clear) -->
+    <div class="no-print fixed bottom-6 right-6 z-50 md:top-6 md:left-6 md:bottom-auto md:right-auto flex flex-col md:flex-row gap-3">
+        <!-- Print Button -->
+        <button onclick="window.print()" class="bg-indigo-600 hover:bg-indigo-700 text-white font-bold py-2 px-4 rounded-full shadow-xl flex items-center justify-center gap-2 transition-all transform hover:scale-105 active:scale-95 text-sm">
             <svg xmlns="http://www.w3.org/2000/svg" class="h-5 w-5" fill="none" viewBox="0 0 24 24" stroke="currentColor">
                 <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M17 17h2a2 2 0 002-2v-4a2 2 0 00-2-2H5a2 2 0 00-2 2v4a2 2 0 002 2h2m2 4h6a2 2 0 002-2v-4a2 2 0 00-2-2H9a2 2 0 00-2 2v4a2 2 0 002 2zm8-12V5a2 2 0 00-2-2H9a2 2 0 00-2 2v4h10z" />
             </svg>
             <span class="hidden md:inline">چاپکردن</span>
         </button>
+
+        <!-- Clear Button -->
+        <button onclick="clearAllData()" class="bg-red-500 hover:bg-red-600 text-white font-bold py-2 px-4 rounded-full shadow-xl flex items-center justify-center gap-2 transition-all transform hover:scale-105 active:scale-95 text-sm">
+            <svg xmlns="http://www.w3.org/2000/svg" class="h-5 w-5" fill="none" viewBox="0 0 24 24" stroke="currentColor">
+                <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M19 7l-.867 12.142A2 2 0 0116.138 21H7.862a2 2 0 01-1.995-1.858L5 7m5 4v6m4-6v6m1-10V4a1 1 0 00-1-1h-4a1 1 0 00-1 1v3M4 7h16" />
+            </svg>
+            <span class="hidden md:inline">پاککردنەوە</span>
+        </button>
     </div>
 
     <div class="a4-page flex flex-col h-full">
-        <!-- Header Section (Compact) -->
-        <div class="text-center mb-3 border-b border-gray-200 pb-2" contenteditable="true">
+        <!-- Header Section -->
+        <div class="text-center mb-3 border-b border-gray-200 pb-2" contenteditable="true" data-save-id="header-title">
             <h1 class="text-xl font-bold text-gray-800">ناونیشانی فۆڕم</h1>
         </div>
 
         <!-- Section 1 (4 Rows) -->
         <div class="mb-3">
-            <h3 class="font-bold mb-1 text-sm text-indigo-700 border-r-4 border-indigo-500 pr-2" contenteditable="true">بەشی یەکەم</h3>
+            <h3 class="font-bold mb-1 text-sm text-indigo-700 border-r-4 border-indigo-500 pr-2" contenteditable="true" data-save-id="sec1-title">بەشی یەکەم</h3>
             <div class="table-responsive">
                 <table>
-                    <tbody>
+                    <tbody id="table1">
+                        <!-- Rows will be identified by index in JS -->
                         <tr><td class="w-12">1</td><td contenteditable="true"></td><td contenteditable="true"></td><td contenteditable="true"></td><td contenteditable="true"></td><td contenteditable="true"></td></tr>
                         <tr><td class="w-12">2</td><td contenteditable="true"></td><td contenteditable="true"></td><td contenteditable="true"></td><td contenteditable="true"></td><td contenteditable="true"></td></tr>
                         <tr><td class="w-12">3</td><td contenteditable="true"></td><td contenteditable="true"></td><td contenteditable="true"></td><td contenteditable="true"></td><td contenteditable="true"></td></tr>
@@ -152,10 +162,10 @@
 
         <!-- Section 2 (15 Rows) -->
         <div class="mb-3">
-            <h3 class="font-bold mb-1 text-sm text-indigo-700 border-r-4 border-indigo-500 pr-2" contenteditable="true">بەشی دووەم</h3>
+            <h3 class="font-bold mb-1 text-sm text-indigo-700 border-r-4 border-indigo-500 pr-2" contenteditable="true" data-save-id="sec2-title">بەشی دووەم</h3>
             <div class="table-responsive">
                 <table>
-                    <tbody>
+                    <tbody id="table2">
                         <tr><td class="w-12">1</td><td contenteditable="true"></td><td contenteditable="true"></td><td contenteditable="true"></td><td contenteditable="true"></td><td contenteditable="true"></td></tr>
                         <tr><td class="w-12">2</td><td contenteditable="true"></td><td contenteditable="true"></td><td contenteditable="true"></td><td contenteditable="true"></td><td contenteditable="true"></td></tr>
                         <tr><td class="w-12">3</td><td contenteditable="true"></td><td contenteditable="true"></td><td contenteditable="true"></td><td contenteditable="true"></td><td contenteditable="true"></td></tr>
@@ -178,10 +188,10 @@
 
         <!-- Section 3 (15 Rows) -->
         <div class="mb-1 flex-grow">
-            <h3 class="font-bold mb-1 text-sm text-indigo-700 border-r-4 border-indigo-500 pr-2" contenteditable="true">بەشی سێیەم</h3>
+            <h3 class="font-bold mb-1 text-sm text-indigo-700 border-r-4 border-indigo-500 pr-2" contenteditable="true" data-save-id="sec3-title">بەشی سێیەم</h3>
             <div class="table-responsive">
                 <table>
-                    <tbody>
+                    <tbody id="table3">
                         <tr><td class="w-12">1</td><td contenteditable="true"></td><td contenteditable="true"></td><td contenteditable="true"></td><td contenteditable="true"></td><td contenteditable="true"></td></tr>
                         <tr><td class="w-12">2</td><td contenteditable="true"></td><td contenteditable="true"></td><td contenteditable="true"></td><td contenteditable="true"></td><td contenteditable="true"></td></tr>
                         <tr><td class="w-12">3</td><td contenteditable="true"></td><td contenteditable="true"></td><td contenteditable="true"></td><td contenteditable="true"></td><td contenteditable="true"></td></tr>
@@ -203,5 +213,77 @@
         </div>
     </div>
 
+    <script>
+        // Unique ID for LocalStorage
+        const STORAGE_PREFIX = 'a4_form_data_';
+
+        // 1. Function to save data
+        function saveData(element) {
+            const id = element.getAttribute('data-save-id');
+            if (id) {
+                localStorage.setItem(STORAGE_PREFIX + id, element.innerHTML);
+            }
+        }
+
+        // 2. Function to load data on startup
+        function loadAllData() {
+            // Load Headings
+            document.querySelectorAll('[data-save-id]').forEach(el => {
+                const saved = localStorage.getItem(STORAGE_PREFIX + el.getAttribute('data-save-id'));
+                if (saved) el.innerHTML = saved;
+            });
+
+            // Load Table Cells
+            // Assign IDs to cells dynamically if they don't have them
+            let cellIndex = 0;
+            document.querySelectorAll('td[contenteditable="true"]').forEach(cell => {
+                const uniqueId = 'cell_' + cellIndex++;
+                cell.setAttribute('data-save-id', uniqueId);
+                
+                const saved = localStorage.getItem(STORAGE_PREFIX + uniqueId);
+                if (saved) cell.innerText = saved; // Use innerText for inputs to avoid HTML injection issues
+
+                // Add listener for typing
+                cell.addEventListener('input', function() {
+                    localStorage.setItem(STORAGE_PREFIX + uniqueId, this.innerText);
+                });
+            });
+
+            // Add listeners to headings
+            document.querySelectorAll('h1[contenteditable], h3[contenteditable], div[contenteditable]').forEach(el => {
+                el.addEventListener('input', function() {
+                    if(this.getAttribute('data-save-id')) {
+                        saveData(this);
+                    }
+                });
+            });
+        }
+
+        // 3. Function to Clear All Data
+        function clearAllData() {
+            if (confirm("دڵنیای لە سڕینەوەی هەموو زانیارییەکان؟")) {
+                // Clear LocalStorage
+                Object.keys(localStorage).forEach(key => {
+                    if (key.startsWith(STORAGE_PREFIX)) {
+                        localStorage.removeItem(key);
+                    }
+                });
+
+                // Clear UI
+                document.querySelectorAll('td[contenteditable="true"]').forEach(cell => {
+                    cell.innerText = '';
+                });
+                
+                // Reset Titles to default (Optional: or just leave them blank)
+                // If you want to keep titles but clear data, remove the next lines:
+                // document.querySelectorAll('[data-save-id^="header"], [data-save-id^="sec"]').forEach(el => {
+                //    // You might want to keep titles, so I won't clear them by default unless requested.
+                // });
+            }
+        }
+
+        // Initialize
+        document.addEventListener('DOMContentLoaded', loadAllData);
+    </script>
 </body>
 </html>
