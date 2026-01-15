@@ -1,677 +1,176 @@
 <!DOCTYPE html>
-<html lang="ckb" dir="rtl">
+<html lang="ku" dir="rtl">
 <head>
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
-    <title>هاوبەشکردنی پەڕگەکان - کوردی (جێگیر)</title>
+    <title>فۆڕمی A4</title>
     <script src="https://cdn.tailwindcss.com"></script>
-    <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.4.0/css/all.min.css">
+    <link href="https://fonts.googleapis.com/css2?family=Noto+Sans+Arabic:wght@400;700&display=swap" rel="stylesheet">
     
-    <!-- Firebase Imports -->
-    <script type="module">
-        import { initializeApp } from "https://www.gstatic.com/firebasejs/11.6.1/firebase-app.js";
-        import { getAuth, signInAnonymously, signInWithCustomToken, onAuthStateChanged } from "https://www.gstatic.com/firebasejs/11.6.1/firebase-auth.js";
-        import { getFirestore, collection, addDoc, onSnapshot, deleteDoc, doc, serverTimestamp } from "https://www.gstatic.com/firebasejs/11.6.1/firebase-firestore.js";
-        import { getStorage, ref, uploadBytesResumable, getDownloadURL, deleteObject } from "https://www.gstatic.com/firebasejs/11.6.1/firebase-storage.js";
-
-        // ==========================================
-        //  بەشی ڕێکخستنی فایەربەیس
-        // ==========================================
-        const MANUAL_CONFIG = {
-            apiKey: "AIzaSyBHxuOA6uuX1EZGse5_JOHc3WMjvPywLD4",
-            authDomain: "prsyar-c93dd.firebaseapp.com",
-            projectId: "prsyar-c93dd",
-            storageBucket: "prsyar-c93dd.firebasestorage.app",
-            messagingSenderId: "623772510800",
-            appId: "1:623772510800:web:cc49fc9bbd9ed9c170ff55",
-            measurementId: "G-7KLKMNVFHC"
-        };
-        // ==========================================
-
-        // Global Variables
-        window.db = null;
-        window.storage = null;
-        window.auth = null;
-        window.appId = typeof __app_id !== 'undefined' ? __app_id : 'default-share-app';
-        window.unsubscribeFiles = null;
-        window.currentUser = null;
-
-        // Initialize Firebase
-        const initFirebase = async () => {
-            let firebaseConfig;
-
-            if (typeof __firebase_config !== 'undefined') {
-                firebaseConfig = JSON.parse(__firebase_config);
-            } 
-            else if (typeof MANUAL_CONFIG !== 'undefined' && MANUAL_CONFIG.apiKey !== "YOUR_API_KEY_HERE") {
-                firebaseConfig = MANUAL_CONFIG;
-            } 
-            else {
-                console.warn("No Firebase config found.");
-                document.getElementById('status-msg').innerText = "تکایە زانیاری Firebase دابنێ";
-                return;
-            }
-
-            try {
-                const app = initializeApp(firebaseConfig);
-                window.auth = getAuth(app);
-                window.db = getFirestore(app);
-                window.storage = getStorage(app);
-
-                const initAuth = async () => {
-                    try {
-                        if (typeof __initial_auth_token !== 'undefined' && __initial_auth_token) {
-                            await signInWithCustomToken(window.auth, __initial_auth_token);
-                        } else {
-                            await signInAnonymously(window.auth);
-                        }
-                    } catch (error) {
-                        console.error("Auth Error:", error);
-                        document.getElementById('status-msg').innerText = "کێشەی پەیوەستبوون: " + error.code;
-                        document.getElementById('status-dot').classList.remove('text-green-600');
-                        document.getElementById('status-dot').classList.add('text-red-600');
-                    }
-                };
-                
-                await initAuth();
-
-                onAuthStateChanged(window.auth, (user) => {
-                    if (user) {
-                        window.currentUser = user;
-                        document.getElementById('status-msg').innerText = "بە هێڵەوەیە";
-                        document.getElementById('status-dot').classList.add('text-green-600');
-                        document.getElementById('status-dot').classList.remove('text-red-600');
-                        initRoom();
-                    } else {
-                        window.currentUser = null;
-                        document.getElementById('status-msg').innerText = "پەیوەست نییە";
-                    }
-                });
-            } catch (err) {
-                console.error("Firebase Init Error:", err);
-                alert("هەڵە لە بەستنەوەی فایەربەیس: " + err.message);
-            }
-        };
-
-        initFirebase();
-
-        // --- Logic Functions ---
-
-        function initRoom() {
-            let savedRoom = localStorage.getItem('share_room_id');
-            if (!savedRoom) {
-                savedRoom = Math.floor(1000 + Math.random() * 9000).toString();
-                localStorage.setItem('share_room_id', savedRoom);
-            }
-            document.getElementById('room-code-input').value = savedRoom;
-            connectToRoom(savedRoom);
-        }
-
-        window.updateRoom = function() {
-            const newCode = document.getElementById('room-code-input').value.trim();
-            if (newCode && newCode.length > 0) {
-                localStorage.setItem('share_room_id', newCode);
-                connectToRoom(newCode);
-                
-                const btn = document.getElementById('refresh-btn');
-                btn.classList.add('text-green-600');
-                setTimeout(() => btn.classList.remove('text-green-600'), 1000);
-            }
-        }
-
-        function connectToRoom(roomId) {
-            if (window.unsubscribeFiles) {
-                window.unsubscribeFiles();
-            }
-
-            const filesRef = collection(window.db, 'artifacts', window.appId, 'public', 'data', 'shared_files');
-            
-            document.getElementById('loader').classList.remove('hidden');
-
-            window.unsubscribeFiles = onSnapshot(filesRef, (snapshot) => {
-                document.getElementById('loader').classList.add('hidden');
-                const files = [];
-                snapshot.forEach((doc) => {
-                    const data = doc.data();
-                    if (String(data.roomId).trim() === String(roomId).trim()) {
-                        files.push({ id: doc.id, ...data });
-                    }
-                });
-                
-                files.sort((a, b) => (b.createdAt?.seconds || 0) - (a.createdAt?.seconds || 0));
-
-                renderFiles(files);
-                updateStats(files);
-            }, (error) => {
-                console.error("Error fetching files:", error);
-                document.getElementById('loader').classList.add('hidden');
-                if (error.code === 'permission-denied') {
-                    // Usually implies rules issue or auth drop
-                }
-            });
-        }
-
-        // --- Image Compression Logic (Safe Mode) ---
-        async function compressImage(file) {
-            if (!file.type.startsWith('image/')) return file;
-            if (file.size < 1024 * 1024) return file; // Don't compress < 1MB
-
-            // Create a timeout promise to prevent hanging
-            const timeoutPromise = new Promise((resolve) => {
-                setTimeout(() => resolve(file), 3000); // If > 3s, return original
-            });
-
-            const compressionPromise = new Promise((resolve) => {
-                const img = new Image();
-                img.src = URL.createObjectURL(file);
-                img.onload = () => {
-                    try {
-                        const canvas = document.createElement('canvas');
-                        const ctx = canvas.getContext('2d');
-                        
-                        const MAX_WIDTH = 1920;
-                        const MAX_HEIGHT = 1920;
-                        let width = img.width;
-                        let height = img.height;
-
-                        if (width > height) {
-                            if (width > MAX_WIDTH) {
-                                height *= MAX_WIDTH / width;
-                                width = MAX_WIDTH;
-                            }
-                        } else {
-                            if (height > MAX_HEIGHT) {
-                                width *= MAX_HEIGHT / height;
-                                height = MAX_HEIGHT;
-                            }
-                        }
-
-                        canvas.width = width;
-                        canvas.height = height;
-                        ctx.drawImage(img, 0, 0, width, height);
-
-                        canvas.toBlob((blob) => {
-                            if (blob) {
-                                const compressedFile = new File([blob], file.name, {
-                                    type: 'image/jpeg',
-                                    lastModified: Date.now(),
-                                });
-                                resolve(compressedFile);
-                            } else {
-                                resolve(file);
-                            }
-                        }, 'image/jpeg', 0.8);
-                    } catch (e) {
-                        console.error("Compression error:", e);
-                        resolve(file);
-                    }
-                };
-                img.onerror = () => resolve(file);
-            });
-
-            // Race: whichever finishes first (compression or 3s timeout)
-            return Promise.race([compressionPromise, timeoutPromise]);
-        }
-
-        // --- Upload Logic ---
-
-        // Helper to wait for auth
-        function waitForAuth() {
-            return new Promise((resolve, reject) => {
-                if (window.currentUser) return resolve(window.currentUser);
-                let attempts = 0;
-                const check = setInterval(() => {
-                    attempts++;
-                    if (window.currentUser) {
-                        clearInterval(check);
-                        resolve(window.currentUser);
-                    }
-                    if (attempts > 20) { // 10 seconds timeout
-                        clearInterval(check);
-                        reject("کات بەسەرچوو بۆ پەیوەستبوون");
-                    }
-                }, 500);
-            });
-        }
-
-        window.handleFiles = async function(fileList) {
-            const files = [...fileList];
-            
-            const inputCode = document.getElementById('room-code-input').value.trim();
-            const activeRoom = localStorage.getItem('share_room_id');
-
-            if (inputCode !== activeRoom) {
-                localStorage.setItem('share_room_id', inputCode);
-                connectToRoom(inputCode);
-            }
-            
-            const roomId = inputCode;
-            
-            // Check auth first
-            if (!window.currentUser) {
-                // Show temporary toast
-                const toast = document.createElement('div');
-                toast.className = "fixed top-4 left-1/2 transform -translate-x-1/2 bg-yellow-100 text-yellow-800 px-4 py-2 rounded shadow z-50";
-                toast.innerText = "چاوەڕێی پەیوەستبوون...";
-                document.body.appendChild(toast);
-                
-                try {
-                    await waitForAuth();
-                    toast.remove();
-                } catch (e) {
-                    toast.innerText = "پەیوەستبوون سەرکەوتوو نەبوو. تکایە ئینتەرنێت پشکنین بکە.";
-                    setTimeout(() => toast.remove(), 3000);
-                    return;
-                }
-            }
-
-            for (const file of files) {
-                uploadSingleFile(file, roomId);
-            }
-        }
-
-        async function uploadSingleFile(file, roomId) {
-            if (!window.storage) return;
-
-            const progressId = 'prog-' + Math.random().toString(36).substr(2, 9);
-            showUploadingState(file.name, progressId, "ئامادەکردن...");
-
-            try {
-                // Try compression with safe fallback
-                let uploadFile = file;
-                if (file.type.startsWith('image/')) {
-                     updateStatusText(progressId, "پچووککردنەوە...");
-                     try {
-                         uploadFile = await compressImage(file);
-                     } catch (e) {
-                         console.log("Compression failed, using original");
-                         uploadFile = file;
-                     }
-                }
-
-                updateStatusText(progressId, "دەستپێکردنی ناردن...");
-                
-                // Construct path
-                const storagePath = `artifacts/${window.appId}/public/${roomId}/${Date.now()}_${uploadFile.name.replace(/[^a-zA-Z0-9.-]/g, '_')}`;
-                const storageRef = ref(window.storage, storagePath);
-                
-                const uploadTask = uploadBytesResumable(storageRef, uploadFile);
-
-                uploadTask.on('state_changed', 
-                    (snapshot) => {
-                        const progress = (snapshot.bytesTransferred / snapshot.totalBytes) * 100;
-                        updateProgress(progressId, progress);
-                        updateStatusText(progressId, `${Math.round(progress)}%`);
-                    }, 
-                    (error) => {
-                        console.error("Upload failed", error);
-                        removeProgress(progressId);
-                        let msg = "هەڵە: " + error.code;
-                        if (error.code === 'storage/unauthorized') msg = "هەڵە: ڕێگەپێدان نییە (CORS یان Rules)";
-                        if (error.code === 'storage/retry-limit-exceeded') msg = "هەڵە: ئینتەرنێت زۆر خاوە";
-                        alert(msg);
-                    }, 
-                    async () => {
-                        try {
-                            const downloadURL = await getDownloadURL(uploadTask.snapshot.ref);
-                            
-                            await addDoc(collection(window.db, 'artifacts', window.appId, 'public', 'data', 'shared_files'), {
-                                name: file.name,
-                                type: uploadFile.type,
-                                size: uploadFile.size,
-                                url: downloadURL,
-                                roomId: String(roomId).trim(),
-                                createdAt: serverTimestamp(),
-                                storagePath: uploadTask.snapshot.ref.fullPath
-                            });
-                            
-                            removeProgress(progressId);
-                        } catch (firestoreError) {
-                            console.error("Firestore Error:", firestoreError);
-                            // Even if firestore fails, file is uploaded. 
-                            removeProgress(progressId);
-                            alert("فایلەکە نێردرا بەڵام تۆمار نەکرا: " + firestoreError.message);
-                        }
-                    }
-                );
-            } catch (err) {
-                console.error(err);
-                removeProgress(progressId);
-                alert("هەڵەیەکی نەزانراو: " + err.message);
-            }
-        }
-
-        // --- Delete Functions ---
-        
-        const performDelete = async (id, storagePath) => {
-            try {
-                await deleteDoc(doc(window.db, 'artifacts', window.appId, 'public', 'data', 'shared_files', id));
-                if (storagePath) {
-                    const fileRef = ref(window.storage, storagePath);
-                    await deleteObject(fileRef).catch(e => console.log("Storage delete error:", e));
-                }
-            } catch (e) {
-                console.error("Error deleting:", e);
-            }
-        }
-
-        window.deleteFile = async function(id, storagePath) {
-            if(!confirm('دڵنیایت لە سڕینەوەی ئەم پەڕگەیە؟')) return;
-            await performDelete(id, storagePath);
-        }
-
-        window.downloadAndDelete = function(url, id, storagePath) {
-            window.open(url, '_blank');
-            const notification = document.createElement('div');
-            notification.className = "fixed bottom-4 right-4 bg-slate-800 text-white px-4 py-2 rounded-lg shadow-lg z-50 text-sm animate-bounce";
-            notification.innerHTML = '<i class="fa-solid fa-trash-can ml-2"></i> فایلەکە سڕایەوە';
-            document.body.appendChild(notification);
-            setTimeout(() => notification.remove(), 3000);
-
-            setTimeout(() => {
-                performDelete(id, storagePath);
-            }, 1000);
-        }
-
-        // --- UI Functions ---
-        function showUploadingState(filename, id, status = "0%") {
-            const container = document.getElementById('upload-progress-container');
-            const div = document.createElement('div');
-            div.id = id;
-            div.className = "bg-white p-3 rounded-lg shadow-sm border border-blue-100 mb-2 flex flex-col gap-2";
-            div.innerHTML = `
-                <div class="flex items-center justify-between">
-                    <div class="flex items-center space-x-3 space-x-reverse truncate">
-                        <i class="fa-solid fa-spinner fa-spin text-blue-500"></i>
-                        <span class="text-sm text-slate-700 truncate max-w-[150px]">${filename}</span>
-                    </div>
-                    <span class="status-text text-xs text-blue-600 font-bold">${status}</span>
-                </div>
-                <div class="w-full bg-gray-100 rounded-full h-1.5">
-                    <div class="progress-bar bg-blue-500 h-1.5 rounded-full transition-all duration-300" style="width: 0%"></div>
-                </div>
-            `;
-            container.appendChild(div);
-            container.classList.remove('hidden');
-        }
-
-        function updateProgress(id, percent) {
-            const el = document.getElementById(id);
-            if (el) {
-                el.querySelector('.progress-bar').style.width = percent + '%';
-            }
-        }
-
-        function updateStatusText(id, text) {
-            const el = document.getElementById(id);
-            if (el) {
-                el.querySelector('.status-text').innerText = text;
-            }
-        }
-
-        function removeProgress(id) {
-            const el = document.getElementById(id);
-            if (el) el.remove();
-            
-            const container = document.getElementById('upload-progress-container');
-            if (container.children.length === 0) container.classList.add('hidden');
-        }
-
-        function renderFiles(files) {
-            const fileList = document.getElementById('file-list');
-            const emptyState = document.getElementById('empty-state');
-
-            Array.from(fileList.children).forEach(child => {
-                if (child.id !== 'empty-state') child.remove();
-            });
-
-            if (files.length === 0) {
-                emptyState.style.display = 'block';
-                return;
-            } else {
-                emptyState.style.display = 'none';
-            }
-
-            files.forEach(file => {
-                const fileType = getFileType(file.type || '');
-                const fileSize = formatBytes(file.size);
-                const fileIcon = getFileIcon(fileType);
-                const iconColor = getIconColor(fileType);
-                const dateStr = file.createdAt ? new Date(file.createdAt.seconds * 1000).toLocaleTimeString('ckb-IQ') : '...';
-
-                const div = document.createElement('div');
-                div.className = 'file-card bg-white p-4 rounded-xl border border-slate-100 shadow-sm flex flex-col gap-3 group relative';
-                
-                div.innerHTML = `
-                    <div class="flex items-center justify-between w-full">
-                        <div class="flex items-center space-x-3 space-x-reverse overflow-hidden">
-                            <div class="w-10 h-10 ${iconColor} bg-opacity-10 rounded-lg flex items-center justify-center flex-shrink-0 text-lg">
-                                <i class="${fileIcon}"></i>
-                            </div>
-                            <div class="min-w-0 flex-1">
-                                <p class="text-sm font-bold text-slate-800 truncate max-w-[150px]" title="${file.name}">${file.name}</p>
-                                <p class="text-[10px] text-slate-500">${fileSize} • ${dateStr}</p>
-                            </div>
-                        </div>
-                    </div>
-                    
-                    <div class="flex items-center gap-2 mt-1 border-t border-slate-50 pt-3">
-                        <button onclick="downloadAndDelete('${file.url}', '${file.id}', '${file.storagePath}')" class="flex-1 bg-red-50 hover:bg-red-100 text-red-600 text-xs font-bold py-2 rounded-lg text-center transition flex items-center justify-center gap-2 border border-red-200">
-                            <i class="fa-solid fa-download"></i> داگرتن و سڕینەوە
-                        </button>
-                    </div>
-                `;
-                fileList.appendChild(div);
-            });
-        }
-
-        function updateStats(files) {
-            document.getElementById('total-count').innerText = files.length;
-            document.getElementById('image-count').innerText = files.filter(f => (f.type || '').startsWith('image/')).length;
-            document.getElementById('video-count').innerText = files.filter(f => (f.type || '').startsWith('video/')).length;
-            const totalBytes = files.reduce((acc, file) => acc + (file.size || 0), 0);
-            document.getElementById('total-size').innerText = formatBytes(totalBytes);
-        }
-
-        function formatBytes(bytes, decimals = 2) {
-            if (!+bytes) return '0 Bytes';
-            const k = 1024;
-            const dm = decimals < 0 ? 0 : decimals;
-            const sizes = ['Bytes', 'KB', 'MB', 'GB', 'TB'];
-            const i = Math.floor(Math.log(bytes) / Math.log(k));
-            return `${parseFloat((bytes / Math.pow(k, i)).toFixed(dm))} ${sizes[i]}`;
-        }
-
-        function getFileType(mime) {
-            if (mime.startsWith('image/')) return 'image';
-            if (mime.startsWith('video/')) return 'video';
-            if (mime.startsWith('audio/')) return 'audio';
-            if (mime.includes('pdf')) return 'pdf';
-            return 'other';
-        }
-
-        function getFileIcon(type) {
-            switch(type) {
-                case 'image': return 'fa-regular fa-image text-purple-600';
-                case 'video': return 'fa-solid fa-video text-orange-600';
-                case 'audio': return 'fa-solid fa-music text-pink-600';
-                case 'pdf': return 'fa-regular fa-file-pdf text-red-600';
-                default: return 'fa-regular fa-file text-blue-600';
-            }
-        }
-
-        function getIconColor(type) {
-            switch(type) {
-                case 'image': return 'bg-purple-500 text-purple-600';
-                case 'video': return 'bg-orange-500 text-orange-600';
-                case 'audio': return 'bg-pink-500 text-pink-600';
-                case 'pdf': return 'bg-red-500 text-red-600';
-                default: return 'bg-blue-500 text-blue-600';
-            }
-        }
-    </script>
     <style>
-        @import url('https://fonts.googleapis.com/css2?family=Rudaw&family=NRT+Reg&family=Vazirmatn:wght@300;400;700&display=swap');
-        
         body {
-            font-family: 'Vazirmatn', sans-serif;
-            background-color: #f8fafc;
+            font-family: 'Noto Sans Arabic', sans-serif;
+            background-color: #e5e7eb;
+            margin: 0;
+            padding: 10px; /* Reduced padding for mobile */
         }
 
-        ::-webkit-scrollbar { width: 6px; }
-        ::-webkit-scrollbar-track { background: #f1f1f1; }
-        ::-webkit-scrollbar-thumb { background: #cbd5e1; border-radius: 4px; }
-
-        .drop-zone {
-            border: 2px dashed #cbd5e1;
-            transition: all 0.3s ease;
-            background-image: url("data:image/svg+xml,%3csvg width='100%25' height='100%25' xmlns='http://www.w3.org/2000/svg'%3e%3crect width='100%25' height='100%25' fill='none' rx='16' ry='16' stroke='%233B82F6FF' stroke-width='2' stroke-dasharray='12%2c 12' stroke-dashoffset='0' stroke-linecap='square'/%3e%3c/svg%3e");
-            border: none;
+        .a4-page {
+            background-color: white;
+            /* Responsive width: 100% on mobile, max 210mm for desktop/print view */
+            width: 100%;
+            max-width: 210mm; 
+            min-height: 297mm;
+            margin: 0 auto;
+            padding: 15mm; /* Slightly reduced padding */
+            box-shadow: 0 0 10px rgba(0, 0, 0, 0.1);
+            box-sizing: border-box;
+            position: relative;
         }
-        .drop-zone:hover {
+
+        /* Container to allow horizontal scroll on very small screens */
+        .table-responsive {
+            width: 100%;
+            overflow-x: auto;
+            margin-bottom: 20px;
+        }
+
+        table {
+            width: 100%;
+            border-collapse: collapse;
+            table-layout: fixed;
+            min-width: 500px; /* Ensures cells don't get too squashed on mobile */
+        }
+
+        td {
+            border: 1px solid #000;
+            padding: 8px;
+            text-align: center;
+            height: 35px; /* Increased height slightly for easier tapping */
+        }
+
+        /* Make empty cells focusable and visibly editable */
+        td[contenteditable="true"]:focus {
             background-color: #f0f9ff;
-            transform: scale(1.01);
+            outline: none;
         }
 
-        .file-card { transition: all 0.2s ease; }
-        .file-card:hover { transform: translateY(-2px); box-shadow: 0 10px 15px -3px rgba(0, 0, 0, 0.1); }
-        
-        .loader {
-            border: 3px solid #f3f3f3;
-            border-radius: 50%;
-            border-top: 3px solid #3498db;
-            width: 20px;
-            height: 20px;
-            -webkit-animation: spin 1s linear infinite;
-            animation: spin 1s linear infinite;
-        }
-
-        @keyframes spin {
-            0% { transform: rotate(0deg); }
-            100% { transform: rotate(360deg); }
+        /* Print styles */
+        @media print {
+            body {
+                background: none;
+                padding: 0;
+                margin: 0;
+            }
+            .a4-page {
+                max-width: none;
+                width: 100%;
+                height: auto;
+                box-shadow: none;
+                margin: 0;
+                padding: 10mm;
+            }
+            .no-print {
+                display: none !important;
+            }
+            .table-responsive {
+                overflow-x: visible;
+            }
+            table {
+                min-width: auto; /* Allow table to fit page on print */
+            }
         }
     </style>
 </head>
-<body class="bg-slate-50 min-h-screen text-slate-800 pb-20">
+<body>
 
-    <!-- Header -->
-    <header class="bg-white shadow-sm sticky top-0 z-50 backdrop-blur-md bg-opacity-90">
-        <div class="container mx-auto px-4 py-3 flex justify-between items-center">
-            <div class="flex items-center space-x-3 space-x-reverse">
-                <div class="bg-gradient-to-br from-blue-600 to-indigo-600 text-white p-2.5 rounded-xl shadow-lg shadow-blue-200">
-                    <i class="fa-solid fa-share-nodes text-lg"></i>
-                </div>
-                <div>
-                    <h1 class="text-lg font-bold text-slate-800 leading-tight">کورد شێیەر</h1>
-                    <div class="flex items-center gap-1">
-                        <div id="loader" class="loader hidden"></div>
-                        <i id="status-dot" class="fa-solid fa-circle text-[8px] text-gray-400"></i>
-                        <p id="status-msg" class="text-[10px] text-gray-500 font-medium">پەیوەستکردن...</p>
-                    </div>
-                </div>
-            </div>
-            
-            <div class="flex items-center bg-slate-100 rounded-lg p-1 pr-3 border border-slate-200">
-                <span class="text-xs text-slate-500 ml-2 hidden sm:inline">کۆدی ژوور:</span>
-                <input type="text" id="room-code-input" class="bg-transparent w-16 text-center font-mono font-bold text-slate-700 focus:outline-none" value="...">
-                <button id="refresh-btn" onclick="updateRoom()" class="bg-white hover:bg-blue-50 text-blue-600 p-1.5 rounded-md shadow-sm transition">
-                    <i class="fa-solid fa-arrows-rotate text-xs"></i>
-                </button>
-            </div>
+    <!-- Print Button -->
+    <div class="no-print fixed bottom-5 right-5 z-50 md:top-5 md:left-5 md:bottom-auto md:right-auto">
+        <button onclick="window.print()" class="bg-blue-600 hover:bg-blue-700 text-white font-bold py-3 px-5 rounded-full shadow-lg flex items-center gap-2">
+            <svg xmlns="http://www.w3.org/2000/svg" class="h-6 w-6" fill="none" viewBox="0 0 24 24" stroke="currentColor">
+                <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M17 17h2a2 2 0 002-2v-4a2 2 0 00-2-2H5a2 2 0 00-2 2v4a2 2 0 002 2h2m2 4h6a2 2 0 002-2v-4a2 2 0 00-2-2H9a2 2 0 00-2 2v4a2 2 0 002 2zm8-12V5a2 2 0 00-2-2H9a2 2 0 00-2 2v4h10z" />
+            </svg>
+            <span class="hidden md:inline">چاپکردن</span>
+        </button>
+    </div>
+
+    <div class="a4-page">
+        <!-- Optional Title Area -->
+        <div class="text-center mb-6" contenteditable="true">
+            <h1 class="text-2xl font-bold">ناونیشانی فۆڕم</h1>
+            <p class="text-gray-600 mt-1">تکایە ئەم فۆڕمە پڕ بکەرەوە</p>
         </div>
-    </header>
 
-    <!-- Main Content -->
-    <main class="container mx-auto px-4 py-6 max-w-4xl">
-        
-        <div class="bg-blue-50 border border-blue-100 rounded-xl p-4 mb-6 flex items-start gap-3">
-            <i class="fa-solid fa-circle-info text-blue-500 mt-1"></i>
-            <div class="text-sm text-blue-800">
-                <p class="font-bold mb-1">تێبینی گرنگ:</p>
-                <p>هەر فایلێک داونلۆد بکرێت، <span class="font-bold text-red-600">ڕاستەوخۆ دەسڕێتەوە</span>. دڵنیابە لە کاتی گونجاودا دایدەگریت.</p>
+        <!-- Table 1: 6 Columns, 4 Rows -->
+        <div class="mb-4">
+            <h3 class="font-bold mb-2 text-lg" contenteditable="true">بەشی یەکەم</h3>
+            <div class="table-responsive">
+                <table>
+                    <tbody>
+                        <!-- 4 Rows -->
+                        <tr><td class="bg-gray-50 w-12">1</td><td contenteditable="true"></td><td contenteditable="true"></td><td contenteditable="true"></td><td contenteditable="true"></td><td contenteditable="true"></td></tr>
+                        <tr><td class="bg-gray-50 w-12">2</td><td contenteditable="true"></td><td contenteditable="true"></td><td contenteditable="true"></td><td contenteditable="true"></td><td contenteditable="true"></td></tr>
+                        <tr><td class="bg-gray-50 w-12">3</td><td contenteditable="true"></td><td contenteditable="true"></td><td contenteditable="true"></td><td contenteditable="true"></td><td contenteditable="true"></td></tr>
+                        <tr><td class="bg-gray-50 w-12">4</td><td contenteditable="true"></td><td contenteditable="true"></td><td contenteditable="true"></td><td contenteditable="true"></td><td contenteditable="true"></td></tr>
+                    </tbody>
+                </table>
             </div>
         </div>
 
-        <div class="bg-white rounded-2xl p-6 shadow-sm mb-6 text-center relative overflow-hidden">
-            <div id="drop-area" class="drop-zone rounded-xl p-8 cursor-pointer group" onclick="document.getElementById('fileElem').click()">
-                <input type="file" id="fileElem" multiple accept="*/*" class="hidden" onchange="handleFiles(this.files)">
-                
-                <div class="flex flex-col items-center justify-center space-y-3 relative z-10">
-                    <div class="w-14 h-14 bg-blue-50 text-blue-600 rounded-2xl flex items-center justify-center text-2xl mb-1 group-hover:scale-110 transition duration-300 shadow-sm">
-                        <i class="fa-solid fa-cloud-arrow-up"></i>
-                    </div>
-                    <h3 class="text-lg font-bold text-slate-700">پەڕگەکان لێرە دابنێ</h3>
-                    <p class="text-slate-400 text-xs max-w-xs mx-auto">
-                        وێنە، ڤیدیۆ یان هەر فایلێک هەڵبژێرە بۆ ناردن
-                    </p>
-                </div>
-            </div>
-
-            <div id="upload-progress-container" class="mt-4 hidden text-left dir-ltr">
-                <!-- Dynamic progress bars -->
-            </div>
-        </div>
-
-        <div class="grid grid-cols-4 gap-2 mb-6">
-            <div class="bg-white p-3 rounded-xl shadow-sm border-b-2 border-blue-500 text-center">
-                <p class="text-slate-400 text-[10px]">کۆی گشتی</p>
-                <p class="text-lg font-bold text-slate-700" id="total-count">0</p>
-            </div>
-            <div class="bg-white p-3 rounded-xl shadow-sm border-b-2 border-purple-500 text-center">
-                <p class="text-slate-400 text-[10px]">وێنە</p>
-                <p class="text-lg font-bold text-slate-700" id="image-count">0</p>
-            </div>
-            <div class="bg-white p-3 rounded-xl shadow-sm border-b-2 border-orange-500 text-center">
-                <p class="text-slate-400 text-[10px]">ڤیدیۆ</p>
-                <p class="text-lg font-bold text-slate-700" id="video-count">0</p>
-            </div>
-            <div class="bg-white p-3 rounded-xl shadow-sm border-b-2 border-emerald-500 text-center">
-                <p class="text-slate-400 text-[10px]">قەبارە</p>
-                <p class="text-sm font-bold text-slate-700 mt-1 dir-ltr" id="total-size">0 MB</p>
+        <!-- Table 2: 6 Columns, 15 Rows -->
+        <div class="mb-4">
+            <h3 class="font-bold mb-2 text-lg" contenteditable="true">بەشی دووەم</h3>
+            <div class="table-responsive">
+                <table>
+                    <tbody>
+                        <!-- 15 Rows -->
+                        <tr><td class="bg-gray-50 w-12">1</td><td contenteditable="true"></td><td contenteditable="true"></td><td contenteditable="true"></td><td contenteditable="true"></td><td contenteditable="true"></td></tr>
+                        <tr><td class="bg-gray-50 w-12">2</td><td contenteditable="true"></td><td contenteditable="true"></td><td contenteditable="true"></td><td contenteditable="true"></td><td contenteditable="true"></td></tr>
+                        <tr><td class="bg-gray-50 w-12">3</td><td contenteditable="true"></td><td contenteditable="true"></td><td contenteditable="true"></td><td contenteditable="true"></td><td contenteditable="true"></td></tr>
+                        <tr><td class="bg-gray-50 w-12">4</td><td contenteditable="true"></td><td contenteditable="true"></td><td contenteditable="true"></td><td contenteditable="true"></td><td contenteditable="true"></td></tr>
+                        <tr><td class="bg-gray-50 w-12">5</td><td contenteditable="true"></td><td contenteditable="true"></td><td contenteditable="true"></td><td contenteditable="true"></td><td contenteditable="true"></td></tr>
+                        <tr><td class="bg-gray-50 w-12">6</td><td contenteditable="true"></td><td contenteditable="true"></td><td contenteditable="true"></td><td contenteditable="true"></td><td contenteditable="true"></td></tr>
+                        <tr><td class="bg-gray-50 w-12">7</td><td contenteditable="true"></td><td contenteditable="true"></td><td contenteditable="true"></td><td contenteditable="true"></td><td contenteditable="true"></td></tr>
+                        <tr><td class="bg-gray-50 w-12">8</td><td contenteditable="true"></td><td contenteditable="true"></td><td contenteditable="true"></td><td contenteditable="true"></td><td contenteditable="true"></td></tr>
+                        <tr><td class="bg-gray-50 w-12">9</td><td contenteditable="true"></td><td contenteditable="true"></td><td contenteditable="true"></td><td contenteditable="true"></td><td contenteditable="true"></td></tr>
+                        <tr><td class="bg-gray-50 w-12">10</td><td contenteditable="true"></td><td contenteditable="true"></td><td contenteditable="true"></td><td contenteditable="true"></td><td contenteditable="true"></td></tr>
+                        <tr><td class="bg-gray-50 w-12">11</td><td contenteditable="true"></td><td contenteditable="true"></td><td contenteditable="true"></td><td contenteditable="true"></td><td contenteditable="true"></td></tr>
+                        <tr><td class="bg-gray-50 w-12">12</td><td contenteditable="true"></td><td contenteditable="true"></td><td contenteditable="true"></td><td contenteditable="true"></td><td contenteditable="true"></td></tr>
+                        <tr><td class="bg-gray-50 w-12">13</td><td contenteditable="true"></td><td contenteditable="true"></td><td contenteditable="true"></td><td contenteditable="true"></td><td contenteditable="true"></td></tr>
+                        <tr><td class="bg-gray-50 w-12">14</td><td contenteditable="true"></td><td contenteditable="true"></td><td contenteditable="true"></td><td contenteditable="true"></td><td contenteditable="true"></td></tr>
+                        <tr><td class="bg-gray-50 w-12">15</td><td contenteditable="true"></td><td contenteditable="true"></td><td contenteditable="true"></td><td contenteditable="true"></td><td contenteditable="true"></td></tr>
+                    </tbody>
+                </table>
             </div>
         </div>
 
-        <div class="flex justify-between items-center mb-4 px-1">
-            <h2 class="text-base font-bold text-slate-800 flex items-center">
-                <span class="w-2 h-6 bg-yellow-400 rounded-full ml-2"></span>
-                پەڕگە هاوبەش کراوەکان
-            </h2>
-        </div>
-
-        <div id="file-list" class="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-3 gap-3">
-            <div id="empty-state" class="col-span-full py-12 text-center text-slate-400 bg-white rounded-xl border border-slate-100 border-dashed">
-                <div class="w-16 h-16 bg-slate-50 rounded-full flex items-center justify-center mx-auto mb-3">
-                    <i class="fa-regular fa-folder-open text-2xl opacity-50"></i>
-                </div>
-                <p class="text-sm">هێشتا هیچ فایلێک لەم ژوورە نییە</p>
-                <p class="text-xs opacity-60 mt-1">فایلێک بار بکە بۆ ئەوەی لێرە دەربکەوێت</p>
+        <!-- Table 3: 6 Columns, 15 Rows -->
+        <div class="mb-4">
+            <h3 class="font-bold mb-2 text-lg" contenteditable="true">بەشی سێیەم</h3>
+            <div class="table-responsive">
+                <table>
+                    <tbody>
+                        <!-- 15 Rows -->
+                        <tr><td class="bg-gray-50 w-12">1</td><td contenteditable="true"></td><td contenteditable="true"></td><td contenteditable="true"></td><td contenteditable="true"></td><td contenteditable="true"></td></tr>
+                        <tr><td class="bg-gray-50 w-12">2</td><td contenteditable="true"></td><td contenteditable="true"></td><td contenteditable="true"></td><td contenteditable="true"></td><td contenteditable="true"></td></tr>
+                        <tr><td class="bg-gray-50 w-12">3</td><td contenteditable="true"></td><td contenteditable="true"></td><td contenteditable="true"></td><td contenteditable="true"></td><td contenteditable="true"></td></tr>
+                        <tr><td class="bg-gray-50 w-12">4</td><td contenteditable="true"></td><td contenteditable="true"></td><td contenteditable="true"></td><td contenteditable="true"></td><td contenteditable="true"></td></tr>
+                        <tr><td class="bg-gray-50 w-12">5</td><td contenteditable="true"></td><td contenteditable="true"></td><td contenteditable="true"></td><td contenteditable="true"></td><td contenteditable="true"></td></tr>
+                        <tr><td class="bg-gray-50 w-12">6</td><td contenteditable="true"></td><td contenteditable="true"></td><td contenteditable="true"></td><td contenteditable="true"></td><td contenteditable="true"></td></tr>
+                        <tr><td class="bg-gray-50 w-12">7</td><td contenteditable="true"></td><td contenteditable="true"></td><td contenteditable="true"></td><td contenteditable="true"></td><td contenteditable="true"></td></tr>
+                        <tr><td class="bg-gray-50 w-12">8</td><td contenteditable="true"></td><td contenteditable="true"></td><td contenteditable="true"></td><td contenteditable="true"></td><td contenteditable="true"></td></tr>
+                        <tr><td class="bg-gray-50 w-12">9</td><td contenteditable="true"></td><td contenteditable="true"></td><td contenteditable="true"></td><td contenteditable="true"></td><td contenteditable="true"></td></tr>
+                        <tr><td class="bg-gray-50 w-12">10</td><td contenteditable="true"></td><td contenteditable="true"></td><td contenteditable="true"></td><td contenteditable="true"></td><td contenteditable="true"></td></tr>
+                        <tr><td class="bg-gray-50 w-12">11</td><td contenteditable="true"></td><td contenteditable="true"></td><td contenteditable="true"></td><td contenteditable="true"></td><td contenteditable="true"></td></tr>
+                        <tr><td class="bg-gray-50 w-12">12</td><td contenteditable="true"></td><td contenteditable="true"></td><td contenteditable="true"></td><td contenteditable="true"></td><td contenteditable="true"></td></tr>
+                        <tr><td class="bg-gray-50 w-12">13</td><td contenteditable="true"></td><td contenteditable="true"></td><td contenteditable="true"></td><td contenteditable="true"></td><td contenteditable="true"></td></tr>
+                        <tr><td class="bg-gray-50 w-12">14</td><td contenteditable="true"></td><td contenteditable="true"></td><td contenteditable="true"></td><td contenteditable="true"></td><td contenteditable="true"></td></tr>
+                        <tr><td class="bg-gray-50 w-12">15</td><td contenteditable="true"></td><td contenteditable="true"></td><td contenteditable="true"></td><td contenteditable="true"></td><td contenteditable="true"></td></tr>
+                    </tbody>
+                </table>
             </div>
         </div>
+    </div>
 
-    </main>
-
-    <script>
-        const dropArea = document.getElementById('drop-area');
-        
-        ['dragenter', 'dragover', 'dragleave', 'drop'].forEach(eventName => {
-            dropArea.addEventListener(eventName, preventDefaults, false);
-        });
-
-        function preventDefaults(e) { e.preventDefault(); e.stopPropagation(); }
-
-        ['dragenter', 'dragover'].forEach(eventName => {
-            dropArea.addEventListener(eventName, () => dropArea.classList.add('bg-blue-50', 'border-blue-300'), false);
-        });
-
-        ['dragleave', 'drop'].forEach(eventName => {
-            dropArea.addEventListener(eventName, () => dropArea.classList.remove('bg-blue-50', 'border-blue-300'), false);
-        });
-
-        dropArea.addEventListener('drop', handleDrop, false);
-        function handleDrop(e) {
-            const dt = e.dataTransfer;
-            window.handleFiles(dt.files);
-        }
-    </script>
 </body>
 </html>
