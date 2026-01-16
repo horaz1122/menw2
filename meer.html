@@ -242,7 +242,7 @@
             }
         }
 
-        // --- IMAGE DOWNLOAD FUNCTION ---
+        // --- IMAGE DOWNLOAD FUNCTION (FIXED FOR MOBILE) ---
         function downloadAsImage() {
             // Remove focus from any active element to avoid capturing cursor
             if (document.activeElement) {
@@ -250,29 +250,48 @@
             }
 
             const element = document.getElementById('capture-area');
-            
-            // Show loading or feedback could go here
             const btn = event.currentTarget;
             const originalText = btn.innerHTML;
             btn.innerHTML = '...';
 
+            // Critical Options for Full Page Capture on Mobile
             html2canvas(element, {
                 scale: 2, // High resolution
-                backgroundColor: '#ffffff', // Force white background
-                useCORS: true
+                backgroundColor: '#ffffff',
+                useCORS: true,
+                // These force the library to render as if on a desktop screen
+                windowWidth: 1200, 
+                onclone: function(clonedDoc) {
+                    const clonedElement = clonedDoc.getElementById('capture-area');
+                    
+                    // Force the cloned element to be full A4 width (approx 210mm)
+                    // This overrides the mobile "100%" width
+                    clonedElement.style.width = '210mm';
+                    clonedElement.style.maxWidth = 'none';
+                    clonedElement.style.height = 'auto';
+                    clonedElement.style.margin = '0';
+                    
+                    // Force tables to expand fully and remove scrollbars
+                    const responsiveDivs = clonedElement.querySelectorAll('.table-responsive');
+                    responsiveDivs.forEach(div => {
+                        div.style.overflow = 'visible';
+                        div.style.width = '100%';
+                        div.style.display = 'block';
+                    });
+                }
             }).then(canvas => {
                 // Restore button text
                 btn.innerHTML = originalText;
 
                 // Create download link
                 const link = document.createElement('a');
-                link.download = 'form.png';
+                link.download = 'form_full.png';
                 link.href = canvas.toDataURL('image/png');
                 link.click();
             }).catch(err => {
                 console.error("Error generating image:", err);
                 btn.innerHTML = originalText;
-                alert("ببورە هەڵەیەک ڕوویدا لە کاتی وێنەگرتندا");
+                alert("ببورە هەڵەیەک ڕوویدا. تکایە دووبارە هەوڵ بدەرەوە.");
             });
         }
 
