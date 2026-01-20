@@ -3,7 +3,7 @@
 <head>
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
-    <title>Horaz IT - 3D Studio</title>
+    <title>Horaz IT - 3D Pro</title>
     <script src="https://cdn.tailwindcss.com"></script>
     <script src="https://cdnjs.cloudflare.com/ajax/libs/html2canvas/1.4.1/html2canvas.min.js"></script>
     <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.4.0/css/all.min.css">
@@ -17,27 +17,26 @@
             overflow: hidden; 
         }
 
-        /* High-End Background */
+        /* Background */
         .tech-bg {
             background: radial-gradient(circle at center, #1e293b 0%, #020617 100%);
             position: relative;
-            perspective: 1500px; /* Enable 3D Space */
+            perspective: 2000px; /* Enhanced Depth */
         }
         .tech-bg::after {
             content: ''; position: absolute; inset: 0;
             background-image: radial-gradient(#3b82f6 1px, transparent 1px);
-            background-size: 40px 40px; opacity: 0.1; pointer-events: none;
+            background-size: 30px 30px; opacity: 0.15; pointer-events: none;
         }
 
-        /* Compact Glass Cards */
+        /* Glass Cards */
         .glass-card {
             background: rgba(255, 255, 255, 0.04);
             backdrop-filter: blur(8px);
             border-right: 3px solid #3b82f6;
             border-radius: 6px;
-            /* Reduced Padding for compactness */
-            padding: 10px 15px; 
-            margin-bottom: 8px; /* Tighter gap */
+            padding: 8px 12px; 
+            margin-bottom: 8px;
             box-shadow: 0 4px 10px rgba(0,0,0,0.2);
             transition: transform 0.3s ease;
         }
@@ -46,34 +45,34 @@
             background: rgba(255, 255, 255, 0.08);
         }
 
-        /* 3D Device Styles */
+        /* 3D Rotations - MORE TILT */
         .device-container {
             transition: all 0.5s ease;
             transform-style: preserve-3d;
         }
         
-        /* Left Device (Laptop) - Angled Right */
+        /* Left Device (Laptop) - Increased Angle to 35deg */
         .angle-right {
-            transform: rotateY(20deg) rotateX(2deg);
-            box-shadow: -20px 20px 30px rgba(0,0,0,0.5);
-            border-right: 2px solid #334155; /* Fake Thickness */
+            transform: rotateY(35deg) rotateX(5deg);
+            box-shadow: -25px 25px 40px rgba(0,0,0,0.6);
+            border-right: 5px solid #334155; /* Thicker side for realism */
         }
 
-        /* Right Device (Monitor) - Angled Left */
+        /* Right Device (Monitor) - Increased Angle to -35deg */
         .angle-left {
-            transform: rotateY(-20deg) rotateX(2deg);
-            box-shadow: 20px 20px 30px rgba(0,0,0,0.5);
-            border-left: 2px solid #334155; /* Fake Thickness */
+            transform: rotateY(-35deg) rotateX(5deg);
+            box-shadow: 25px 25px 40px rgba(0,0,0,0.6);
+            border-left: 5px solid #334155; /* Thicker side for realism */
         }
 
-        /* Frame Styles */
+        /* Screens */
         .screen-frame {
             background: #020617;
-            border: 8px solid #1e293b;
+            border: 6px solid #1e293b;
             position: relative;
             overflow: hidden;
             cursor: pointer;
-            border-radius: 8px;
+            border-radius: 6px;
         }
         
         .upload-overlay {
@@ -87,18 +86,22 @@
         .has-image .upload-overlay { opacity: 0; }
         .has-image:hover .upload-overlay { opacity: 1; }
 
-        /* Footer Compact */
+        /* Slogan Text Editing */
+        .slogan-box:focus {
+            outline: 2px dashed #3b82f6;
+            background: rgba(255,255,255,0.05);
+            border-radius: 4px;
+        }
+
+        /* Footer */
         .contact-bar {
-            background: linear-gradient(to top, #020617, rgba(15, 23, 42, 0.9));
+            background: linear-gradient(to top, #020617, rgba(15, 23, 42, 0.95));
             border-top: 1px solid rgba(59, 130, 246, 0.3);
         }
 
-        /* Modes */
         .mode-post { width: 1200px; height: 630px; }
         .mode-story { width: 1080px; height: 1920px; }
-        
         .phone-number { font-family: 'Montserrat', sans-serif; direction: ltr; }
-        [contenteditable]:focus { outline: 2px dashed #3b82f6; background: rgba(255,255,255,0.05); }
     </style>
 </head>
 <body class="h-screen flex flex-col bg-slate-900">
@@ -124,12 +127,17 @@
         
         <div id="captureArea" class="mode-post tech-bg shadow-2xl flex flex-col items-center justify-between transition-all duration-300 origin-center">
             
-            <div id="headerSection" class="relative z-10 w-full text-center pt-8 shrink-0">
-                <h1 class="font-[Montserrat] text-6xl font-extrabold text-white tracking-widest drop-shadow-[0_0_15px_rgba(59,130,246,0.6)]">HORAZ IT</h1>
-                <div class="h-1 w-24 bg-blue-500 mx-auto mt-2 rounded-full"></div>
+            <div id="headerSection" class="relative z-10 w-full text-center pt-8 shrink-0 px-10">
+                <h1 class="font-[Montserrat] text-6xl font-extrabold text-white tracking-widest drop-shadow-[0_0_20px_rgba(59,130,246,0.6)]">HORAZ IT</h1>
+                
+                <div contenteditable="true" class="slogan-box mt-3 text-blue-100 text-xl font-bold tracking-wide leading-relaxed border border-transparent hover:border-blue-500/30 rounded px-2" dir="auto">
+                    ئامادین بۆ دروست کردنی هەموو جۆرە سیستەمێک بەخواستی خۆتان
+                </div>
+
+                <div class="h-1 w-32 bg-gradient-to-r from-transparent via-blue-500 to-transparent mx-auto mt-3 rounded-full opacity-70"></div>
             </div>
 
-            <div id="layoutContainer" class="flex-1 w-full flex px-6 items-center justify-center relative z-10 gap-4">
+            <div id="layoutContainer" class="flex-1 w-full flex px-4 items-center justify-center relative z-10 gap-2">
                 
                 <div class="flex-1 flex justify-center items-center group perspective-container">
                     <div class="device-container angle-right relative w-72 transition-transform duration-300 group-hover:rotate-y-0" onclick="document.getElementById('laptopInput').click()">
@@ -137,31 +145,31 @@
                             <img id="laptopImg" src="" class="w-full h-full object-cover hidden">
                             <div class="upload-overlay backdrop-blur-sm">
                                 <i class="fa-solid fa-laptop text-3xl mb-1 text-blue-500"></i>
-                                <span class="text-[10px] font-bold uppercase tracking-widest">Click to Upload</span>
+                                <span class="text-[10px] font-bold uppercase tracking-widest">Upload</span>
                             </div>
                         </div>
                         <div class="h-4 bg-[#1e293b] w-[115%] -ml-[7.5%] transform -skew-x-12 mt-1 rounded shadow-xl border-t border-slate-600"></div>
                     </div>
                 </div>
 
-                <div id="listSection" class="w-full max-w-[420px] flex flex-col justify-center z-20">
+                <div id="listSection" class="w-full max-w-[400px] flex flex-col justify-center z-20">
                     <div class="glass-card flex items-center gap-3">
                         <div class="w-6 h-6 rounded-full bg-blue-600 flex items-center justify-center shadow-lg shadow-blue-500/30 shrink-0">
                             <i class="fa-solid fa-check text-white text-xs"></i>
                         </div>
-                        <div contenteditable="true" class="text-white text-xl font-bold bg-transparent outline-none w-full leading-tight" dir="auto">سیستەمی ژمێریاری</div>
+                        <div contenteditable="true" class="text-white text-lg font-bold bg-transparent outline-none w-full leading-tight" dir="auto">سیستەمی ژمێریاری</div>
                     </div>
                     <div class="glass-card flex items-center gap-3">
                         <div class="w-6 h-6 rounded-full bg-blue-600 flex items-center justify-center shadow-lg shadow-blue-500/30 shrink-0">
                             <i class="fa-solid fa-check text-white text-xs"></i>
                         </div>
-                        <div contenteditable="true" class="text-white text-xl font-bold bg-transparent outline-none w-full leading-tight" dir="auto">دروستکردنی وێبسایت</div>
+                        <div contenteditable="true" class="text-white text-lg font-bold bg-transparent outline-none w-full leading-tight" dir="auto">دروستکردنی وێبسایت</div>
                     </div>
                     <div class="glass-card flex items-center gap-3">
                         <div class="w-6 h-6 rounded-full bg-blue-600 flex items-center justify-center shadow-lg shadow-blue-500/30 shrink-0">
                             <i class="fa-solid fa-check text-white text-xs"></i>
                         </div>
-                        <div contenteditable="true" class="text-white text-xl font-bold bg-transparent outline-none w-full leading-tight" dir="auto">پاراستنی داتا</div>
+                        <div contenteditable="true" class="text-white text-lg font-bold bg-transparent outline-none w-full leading-tight" dir="auto">پاراستنی داتا</div>
                     </div>
                 </div>
 
@@ -171,7 +179,7 @@
                             <img id="monitorImg" src="" class="w-full h-full object-cover hidden">
                             <div class="upload-overlay backdrop-blur-sm">
                                 <i class="fa-solid fa-desktop text-3xl mb-1 text-cyan-500"></i>
-                                <span class="text-[10px] font-bold uppercase tracking-widest">Click to Upload</span>
+                                <span class="text-[10px] font-bold uppercase tracking-widest">Upload</span>
                             </div>
                         </div>
                         <div class="w-16 h-8 bg-slate-700 mx-auto mt-0.5 shadow-inner border border-slate-600"></div>
@@ -180,9 +188,9 @@
                 </div>
             </div>
 
-            <div id="footerSection" class="w-full contact-bar py-4 px-8 flex items-center justify-between z-20 shrink-0 mt-2">
+            <div id="footerSection" class="w-full contact-bar py-3 px-8 flex items-center justify-between z-20 shrink-0 mt-2">
                 <div class="text-right">
-                    <div contenteditable="true" class="text-blue-400 text-xs font-bold mb-0.5 uppercase tracking-wide opacity-80">بۆ پەیوەندی</div>
+                    <div contenteditable="true" class="text-blue-400 text-[10px] font-bold mb-0.5 uppercase tracking-wide opacity-80">بۆ داواکردن پەیوەندی بکەن</div>
                     <div class="flex items-center gap-2">
                         <i class="fa-solid fa-phone text-white text-lg"></i>
                         <div contenteditable="true" class="phone-number text-white text-3xl font-black tracking-widest leading-none">
@@ -190,7 +198,7 @@
                         </div>
                     </div>
                 </div>
-                <div class="bg-gradient-to-r from-green-500 to-green-600 text-white px-5 py-1.5 rounded-full flex items-center gap-2 shadow-lg cursor-pointer transform hover:scale-105 transition">
+                <div class="bg-gradient-to-r from-green-500 to-green-600 text-white px-4 py-1.5 rounded-full flex items-center gap-2 shadow-lg cursor-pointer transform hover:scale-105 transition">
                     <i class="fa-brands fa-whatsapp text-2xl"></i>
                     <div class="text-right leading-none">
                         <div class="text-[9px] uppercase font-bold opacity-90">Chat on</div>
@@ -213,7 +221,6 @@
             window.addEventListener('resize', adjustZoom);
         }
 
-        // Add Item (Compact Style)
         function addItem() {
             const list = document.getElementById('listSection');
             const newItem = document.createElement('div');
@@ -222,7 +229,7 @@
                 <div class="w-6 h-6 rounded-full bg-blue-600 flex items-center justify-center shadow-lg shadow-blue-500/30 shrink-0">
                     <i class="fa-solid fa-check text-white text-xs"></i>
                 </div>
-                <div contenteditable="true" class="text-white text-xl font-bold bg-transparent outline-none w-full leading-tight" dir="auto">
+                <div contenteditable="true" class="text-white text-lg font-bold bg-transparent outline-none w-full leading-tight" dir="auto">
                     خزمەتگوزاری نوێ
                 </div>
             `;
@@ -241,26 +248,26 @@
             const footer = document.getElementById('footerSection');
             const list = document.getElementById('listSection');
             
-            // UI Toggles
+            // Buttons
             document.getElementById('btnPost').className = mode === 'post' ? "px-3 py-1 rounded text-xs font-bold bg-blue-600 text-white" : "px-3 py-1 rounded text-xs font-bold text-slate-300 hover:bg-slate-700";
             document.getElementById('btnStory').className = mode === 'story' ? "px-3 py-1 rounded text-xs font-bold bg-purple-600 text-white" : "px-3 py-1 rounded text-xs font-bold text-slate-300 hover:bg-slate-700";
 
             if (mode === 'post') {
                 el.className = "mode-post tech-bg shadow-2xl flex flex-col items-center justify-between transition-all duration-300 origin-center";
-                layout.className = "flex-1 w-full flex px-6 items-center justify-center relative z-10 gap-4 flex-row";
-                list.style.maxWidth = "420px";
-                footer.className = "w-full contact-bar py-4 px-8 flex items-center justify-between z-20 shrink-0 mt-2 flex-row";
-                // Reset Rotation for Post
-                document.querySelector('.angle-right').style.transform = "rotateY(20deg) rotateX(2deg)";
-                document.querySelector('.angle-left').style.transform = "rotateY(-20deg) rotateX(2deg)";
+                layout.className = "flex-1 w-full flex px-4 items-center justify-center relative z-10 gap-2 flex-row";
+                list.style.maxWidth = "400px";
+                footer.className = "w-full contact-bar py-3 px-8 flex items-center justify-between z-20 shrink-0 mt-2 flex-row";
+                // Reset Angle
+                document.querySelector('.angle-right').style.transform = "rotateY(35deg) rotateX(5deg)";
+                document.querySelector('.angle-left').style.transform = "rotateY(-35deg) rotateX(5deg)";
             } else {
                 el.className = "mode-story tech-bg shadow-2xl flex flex-col items-center justify-between transition-all duration-300 origin-center";
-                layout.className = "flex-1 w-full flex px-8 items-center justify-center relative z-10 gap-8 flex-col pt-16";
+                layout.className = "flex-1 w-full flex px-8 items-center justify-center relative z-10 gap-8 flex-col pt-10";
                 list.style.maxWidth = "700px";
                 footer.className = "w-full contact-bar py-8 px-6 flex items-center justify-center gap-6 z-20 shrink-0 flex-col-reverse text-center";
-                // Adjust Rotation for Story (Vertical Stack) - Less extreme
-                document.querySelector('.angle-right').style.transform = "rotateY(10deg)";
-                document.querySelector('.angle-left').style.transform = "rotateY(-10deg)";
+                // Less Angle for Vertical layout
+                document.querySelector('.angle-right').style.transform = "rotateY(15deg)";
+                document.querySelector('.angle-left').style.transform = "rotateY(-15deg)";
             }
             adjustZoom();
         }
