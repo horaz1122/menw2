@@ -3,7 +3,7 @@
 <head>
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
-    <title>Horaz IT - Final Editor</title>
+    <title>Horaz IT - 3D Studio</title>
     <script src="https://cdn.tailwindcss.com"></script>
     <script src="https://cdnjs.cloudflare.com/ajax/libs/html2canvas/1.4.1/html2canvas.min.js"></script>
     <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.4.0/css/all.min.css">
@@ -17,195 +17,184 @@
             overflow: hidden; 
         }
 
-        /* Tech Background */
+        /* High-End Background */
         .tech-bg {
-            background: linear-gradient(135deg, #0f172a 0%, #1e293b 100%);
+            background: radial-gradient(circle at center, #1e293b 0%, #020617 100%);
             position: relative;
+            perspective: 1500px; /* Enable 3D Space */
         }
-        .tech-bg::before {
-            content: '';
-            position: absolute;
-            inset: 0;
-            background-image: 
-                linear-gradient(rgba(255,255,255,0.03) 1px, transparent 1px),
-                linear-gradient(90deg, rgba(255,255,255,0.03) 1px, transparent 1px);
-            background-size: 30px 30px;
-            pointer-events: none;
+        .tech-bg::after {
+            content: ''; position: absolute; inset: 0;
+            background-image: radial-gradient(#3b82f6 1px, transparent 1px);
+            background-size: 40px 40px; opacity: 0.1; pointer-events: none;
         }
 
-        /* Glass Cards */
+        /* Compact Glass Cards */
         .glass-card {
-            background: rgba(255, 255, 255, 0.05);
-            backdrop-filter: blur(10px);
-            border-right: 4px solid #3b82f6;
-            border-radius: 8px;
+            background: rgba(255, 255, 255, 0.04);
+            backdrop-filter: blur(8px);
+            border-right: 3px solid #3b82f6;
+            border-radius: 6px;
+            /* Reduced Padding for compactness */
+            padding: 10px 15px; 
+            margin-bottom: 8px; /* Tighter gap */
             box-shadow: 0 4px 10px rgba(0,0,0,0.2);
-            transition: all 0.3s ease;
+            transition: transform 0.3s ease;
         }
         .glass-card:hover {
             transform: translateX(-5px);
             background: rgba(255, 255, 255, 0.08);
         }
 
-        /* Footer / Contact Bar */
-        .contact-bar {
-            background: rgba(15, 23, 42, 0.9);
-            backdrop-filter: blur(15px);
-            border-top: 1px solid rgba(59, 130, 246, 0.3);
+        /* 3D Device Styles */
+        .device-container {
+            transition: all 0.5s ease;
+            transform-style: preserve-3d;
+        }
+        
+        /* Left Device (Laptop) - Angled Right */
+        .angle-right {
+            transform: rotateY(20deg) rotateX(2deg);
+            box-shadow: -20px 20px 30px rgba(0,0,0,0.5);
+            border-right: 2px solid #334155; /* Fake Thickness */
         }
 
-        .brand-text {
-            font-family: 'Montserrat', sans-serif;
-            text-shadow: 0 0 35px rgba(59, 130, 246, 0.5);
+        /* Right Device (Monitor) - Angled Left */
+        .angle-left {
+            transform: rotateY(-20deg) rotateX(2deg);
+            box-shadow: 20px 20px 30px rgba(0,0,0,0.5);
+            border-left: 2px solid #334155; /* Fake Thickness */
         }
 
-        /* Device Frames */
-        .device-frame {
+        /* Frame Styles */
+        .screen-frame {
             background: #020617;
-            border: 2px solid #334155;
+            border: 8px solid #1e293b;
             position: relative;
-            box-shadow: 0 20px 40px rgba(0, 0, 0, 0.6);
             overflow: hidden;
             cursor: pointer;
+            border-radius: 8px;
         }
         
         .upload-overlay {
             position: absolute; inset: 0;
             display: flex; flex-direction: column;
             align-items: center; justify-content: center;
-            background: rgba(15, 23, 42, 0.85); color: #94a3b8;
+            background: rgba(15, 23, 42, 0.9); color: #94a3b8;
             transition: opacity 0.3s;
             z-index: 20;
         }
         .has-image .upload-overlay { opacity: 0; }
         .has-image:hover .upload-overlay { opacity: 1; }
 
+        /* Footer Compact */
+        .contact-bar {
+            background: linear-gradient(to top, #020617, rgba(15, 23, 42, 0.9));
+            border-top: 1px solid rgba(59, 130, 246, 0.3);
+        }
+
         /* Modes */
         .mode-post { width: 1200px; height: 630px; }
         .mode-story { width: 1080px; height: 1920px; }
         
-        /* Phone Number Fix */
-        .phone-number {
-            font-family: 'Montserrat', sans-serif;
-            direction: ltr; /* Force Left-to-Right for numbers */
-            unicode-bidi: embed;
-        }
-
-        /* Edit Focus */
-        [contenteditable]:focus {
-            outline: 2px dashed #3b82f6;
-            background: rgba(255,255,255,0.05);
-            border-radius: 4px;
-        }
+        .phone-number { font-family: 'Montserrat', sans-serif; direction: ltr; }
+        [contenteditable]:focus { outline: 2px dashed #3b82f6; background: rgba(255,255,255,0.05); }
     </style>
 </head>
-<body class="h-screen flex flex-col">
+<body class="h-screen flex flex-col bg-slate-900">
 
-    <div class="h-16 bg-slate-900 border-b border-slate-700 flex items-center justify-between px-6 z-50 shadow-xl">
-        <div class="text-white font-bold text-lg flex items-center gap-2">
-            Horaz IT <span class="text-xs bg-blue-600 px-2 rounded">PRO</span>
-        </div>
-        
-        <div class="flex gap-4 items-center">
-            <div class="bg-slate-800 p-1 rounded border border-slate-600 flex">
-                <button onclick="setMode('post')" id="btnPost" class="px-4 py-1.5 rounded text-sm font-bold bg-blue-600 text-white">Post</button>
-                <button onclick="setMode('story')" id="btnStory" class="px-4 py-1.5 rounded text-sm font-bold text-slate-300 hover:bg-slate-700">Story</button>
+    <div class="h-14 bg-slate-900 border-b border-slate-700 flex items-center justify-between px-4 z-50 shadow-xl shrink-0">
+        <div class="text-white font-bold text-lg">Horaz IT <span class="text-blue-500">3D</span></div>
+        <div class="flex gap-3 items-center">
+            <div class="bg-slate-800 p-1 rounded flex border border-slate-600">
+                <button onclick="setMode('post')" id="btnPost" class="px-3 py-1 rounded text-xs font-bold bg-blue-600 text-white">Post</button>
+                <button onclick="setMode('story')" id="btnStory" class="px-3 py-1 rounded text-xs font-bold text-slate-300">Story</button>
             </div>
-
-            <div class="bg-slate-800 p-1 rounded border border-slate-600 flex gap-1">
-                <button onclick="addItem()" class="w-8 h-8 rounded bg-green-600 hover:bg-green-500 text-white flex items-center justify-center transition" title="زیادکردن">
-                    <i class="fa-solid fa-plus"></i>
-                </button>
-                <button onclick="removeItem()" class="w-8 h-8 rounded bg-red-600 hover:bg-red-500 text-white flex items-center justify-center transition" title="کەمکردنەوە">
-                    <i class="fa-solid fa-minus"></i>
-                </button>
+            <div class="flex gap-1">
+                <button onclick="addItem()" class="w-7 h-7 rounded bg-green-600 hover:bg-green-500 text-white flex items-center justify-center"><i class="fa-solid fa-plus text-xs"></i></button>
+                <button onclick="removeItem()" class="w-7 h-7 rounded bg-red-600 hover:bg-red-500 text-white flex items-center justify-center"><i class="fa-solid fa-minus text-xs"></i></button>
             </div>
-
-            <button onclick="downloadImage()" class="px-5 py-2 bg-gradient-to-r from-blue-600 to-cyan-600 hover:from-blue-500 hover:to-cyan-500 text-white rounded font-bold shadow-lg flex items-center gap-2 transition">
+            <button onclick="downloadImage()" class="px-4 py-1 bg-blue-600 hover:bg-blue-500 text-white rounded font-bold shadow text-sm flex items-center gap-2">
                 <i class="fa-solid fa-download"></i> Save
             </button>
         </div>
     </div>
 
-    <div id="workspace" class="flex-1 overflow-hidden bg-slate-800 flex items-center justify-center relative">
+    <div id="workspace" class="flex-1 overflow-hidden flex items-center justify-center relative bg-slate-800">
+        
         <div id="captureArea" class="mode-post tech-bg shadow-2xl flex flex-col items-center justify-between transition-all duration-300 origin-center">
             
-            <div class="absolute top-0 right-0 w-[500px] h-[500px] bg-blue-600/20 rounded-full blur-[100px] pointer-events-none"></div>
-            <div class="absolute bottom-0 left-0 w-[500px] h-[500px] bg-cyan-600/20 rounded-full blur-[100px] pointer-events-none"></div>
-
-            <div id="headerSection" class="relative z-10 w-full text-center pt-10">
-                <h1 class="brand-text text-7xl font-extrabold text-white tracking-widest">HORAZ IT</h1>
-                <div class="text-blue-200 tracking-[0.5em] text-sm uppercase mt-2 font-bold opacity-80">Software Solutions</div>
+            <div id="headerSection" class="relative z-10 w-full text-center pt-8 shrink-0">
+                <h1 class="font-[Montserrat] text-6xl font-extrabold text-white tracking-widest drop-shadow-[0_0_15px_rgba(59,130,246,0.6)]">HORAZ IT</h1>
+                <div class="h-1 w-24 bg-blue-500 mx-auto mt-2 rounded-full"></div>
             </div>
 
-            <div id="layoutContainer" class="flex-1 w-full flex p-8 gap-10 items-center justify-center relative z-10">
+            <div id="layoutContainer" class="flex-1 w-full flex px-6 items-center justify-center relative z-10 gap-4">
                 
-                <div class="flex-1 flex justify-center items-center order-1 group">
-                    <div class="relative w-80 transition transform group-hover:-translate-y-2 duration-300" onclick="document.getElementById('laptopInput').click()">
-                        <div class="device-frame h-48 rounded-lg relative" id="laptopOverlay">
+                <div class="flex-1 flex justify-center items-center group perspective-container">
+                    <div class="device-container angle-right relative w-72 transition-transform duration-300 group-hover:rotate-y-0" onclick="document.getElementById('laptopInput').click()">
+                        <div class="screen-frame h-44 bg-slate-900" id="laptopOverlay">
                             <img id="laptopImg" src="" class="w-full h-full object-cover hidden">
                             <div class="upload-overlay backdrop-blur-sm">
-                                <i class="fa-solid fa-laptop text-4xl mb-2 text-blue-500"></i>
-                                <span class="text-xs font-bold uppercase tracking-widest">Upload</span>
+                                <i class="fa-solid fa-laptop text-3xl mb-1 text-blue-500"></i>
+                                <span class="text-[10px] font-bold uppercase tracking-widest">Click to Upload</span>
                             </div>
                         </div>
-                        <div class="h-3 bg-gradient-to-r from-slate-700 via-slate-600 to-slate-700 rounded-b-xl w-[110%] -mr-[5%] mt-1 shadow-lg"></div>
+                        <div class="h-4 bg-[#1e293b] w-[115%] -ml-[7.5%] transform -skew-x-12 mt-1 rounded shadow-xl border-t border-slate-600"></div>
                     </div>
                 </div>
 
-                <div id="listSection" class="w-full max-w-[480px] flex flex-col gap-4 order-2 z-20">
-                    <div class="glass-card p-4 flex items-center gap-4">
-                        <div class="w-8 h-8 rounded-full bg-blue-600 flex items-center justify-center shadow-lg shadow-blue-500/30 shrink-0">
-                            <i class="fa-solid fa-check text-white text-sm"></i>
+                <div id="listSection" class="w-full max-w-[420px] flex flex-col justify-center z-20">
+                    <div class="glass-card flex items-center gap-3">
+                        <div class="w-6 h-6 rounded-full bg-blue-600 flex items-center justify-center shadow-lg shadow-blue-500/30 shrink-0">
+                            <i class="fa-solid fa-check text-white text-xs"></i>
                         </div>
-                        <div contenteditable="true" class="text-white text-2xl font-bold bg-transparent outline-none w-full" dir="auto">سیستەمی ژمێریاری</div>
+                        <div contenteditable="true" class="text-white text-xl font-bold bg-transparent outline-none w-full leading-tight" dir="auto">سیستەمی ژمێریاری</div>
                     </div>
-                    <div class="glass-card p-4 flex items-center gap-4">
-                        <div class="w-8 h-8 rounded-full bg-blue-600 flex items-center justify-center shadow-lg shadow-blue-500/30 shrink-0">
-                            <i class="fa-solid fa-check text-white text-sm"></i>
+                    <div class="glass-card flex items-center gap-3">
+                        <div class="w-6 h-6 rounded-full bg-blue-600 flex items-center justify-center shadow-lg shadow-blue-500/30 shrink-0">
+                            <i class="fa-solid fa-check text-white text-xs"></i>
                         </div>
-                        <div contenteditable="true" class="text-white text-2xl font-bold bg-transparent outline-none w-full" dir="auto">دروستکردنی وێبسایت</div>
+                        <div contenteditable="true" class="text-white text-xl font-bold bg-transparent outline-none w-full leading-tight" dir="auto">دروستکردنی وێبسایت</div>
                     </div>
-                    <div class="glass-card p-4 flex items-center gap-4">
-                        <div class="w-8 h-8 rounded-full bg-blue-600 flex items-center justify-center shadow-lg shadow-blue-500/30 shrink-0">
-                            <i class="fa-solid fa-check text-white text-sm"></i>
+                    <div class="glass-card flex items-center gap-3">
+                        <div class="w-6 h-6 rounded-full bg-blue-600 flex items-center justify-center shadow-lg shadow-blue-500/30 shrink-0">
+                            <i class="fa-solid fa-check text-white text-xs"></i>
                         </div>
-                        <div contenteditable="true" class="text-white text-2xl font-bold bg-transparent outline-none w-full" dir="auto">پاراستنی داتا</div>
+                        <div contenteditable="true" class="text-white text-xl font-bold bg-transparent outline-none w-full leading-tight" dir="auto">پاراستنی داتا</div>
                     </div>
                 </div>
 
-                <div class="flex-1 flex justify-center items-center order-3 group">
-                    <div class="relative w-96 transition transform group-hover:-translate-y-2 duration-300" onclick="document.getElementById('monitorInput').click()">
-                        <div class="device-frame h-56 rounded-lg relative" id="monitorOverlay">
+                <div class="flex-1 flex justify-center items-center group perspective-container">
+                    <div class="device-container angle-left relative w-80 transition-transform duration-300 group-hover:rotate-y-0" onclick="document.getElementById('monitorInput').click()">
+                        <div class="screen-frame h-48 bg-slate-900" id="monitorOverlay">
                             <img id="monitorImg" src="" class="w-full h-full object-cover hidden">
                             <div class="upload-overlay backdrop-blur-sm">
-                                <i class="fa-solid fa-desktop text-4xl mb-2 text-cyan-500"></i>
-                                <span class="text-xs font-bold uppercase tracking-widest">Upload</span>
+                                <i class="fa-solid fa-desktop text-3xl mb-1 text-cyan-500"></i>
+                                <span class="text-[10px] font-bold uppercase tracking-widest">Click to Upload</span>
                             </div>
                         </div>
-                        <div class="w-20 h-10 bg-slate-700 mx-auto mt-0.5 shadow-inner"></div>
-                        <div class="w-32 h-2 bg-slate-600 mx-auto rounded-t shadow-lg"></div>
+                        <div class="w-16 h-8 bg-slate-700 mx-auto mt-0.5 shadow-inner border border-slate-600"></div>
+                        <div class="w-24 h-2 bg-slate-600 mx-auto rounded shadow-lg transform perspective(500px) rotateX(20deg)"></div>
                     </div>
                 </div>
             </div>
 
-            <div id="footerSection" class="w-full contact-bar py-6 px-12 flex items-center justify-between z-20 shadow-[0_-5px_20px_rgba(0,0,0,0.4)]">
-                
+            <div id="footerSection" class="w-full contact-bar py-4 px-8 flex items-center justify-between z-20 shrink-0 mt-2">
                 <div class="text-right">
-                    <div contenteditable="true" class="text-blue-300 text-sm font-bold mb-1 uppercase tracking-wide">بۆ داواکردن پەیوەندی بکەن</div>
-                    <div class="flex items-center gap-3">
-                        <i class="fa-solid fa-phone-volume text-white text-2xl animate-pulse"></i>
-                        <div contenteditable="true" class="phone-number text-white text-4xl font-black tracking-widest">
+                    <div contenteditable="true" class="text-blue-400 text-xs font-bold mb-0.5 uppercase tracking-wide opacity-80">بۆ پەیوەندی</div>
+                    <div class="flex items-center gap-2">
+                        <i class="fa-solid fa-phone text-white text-lg"></i>
+                        <div contenteditable="true" class="phone-number text-white text-3xl font-black tracking-widest leading-none">
                             0750 178 40 02
                         </div>
                     </div>
                 </div>
-
-                <div class="bg-[#25D366] text-white px-6 py-2 rounded-full flex items-center gap-3 shadow-lg shadow-green-500/20 cursor-pointer">
-                    <i class="fa-brands fa-whatsapp text-3xl"></i>
-                    <div class="text-right leading-tight">
-                        <div class="text-[10px] uppercase font-bold text-green-100">نامە بنێرە لە</div>
-                        <div class="text-xl font-bold">WhatsApp</div>
+                <div class="bg-gradient-to-r from-green-500 to-green-600 text-white px-5 py-1.5 rounded-full flex items-center gap-2 shadow-lg cursor-pointer transform hover:scale-105 transition">
+                    <i class="fa-brands fa-whatsapp text-2xl"></i>
+                    <div class="text-right leading-none">
+                        <div class="text-[9px] uppercase font-bold opacity-90">Chat on</div>
+                        <div class="text-md font-bold">WhatsApp</div>
                     </div>
                 </div>
             </div>
@@ -224,29 +213,25 @@
             window.addEventListener('resize', adjustZoom);
         }
 
-        // --- NEW: Add Item Function ---
+        // Add Item (Compact Style)
         function addItem() {
             const list = document.getElementById('listSection');
             const newItem = document.createElement('div');
-            newItem.className = 'glass-card p-4 flex items-center gap-4 animate-fade-in';
-            // Use same HTML structure as existing items
+            newItem.className = 'glass-card flex items-center gap-3 animate-fade-in';
             newItem.innerHTML = `
-                <div class="w-8 h-8 rounded-full bg-blue-600 flex items-center justify-center shadow-lg shadow-blue-500/30 shrink-0">
-                    <i class="fa-solid fa-check text-white text-sm"></i>
+                <div class="w-6 h-6 rounded-full bg-blue-600 flex items-center justify-center shadow-lg shadow-blue-500/30 shrink-0">
+                    <i class="fa-solid fa-check text-white text-xs"></i>
                 </div>
-                <div contenteditable="true" class="text-white text-2xl font-bold bg-transparent outline-none w-full" dir="auto">
+                <div contenteditable="true" class="text-white text-xl font-bold bg-transparent outline-none w-full leading-tight" dir="auto">
                     خزمەتگوزاری نوێ
                 </div>
             `;
             list.appendChild(newItem);
         }
 
-        // --- NEW: Remove Item Function ---
         function removeItem() {
             const list = document.getElementById('listSection');
-            if(list.children.length > 1) { // Prevent deleting the last item
-                list.removeChild(list.lastElementChild);
-            }
+            if(list.children.length > 1) list.lastElementChild.remove();
         }
 
         function setMode(mode) {
@@ -256,20 +241,26 @@
             const footer = document.getElementById('footerSection');
             const list = document.getElementById('listSection');
             
-            // Toggle Button Styles
-            document.getElementById('btnPost').className = mode === 'post' ? "px-4 py-1.5 rounded text-sm font-bold bg-blue-600 text-white" : "px-4 py-1.5 rounded text-sm font-bold text-slate-300 hover:bg-slate-700";
-            document.getElementById('btnStory').className = mode === 'story' ? "px-4 py-1.5 rounded text-sm font-bold bg-purple-600 text-white" : "px-4 py-1.5 rounded text-sm font-bold text-slate-300 hover:bg-slate-700";
+            // UI Toggles
+            document.getElementById('btnPost').className = mode === 'post' ? "px-3 py-1 rounded text-xs font-bold bg-blue-600 text-white" : "px-3 py-1 rounded text-xs font-bold text-slate-300 hover:bg-slate-700";
+            document.getElementById('btnStory').className = mode === 'story' ? "px-3 py-1 rounded text-xs font-bold bg-purple-600 text-white" : "px-3 py-1 rounded text-xs font-bold text-slate-300 hover:bg-slate-700";
 
             if (mode === 'post') {
                 el.className = "mode-post tech-bg shadow-2xl flex flex-col items-center justify-between transition-all duration-300 origin-center";
-                layout.className = "flex-1 w-full flex p-8 gap-8 items-center justify-center relative z-10 flex-row";
-                list.style.maxWidth = "480px";
-                footer.className = "w-full contact-bar py-6 px-12 flex items-center justify-between z-20 flex-row";
+                layout.className = "flex-1 w-full flex px-6 items-center justify-center relative z-10 gap-4 flex-row";
+                list.style.maxWidth = "420px";
+                footer.className = "w-full contact-bar py-4 px-8 flex items-center justify-between z-20 shrink-0 mt-2 flex-row";
+                // Reset Rotation for Post
+                document.querySelector('.angle-right').style.transform = "rotateY(20deg) rotateX(2deg)";
+                document.querySelector('.angle-left').style.transform = "rotateY(-20deg) rotateX(2deg)";
             } else {
                 el.className = "mode-story tech-bg shadow-2xl flex flex-col items-center justify-between transition-all duration-300 origin-center";
-                layout.className = "flex-1 w-full flex p-10 gap-10 items-center justify-center relative z-10 flex-col pt-24";
+                layout.className = "flex-1 w-full flex px-8 items-center justify-center relative z-10 gap-8 flex-col pt-16";
                 list.style.maxWidth = "700px";
-                footer.className = "w-full contact-bar py-12 px-8 flex items-center justify-center gap-10 z-20 flex-col-reverse text-center";
+                footer.className = "w-full contact-bar py-8 px-6 flex items-center justify-center gap-6 z-20 shrink-0 flex-col-reverse text-center";
+                // Adjust Rotation for Story (Vertical Stack) - Less extreme
+                document.querySelector('.angle-right').style.transform = "rotateY(10deg)";
+                document.querySelector('.angle-left').style.transform = "rotateY(-10deg)";
             }
             adjustZoom();
         }
@@ -277,7 +268,7 @@
         function adjustZoom() {
             const workspace = document.getElementById('workspace');
             const el = document.getElementById('captureArea');
-            const padding = 40;
+            const padding = 20;
             const scale = Math.min((workspace.clientWidth - padding) / (currentMode === 'post' ? 1200 : 1080), (workspace.clientHeight - padding) / (currentMode === 'post' ? 630 : 1920));
             el.style.transform = `scale(${scale})`;
         }
@@ -305,7 +296,6 @@
                     const clonedEl = clonedDoc.getElementById('captureArea');
                     clonedEl.style.transform = 'scale(1)';
                     clonedEl.style.margin = '0';
-                    // Ensure number stays LTR in export
                     const phone = clonedEl.querySelector('.phone-number');
                     if(phone) phone.style.direction = 'ltr';
                 }
