@@ -3,7 +3,7 @@
 <head>
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
-    <title>Horaz IT - Ultimate Editor</title>
+    <title>Horaz IT - Ad Creator</title>
     <script src="https://cdn.tailwindcss.com"></script>
     <script src="https://cdnjs.cloudflare.com/ajax/libs/html2canvas/1.4.1/html2canvas.min.js"></script>
     <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.4.0/css/all.min.css">
@@ -17,172 +17,177 @@
             overflow: hidden; 
         }
 
-        /* 1. New Professional Background */
+        /* Modern Tech Background */
         .tech-bg {
-            background: radial-gradient(circle at 50% 0%, #1e3a8a 0%, #0f172a 60%, #020617 100%);
+            background: linear-gradient(135deg, #0f172a 0%, #1e293b 100%);
             position: relative;
         }
-        /* Subtle Grid Pattern */
         .tech-bg::before {
             content: '';
             position: absolute;
-            inset: 0;
-            background-image: linear-gradient(rgba(255,255,255,0.03) 1px, transparent 1px),
-            linear-gradient(90deg, rgba(255,255,255,0.03) 1px, transparent 1px);
-            background-size: 40px 40px;
+            top: 0; left: 0; right: 0; bottom: 0;
+            background-image: 
+                radial-gradient(circle at 15% 50%, rgba(59, 130, 246, 0.08) 0%, transparent 25%),
+                radial-gradient(circle at 85% 30%, rgba(14, 165, 233, 0.08) 0%, transparent 25%);
             pointer-events: none;
         }
 
-        /* Glass Panel - Cleaner */
-        .glass-panel {
-            background: rgba(30, 41, 59, 0.6); /* Darker semi-transparent */
-            backdrop-filter: blur(12px);
-            border-right: 4px solid #3b82f6; /* Blue accent line */
-            border-radius: 8px;
-            box-shadow: 0 4px 15px rgba(0, 0, 0, 0.3);
+        /* Glass Cards */
+        .glass-card {
+            background: rgba(255, 255, 255, 0.03);
+            backdrop-filter: blur(10px);
+            border: 1px solid rgba(255, 255, 255, 0.1);
+            border-radius: 12px;
             transition: all 0.3s ease;
         }
-        .glass-panel:hover {
-            background: rgba(30, 41, 59, 0.8);
-            transform: translateX(-5px);
+        .glass-card:hover {
+            background: rgba(255, 255, 255, 0.06);
+            border-color: rgba(59, 130, 246, 0.3);
+        }
+
+        /* Contact Bar Style */
+        .contact-bar {
+            background: rgba(15, 23, 42, 0.85);
+            backdrop-filter: blur(15px);
+            border-top: 1px solid rgba(59, 130, 246, 0.3);
+            box-shadow: 0 -10px 40px rgba(0,0,0,0.3);
         }
 
         .brand-text {
             font-family: 'Montserrat', sans-serif;
-            text-shadow: 0 0 40px rgba(59, 130, 246, 0.5);
+            text-shadow: 0 0 30px rgba(59, 130, 246, 0.4);
         }
 
         /* Device Frames */
-        .monitor-frame, .laptop-frame {
+        .device-frame {
             background: #020617;
             border: 1px solid #334155;
             position: relative;
-            box-shadow: 0 20px 50px rgba(0,0,0,0.7);
-            overflow: hidden;
+            box-shadow: 0 25px 50px -12px rgba(0, 0, 0, 0.7);
             cursor: pointer;
+            overflow: hidden;
         }
         
-        /* Upload Overlay */
         .upload-overlay {
             position: absolute; inset: 0;
             display: flex; flex-direction: column;
             align-items: center; justify-content: center;
-            background: rgba(15, 23, 42, 0.9); color: #94a3b8;
+            background: rgba(15, 23, 42, 0.8); color: #94a3b8;
             transition: opacity 0.3s;
             z-index: 20;
         }
         .has-image .upload-overlay { opacity: 0; }
         .has-image:hover .upload-overlay { opacity: 1; }
 
-        /* Canvas Sizes */
+        /* Modes */
         .mode-post { width: 1200px; height: 630px; }
         .mode-story { width: 1080px; height: 1920px; }
 
-        /* Editing Text Fixes */
-        [contenteditable]:focus {
-            outline: 2px dashed #3b82f6;
-            background: rgba(0,0,0,0.2);
-            border-radius: 4px;
+        /* WhatsApp Button Style */
+        .whatsapp-badge {
+            background: linear-gradient(to right, #25d366, #128c7e);
+            color: white;
+            padding: 8px 20px;
+            border-radius: 50px;
+            display: flex;
+            align-items: center;
+            gap: 10px;
+            font-weight: bold;
+            box-shadow: 0 4px 15px rgba(37, 211, 102, 0.3);
         }
     </style>
 </head>
 <body class="h-screen flex flex-col">
 
-    <div class="h-16 bg-slate-900 border-b border-slate-700 flex items-center justify-between px-6 z-50 shadow-lg">
-        <div class="text-white font-bold text-lg">Horaz IT <span class="text-blue-500 text-xs uppercase tracking-widest">Creator</span></div>
-
-        <div class="flex gap-3 bg-slate-800 p-1 rounded-lg">
-            <button onclick="setMode('post')" id="btnPost" class="px-4 py-1.5 rounded text-sm font-bold bg-blue-600 text-white shadow transition">Post</button>
-            <button onclick="setMode('story')" id="btnStory" class="px-4 py-1.5 rounded text-sm font-bold text-slate-300 hover:bg-slate-700 transition">Story</button>
+    <div class="h-16 bg-slate-900 border-b border-slate-700 flex items-center justify-between px-6 z-50">
+        <div class="text-white font-bold text-lg flex items-center gap-2">
+            <i class="fa-solid fa-layer-group text-blue-500"></i> Horaz IT Editor
         </div>
-
-        <div class="flex gap-3">
-             <div class="flex bg-slate-800 rounded p-1">
-                <button onclick="addItem()" class="w-8 h-8 flex items-center justify-center text-green-400 hover:bg-slate-700 rounded"><i class="fa-solid fa-plus"></i></button>
-                <button onclick="removeItem()" class="w-8 h-8 flex items-center justify-center text-red-400 hover:bg-slate-700 rounded"><i class="fa-solid fa-minus"></i></button>
+        <div class="flex gap-4">
+            <div class="bg-slate-800 p-1 rounded flex">
+                <button onclick="setMode('post')" id="btnPost" class="px-4 py-1.5 rounded text-sm font-bold bg-blue-600 text-white">Post</button>
+                <button onclick="setMode('story')" id="btnStory" class="px-4 py-1.5 rounded text-sm font-bold text-slate-300 hover:bg-slate-700">Story</button>
             </div>
-            <button onclick="downloadImage()" class="px-5 py-1.5 bg-green-600 hover:bg-green-500 text-white rounded font-bold shadow transition flex items-center gap-2">
-                <i class="fa-solid fa-download"></i> Save
+            <button onclick="downloadImage()" class="px-5 py-1.5 bg-green-600 hover:bg-green-500 text-white rounded font-bold shadow flex items-center gap-2">
+                <i class="fa-solid fa-download"></i> Save Image
             </button>
         </div>
     </div>
 
     <div id="workspace" class="flex-1 overflow-hidden bg-slate-800 flex items-center justify-center relative">
-        <div class="absolute inset-0 opacity-10" style="background-image: radial-gradient(#fff 1px, transparent 1px); background-size: 20px 20px;"></div>
-        
-        <div id="captureArea" class="mode-post tech-bg shadow-2xl flex flex-col items-center transition-all duration-300 origin-center">
+        <div id="captureArea" class="mode-post tech-bg shadow-2xl flex flex-col items-center justify-between transition-all duration-300 origin-center">
             
-            <div class="absolute top-0 right-0 w-[600px] h-[600px] bg-blue-600 rounded-full mix-blend-screen filter blur-[150px] opacity-20 pointer-events-none"></div>
-            <div class="absolute bottom-0 left-0 w-[600px] h-[600px] bg-indigo-600 rounded-full mix-blend-screen filter blur-[150px] opacity-20 pointer-events-none"></div>
-
-            <div id="headerSection" class="relative z-10 pt-10 pb-4 text-center w-full">
-                <h1 class="brand-text text-7xl font-extrabold text-white tracking-widest">HORAZ IT</h1>
-                <div class="text-blue-300 tracking-[0.6em] text-sm uppercase mt-2 font-bold opacity-80">Software & Security</div>
+            <div id="headerSection" class="relative z-10 w-full text-center pt-8">
+                <h1 class="brand-text text-6xl font-extrabold text-white tracking-widest">HORAZ IT</h1>
+                <div class="h-1 w-20 bg-blue-500 mx-auto mt-4 rounded-full shadow-[0_0_10px_#3b82f6]"></div>
             </div>
 
-            <div id="layoutContainer" class="relative z-10 flex w-full h-full p-10 gap-8 items-center justify-center">
+            <div id="layoutContainer" class="flex-1 w-full flex p-8 gap-8 items-center justify-center relative z-10">
                 
-                <div class="flex-1 flex justify-center items-center group order-1">
-                    <div class="relative w-80 transition transform group-hover:-translate-y-2 duration-300" onclick="document.getElementById('laptopInput').click()">
-                        <div class="laptop-frame h-48 rounded-lg relative" id="laptopOverlay">
+                <div class="flex-1 flex justify-center items-center order-1 group">
+                    <div class="relative w-72 transition transform group-hover:-translate-y-2 duration-300" onclick="document.getElementById('laptopInput').click()">
+                        <div class="device-frame h-44 rounded-lg" id="laptopOverlay">
                             <img id="laptopImg" src="" class="w-full h-full object-cover hidden">
                             <div class="upload-overlay backdrop-blur-sm">
-                                <i class="fa-solid fa-laptop text-3xl mb-2 text-blue-500"></i>
-                                <span class="text-xs font-bold uppercase tracking-wide">Select Image</span>
+                                <i class="fa-solid fa-laptop text-3xl mb-2 text-blue-400"></i>
+                                <span class="text-xs font-bold uppercase">Upload</span>
                             </div>
                         </div>
-                        <div class="h-3 bg-slate-700 rounded-b-xl w-[110%] -mr-[5%] mt-1 shadow-lg"></div>
+                        <div class="h-3 bg-slate-700 rounded-b-xl w-[110%] -mr-[5%] mt-1 shadow-lg"></div> </div>
+                </div>
+
+                <div id="listSection" class="w-full max-w-[450px] flex flex-col gap-4 order-2">
+                    <div class="glass-card p-4 flex items-center gap-4">
+                        <div class="w-8 h-8 rounded bg-blue-500/20 text-blue-400 flex items-center justify-center border border-blue-500/30">
+                            <i class="fa-solid fa-check text-sm"></i>
+                        </div>
+                        <div contenteditable="true" class="text-white text-xl font-bold bg-transparent outline-none w-full" dir="auto">سیستەمی ژمێریاری پێشکەوتوو</div>
+                    </div>
+                    <div class="glass-card p-4 flex items-center gap-4">
+                        <div class="w-8 h-8 rounded bg-blue-500/20 text-blue-400 flex items-center justify-center border border-blue-500/30">
+                            <i class="fa-solid fa-check text-sm"></i>
+                        </div>
+                        <div contenteditable="true" class="text-white text-xl font-bold bg-transparent outline-none w-full" dir="auto">دیزاینی وێبسایت و ئەپڵیکەیشن</div>
+                    </div>
+                    <div class="glass-card p-4 flex items-center gap-4">
+                        <div class="w-8 h-8 rounded bg-blue-500/20 text-blue-400 flex items-center justify-center border border-blue-500/30">
+                            <i class="fa-solid fa-check text-sm"></i>
+                        </div>
+                        <div contenteditable="true" class="text-white text-xl font-bold bg-transparent outline-none w-full" dir="auto">پاراستنی داتا و سێرڤەر</div>
                     </div>
                 </div>
 
-                <div id="listSection" class="w-full max-w-[480px] flex flex-col gap-4 z-20 order-2">
-                    <div class="glass-panel p-4 flex items-center gap-4">
-                        <div class="w-8 h-8 rounded-full bg-blue-600 flex items-center justify-center shadow-lg shadow-blue-500/40 shrink-0">
-                            <i class="fa-solid fa-check text-white text-sm"></i>
-                        </div>
-                        <div contenteditable="true" class="text-white text-2xl font-bold bg-transparent outline-none w-full leading-normal" dir="auto">
-                            سیستەمی ژمێریاری
-                        </div>
-                    </div>
-
-                    <div class="glass-panel p-4 flex items-center gap-4">
-                        <div class="w-8 h-8 rounded-full bg-blue-600 flex items-center justify-center shadow-lg shadow-blue-500/40 shrink-0">
-                            <i class="fa-solid fa-check text-white text-sm"></i>
-                        </div>
-                        <div contenteditable="true" class="text-white text-2xl font-bold bg-transparent outline-none w-full leading-normal" dir="auto">
-                            دروستکردنی وێبسایت
-                        </div>
-                    </div>
-
-                    <div class="glass-panel p-4 flex items-center gap-4">
-                        <div class="w-8 h-8 rounded-full bg-blue-600 flex items-center justify-center shadow-lg shadow-blue-500/40 shrink-0">
-                            <i class="fa-solid fa-check text-white text-sm"></i>
-                        </div>
-                        <div contenteditable="true" class="text-white text-2xl font-bold bg-transparent outline-none w-full leading-normal" dir="auto">
-                            پاراستنی داتا
-                        </div>
-                    </div>
-                </div>
-
-                <div class="flex-1 flex flex-col items-center justify-center group order-3">
-                    <div class="relative w-96 transition transform group-hover:-translate-y-2 duration-300" onclick="document.getElementById('monitorInput').click()">
-                        <div class="monitor-frame h-56 rounded-lg relative" id="monitorOverlay">
+                <div class="flex-1 flex justify-center items-center order-3 group">
+                    <div class="relative w-80 transition transform group-hover:-translate-y-2 duration-300" onclick="document.getElementById('monitorInput').click()">
+                        <div class="device-frame h-48 rounded-lg" id="monitorOverlay">
                             <img id="monitorImg" src="" class="w-full h-full object-cover hidden">
                             <div class="upload-overlay backdrop-blur-sm">
-                                <i class="fa-solid fa-desktop text-3xl mb-2 text-indigo-500"></i>
-                                <span class="text-xs font-bold uppercase tracking-wide">Select Image</span>
+                                <i class="fa-solid fa-desktop text-3xl mb-2 text-cyan-400"></i>
+                                <span class="text-xs font-bold uppercase">Upload</span>
                             </div>
                         </div>
-                        <div class="w-20 h-8 bg-slate-700 mx-auto mt-0.5"></div>
-                        <div class="w-32 h-2 bg-slate-600 mx-auto rounded-t shadow-lg"></div>
+                        <div class="w-16 h-8 bg-slate-700 mx-auto mt-0.5"></div> <div class="w-24 h-1.5 bg-slate-600 mx-auto rounded-t shadow-lg"></div> </div>
+                </div>
+            </div>
+
+            <div id="footerSection" class="w-full contact-bar py-5 px-10 flex items-center justify-between z-20">
+                <div class="flex items-center gap-3">
+                    <div class="text-right">
+                        <div contenteditable="true" class="text-slate-400 text-sm font-bold mb-1">بۆ داواکردن پەیوەندی بکەن بە:</div>
+                        <div class="flex items-center gap-3">
+                            <div contenteditable="true" class="text-white text-3xl font-black tracking-widest" style="font-family: 'Montserrat', sans-serif;">
+                                0750 178 40 02
+                            </div>
+                        </div>
                     </div>
                 </div>
 
-            </div>
-
-            <div class="absolute bottom-6 w-full text-center">
-                 <div class="text-white/40 text-xs font-bold tracking-[0.4em] uppercase">
-                    Innovating The Future
+                <div class="whatsapp-badge">
+                    <i class="fa-brands fa-whatsapp text-2xl"></i>
+                    <div class="text-right leading-tight">
+                        <div class="text-[10px] uppercase opacity-80">Available on</div>
+                        <div class="text-lg">WhatsApp</div>
+                    </div>
                 </div>
             </div>
 
@@ -200,47 +205,27 @@
             window.addEventListener('resize', adjustZoom);
         }
 
-        function addItem() {
-            const list = document.getElementById('listSection');
-            const newItem = document.createElement('div');
-            newItem.className = 'glass-panel p-4 flex items-center gap-4 animate-fade-in';
-            newItem.innerHTML = `
-                <div class="w-8 h-8 rounded-full bg-blue-600 flex items-center justify-center shadow-lg shadow-blue-500/40 shrink-0">
-                    <i class="fa-solid fa-check text-white text-sm"></i>
-                </div>
-                <div contenteditable="true" class="text-white text-2xl font-bold bg-transparent outline-none w-full leading-normal" dir="auto">
-                    خاڵی نوێ بنووسە
-                </div>
-            `;
-            list.appendChild(newItem);
-        }
-
-        function removeItem() {
-            const list = document.getElementById('listSection');
-            if(list.children.length > 1) list.lastElementChild.remove();
-        }
-
         function setMode(mode) {
             currentMode = mode;
             const el = document.getElementById('captureArea');
             const layout = document.getElementById('layoutContainer');
-            const header = document.getElementById('headerSection');
+            const footer = document.getElementById('footerSection');
             const list = document.getElementById('listSection');
             
-            // Buttons
-            document.getElementById('btnPost').className = mode === 'post' ? "px-4 py-1.5 rounded text-sm font-bold bg-blue-600 text-white shadow transition" : "px-4 py-1.5 rounded text-sm font-bold text-slate-300 hover:bg-slate-700 transition";
-            document.getElementById('btnStory').className = mode === 'story' ? "px-4 py-1.5 rounded text-sm font-bold bg-purple-600 text-white shadow transition" : "px-4 py-1.5 rounded text-sm font-bold text-slate-300 hover:bg-slate-700 transition";
+            // Buttons UI
+            document.getElementById('btnPost').className = mode === 'post' ? "px-4 py-1.5 rounded text-sm font-bold bg-blue-600 text-white" : "px-4 py-1.5 rounded text-sm font-bold text-slate-300 hover:bg-slate-700";
+            document.getElementById('btnStory').className = mode === 'story' ? "px-4 py-1.5 rounded text-sm font-bold bg-purple-600 text-white" : "px-4 py-1.5 rounded text-sm font-bold text-slate-300 hover:bg-slate-700";
 
             if (mode === 'post') {
-                el.className = "mode-post tech-bg shadow-2xl flex flex-col items-center transition-all duration-300 origin-center";
-                layout.className = "relative z-10 flex w-full h-full p-10 gap-8 items-center justify-center flex-row";
-                header.className = "relative z-10 pt-10 pb-4 text-center w-full transform scale-100";
-                list.style.maxWidth = "480px";
+                el.className = "mode-post tech-bg shadow-2xl flex flex-col items-center justify-between transition-all duration-300 origin-center";
+                layout.className = "flex-1 w-full flex p-8 gap-8 items-center justify-center relative z-10 flex-row";
+                list.style.maxWidth = "450px";
+                footer.className = "w-full contact-bar py-5 px-10 flex items-center justify-between z-20 flex-row";
             } else {
-                el.className = "mode-story tech-bg shadow-2xl flex flex-col items-center transition-all duration-300 origin-center";
-                layout.className = "relative z-10 flex w-full h-full p-10 gap-12 items-center justify-center flex-col";
-                header.className = "relative z-10 pt-28 pb-8 text-center w-full transform scale-125";
+                el.className = "mode-story tech-bg shadow-2xl flex flex-col items-center justify-between transition-all duration-300 origin-center";
+                layout.className = "flex-1 w-full flex p-10 gap-10 items-center justify-center relative z-10 flex-col pt-20";
                 list.style.maxWidth = "700px";
+                footer.className = "w-full contact-bar py-10 px-8 flex items-center justify-center gap-8 z-20 flex-col-reverse text-center";
             }
             adjustZoom();
         }
@@ -248,15 +233,8 @@
         function adjustZoom() {
             const workspace = document.getElementById('workspace');
             const el = document.getElementById('captureArea');
-            
             const padding = 40;
-            const availableWidth = workspace.clientWidth - padding;
-            const availableHeight = workspace.clientHeight - padding;
-            
-            const targetWidth = currentMode === 'post' ? 1200 : 1080;
-            const targetHeight = currentMode === 'post' ? 630 : 1920;
-
-            const scale = Math.min(availableWidth / targetWidth, availableHeight / targetHeight);
+            const scale = Math.min((workspace.clientWidth - padding) / (currentMode === 'post' ? 1200 : 1080), (workspace.clientHeight - padding) / (currentMode === 'post' ? 630 : 1920));
             el.style.transform = `scale(${scale})`;
         }
 
@@ -273,27 +251,16 @@
             }
         }
 
-        // --- THE MAGIC FIX FOR TEXT DISTORTION ---
         function downloadImage() {
             const captureElement = document.getElementById('captureArea');
-            
-            // We use the 'onclone' callback to manipulate the element BEFORE it gets screenshotted
-            // This allows us to reset the scale so the image is 1:1 crisp quality
             html2canvas(captureElement, {
-                scale: 2, // High resolution export
+                scale: 2,
                 useCORS: true,
                 backgroundColor: null,
-                letterRendering: true, // Attempt to fix font kerning
                 onclone: (clonedDoc) => {
-                    const clonedElement = clonedDoc.getElementById('captureArea');
-                    
-                    // Force reset transform on the cloned element to remove the preview zoom
-                    clonedElement.style.transform = 'scale(1)';
-                    clonedElement.style.margin = '0 auto';
-                    
-                    // Explicitly force font rendering consistency if needed
-                    const texts = clonedElement.querySelectorAll('[contenteditable]');
-                    texts.forEach(t => t.style.lineHeight = '1.5');
+                    const clonedEl = clonedDoc.getElementById('captureArea');
+                    clonedEl.style.transform = 'scale(1)';
+                    clonedEl.style.margin = '0';
                 }
             }).then(canvas => {
                 const link = document.createElement('a');
