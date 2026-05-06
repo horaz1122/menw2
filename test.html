@@ -1,1197 +1,462 @@
 <!DOCTYPE html>
-<html lang="ckb" dir="rtl">
+<html lang="ku" dir="rtl">
 <head>
     <meta charset="UTF-8">
-    <meta name="viewport" content="width=device-width, initial-scale=1.0, maximum-scale=1.0, user-scalable=no">
-    <title>سیستەمی پرسیار - وەشان ٢٦ (Security Check)</title>
-    
-    <script src="https://cdn.tailwindcss.com"></script>
-    <script src="https://cdnjs.cloudflare.com/ajax/libs/html2pdf.js/0.10.1/html2pdf.bundle.min.js"></script>
-    <script src="https://cdnjs.cloudflare.com/ajax/libs/Sortable/1.15.0/Sortable.min.js"></script>
-    
-    <link href="https://fonts.googleapis.com/css2?family=Nrt+Reg&family=Vazirmatn:wght@300;400;700;900&display=swap" rel="stylesheet">
-    <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.4.0/css/all.min.css">
-    
-    <script type="module">
-        import { initializeApp } from "https://www.gstatic.com/firebasejs/11.6.1/firebase-app.js";
-        import { getAuth, signInAnonymously, onAuthStateChanged } from "https://www.gstatic.com/firebasejs/11.6.1/firebase-auth.js";
-        import { getFirestore, doc, getDoc, setDoc, updateDoc, addDoc, deleteDoc, collection, getDocs, query, orderBy } from "https://www.gstatic.com/firebasejs/11.6.1/firebase-firestore.js";
-
-        const firebaseConfig = {
-            apiKey: "AIzaSyBHxuOA6uuX1EZGse5_JOHc3WMjvPywLD4",
-            authDomain: "prsyar-c93dd.firebaseapp.com",
-            projectId: "prsyar-c93dd",
-            storageBucket: "prsyar-c93dd.firebasestorage.app",
-            messagingSenderId: "623772510800",
-            appId: "1:623772510800:web:cc49fc9bbd9ed9c170ff55",
-            measurementId: "G-7KLKMNVFHC"
-        };
-
-        try {
-            const app = initializeApp(firebaseConfig);
-            const auth = getAuth(app);
-            const db = getFirestore(app);
-            const appId = 'exam-system-v12-locked'; 
-
-            window.firebaseApp = { auth, db, appId, doc, getDoc, setDoc, addDoc, deleteDoc, updateDoc, collection, getDocs, query, orderBy };
-
-            onAuthStateChanged(auth, (user) => {
-                if (user) {
-                    window.currentUser = user;
-                    checkSessionValidity(); // Check immediately on load
-                } else {
-                    signInAnonymously(auth);
-                }
-            });
-
-        } catch (e) {
-            console.error("Firebase Init Error", e);
-        }
-    </script>
-    
-    <script>
-        window.MathJax = {
-            tex: { inlineMath: [['$', '$'], ['\\(', '\\)']] },
-            svg: { fontCache: 'global' },
-            startup: { typeset: false } 
-        };
-    </script>
-    <script id="MathJax-script" async src="https://cdn.jsdelivr.net/npm/mathjax@3/es5/tex-svg.js"></script>
-
-    <script>
-        tailwind.config = {
-            theme: {
-                extend: {
-                    fontFamily: { sans: ['Vazirmatn', 'Arial', 'sans-serif'], nrt: ['Nrt Reg', 'Arial', 'sans-serif'] },
-                    colors: { brand: { 50: '#f0f9ff', 500: '#0ea5e9', 600: '#0284c7', 900: '#0c4a6e' } },
-                    screens: { 'print': {'raw': 'print'} }
-                }
-            }
-        }
-    </script>
-
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>مەلزەمەی ئینگلیزی - وەرزی دووەم</title>
     <style>
-        html, body { height: 100%; overflow: hidden; background-color: #f8fafc; }
-        .main-layout { display: flex; flex-direction: column; height: 100vh; }
-        .content-area { flex: 1; overflow: hidden; display: flex; position: relative; }
-        #editor-panel, #preview-panel { overflow-y: auto; height: 100%; padding-bottom: 150px; -webkit-overflow-scrolling: touch; }
+        @import url('https://fonts.googleapis.com/css2?family=Cairo:wght@400;600;800&family=Quicksand:wght@500;700&display=swap');
         
-        .a4-paper { 
-            width: 210mm; min-height: 297mm; background: white; margin: 0 auto; padding: 10mm; 
-            box-shadow: 0 4px 15px rgba(0,0,0,0.1); font-family: 'Nrt Reg', sans-serif; 
-            color: black; transform-origin: top center; transition: transform 0.3s;
+        :root {
+            /* Light Theme */
+            --bg-color: #f0fdf4;
+            --container-bg: #ffffff;
+            --text-color: #1e293b;
+            --text-muted: #475569;
+            --primary-gradient: linear-gradient(135deg, #10b981, #059669);
+            --accent: #10b981;
+            --accent-light: #d1fae5;
+            --card-border: #e2e8f0;
+            --en-font: 'Quicksand', sans-serif;
+            --ku-font: 'Cairo', sans-serif;
+            
+            /* Box Colors */
+            --box-blue: #eff6ff;
+            --border-blue: #3b82f6;
+            --box-yellow: #fefce8;
+            --border-yellow: #eab308;
+            --box-purple: #faf5ff;
+            --border-purple: #a855f7;
         }
 
-        @media (max-width: 1023px) {
-            .a4-paper { transform: scale(0.55); margin-top: 10px; margin-bottom: 50px; }
-            #preview-panel { display: flex; justify-content: center; background: #e2e8f0; }
+        .dark-mode {
+            /* Dark Theme */
+            --bg-color: #0f172a;
+            --container-bg: #1e293b;
+            --text-color: #f1f5f9;
+            --text-muted: #94a3b8;
+            --primary-gradient: linear-gradient(135deg, #34d399, #10b981);
+            --accent: #34d399;
+            --accent-light: #064e3b;
+            --card-border: #334155;
+            
+            --box-blue: #172554;
+            --box-yellow: #422006;
+            --box-purple: #3b0764;
         }
-        
-        .exam-header { display: grid; grid-template-columns: 1fr 1.5fr 1fr; gap: 5px; border-bottom: 2px double #000; padding-bottom: 5px; margin-bottom: 10px; align-items: center; }
-        .header-section { display: flex; flex-direction: column; font-size: 11px; font-weight: bold; line-height: 1.2; }
-        .header-center { text-align: center; align-items: center; }
-        .header-left { text-align: left; align-items: flex-end; }
-        .header-logo-img { width: 90px; height: 90px; object-fit: contain; margin-bottom: 2px; }
-        
-        .q-wrapper { margin-bottom: 8px; margin-top: 25px; break-inside: avoid; position: relative; } 
-        .q-number { background: #000; color: white; width: 24px; height: 24px; border-radius: 50%; display: inline-flex; align-items: center; justify-content: center; font-size: 11px; margin: 0 8px; font-weight: bold; -webkit-print-color-adjust: exact; print-color-adjust: exact; flex-shrink: 0; z-index: 5; }
-        .q-sub-label { font-weight: bold; min-width: 20px; display: inline-block; font-size: 13px; margin: 0 5px; } 
-        .q-content { font-size: 13px; line-height: 1.8; text-align: justify; display: block; width: 100%; font-weight: bold; }
-        
-        mjx-container { display: inline-block !important; margin: 0 5px !important; vertical-align: middle !important; outline: none !important; }
-        
-        .mcq-option-wrapper { display: inline-flex !important; align-items: center !important; margin: 0 12px; margin-bottom: 2px; height: auto; }
-        .mcq-label { font-family: monospace; font-weight: 900; font-size: 14px; margin: 0 5px; flex-shrink: 0; }
 
-        .section-title { width: 100%; text-align: center; font-weight: 900; font-size: 15px; padding: 3px; border-top: 2px solid #000; border-bottom: 2px solid #000; margin: 5px 0; background-color: #f3f4f6; -webkit-print-color-adjust: exact; }
-        .page-break-marker { border-top: 2px dashed #cbd5e1; margin: 15px 0; position: relative; text-align: center; color: #94a3b8; font-size: 10px; page-break-after: always; break-after: always; }
-        .page-break-marker::after { content: 'پەڕەی نوێ (Page Break)'; background: #f8fafc; padding: 0 10px; position: relative; top: -8px; }
+        body {
+            font-family: var(--ku-font);
+            background-color: var(--bg-color);
+            color: var(--text-color);
+            line-height: 1.8;
+            margin: 0;
+            padding: 30px 15px;
+            transition: all 0.3s ease;
+        }
 
-        .custom-side-label {
-            position: absolute;
-            top: -24px; 
-            font-size: 11px; 
-            font-weight: 900; 
-            padding: 0px 6px 8px 6px; 
-            background: #1e293b; 
-            color: #fff;
-            z-index: 10;
-            line-height: 1;
-            border-radius: 4px;
-            min-width: 24px;
+        .container {
+            max-width: 900px;
+            margin: 0 auto;
+        }
+
+        .header-section {
             text-align: center;
-            box-shadow: 0 2px 4px rgba(0,0,0,0.15);
+            margin-bottom: 40px;
+            background-color: var(--container-bg);
+            padding: 40px 30px;
+            border-radius: 20px;
+            box-shadow: 0 10px 25px -5px rgba(0, 0, 0, 0.05);
+            border: 1px solid var(--card-border);
+            position: relative;
+            overflow: hidden;
         }
         
-        .lbl-pos-right { right: 8px; }
-        .lbl-pos-left { left: 8px; }
-
-        .score-badge {
+        .header-section::before {
+            content: '';
             position: absolute;
-            top: -5px;
-            font-size: 9px;
-            border: 1px solid #94a3b8;
-            padding: 1px 4px;
-            border-radius: 3px;
-            background: #f8fafc;
-            color: #64748b;
-            z-index: 15;
-            font-weight: bold;
+            top: 0; left: 0; right: 0; height: 6px;
+            background: var(--primary-gradient);
         }
 
-        @media print { 
-            @page { size: A4; margin: 0; } 
-            body { background: white; height: auto; display: block; overflow: visible; } 
-            .no-print { display: none !important; } 
-            .a4-paper { width: 100%; box-shadow: none; margin: 0; padding: 10mm; height: auto; transform: none !important; overflow: visible; } 
-            #editor-panel { display: none !important; }
-            #preview-panel { display: block !important; padding: 0 !important; overflow: visible !important; height: auto !important; }
-            .section-title { background-color: #f3f4f6 !important; }
+        h1 {
+            color: var(--accent);
+            font-size: 36px;
+            font-weight: 800;
+            margin: 0 0 10px 0;
+        }
+
+        .subtitle {
+            color: var(--text-muted);
+            font-size: 18px;
+            font-weight: 600;
+        }
+
+        /* Controls */
+        .controls {
+            display: flex;
+            justify-content: center;
+            gap: 15px;
+            margin-bottom: 30px;
+        }
+
+        .btn {
+            padding: 12px 25px;
+            color: white;
+            border: none;
+            border-radius: 10px;
+            font-size: 16px;
+            font-weight: 700;
+            cursor: pointer;
+            font-family: var(--ku-font);
+            transition: transform 0.2s, box-shadow 0.2s;
+            display: flex;
+            align-items: center;
+            gap: 8px;
+        }
+        .btn-print { background-color: #475569; }
+        .btn-theme { background: var(--primary-gradient); }
+        .btn:hover { transform: translateY(-2px); box-shadow: 0 4px 12px rgba(0,0,0,0.15); }
+
+        /* Section Cards */
+        .section-card {
+            background-color: var(--container-bg);
+            border: 1px solid var(--card-border);
+            border-radius: 16px;
+            padding: 35px;
+            margin-bottom: 30px;
+            box-shadow: 0 4px 6px -1px rgba(0, 0, 0, 0.05);
+        }
+
+        h2 {
+            display: flex;
+            align-items: center;
+            gap: 12px;
+            color: var(--text-color);
+            font-size: 26px;
+            border-bottom: 2px solid var(--accent-light);
+            padding-bottom: 15px;
+            margin-top: 0;
+            margin-bottom: 25px;
+        }
+
+        /* English Text Styling */
+        .en {
+            font-family: var(--en-font);
+            direction: ltr;
+            display: inline-block;
+            font-weight: 700;
+            color: var(--border-blue);
+            font-size: 18px;
+            letter-spacing: 0.3px;
         }
         
-        .no-scrollbar::-webkit-scrollbar { display: none; }
+        .en-block {
+            font-family: var(--en-font);
+            direction: ltr;
+            text-align: left;
+            display: block;
+        }
+
+        .highlight {
+            background-color: var(--accent-light);
+            color: var(--accent);
+            padding: 2px 8px;
+            border-radius: 6px;
+            margin: 0 4px;
+        }
+
+        /* Content Boxes */
+        .info-box {
+            padding: 15px 20px;
+            border-radius: 12px;
+            margin-bottom: 20px;
+            border-right: 5px solid;
+        }
+
+        .box-blue { background-color: var(--box-blue); border-color: var(--border-blue); }
+        .box-yellow { background-color: var(--box-yellow); border-color: var(--border-yellow); }
+        .box-purple { background-color: var(--box-purple); border-color: var(--border-purple); }
+
+        /* Lists and Tables */
+        ul { padding-right: 20px; margin: 10px 0; }
+        li { margin-bottom: 12px; font-size: 17px; }
+
+        .matching-grid {
+            display: grid;
+            grid-template-columns: 1fr auto 1fr;
+            gap: 15px;
+            align-items: center;
+            background-color: var(--bg-color);
+            padding: 15px;
+            border-radius: 10px;
+            margin-bottom: 15px;
+            border: 1px dashed var(--card-border);
+        }
+        
+        .matching-item { font-family: var(--en-font); direction: ltr; font-weight: 700; font-size: 17px; }
+        .matching-arrow { color: var(--text-muted); font-size: 20px; text-align: center; }
+        .matching-desc { color: var(--text-muted); font-size: 15px; }
+
+        table {
+            width: 100%;
+            border-collapse: collapse;
+            margin: 20px 0;
+            border-radius: 10px;
+            overflow: hidden;
+        }
+        th, td {
+            padding: 15px;
+            text-align: center;
+            border: 1px solid var(--card-border);
+        }
+        th { background-color: var(--accent-light); color: var(--text-color); font-weight: 800; }
+        td.en-td { font-family: var(--en-font); direction: ltr; font-weight: 700; color: var(--border-blue); }
+
+        /* Print Media */
+        @media print {
+            body { background-color: #fff; color: #000; }
+            .container { max-width: 100%; }
+            .controls { display: none; }
+            .section-card { border: 1px solid #ccc; box-shadow: none; page-break-inside: avoid; }
+            .info-box { border: 1px solid #ddd; border-right: 5px solid #666; }
+            .highlight { border: 1px solid #999; }
+        }
     </style>
 </head>
-<body class="font-sans text-slate-800 main-layout" onload="loadLocalDraft()">
+<body>
 
-    <div id="login-overlay" class="fixed inset-0 bg-slate-900/95 z-[100] flex items-center justify-center backdrop-blur-sm p-4">
-        <div class="bg-white p-6 rounded-2xl shadow-2xl w-full max-w-sm text-center border-t-4 border-brand-500">
-            <div id="login-loader" class="hidden absolute inset-0 bg-white/80 flex items-center justify-center rounded-2xl"><div class="animate-spin h-8 w-8 border-4 border-brand-500 rounded-full border-t-transparent"></div></div>
-            <div class="mb-4"><i class="fa-solid fa-lock text-4xl text-brand-600 mb-2"></i><h2 class="text-2xl font-bold text-brand-900">چوونەژوورەوە</h2></div>
-            <div class="bg-blue-50 border border-blue-200 rounded-lg p-3 text-right mb-4 text-sm">
-                <p class="font-bold text-gray-700 mb-2"><i class="fa-solid fa-circle-info text-blue-500 ml-1"></i> ڕێنمایی:</p>
-                <p class="text-gray-600 mb-1">تکایە بڕی <span class="font-bold text-black">5000 دینار</span> بنێرە بە FIB بۆ:</p>
-                <div class="bg-white p-2 rounded text-center font-mono font-bold text-lg border mb-2 select-all">07501784002</div>
-                <p class="text-xs text-gray-500">دواتر وێنەی پسوڵەکە لە وەتسئەپ بنێرە بۆ وەرگرتنی کۆد.</p>
-            </div>
-            <a href="https://wa.me/9647501784002" target="_blank" class="flex items-center justify-center gap-2 w-full bg-green-500 hover:bg-green-600 text-white font-bold py-2 rounded-lg mb-4 transition shadow-sm"><i class="fa-brands fa-whatsapp text-xl"></i> ناردنی نامە لە وەتسئەپ</a>
-            <div class="relative"><input type="number" id="password-input" class="w-full p-3 border-2 rounded-xl text-center text-xl font-bold mb-3 focus:border-brand-500 outline-none" placeholder="کۆدی چالاککردن لێرە بنووسە"></div>
-            <p id="login-error-msg" class="text-red-500 text-xs mb-2 hidden bg-red-50 p-2 rounded"></p>
-            <button onclick="checkPassword()" id="login-btn" class="w-full bg-brand-600 hover:bg-brand-500 text-white font-bold py-3 rounded-xl transition shadow-lg">چوونەژوورەوە</button>
-        </div>
+    <div class="controls">
+        <button class="btn btn-print" onclick="window.print()">🖨️ پرینت / PDF</button>
+        <button class="btn btn-theme" onclick="toggleTheme()">تاریک / ڕوون 🌙</button>
     </div>
 
-    <div class="content-area block lg:flex lg:flex-row">
-        
-        <div id="editor-panel" class="w-full lg:w-[400px] bg-white lg:border-l z-20 flex flex-col shadow-xl">
-            <div class="p-3 border-b bg-slate-50 flex justify-between items-center sticky top-0 z-10">
-                <div class="font-bold text-brand-900 flex items-center gap-2 text-sm">
-                    <i class="fa-solid fa-layer-group"></i> <span id="current-exam-title">تاقیکردنەوەی نوێ</span>
-                </div>
-                <div id="score-wrapper" class="flex items-center gap-1 bg-gray-100 px-2 py-1 rounded-lg">
-                    <span class="text-[10px] text-gray-500 font-bold">کۆی نمرە:</span>
-                    <span id="live-score" class="font-black text-sm text-red-600">0</span>
-                </div>
-                <button onclick="createNewExam()" class="text-xs bg-green-100 text-green-700 px-2 py-1 rounded">+ نوێ</button>
-            </div>
-
-            <div class="flex text-xs font-bold border-b bg-white sticky top-[50px] z-10 shadow-sm">
-                <button onclick="setTab('create')" id="tab-create" class="flex-1 py-3 text-brand-600 border-b-2 border-brand-600 bg-blue-50">نووسین</button>
-                <button onclick="setTab('archive')" id="tab-archive" class="flex-1 py-3 text-gray-500">ئەرشیف</button>
-                <button onclick="setTab('bank')" id="tab-bank" class="flex-1 py-3 text-gray-500">بانک</button>
-                <button onclick="setTab('settings')" id="tab-settings" class="flex-1 py-3 text-gray-500">ڕێکخستن</button>
-            </div>
-
-            <div id="view-create" class="flex-1 p-3 space-y-3">
-                <div id="bank-edit-alert" class="hidden bg-yellow-50 text-yellow-800 p-2 text-xs border border-yellow-200 rounded font-bold">⚠️ تۆ خەریکی دەستکاری پرسیاری بانکیت <button onclick="clearForm()" class="text-red-500 underline mr-2">هەڵوەشاندنەوە</button></div>
-                <div class="flex gap-2 mb-2">
-                    <button onclick="addSectionTitle()" class="bg-gray-800 text-white px-3 py-2 rounded text-xs font-bold w-1/2 shadow-sm"><i class="fa-solid fa-heading"></i> سەردێڕ</button>
-                    <button onclick="addPageBreak()" class="bg-gray-600 text-white px-3 py-2 rounded text-xs font-bold w-1/2"><i class="fa-solid fa-scissors"></i> پەڕەی نوێ</button>
-                </div>
-                <div id="math-toolbar-container" class="flex overflow-x-auto gap-1 py-1 mb-1 no-scrollbar"></div>
-                <div class="flex gap-1 mb-1 border-b pb-1">
-                    <button onclick="insertTag('b')" class="px-2 py-1 bg-gray-100 rounded text-xs font-bold hover:bg-gray-200">B</button>
-                    <button onclick="insertTag('i')" class="px-2 py-1 bg-gray-100 rounded text-xs italic hover:bg-gray-200">I</button>
-                    <button onclick="insertTag('u')" class="px-2 py-1 bg-gray-100 rounded text-xs underline hover:bg-gray-200">U</button>
-                </div>
-                <textarea id="q_text" rows="2" class="w-full p-2 border rounded text-sm focus:border-brand-500 focus:ring-1 focus:ring-brand-200 transition text-right" dir="auto" placeholder="دەقی پرسیار..."></textarea>
-                <div class="flex gap-2 items-center">
-                     <div class="flex-1 bg-slate-50 border rounded p-1 flex items-center overflow-hidden"><i class="fa-regular fa-image text-gray-400 mx-2"></i><input type="file" id="q_image" accept="image/*" class="w-full text-xs bg-transparent"></div>
-                     <input type="number" id="q_score" value="2" class="w-16 text-center border rounded text-sm font-bold p-1" title="نمرە">
-                </div>
-                <div class="bg-gray-50 p-2 rounded border flex gap-2 items-center">
-                    <span class="text-xs font-bold">ناسێنەر (Badge):</span>
-                    <input type="text" id="q_custom_label" class="flex-1 text-xs p-1 border rounded text-center" placeholder="Q1, P1, T1...">
-                </div>
-                <div class="bg-blue-50 p-2 rounded border border-blue-100 mt-1">
-                    <div class="flex justify-between items-center mb-1"><span class="text-xs font-bold text-gray-600">بۆشایی (cm):</span><span id="spacing-display" class="text-xs font-bold text-blue-600 bg-white px-2 rounded">0</span></div>
-                    <input type="range" id="q_spacing" min="0" max="15" value="0" step="0.5" class="w-full accent-blue-600 cursor-pointer" oninput="document.getElementById('spacing-display').innerText = this.value">
-                </div>
-                <div class="border rounded bg-slate-50 p-2">
-                    <div class="flex justify-between items-center mb-2">
-                        <label class="text-xs font-bold text-gray-600">جۆری پرسیار:</label>
-                        <select id="q_type" class="text-xs border rounded p-1 bg-white" onchange="toggleQuestionInputs()">
-                            <option value="mcq">هەڵبژاردن</option>
-                            <option value="tf">ڕاست و هەڵە (True/False)</option>
-                            <option value="text">نووسین (Inshai)</option>
-                            <option value="match">ڕاکێشان (Matching)</option>
-                        </select>
-                    </div>
-                    <div id="sub-label-box" class="hidden mb-2 border-t pt-2">
-                        <div class="flex justify-between items-center"><label class="text-xs text-gray-600">شێوازی لق:</label><select id="q_sub_style" class="text-xs border rounded p-1 bg-white w-2/3"><option value="none">هیچ (ئاسایی)</option><option value="alpha">A, B, C</option><option value="number">1, 2, 3</option></select></div>
-                    </div>
-                    <div id="mcq-container">
-                        <div id="mcq-inputs" class="space-y-2 mb-2"></div>
-                        <button onclick="addMCQOption()" class="text-xs text-brand-600 font-bold w-full text-right py-1">+ زیادکردنی هەڵبژاردە</button>
-                    </div>
-                    <div id="tf-container" class="hidden mt-2 bg-white p-2 border rounded">
-                        <div class="text-xs font-bold text-gray-600 mb-2">وەڵامی ڕاست دیاری بکە (بۆ وەڵامنامە):</div>
-                        <div class="flex gap-4 justify-center">
-                            <label class="flex items-center gap-1 cursor-pointer bg-green-50 px-3 py-1 rounded border border-green-200"><input type="radio" name="tf_choice" value="true" onchange="tfAnswer='true'" checked class="accent-green-600"><span class="text-xs font-bold text-green-700">ڕاست / True</span></label>
-                            <label class="flex items-center gap-1 cursor-pointer bg-red-50 px-3 py-1 rounded border border-red-200"><input type="radio" name="tf_choice" value="false" onchange="tfAnswer='false'" class="accent-red-600"><span class="text-xs font-bold text-red-700">هەڵە / False</span></label>
-                        </div>
-                    </div>
-                    <div id="match-container" class="hidden">
-                         <div class="text-xs text-gray-400 mb-1 text-center font-bold">جووتەکان:</div>
-                         <div id="match-inputs" class="space-y-1 mb-2"></div>
-                         <button onclick="addMatchPair()" class="text-xs text-brand-600 font-bold w-full text-right py-1">+ زیادکردنی جووت</button>
-                    </div>
-                </div>
-                <div class="flex gap-2">
-                    <button onclick="addItem()" id="btn-add" class="flex-1 bg-brand-600 hover:bg-brand-700 text-white py-3 rounded-lg font-bold shadow-md transition">زیادکردن</button>
-                    <button onclick="clearForm()" class="px-4 bg-gray-200 rounded-lg text-gray-600"><i class="fa-solid fa-rotate-left"></i></button>
-                </div>
-                <div id="questions-list" class="space-y-2 mt-4 pb-20"></div>
-            </div>
-
-            <div id="view-settings" class="hidden flex-1 p-3 space-y-4">
-                 <div class="bg-white p-3 rounded border shadow-sm">
-                    <h3 class="font-bold text-xs text-brand-600 mb-2 border-b pb-1">زانیاری سەرپەڕە</h3>
-                    <div class="mb-3"><label class="text-xs font-bold text-gray-600">لۆگۆ:</label><input type="file" id="h_logo_input" accept="image/*" class="w-full text-xs"></div>
-                    <div class="grid grid-cols-2 gap-3 text-xs">
-                        <div class="col-span-2"><input id="h_gov" class="border p-2 rounded w-full" value="حکومەتی هەرێمی کوردستان" oninput="updatePaper()"></div>
-                        <div class="col-span-2"><input id="h_min" class="border p-2 rounded w-full" value="وەزارەتی پەروەردە" oninput="updatePaper()"></div>
-                        <div class="col-span-2"><input id="h_dir" class="border p-2 rounded w-full" placeholder="بەڕێوەبەرایەتی..." oninput="updatePaper()"></div>
-                        <div><input id="h_school" class="border p-2 rounded w-full" placeholder="قوتابخانە" oninput="updatePaper()"></div>
-                        <div><input id="h_subject" class="border p-2 rounded w-full" placeholder="بابەت" oninput="updatePaper()"></div>
-                        <div><input id="h_class" class="border p-2 rounded w-full" placeholder="پۆل" oninput="updatePaper()"></div>
-                        <div><input id="h_time" class="border p-2 rounded w-full" value="٢ کاتژمێر" oninput="updatePaper()"></div>
-                        <div><input id="h_type" class="border p-2 rounded w-full" value="خولی یەکەم" oninput="updatePaper()"></div>
-                        <div><input id="h_year" class="border p-2 rounded w-full" value="2024 - 2025" oninput="updatePaper()"></div>
-                        <div><input id="h_date" class="border p-2 rounded w-full" placeholder="بەروار" oninput="updatePaper()"></div>
-                        <div><input id="h_group" class="border p-2 rounded w-full bg-yellow-50 font-bold" placeholder="گروپ (A, B...)" oninput="updatePaper()"></div>
-                        
-                        <div class="col-span-2 border-t pt-2 mt-2 bg-blue-50 p-2 rounded">
-                             <label class="text-xs font-bold text-gray-600 mb-1 block">شێوازی نووسین (زمان):</label>
-                             <select id="h_num_pos" class="border p-2 rounded w-full font-bold" onchange="updatePaper()">
-                                 <option value="right">کوردی / عەرەبی (RTL)</option>
-                                 <option value="left">English (LTR)</option>
-                             </select>
-                             <p class="text-[10px] text-gray-500 mt-1">* English: ژمارە لە چەپ، دەق لە چەپ، True/False دەنوسێت.</p>
-                        </div>
-                    </div>
-                 </div>
-                 
-                 <div class="bg-white p-3 rounded border shadow-sm">
-                    <h3 class="font-bold text-xs text-brand-600 mb-2 border-b pb-1">دروستکردنی گروپ (Shuffle)</h3>
-                    <div class="grid grid-cols-4 gap-2 mb-3">
-                        <button onclick="generateGroup('A')" class="bg-gray-100 hover:bg-gray-200 text-gray-800 font-bold py-2 rounded shadow-sm">A</button>
-                        <button onclick="generateGroup('B')" class="bg-gray-100 hover:bg-gray-200 text-gray-800 font-bold py-2 rounded shadow-sm">B</button>
-                        <button onclick="generateGroup('C')" class="bg-gray-100 hover:bg-gray-200 text-gray-800 font-bold py-2 rounded shadow-sm">C</button>
-                        <button onclick="generateGroup('D')" class="bg-gray-100 hover:bg-gray-200 text-gray-800 font-bold py-2 rounded shadow-sm">D</button>
-                    </div>
-                    <p class="text-[10px] text-gray-500">* تێبینی: بە لێدان لە پیتەکان، تەنها پرسیارە هەڵبژاردنەکان (MCQ) تێکەڵ دەبن و پاشکەوت دەکرێن.</p>
-                 </div>
-
-                 <div class="bg-white p-3 rounded border shadow-sm">
-                    <h3 class="font-bold text-xs text-brand-600 mb-2 border-b pb-1">کردارەکان</h3>
-                    <div class="grid grid-cols-2 gap-2">
-                        <button onclick="generateGroupKeys()" class="bg-purple-100 text-purple-700 py-3 rounded text-xs font-bold col-span-2">وەڵامنامەی گروپەکان</button>
-                        <button onclick="shuffleQuestions()" class="bg-orange-100 text-orange-700 py-3 rounded text-xs font-bold">تێکەڵکردنی هەمووی</button>
-                        <button onclick="generateAnswerKey()" class="bg-yellow-100 text-yellow-700 py-3 rounded text-xs font-bold">وەڵامنامە (ئێستا)</button>
-                        <button onclick="downloadWord()" class="bg-blue-100 text-blue-700 py-3 rounded text-xs font-bold">Word</button>
-                        <button onclick="downloadPDF()" class="bg-green-100 text-green-700 py-3 rounded text-xs font-bold">PDF</button>
-                    </div>
-                 </div>
-            </div>
-
-            <div id="view-archive" class="hidden flex-1 p-3"><div id="exam-list-container" class="space-y-2"></div><button onclick="saveCurrentExam()" class="w-full mt-4 bg-green-600 text-white py-3 rounded-lg font-bold">هەڵگرتن</button></div>
-            <div id="view-bank" class="hidden flex-1 p-3"><input type="text" id="bank-search" class="w-full p-2 border rounded mb-2" oninput="filterBank()"><div id="bank-list-container" class="space-y-2"></div></div>
+    <div class="container">
+        <div class="header-section">
+            <h1>مەلزەمەی ئینگلیزی (وەرزی دووەم)</h1>
+            <div class="subtitle">پوختەی دەفتەر: ڕێساکانی تەلەفۆن، دەستەواژەکان، ڕێزمان، و وشەسازی</div>
         </div>
-        
-        <div id="preview-panel" class="hidden lg:flex w-full bg-slate-200 pt-8 flex justify-center items-start">
-            <div id="examPaper" class="a4-paper">
-                <div class="exam-header">
-                    <div class="header-section text-right">
-                        <div id="view_gov">حکومەتی هەرێمی کوردستان</div>
-                        <div id="view_min">وەزارەتی پەروەردە</div>
-                        <div id="view_dir">...</div>
-                        <div id="view_school" class="mt-1 font-black">...</div>
-                    </div>
-                    <div class="header-section header-center">
-                        <img id="header_logo_view" src="https://upload.wikimedia.org/wikipedia/commons/d/d3/Kurdistan_Regional_Government_emblem.svg" class="header-logo-img">
-                        <div class="border-b-2 border-black pb-1 mb-1 text-lg">پرسیارەکانی <span id="view_subject">...</span></div>
-                        <div class="text-[12px]"><span id="view_type">...</span> - <span id="view_year">2024-2025</span></div>
-                    </div>
-                    <div class="header-section header-left">
-                        <div>پۆل: <span id="view_class">...</span></div>
-                        <div>کات: <span id="view_time">...</span></div>
-                        <div>بەروار: <span id="view_date">...</span></div>
-                        <div id="view_group_container" class="hidden font-bold mt-1 text-brand-900 border-t pt-1 border-gray-400">گروپ: <span id="view_group"></span></div>
-                    </div>
-                </div>
-                <div id="paper_questions" class="w-full"></div>
+
+        <div class="section-card">
+            <h2>📞 بەشی یەکەم: ڕێساکان و بەڕێوەبردنی تەلەفۆن (Telephone Manners)</h2>
+            
+            <div class="info-box box-blue">
+                <strong>پرسیار:</strong> <span class="en">Why is it important to smile?</span> (بۆچی گرنگە زەردەخەنە بکەیت لە کاتی تەلەفۆن؟)<br>
+                <strong>وەڵام:</strong> <span class="en">A smile makes your voice sound friendly and polite.</span><br>
+                (زەردەخەنە وا دەکات دەنگت هاوڕێیانە و بەڕێز بێت).
+            </div>
+
+            <h3>ئەرکەکان لە کاتی تەلەفۆن (Matching Roles):</h3>
+            <div class="matching-grid">
+                <div class="matching-item">To represent a well-known bank...</div>
+                <div class="matching-arrow">➔</div>
+                <div class="matching-item" style="color: var(--border-purple);">Telesales agent <div class="matching-desc">(بریکاری فرۆشتن)</div></div>
+
+                <div class="matching-item">A friendly and polite telephone is essential...</div>
+                <div class="matching-arrow">➔</div>
+                <div class="matching-item" style="color: var(--border-purple);">Customer care telephonist <div class="matching-desc">(چاودێری کڕیار)</div></div>
+
+                <div class="matching-item">To conduct market research...</div>
+                <div class="matching-arrow">➔</div>
+                <div class="matching-item" style="color: var(--border-purple);">Telephone interviewer <div class="matching-desc">(چاوپێکەوتنی تەلەفۆنی)</div></div>
+            </div>
+
+            <h3>چۆن وەڵامی تەلەفۆن دەدەیتەوە؟ (Procedure):</h3>
+            <ul>
+                <li><span class="en">Answer the call promptly ➔ by the second or third ring.</span> (زوو وەڵام بدەرەوە، لە زەنگی دووەم یان سێیەم).</li>
+                <li><span class="en">Identify yourself ➔ and your department.</span> (خۆت و بەشەکەت بناسێنە).</li>
+                <li><span class="en">Avoid talking with anything in your mouth ➔ such as gum or sweets.</span> (قسە مەکە کاتێک شتێک لە دەمتدایە وەکو بنێشت).</li>
+                <li><span class="en">Learn the procedure ➔ for transferring calls.</span> (فێری شێوازی گواستنەوەی پەیوەندییەکان ببە).</li>
+                <li><span class="en">When taking messages ➔ use the official forms.</span> (کاتێک نامە وەردەگریت فۆڕمی فەرمی بەکاربهێنە).</li>
+            </ul>
+
+            <div class="info-box box-yellow">
+                <strong>ڕاست و هەڵە (True/False):</strong>
+                <ul>
+                    <li>بە شێوەیەکی گشتی لە تەلەفۆندا گفتوگۆ کورتە. <strong style="color: #10b981;">(T - ڕاستە)</strong></li>
+                    <li>لە سەرەتای تەلەفۆن ڕاستەوخۆ دەچیتە ناو بابەتەکەی. <strong style="color: #ef4444;">(F - هەڵەیە)</strong></li>
+                    <li>قسەی کورت لەسەر تەلەفۆن یارمەتیت دەدات بۆ پەیوەندییەکی باش. <strong style="color: #10b981;">(T - ڕاستە)</strong></li>
+                </ul>
             </div>
         </div>
-    </div>
 
-    <div class="lg:hidden fixed bottom-0 left-0 w-full bg-white border-t flex z-50 pb-safe">
-        <button onclick="showMobileView('editor')" id="mb-editor" class="flex-1 py-4 text-center font-bold text-brand-600 border-t-4 border-brand-600 bg-blue-50">نووسین</button>
-        <button onclick="showMobileView('preview')" id="mb-preview" class="flex-1 py-4 text-center font-bold text-gray-400 border-t-4 border-transparent">پەڕە</button>
+        <div class="section-card">
+            <h2>💬 بەشی دووەم: دەستەواژەکان و گفتوگۆی کورت (Phrases & Small Talk)</h2>
+
+            <h3>بەکارهێنانی (How) لە پرسیاردا:</h3>
+            <ul>
+                <li><span class="en">How <span class="highlight">long</span> is it since we spoke?</span></li>
+                <li><span class="en">How <span class="highlight">are</span> you and the children?</span></li>
+                <li><span class="en">How <span class="highlight">was</span> your flight?</span></li>
+            </ul>
+
+            <h3>تەواوکردنی ڕستەی بانگهێشتکردن:</h3>
+            <ul>
+                <li><span class="en">Would you like to <span class="highlight">have</span> a drink?</span></li>
+                <li><span class="en">We'd like to <span class="highlight">come</span> over for lunch.</span></li>
+                <li><span class="en">How about <span class="highlight">meeting</span> for dinner?</span></li>
+                <li><span class="en">Why don't you <span class="highlight">join</span> us at the restaurant?</span></li>
+            </ul>
+
+            <div class="info-box box-purple">
+                <strong>تێبینی کاتی بانگهێشتکردن:</strong><br>
+                ئەگەر قبوڵت کرد دەڵێیت: <span class="en">I'd love to</span><br>
+                ئەگەر قبوڵت نەکرد دەڵێیت: <span class="en">I'd love to but...</span> (پاشان هۆکارێک دەهێنیتەوە).
+            </div>
+
+            <h3>دەربڕینەکان (Expressions):</h3>
+            <ul>
+                <li>کاتێک نیشانی دەدەیت کە گوێ دەگریت (<span class="en">Show you're listening</span>) ➔ <span class="en">Ok</span></li>
+                <li>کاتێک نیشانی دەدەیت کە تێگەیشتوویت (<span class="en">Show you understand</span>) ➔ <span class="en">I see</span></li>
+                <li>کاتێک نیشانی دەدەیت کە سەرسام بوویت (<span class="en">Show surprise</span>) ➔ <span class="en">Really</span></li>
+            </ul>
+
+            <h3>کێشەی هێڵی تەلەفۆن (Bad Connection):</h3>
+            <ul>
+                <li><span class="en">It is a really <span class="highlight">bad</span> line.</span> (هێڵەکە زۆر خراپە)</li>
+                <li><span class="en">It's too <span class="highlight">noisy</span>.</span> (زۆر ژاوەژاوە)</li>
+                <li><span class="en">I must have got the <span class="highlight">wrong</span> number.</span> (هەڵە نیم ژمارەکەم هەڵە لێداوە)</li>
+                <li><span class="en">My battery's very <span class="highlight">low</span>.</span> (شەحنی مۆبایلەکەم کەمە)</li>
+                <li><span class="en">The line just went <span class="highlight">dead</span>.</span> (هێڵەکە پچڕا)</li>
+            </ul>
+            
+            <h3>ڕێکخستنەوەی ڕستەکان:</h3>
+            <ul>
+                <li><span class="en">sorry you up speak can?</span> ➔ <span class="en">Sorry, can you speak up?</span></li>
+                <li><span class="en">calling try later again</span> ➔ <span class="en">Try calling again later.</span></li>
+                <li><span class="en">him try 376 on extension</span> ➔ <span class="en">Try him on extension 376.</span></li>
+            </ul>
+        </div>
+
+        <div class="section-card">
+            <h2>📝 بەشی سێیەم: وشەسازی و فەرمیبوون (Vocabulary & Collocations)</h2>
+
+            <h3>وشەی نافەرمی بەرامبەر وشەی فەرمی:</h3>
+            <table>
+                <tr>
+                    <th>وشەی نافەرمی (Informal)</th>
+                    <th>وشەی فەرمی (Formal)</th>
+                </tr>
+                <tr>
+                    <td class="en-td">Say Sorry</td>
+                    <td class="en-td">Apologize</td>
+                </tr>
+                <tr>
+                    <td class="en-td">Tell</td>
+                    <td class="en-td">Inform</td>
+                </tr>
+                <tr>
+                    <td class="en-td">Help</td>
+                    <td class="en-td">Assist</td>
+                </tr>
+                <tr>
+                    <td class="en-td">Check</td>
+                    <td class="en-td">Verify</td>
+                </tr>
+            </table>
+
+            <h3>وشە گونجاوەکان بەیەکەوە (Collocations):</h3>
+            <div class="matching-grid" style="grid-template-columns: auto auto auto;">
+                <div class="matching-item">Apply for</div><div class="matching-arrow">➔</div><div class="matching-item">a job <span class="matching-desc">(داواکردنی کار)</span></div>
+                <div class="matching-item">Arrange</div><div class="matching-arrow">➔</div><div class="matching-item">a course <span class="matching-desc">(ڕێکخستنی کۆرس)</span></div>
+                <div class="matching-item">Make</div><div class="matching-arrow">➔</div><div class="matching-item">a complaint <span class="matching-desc">(سکاڵا کردن)</span></div>
+                <div class="matching-item">Place</div><div class="matching-arrow">➔</div><div class="matching-item">an order <span class="matching-desc">(داواکردنی کاڵا)</span></div>
+                <div class="matching-item">Query</div><div class="matching-arrow">➔</div><div class="matching-item">an invoice <span class="matching-desc">(پرسیارکردن لە وەسڵ)</span></div>
+                <div class="matching-item">Request</div><div class="matching-arrow">➔</div><div class="matching-item">a catalogue <span class="matching-desc">(داواکردنی کەتەلۆگ)</span></div>
+            </div>
+
+            <div class="info-box box-blue">
+                <strong>چەند دەستەواژەیەکی تر:</strong><br>
+                <span class="en">Please select one of the following <span class="highlight">options</span>.</span> (هەڵبژاردن)<br>
+                <span class="en">We apologize for the <span class="highlight">delay</span>.</span> (دواکەوتن)<br>
+                <strong>کۆتایی هێنان بە نامە:</strong> <span class="en">Thanks very much / Bye / See you</span>
+            </div>
+        </div>
+
+        <div class="section-card">
+            <h2>⚙️ بەشی چوارەم: ڕێزمان (Grammar)</h2>
+
+            <h3>ئامرازەکانی کات (Prepositions of Time):</h3>
+            <div class="info-box box-yellow">
+                <strong>١. بەکارهێنانی (At):</strong> بۆ کاتی دیاریکراو (وەک سەعات یان نیوەشەو).<br>
+                <span class="en">The overnight train leaves <span class="highlight">at</span> midnight.</span>
+                <hr style="border: 0; border-top: 1px dashed #eab308; margin: 10px 0;">
+                
+                <strong>٢. بەکارهێنانی (On):</strong> بۆ ڕۆژەکانی هەفتە یان بۆنەیەک کە ڕۆژێکی دیاریکراوە.<br>
+                <span class="en">I'd like to book a table <span class="highlight">on</span> Christmas Eve.</span>
+                <hr style="border: 0; border-top: 1px dashed #eab308; margin: 10px 0;">
+                
+                <strong>٣. بەکارهێنانی (In):</strong> بۆ مانگ، وەرز، یان ساڵ.<br>
+                <span class="en">I normally go on holiday <span class="highlight">in</span> the summer.</span>
+            </div>
+
+            <h3>بەکارهێنانی (Some / Any / Information):</h3>
+            <ul>
+                <li><span class="en">We don't have <span class="highlight">any</span> tables left this evening.</span> (وشەی Any لە ڕستەی نەرێ و پرسیاری بەکاردێت).</li>
+                <li><span class="en">Could you give me some <span class="highlight">information</span>.</span> <strong style="color: #ef4444;">(تێبینی: Information کۆ ناکرێتەوە و (s) وەرناگرێت).</strong></li>
+                <li><span class="en">I'd like to book <span class="highlight">some</span> taxis for tomorrow.</span> (وشەی Some لە ڕستەی ئەرێنی بەکاردێت).</li>
+            </ul>
+
+            <h3>بۆشاییەکان بەم وشانە پڕبکەرەوە (Tell, Ask, Say):</h3>
+            <ul>
+                <li><span class="en">Can you <span class="highlight">tell</span> her I rang?</span></li>
+                <li><span class="en">Can you <span class="highlight">ask</span> her to call me back?</span></li>
+                <li><span class="en">Can you <span class="highlight">say</span> I'm arriving at eight?</span></li>
+            </ul>
+        </div>
+
+        <div class="section-card">
+            <h2>🌍 بەشی پێنجەم: کلتور، ژمارە، و نیشانەکان</h2>
+
+            <h3>جیاوازی سڵاوکردن (Face-to-face vs On the phone):</h3>
+            <table>
+                <tr>
+                    <th>وڵات</th>
+                    <th>ڕووبەڕوو (Face to face)</th>
+                    <th>لەسەر تەلەفۆن (On the phone)</th>
+                </tr>
+                <tr>
+                    <td>ژاپۆن (Japan)</td>
+                    <td class="en-td">Konnichiha</td>
+                    <td class="en-td">Moshi moshi</td>
+                </tr>
+                <tr>
+                    <td>ئیسپانیا (Spain)</td>
+                    <td class="en-td">Hola</td>
+                    <td class="en-td">Digame</td>
+                </tr>
+            </table>
+
+            <div class="info-box box-purple">
+                <strong>خوێندنەوەی ژمارەی تەلەفۆن لە ئینگلیزیدا:</strong><br>
+                ١. ژمارە (٠) زۆرجار وەک پیتی <strong>"Oh"</strong> دەخوێندرێتەوە (نەک Zero).<br>
+                ٢. ئەگەر دوو ژمارە بەدوای یەکدا هاتن، وشەی <strong>Double</strong> بەکاردێت. (نموونە: 22 دەخوێندرێتەوە <em>Double two</em>).
+            </div>
+
+            <h3>نیشانەکانی ئیمەیڵ و وێبسایت:</h3>
+            <div class="matching-grid" style="grid-template-columns: auto auto auto;">
+                <div class="matching-item" style="font-size: 20px;">@</div><div class="matching-arrow">=</div><div class="matching-item">at</div>
+                <div class="matching-item" style="font-size: 20px;">.</div><div class="matching-arrow">=</div><div class="matching-item">dot</div>
+                <div class="matching-item" style="font-size: 20px;">/</div><div class="matching-arrow">=</div><div class="matching-item">slash</div>
+                <div class="matching-item" style="font-size: 20px;">_</div><div class="matching-arrow">=</div><div class="matching-item">underscore</div>
+                <div class="matching-item" style="font-size: 20px;">-</div><div class="matching-arrow">=</div><div class="matching-item">hyphen</div>
+            </div>
+            
+            <h3>دەنگەکان (Vowel Sounds):</h3>
+            <p>وشەکان بەپێی ئەو دەنگەی تێیاندایە (هاوکێشەی بزوێنەکان):</p>
+            <ul>
+                <li>دەنگی <strong>/eɪ/</strong>: <span class="en">wait, A</span></li>
+                <li>دەنگی <strong>/aɪ/</strong>: <span class="en">bye, I</span></li>
+                <li>دەنگی <strong>/i:/</strong>: <span class="en">me, E</span></li>
+                <li>دەنگی <strong>/u:/</strong>: <span class="en">do, Q</span></li>
+            </ul>
+        </div>
+
     </div>
 
     <script>
-        function showMobileView(view) {
-            const ed = document.getElementById('editor-panel'), pr = document.getElementById('preview-panel');
-            if(view==='editor'){ ed.classList.remove('hidden'); pr.classList.add('hidden'); pr.classList.remove('flex'); }
-            else { ed.classList.add('hidden'); pr.classList.remove('hidden'); pr.classList.add('flex'); }
-        }
-
-        let currentExamId = null;
-        let examData = [];
-        let bankData = [];
-        let groupSnapshots = {}; // MEMORY FOR GROUPS
-        let editIndex = -1;
-        let activeMathInput = null; 
-        let bankEditMode = false;
-        let bankEditId = null;
-        let mcqOptions = [{text:'', correct:false}, {text:'', correct:false}, {text:'', correct:false}, {text:'', correct:false}];
-        let matchPairs = [{right:'', left:''}, {right:'', left:''}];
-        let tfAnswer = 'true'; 
-        
-        let deviceId = localStorage.getItem('did') || crypto.randomUUID();
-        localStorage.setItem('did', deviceId);
-
-        function insertTag(tag) {
-            const textarea = document.getElementById('q_text');
-            const start = textarea.selectionStart;
-            const end = textarea.selectionEnd;
-            const text = textarea.value;
-            const before = text.substring(0, start);
-            const selected = text.substring(start, end);
-            const after = text.substring(end);
-            textarea.value = before + `<${tag}>` + selected + `</${tag}>` + after;
-            textarea.focus();
-            textarea.selectionStart = start + tag.length + 2;
-            textarea.selectionEnd = end + tag.length + 2;
-        }
-
-        function compressImage(file, callback) {
-            const reader = new FileReader();
-            reader.readAsDataURL(file);
-            reader.onload = (e) => {
-                const img = new Image();
-                img.src = e.target.result;
-                img.onload = () => {
-                    const canvas = document.createElement('canvas');
-                    const ctx = canvas.getContext('2d');
-                    const maxWidth = 800;
-                    let width = img.width;
-                    let height = img.height;
-                    if (width > maxWidth) { height *= maxWidth / width; width = maxWidth; }
-                    canvas.width = width; canvas.height = height;
-                    ctx.drawImage(img, 0, 0, width, height);
-                    callback(canvas.toDataURL('image/jpeg', 0.7));
-                }
-            }
-        }
-
-        function saveLocalDraft() {
-            localStorage.setItem('exam_draft_data', JSON.stringify(examData));
-            const headerData = {};
-            ['gov','min','dir','school','subject','class','time','type','year','date', 'group', 'num_pos'].forEach(id => {
-               if(document.getElementById('h_'+id)) headerData[id] = document.getElementById('h_'+id).value;
-            });
-            localStorage.setItem('exam_draft_header', JSON.stringify(headerData));
-        }
-
-        function loadLocalDraft() {
-            if(currentExamId) return;
-            const draftData = localStorage.getItem('exam_draft_data');
-            const draftHeader = localStorage.getItem('exam_draft_header');
-            if(draftData) { examData = JSON.parse(draftData); renderPaper(); updateList(); }
-            if(draftHeader) {
-                const header = JSON.parse(draftHeader);
-                for(let key in header) {
-                    if(document.getElementById('h_'+key)) document.getElementById('h_'+key).value = header[key];
-                }
-                updatePaper();
-            }
-        }
-
-        async function checkPassword() {
-            const input = document.getElementById('password-input').value.trim();
-            const btn = document.getElementById('login-btn');
-            const errorMsg = document.getElementById('login-error-msg');
-            const loader = document.getElementById('login-loader');
-            errorMsg.classList.add('hidden');
-            if(!input) return;
-            btn.disabled = true; loader.classList.remove('hidden');
-            try {
-                const { db, doc, getDoc, updateDoc, appId } = window.firebaseApp;
-                const docRef = doc(db, 'artifacts', appId, 'access_codes', input);
-                const docSnap = await getDoc(docRef);
-                if (docSnap.exists()) {
-                    const codeData = docSnap.data();
-                    const today = new Date().toISOString().split('T')[0];
-                    if (codeData.expiryDate && codeData.expiryDate < today) {
-                        errorMsg.innerText = "ئەم کۆدە بەسەرچووە!";
-                        errorMsg.classList.remove('hidden'); loader.classList.add('hidden'); btn.disabled = false; return;
-                    }
-                    if (!codeData.used) {
-                        await updateDoc(docRef, { used: true, deviceId: deviceId, usedAt: new Date().toISOString() });
-                        grantAccess();
-                    } else if (codeData.deviceId === deviceId) {
-                        grantAccess();
-                    } else {
-                        errorMsg.innerText = "ئەم کۆدە پێشتر لەسەر ئامێرێکی تر بەکارهاتووە!";
-                        errorMsg.classList.remove('hidden');
-                    }
-                } else {
-                    errorMsg.innerText = "کۆدەکە هەڵەیە";
-                    errorMsg.classList.remove('hidden');
-                }
-            } catch(e) {
-                console.error(e);
-                errorMsg.innerText = "کێشەی ئینتەرنێت هەیە";
-                errorMsg.classList.remove('hidden');
-            } finally {
-                btn.disabled = false; loader.classList.add('hidden');
-            }
-        }
-
-        function checkSessionValidity() {
-            const input = localStorage.getItem('last_valid_code'); // You might need to store this on successful login
-            if (!input) return; // Or handle as not logged in if appropriate for your logic, though usually auth state handles basic login. 
-            // The request was to check EXPIRY repeatedly. 
-            // Since we don't store the code in a globally accessible variable in this snippet easily without modifying login flow significantly, 
-            // we will rely on the initial check. 
-            // **Correction based on prompt:** "Make it check expiry and close".
-            // To do this properly without re-entering code, we need to store the expiry date in localStorage upon login.
-            
-            const expiry = localStorage.getItem('code_expiry_date');
-            if(expiry) {
-                const today = new Date().toISOString().split('T')[0];
-                if(expiry < today) {
-                    logoutAndLock();
-                }
-            }
-        }
-        
-        function logoutAndLock() {
-            localStorage.removeItem('is_logged_in');
-            localStorage.removeItem('code_expiry_date');
-            document.getElementById('login-overlay').style.display = 'flex';
-            document.getElementById('login-error-msg').innerText = "کاتی کۆدەکەت بەسەرچووە!";
-            document.getElementById('login-error-msg').classList.remove('hidden');
-        }
-
-        // Hook into the original checkPassword to store expiry
-        const originalCheckPassword = checkPassword;
-        // redefining checkPassword to include storage of expiry
-        checkPassword = async function() {
-             const input = document.getElementById('password-input').value.trim();
-             const btn = document.getElementById('login-btn');
-             const errorMsg = document.getElementById('login-error-msg');
-             const loader = document.getElementById('login-loader');
-             errorMsg.classList.add('hidden');
-             if(!input) return;
-             btn.disabled = true; loader.classList.remove('hidden');
-             
-             try {
-                const { db, doc, getDoc, updateDoc, appId } = window.firebaseApp;
-                const docRef = doc(db, 'artifacts', appId, 'access_codes', input);
-                const docSnap = await getDoc(docRef);
-
-                if (docSnap.exists()) {
-                    const codeData = docSnap.data();
-                    const today = new Date().toISOString().split('T')[0];
-                    
-                    if (codeData.expiryDate && codeData.expiryDate < today) {
-                        errorMsg.innerText = "ئەم کۆدە بەسەرچووە!";
-                        errorMsg.classList.remove('hidden'); loader.classList.add('hidden'); btn.disabled = false; return;
-                    }
-
-                    // STORE EXPIRY
-                    if(codeData.expiryDate) {
-                        localStorage.setItem('code_expiry_date', codeData.expiryDate);
-                    }
-
-                    if (!codeData.used) {
-                        await updateDoc(docRef, { used: true, deviceId: deviceId, usedAt: new Date().toISOString() });
-                        grantAccess();
-                    } else if (codeData.deviceId === deviceId) {
-                        grantAccess();
-                    } else {
-                        errorMsg.innerText = "ئەم کۆدە پێشتر لەسەر ئامێرێکی تر بەکارهاتووە!";
-                        errorMsg.classList.remove('hidden');
-                    }
-                } else {
-                    errorMsg.innerText = "کۆدەکە هەڵەیە";
-                    errorMsg.classList.remove('hidden');
-                }
-             } catch(e) {
-                 console.error(e);
-                 errorMsg.innerText = "کێشەی ئینتەرنێت هەیە";
-                 errorMsg.classList.remove('hidden');
-             } finally {
-                 btn.disabled = false; loader.classList.add('hidden');
-             }
-        }
-
-        // Periodic Check (every 1 minute)
-        setInterval(checkSessionValidity, 60000);
-
-        function grantAccess() {
-            document.getElementById('login-overlay').style.display = 'none';
-            localStorage.setItem('is_logged_in', 'true');
-            loadExamList();
-            checkSessionValidity(); // Check immediately
-        }
-
-        const mathSymbols = ['+','-','\\times','\\div','=','\\neq','\\approx','\\pm','\\sqrt{}','\\sqrt[3]{}','\\frac{}{}','x^2','x_2','e^x','<','>','\\leq','\\geq','\\infty','\\pi','\\circ','\\angle','\\triangle','\\alpha','\\beta','\\theta','\\lambda','\\Delta','\\in','\\notin','\\cup','\\cap','\\subset','\\subseteq','\\emptyset','\\rightarrow','\\Rightarrow','\\Leftrightarrow','\\sum','\\int','\\lim','\\log','\\ln','\\sin','\\cos','\\tan'];
-        const mainTextArea = document.getElementById('q_text');
-        mainTextArea.addEventListener('focus', () => { activeMathInput = mainTextArea; });
-        activeMathInput = mainTextArea; 
-        const tb = document.getElementById('math-toolbar-container');
-        tb.innerHTML = ''; 
-        mathSymbols.forEach(s => {
-            let btn = document.createElement('button');
-            btn.className = "flex-shrink-0 px-2 py-1 bg-white border rounded text-xs font-bold shadow-sm active:bg-gray-200 min-w-[30px]";
-            btn.innerText = s.replace('\\','');
-            btn.onmousedown = (e) => { 
-                e.preventDefault(); e.stopPropagation();
-                if(!activeMathInput) return;
-                let f = activeMathInput;
-                let start = f.selectionStart;
-                let end = f.selectionEnd;
-                let text = f.value;
-                f.value = text.substring(0, start) + '$' + s + '$' + text.substring(end, text.length);
-                f.dispatchEvent(new Event('input', { bubbles: true }));
-                let bracePos = s.indexOf('{}');
-                if(bracePos !== -1) f.selectionStart = f.selectionEnd = start + 1 + bracePos + 1;
-                else f.selectionStart = f.selectionEnd = start + s.length + 2; 
-            };
-            tb.appendChild(btn);
-        });
-
-        function renderMCQInputs() {
-            const container = document.getElementById('mcq-inputs');
-            container.innerHTML = '';
-            mcqOptions.forEach((opt, idx) => {
-                let div = document.createElement('div');
-                div.className = "flex gap-2 items-center bg-white p-1 rounded border";
-                let textInput = document.createElement('input');
-                textInput.type = 'text';
-                textInput.value = opt.text;
-                textInput.className = "flex-1 p-2 bg-transparent text-sm outline-none";
-                textInput.placeholder = `هەڵبژاردەی ${idx+1}`;
-                textInput.oninput = (e) => { mcqOptions[idx].text = e.target.value; };
-                textInput.onfocus = () => { activeMathInput = textInput; }; 
-                let radio = document.createElement('input');
-                radio.type = 'radio';
-                radio.name = 'correct_opt';
-                radio.checked = opt.correct;
-                radio.className = "w-5 h-5 accent-green-600";
-                radio.onclick = () => mcqOptions.forEach((o,i)=>o.correct=(i===idx));
-                let delBtn = document.createElement('button');
-                delBtn.innerHTML = '<i class="fa-solid fa-xmark"></i>';
-                delBtn.className = "text-red-400 px-2";
-                delBtn.onclick = () => { if(mcqOptions.length>2){mcqOptions.splice(idx,1);renderMCQInputs();} };
-                div.appendChild(radio); div.appendChild(textInput); div.appendChild(delBtn); container.appendChild(div);
-            });
-        }
-        function addMCQOption() { mcqOptions.push({text:'', correct:false}); renderMCQInputs(); }
-
-        function renderMatchInputs() {
-            const container = document.getElementById('match-inputs');
-            container.innerHTML = '';
-            matchPairs.forEach((pair, idx) => {
-                let div = document.createElement('div');
-                div.className = "flex gap-1 items-center bg-white p-1 rounded border";
-                let rightInput = document.createElement('input');
-                rightInput.value = pair.right;
-                rightInput.className = "flex-1 p-1 border rounded text-xs text-right h-8";
-                rightInput.placeholder = "ڕاست";
-                rightInput.oninput = (e) => { matchPairs[idx].right = e.target.value; };
-                rightInput.onfocus = () => { activeMathInput = rightInput; };
-                let leftInput = document.createElement('input');
-                leftInput.value = pair.left;
-                leftInput.className = "flex-1 p-1 border rounded text-xs text-left h-8";
-                leftInput.placeholder = "چەپ";
-                leftInput.dir = "ltr";
-                leftInput.oninput = (e) => { matchPairs[idx].left = e.target.value; };
-                leftInput.onfocus = () => { activeMathInput = leftInput; };
-                let delBtn = document.createElement('button');
-                delBtn.innerHTML = '<i class="fa-solid fa-xmark"></i>';
-                delBtn.className = "text-red-400 px-1 text-xs";
-                delBtn.onclick = () => { if(matchPairs.length>1){matchPairs.splice(idx,1);renderMatchInputs();} };
-                div.appendChild(rightInput); div.appendChild(leftInput); div.appendChild(delBtn); container.appendChild(div);
-            });
-        }
-        function addMatchPair() { matchPairs.push({right:'', left:''}); renderMatchInputs(); }
-
-        function toggleQuestionInputs() {
-            const type = document.getElementById('q_type').value;
-            document.getElementById('mcq-container').style.display = type === 'mcq' ? 'block' : 'none';
-            document.getElementById('match-container').style.display = type === 'match' ? 'block' : 'none';
-            document.getElementById('tf-container').style.display = type === 'tf' ? 'block' : 'none';
-            document.getElementById('sub-label-box').style.display = type === 'text' ? 'block' : 'none';
-        }
-
-        renderMCQInputs(); 
-        renderMatchInputs();
-
-        // --- ADD ITEMS ---
-        function addSectionTitle() {
-            const title = prompt("سەردێڕ بنووسە:");
-            if(title) { 
-                const spacing = document.getElementById('q_spacing').value || 0;
-                examData.push({ type: 'title', id: Date.now(), text: title, spacing: spacing }); 
-                renderPaper(); updateList(); saveLocalDraft(); 
-            }
-        }
-
-        function addPageBreak() { examData.push({ type: 'break', id: Date.now() }); renderPaper(); updateList(); saveLocalDraft(); }
-        
-        async function addItem() {
-            const text = document.getElementById('q_text').value;
-            const score = document.getElementById('q_score').value;
-            const type = document.getElementById('q_type').value;
-            const spacing = document.getElementById('q_spacing').value;
-            const subStyle = document.getElementById('q_sub_style').value;
-            const customLabel = document.getElementById('q_custom_label').value;
-            const file = document.getElementById('q_image').files[0];
-            
-            if(type !== 'match' && !text && !file) return alert('تکایە دەق یان وێنە دابنێ');
-            if(type === 'match' && matchPairs.every(p => !p.right && !p.left)) return alert('تکایە جووتەکان پڕ بکەرەوە');
-
-            const item = {
-                id: Date.now(),
-                type: 'question',
-                qType: type,
-                text: text,
-                score: score,
-                spacing: spacing,
-                subStyle: subStyle, 
-                customLabel: customLabel,
-                options: type === 'mcq' ? JSON.parse(JSON.stringify(mcqOptions)) : null,
-                matchPairs: type === 'match' ? JSON.parse(JSON.stringify(matchPairs)) : null,
-                tfAnswer: type === 'tf' ? tfAnswer : null,
-                img: null
-            };
-
-            const finalizeItem = async () => {
-                if (bankEditMode && bankEditId) {
-                    const { db, doc, setDoc, appId } = window.firebaseApp;
-                    try {
-                        const updatedItem = { ...item, id: bankEditId }; 
-                        delete updatedItem._id; 
-                        await setDoc(doc(db, 'artifacts', appId, 'users', window.currentUser.uid, 'bank', bankEditId), updatedItem);
-                        alert('گۆڕانکارییەکان لە بانک تۆمارکران');
-                        loadBank(); clearForm(); setTab('bank');
-                    } catch(e) { console.error(e); alert('هەڵە لە نوێکردنەوەی بانک'); }
-                    return;
-                }
-                if(editIndex > -1) examData[editIndex] = item;
-                else examData.push(item);
-                renderPaper(); updateList(); saveLocalDraft(); clearForm();
-            };
-
-            if(file) {
-                compressImage(file, (compressedDataUrl) => {
-                    item.img = compressedDataUrl;
-                    finalizeItem();
-                });
-            } else {
-                if(editIndex > -1 && examData[editIndex].img) item.img = examData[editIndex].img; 
-                finalizeItem();
-            }
-        }
-
-        function deleteItem(idx) { if(confirm('دڵنیای؟')) { examData.splice(idx, 1); renderPaper(); updateList(); saveLocalDraft(); } }
-
-        function editItem(idx) {
-            const item = examData[idx];
-            if(item.type === 'break' || item.type === 'title') return;
-            editIndex = idx;
-            loadItemToForm(item);
-            document.getElementById('btn-add').innerText = "گۆڕانکاری";
-            document.getElementById('btn-add').classList.replace('bg-brand-600', 'bg-green-600');
-        }
-
-        function loadItemToForm(item) {
-            document.getElementById('q_text').value = item.text;
-            document.getElementById('q_score').value = item.score;
-            document.getElementById('q_type').value = item.qType;
-            document.getElementById('q_spacing').value = item.spacing || 0;
-            document.getElementById('spacing-display').innerText = item.spacing || 0;
-            document.getElementById('q_sub_style').value = item.subStyle || 'none';
-            document.getElementById('q_custom_label').value = item.customLabel || '';
-            if(item.qType === 'mcq') mcqOptions = JSON.parse(JSON.stringify(item.options));
-            if(item.qType === 'match') matchPairs = JSON.parse(JSON.stringify(item.matchPairs));
-            if(item.qType === 'tf') {
-                tfAnswer = item.tfAnswer || 'true';
-                document.querySelector(`input[name="tf_choice"][value="${tfAnswer}"]`).checked = true;
-            }
-            toggleQuestionInputs(); renderMCQInputs(); renderMatchInputs(); setTab('create');
-        }
-
-        function clearForm() {
-            editIndex = -1; bankEditMode = false; bankEditId = null;
-            document.getElementById('bank-edit-alert').classList.add('hidden');
-            document.getElementById('q_text').value = '';
-            document.getElementById('q_image').value = '';
-            document.getElementById('q_spacing').value = 0;
-            document.getElementById('q_custom_label').value = '';
-            document.getElementById('spacing-display').innerText = 0;
-            document.getElementById('btn-add').innerText = "زیادکردن";
-            document.getElementById('btn-add').classList.replace('bg-green-600', 'bg-brand-600');
-            document.getElementById('btn-add').classList.replace('bg-orange-600', 'bg-brand-600'); 
-            tfAnswer = 'true';
-            document.querySelector(`input[name="tf_choice"][value="true"]`).checked = true;
-            mcqOptions = [{text:'', correct:false}, {text:'', correct:false}, {text:'', correct:false}, {text:'', correct:false}];
-            matchPairs = [{right:'', left:''}, {right:'', left:''}];
-            renderMCQInputs(); renderMatchInputs();
-        }
-
-        function calculateScore() {
-            let total = 0;
-            examData.forEach(item => {
-                if(item.type === 'question' && item.score) {
-                    total += parseFloat(item.score);
-                }
-            });
-            const scoreEl = document.getElementById('live-score');
-            scoreEl.innerText = total;
-            if(total === 100) {
-                scoreEl.className = "font-black text-sm text-green-600";
-            } else {
-                scoreEl.className = "font-black text-sm text-red-600";
-            }
-        }
-
-        function renderPaper() {
-            const container = document.getElementById('paper_questions');
-            const numPos = document.getElementById('h_num_pos').value || 'right';
-            const isEnglish = numPos === 'left';
-            
-            container.innerHTML = '';
-            let qCount = 0;
-            let subCount = 0;
-
-            examData.forEach(item => {
-                if(item.type === 'title') { 
-                    qCount = 0; 
-                    let titleStyle = item.spacing ? `margin-top: ${item.spacing}cm; margin-bottom: ${item.spacing}cm;` : '';
-                    container.innerHTML += `<div class="section-title" style="${titleStyle}">${item.text}</div>`; 
-                    return; 
-                }
-                if(item.type === 'break') { container.innerHTML += `<div class="page-break-marker"></div>`; return; }
-
-                let labelHTML = '';
-                if (item.subStyle && item.subStyle !== 'none') {
-                    if (item.subStyle === 'alpha') { subCount++; labelHTML = `<span class="q-sub-label">${String.fromCharCode(64 + subCount)})</span>`; } 
-                    else if (item.subStyle === 'number') { subCount++; labelHTML = `<span class="q-sub-label">${subCount}-</span>`; }
-                } else {
-                    qCount++; subCount = 0; labelHTML = `<span class="q-number">${qCount}</span>`;
-                }
-
-                let spacer = item.spacing > 0 ? `<div style="height: ${item.spacing}cm"></div>` : '';
-                let mainContent = item.text || '';
-                let extraContentBelow = '';
-
-                if (item.qType === 'tf') {
-                    const tfText = isEnglish ? '( True &nbsp;&nbsp;/&nbsp;&nbsp; False )' : '( ڕاست &nbsp;&nbsp;/&nbsp;&nbsp; هەڵە )';
-                    const marginStyle = isEnglish ? 'margin-left: 20px;' : 'margin-right: 20px;';
-                    mainContent += `<span style="display:inline-block; ${marginStyle} font-weight:bold; white-space: nowrap;">${tfText}</span>`;
-                } 
-                else if (item.qType === 'mcq' && item.options) {
-                      const labels = ['A','B','C','D','E'];
-                      mainContent += `<span style="display:inline-block; width: 10px;"></span>`; 
-                      item.options.forEach((opt, i) => {
-                        if(opt.text) {
-                            mainContent += `
-                            <div class="mcq-option-wrapper">
-                                <span class="mcq-label">${labels[i]})</span>
-                                <span style="font-weight:bold; font-size:13px;">${opt.text}</span>
-                            </div>`;
-                        }
-                      });
-                }
-                else if(item.qType === 'match' && item.matchPairs) {
-                      extraContentBelow = `<div class="mt-1 w-full flex justify-center">
-                        <table class="border-collapse w-auto text-sm mr-0">`; 
-                      item.matchPairs.forEach(p => { 
-                        extraContentBelow += `<tr><td class="pl-4 py-1 font-bold text-right">${p.right}</td><td class="px-4 py-1 text-center text-gray-300">--</td><td class="pr-4 py-1 text-left font-bold" dir="ltr">${p.left}</td></tr>`; 
-                      });
-                      extraContentBelow += `</table></div>`;
-                }
-                
-                let wrapperClass = `flex items-start gap-2 w-full q-wrapper relative group ${isEnglish ? 'flex-row-reverse' : ''}`;
-                let contentDir = isEnglish ? 'ltr' : 'rtl';
-                let contentAlign = isEnglish ? 'text-left' : 'text-right';
-                
-                let customLabelHTML = '';
-                if(item.customLabel) {
-                    let posClass = isEnglish ? 'lbl-pos-left' : 'lbl-pos-right';
-                    customLabelHTML = `<div class="custom-side-label ${posClass}">${item.customLabel}</div>`;
-                }
-
-                let scoreStyle = isEnglish ? 'right:0; left:auto;' : 'left:0; right:auto;';
-
-                let content = `
-                <div class="${wrapperClass}">
-                    ${customLabelHTML}
-                    ${labelHTML}
-                    <div class="flex-1 ${contentAlign}" dir="${contentDir}">
-                        <div class="flex justify-between items-start ${isEnglish ? 'flex-row-reverse' : ''}">
-                            <div class="flex-1 px-2">
-                                <div class="q-content mb-1">
-                                    ${mainContent}
-                                </div>
-                                ${extraContentBelow}
-                                ${spacer} 
-                            </div>
-                            ${item.img ? `<img src="${item.img}" class="w-20 h-20 object-contain border border-dashed p-1 bg-white flex-none ml-2">` : ''} 
-                        </div>
-                    </div>
-                    ${item.subStyle === 'none' ? `<span class="score-badge" style="${scoreStyle}">${item.score} نمرە</span>` : ''}
-                </div>
-                `;
-                container.innerHTML += content;
-            });
-            
-            if (window.MathJax) { MathJax.typesetPromise([container]).then(() => console.log('Math rendered')); }
-        }
-
-        function updateList() {
-            calculateScore(); // Update Live Score
-            const list = document.getElementById('questions-list');
-            list.innerHTML = '';
-            examData.forEach((item, idx) => {
-                let div = document.createElement('div');
-                div.className = "bg-white p-3 rounded-lg border flex justify-between items-center shadow-sm text-xs";
-                if(item.type === 'break') {
-                      div.innerHTML = `<span class="text-gray-400 border-b border-dashed w-full text-center">--- پەڕەی نوێ ---</span> <button onclick="deleteItem(${idx})" class="text-red-500 p-2"><i class="fa-solid fa-trash"></i></button>`;
-                } else if(item.type === 'title') {
-                      div.innerHTML = `<span class="font-bold w-full text-center bg-gray-100 p-1">[سەردێڕ] ${item.text}</span> <button onclick="deleteItem(${idx})" class="text-red-500 p-2"><i class="fa-solid fa-trash"></i></button>`;
-                } else {
-                    let txt = item.text ? item.text.substring(0,15) : (item.qType === 'match' ? 'ڕاکێشان' : 'وێنە');
-                    div.innerHTML = `
-                        <span class="truncate w-1/2 font-bold text-sm">${idx+1}. ${txt}...</span>
-                        <div class="flex gap-2">
-                            <button onclick="addToBank(${idx})" class="text-blue-500 bg-blue-50 p-2 rounded-full" title="ناردن بۆ بانک"><i class="fa-solid fa-building-columns"></i></button>
-                            <button onclick="editItem(${idx})" class="text-green-600 bg-green-50 p-2 rounded-full"><i class="fa-solid fa-pen"></i></button>
-                            <button onclick="deleteItem(${idx})" class="text-red-500 bg-red-50 p-2 rounded-full"><i class="fa-solid fa-trash"></i></button>
-                        </div>
-                    `;
-                }
-                list.appendChild(div);
-            });
-            new Sortable(list, { animation: 150, onEnd: (evt) => { const item = examData.splice(evt.oldIndex, 1)[0]; examData.splice(evt.newIndex, 0, item); renderPaper(); updateList(); saveLocalDraft(); }});
-        }
-
-        // --- IMPROVED GROUP GENERATOR (MCQ ONLY) ---
-        function generateGroup(groupLabel) {
-            if(!confirm(`دڵنیای دەتەوێت گروپی (${groupLabel}) دروست بکەیت؟ تەنها پرسیارە هەڵبژاردنەکان تێکەڵ دەبن.`)) return;
-
-            let mcqIndices = [];
-            examData.forEach((item, index) => {
-                if(item.type === 'question' && item.qType === 'mcq') {
-                    mcqIndices.push(index);
-                }
-            });
-
-            let mcqItems = mcqIndices.map(i => JSON.parse(JSON.stringify(examData[i]))); 
-
-            for (let i = mcqItems.length - 1; i > 0; i--) {
-                const j = Math.floor(Math.random() * (i + 1));
-                [mcqItems[i], mcqItems[j]] = [mcqItems[j], mcqItems[i]];
-            }
-
-            mcqItems.forEach(q => {
-                if(q.options) {
-                    for (let i = q.options.length - 1; i > 0; i--) {
-                        const j = Math.floor(Math.random() * (i + 1));
-                        [q.options[i], q.options[j]] = [q.options[j], q.options[i]];
-                    }
-                }
-            });
-
-            mcqIndices.forEach((originalIndex, i) => {
-                examData[originalIndex] = mcqItems[i];
-            });
-
-            if(document.getElementById('h_group')) {
-                document.getElementById('h_group').value = groupLabel;
-            }
-            updatePaper();
-            updateList();
-            
-            // SAVE SNAPSHOT TO MEMORY
-            groupSnapshots[groupLabel] = JSON.parse(JSON.stringify(examData));
-            
-            alert(`گروپی ${groupLabel} دروستکرا و لە میمۆری هەڵگیرا!`);
-        }
-        
-        // --- NEW: GENERATE ANSWER KEY FOR ALL GROUPS ---
-        function generateGroupKeys() {
-            const keys = Object.keys(groupSnapshots);
-            if(keys.length === 0) return alert('هیچ گروپێک دروست نەکراوە! سەرەتا گروپەکان (A, B...) دروست بکە.');
-            
-            const labels = ['A','B','C','D','E'];
-            let html = `<html dir="rtl"><head><style>body { font-family: 'Vazirmatn', sans-serif; padding: 20px; } table { border-collapse: collapse; width: 100%; margin-bottom: 20px; } th, td { border: 1px solid black; padding: 5px; text-align: center; } .container { display: flex; gap: 20px; flex-wrap: wrap; } .group-box { flex: 1; min-width: 200px; }</style></head><body><h2>وەڵامنامەی گشت گروپەکان</h2><div class="container">`;
-            
-            keys.sort().forEach(groupName => {
-                const gData = groupSnapshots[groupName];
-                let tableRows = '';
-                let count = 0;
-                
-                gData.forEach(q => {
-                    if(q.type === 'break' || q.type === 'title') return;
-                    count++;
-                    let ans = '-';
-                    if(q.qType === 'mcq' && q.options) {
-                        const idx = q.options.findIndex(o => o.correct);
-                        if(idx > -1) ans = labels[idx];
-                    } else if(q.qType === 'tf') {
-                        ans = q.tfAnswer === 'true' ? 'ڕاست' : 'هەڵە';
-                    }
-                    tableRows += `<tr><td>${count}</td><td>${ans}</td></tr>`;
-                });
-                
-                html += `<div class="group-box"><h3>گروپی ${groupName}</h3><table><tr><th>پرسیار</th><th>وەڵام</th></tr>${tableRows}</table></div>`;
-            });
-            
-            html += `</div></body></html>`;
-            const win = window.open('','_blank');
-            win.document.write(html);
-        }
-
-        function shuffleQuestions() {
-            if(!confirm('تەنها پرسیارە هەڵبژاردنەکان تێکەڵ دەکەیت؟')) return;
-            examData.forEach(q => {
-                if(q.qType === 'mcq' && q.options) {
-                    for (let i = q.options.length - 1; i > 0; i--) {
-                        const j = Math.floor(Math.random() * (i + 1));
-                        [q.options[i], q.options[j]] = [q.options[j], q.options[i]];
-                    }
-                }
-            });
-            renderPaper(); updateList(); saveLocalDraft();
-        }
-
-        document.getElementById('h_logo_input').addEventListener('change', function(e) {
-            if(e.target.files[0]) {
-                compressImage(e.target.files[0], (res) => {
-                    document.getElementById('header_logo_view').src = res;
-                    localStorage.setItem('header_logo_data', res); 
-                });
-            }
-        });
-        const savedLogo = localStorage.getItem('header_logo_data');
-        if(savedLogo) document.getElementById('header_logo_view').src = savedLogo;
-
-        async function saveCurrentExam() {
-            if(!window.currentUser) return alert('تکایە سەرەتا بچۆژوورەوە');
-            const { db, collection, addDoc, doc, updateDoc, appId } = window.firebaseApp;
-            const uid = window.currentUser.uid;
-            const title = prompt('ناوی تاقیکردنەوە:', document.getElementById('h_subject').value);
-            if(!title) return;
-            const headerData = {};
-            ['gov','min','dir','school','subject','class','time','type','year','date', 'group', 'num_pos'].forEach(id => {
-                headerData[id] = document.getElementById('h_'+id).value;
-            });
-            const payload = { title: title, data: examData, header: headerData, updatedAt: new Date().toISOString() };
-            try {
-                if(currentExamId) {
-                    await updateDoc(doc(db, 'artifacts', appId, 'users', uid, 'exams', currentExamId), payload);
-                } else {
-                    const ref = await addDoc(collection(db, 'artifacts', appId, 'users', uid, 'exams'), payload);
-                    currentExamId = ref.id;
-                }
-                alert('هەڵگیرا!'); loadExamList();
-            } catch(e) { console.error(e); alert('هەڵە!'); }
-        }
-
-        async function loadExamList() {
-            const { db, collection, getDocs, query, orderBy, appId } = window.firebaseApp;
-            const uid = window.currentUser.uid;
-            const listEl = document.getElementById('exam-list-container');
-            listEl.innerHTML = '';
-            const q = query(collection(db, 'artifacts', appId, 'users', uid, 'exams'), orderBy('updatedAt', 'desc'));
-            const snap = await getDocs(q);
-            snap.forEach(doc => {
-                const d = doc.data();
-                const div = document.createElement('div');
-                div.className = "bg-white p-3 rounded-lg border flex justify-between items-center shadow-sm mb-2 active:bg-blue-50";
-                div.onclick = (e) => { if(!e.target.closest('button')) loadExam(doc.id, d); };
-                div.innerHTML = `<div><div class="font-bold text-sm text-gray-800">${d.title}</div><div class="text-[10px] text-gray-400">${new Date(d.updatedAt).toLocaleDateString()}</div></div><button onclick="deleteExam('${doc.id}', event)" class="text-red-400 p-2"><i class="fa-solid fa-trash"></i></button>`;
-                listEl.appendChild(div);
-            });
-        }
-
-        function loadExam(id, data) {
-            currentExamId = id;
-            examData = data.data || [];
-            if(data.header) {
-                ['gov','min','dir','school','subject','class','time','type','year','date', 'group', 'num_pos'].forEach(field => {
-                    if(data.header[field] && document.getElementById('h_'+field)) document.getElementById('h_'+field).value = data.header[field];
-                });
-                updatePaper();
-            }
-            document.getElementById('current-exam-title').innerText = data.title;
-            renderPaper(); updateList(); setTab('create');
-            saveLocalDraft();
-        }
-        
-        async function deleteExam(id, e) {
-            e.stopPropagation(); if(!confirm('دڵنیای؟')) return;
-            const { db, doc, deleteDoc, appId } = window.firebaseApp;
-            await deleteDoc(doc(db, 'artifacts', appId, 'users', window.currentUser.uid, 'exams', id));
-            loadExamList();
-        }
-
-        function createNewExam() {
-            currentExamId = null; examData = [];
-            groupSnapshots = {}; // Clear Group Memory
-            document.getElementById('current-exam-title').innerText = "تاقیکردنەوەی نوێ";
-            ['gov','min','dir','school','subject','class','time','type','year','date', 'group', 'num_pos'].forEach(id => {
-               if(document.getElementById('h_'+id)) document.getElementById('h_'+id).value = '';
-            });
-            renderPaper(); updateList(); setTab('create'); saveLocalDraft();
-        }
-
-        async function addToBank(idx) {
-            if(!window.currentUser) return alert('پێویستە بچیتە ژوورەوە');
-            const item = examData[idx];
-            if(item.type === 'break' || item.type === 'title') return;
-            const { db, addDoc, collection, appId } = window.firebaseApp;
-            try { await addDoc(collection(db, 'artifacts', appId, 'users', window.currentUser.uid, 'bank'), item); alert('نێردرا بۆ بانک'); loadBank(); } catch(e) { alert('هەڵە ڕوویدا'); }
-        }
-
-        async function loadBank() {
-            const { db, collection, getDocs, appId } = window.firebaseApp;
-            bankData = [];
-            const snap = await getDocs(collection(db, 'artifacts', appId, 'users', window.currentUser.uid, 'bank'));
-            snap.forEach(doc => bankData.push({id: doc.id, ...doc.data()}));
-            filterBank();
-        }
-
-        function filterBank() {
-            const term = document.getElementById('bank-search').value.toLowerCase();
-            const container = document.getElementById('bank-list-container');
-            container.innerHTML = '';
-            bankData.filter(i => i.text && i.text.toLowerCase().includes(term)).forEach(item => {
-                const div = document.createElement('div');
-                div.className = "bg-white p-3 rounded-lg border text-sm mb-2 shadow-sm flex flex-col gap-2";
-                div.innerHTML = `
-                    <div class="font-bold text-gray-700">${item.text}</div>
-                    <div class="flex gap-2">
-                        <button onclick='importFromBank(${JSON.stringify(item)})' class="flex-1 bg-blue-50 py-2 rounded text-blue-600 font-bold active:bg-blue-100">زیادکردن</button>
-                        <button onclick='editBankItem(${JSON.stringify(item)})' class="bg-yellow-50 px-3 rounded text-yellow-600 font-bold active:bg-yellow-100"><i class="fa-solid fa-pen"></i></button>
-                        <button onclick="deleteFromBank('${item.id}')" class="bg-red-50 px-3 rounded text-red-500 font-bold active:bg-red-100"><i class="fa-solid fa-trash"></i></button>
-                    </div>
-                `;
-                container.appendChild(div);
-            });
-        }
-
-        async function deleteFromBank(id) {
-            if(!confirm('دڵنیای لە سڕینەوەی ئەم پرسیارە لە بانک؟')) return;
-            const { db, doc, deleteDoc, appId } = window.firebaseApp;
-            try { await deleteDoc(doc(db, 'artifacts', appId, 'users', window.currentUser.uid, 'bank', id)); loadBank(); } catch(e) { console.error(e); alert('کێشەیەک هەیە'); }
-        }
-
-        function editBankItem(item) {
-            bankEditMode = true; bankEditId = item.id; loadItemToForm(item);
-            document.getElementById('bank-edit-alert').classList.remove('hidden');
-            document.getElementById('btn-add').innerText = "تۆمارکردن لە بانک";
-            document.getElementById('btn-add').classList.replace('bg-brand-600', 'bg-orange-600');
-        }
-
-        function importFromBank(item) {
-            const newItem = JSON.parse(JSON.stringify(item));
-            newItem.id = Date.now(); delete newItem._id; 
-            examData.push(newItem); renderPaper(); updateList(); saveLocalDraft(); alert('زیادکرا');
-        }
-
-        function setTab(tab) {
-            ['create','archive','bank','settings'].forEach(t => {
-                document.getElementById(`view-${t}`).classList.add('hidden');
-                document.getElementById(`tab-${t}`).classList.remove('border-b-2', 'border-brand-600', 'bg-blue-50', 'text-brand-600');
-                document.getElementById(`tab-${t}`).classList.add('text-gray-500');
-            });
-            document.getElementById(`view-${tab}`).classList.remove('hidden');
-            document.getElementById(`tab-${tab}`).classList.add('border-b-2', 'border-brand-600', 'bg-blue-50', 'text-brand-600');
-            document.getElementById(`tab-${tab}`).classList.remove('text-gray-500');
-            if(tab === 'archive') loadExamList();
-            if(tab === 'bank') loadBank();
-        }
-
-        function updatePaper() {
-            ['gov','min','dir','school','subject','class','time','type','year','date', 'group'].forEach(id => {
-                const val = document.getElementById('h_'+id).value;
-                if(id === 'group') {
-                      const el = document.getElementById('view_group');
-                      const container = document.getElementById('view_group_container');
-                      if(val) { el.innerText = val; container.classList.remove('hidden'); } else { container.classList.add('hidden'); }
-                } else {
-                    if(document.getElementById('view_'+id)) document.getElementById('view_'+id).innerText = val;
-                }
-            });
-            renderPaper(); saveLocalDraft();
-        }
-        
-        function downloadPDF() {
-            const el = document.getElementById('examPaper');
-            const clone = el.cloneNode(true); clone.style.transform = "scale(1)"; 
-            document.body.appendChild(clone); 
-            html2pdf().set({ margin: 0, filename: 'Exam.pdf', image: { type: 'jpeg', quality: 0.98 }, html2canvas: { scale: 2 }, jsPDF: { unit: 'mm', format: 'a4', orientation: 'portrait' } }).from(clone).save().then(() => document.body.removeChild(clone));
-        }
-        
-        function downloadWord() {
-            const style = document.getElementsByTagName('style')[0].innerText;
-            const header = document.querySelector('.exam-header').outerHTML;
-            const body = document.getElementById('paper_questions').innerHTML;
-            const html = `
-            <html xmlns:o='urn:schemas-microsoft-com:office:office' xmlns:w='urn:schemas-microsoft-com:office:word' dir="rtl">
-            <head>
-                <meta charset="utf-8">
-                <style>
-                    body { font-family: 'Arial', sans-serif; }
-                    ${style}
-                    .a4-paper { width: 100%; box-shadow: none; padding: 0; margin: 0; }
-                    .exam-header { border-bottom: 2px solid #000; }
-                    .mcq-option-wrapper { display: inline-block !important; }
-                    table { border-collapse: collapse; }
-                </style>
-            </head>
-            <body><div class="WordSection1">${header}<br/>${body}</div></body></html>`;
-            const blob = new Blob(['\ufeff', html], { type: 'application/msword' });
-            const link = document.createElement("a"); link.href = URL.createObjectURL(blob); link.download = "exam.doc"; link.click();
-        }
-        
-        function generateAnswerKey() {
-            let html = `<html dir="rtl"><head><style>table, th, td { border: 1px solid black; border-collapse: collapse; padding: 5px; text-align: center; font-family: sans-serif; }</style></head><body><h2>وەڵامنامە</h2><table style="width:100%"><tr><th>#</th><th>وەڵام</th></tr>`;
-            let count = 0;
-            const labels = ['A','B','C','D','E'];
-            examData.forEach(q => {
-                if(q.type === 'break' || q.type === 'title') return;
-                count++;
-                let ans = '-';
-                if(q.qType === 'mcq' && q.options) {
-                    const idx = q.options.findIndex(o => o.correct);
-                    if(idx > -1) ans = labels[idx];
-                } else if(q.qType === 'tf') {
-                    ans = q.tfAnswer === 'true' ? 'ڕاست (True)' : 'هەڵە (False)';
-                }
-                html += `<tr><td>${count}</td><td>${ans}</td></tr>`;
-            });
-            html += `</table></body></html>`;
-            const win = window.open('','_blank');
-            win.document.write(html);
+        function toggleTheme() {
+            document.body.classList.toggle('dark-mode');
         }
     </script>
 </body>
