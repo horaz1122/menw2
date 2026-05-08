@@ -3,7 +3,7 @@
 <head>
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
-    <title>مەلزەمەی ئینگلیزی - دەستنیشانکردنی تاقیکردنەوە</title>
+    <title>مەلزەمەی پوختەکراو - تەنها ٢ پەڕە</title>
     <style>
         @import url('https://fonts.googleapis.com/css2?family=Cairo:wght@400;600;800&family=Quicksand:wght@500;700&display=swap');
         
@@ -101,22 +101,14 @@
         .en { font-family: var(--en-font); direction: ltr; display: inline-block; font-weight: 700; color: var(--border-blue); font-size: 18px; }
         .highlight { background-color: var(--accent-light); color: var(--accent); padding: 2px 8px; border-radius: 6px; margin: 0 4px; }
 
-        /* Exam Checkbox Styling */
         .exam-check {
-            width: 20px;
-            height: 20px;
-            margin-left: 15px;
-            cursor: pointer;
-            accent-color: #22c55e;
-            vertical-align: middle;
+            width: 20px; height: 20px; margin-left: 15px; cursor: pointer;
+            accent-color: #22c55e; vertical-align: middle;
         }
 
         .check-container {
-            display: flex;
-            align-items: center;
-            padding: 5px 10px;
-            border-radius: 8px;
-            transition: all 0.3s;
+            display: flex; align-items: center; padding: 5px 10px;
+            border-radius: 8px; transition: all 0.3s;
         }
 
         .came-in-exam {
@@ -143,6 +135,14 @@
         th { background-color: var(--accent-light); color: var(--text-color); }
         td.en-td { font-family: var(--en-font); direction: ltr; font-weight: 700; color: var(--border-blue); }
 
+        .matching-grid {
+            display: grid; grid-template-columns: 1fr auto 1fr; gap: 10px;
+            align-items: center; background-color: var(--bg-color);
+            padding: 15px; border-radius: 10px; border: 1px dashed var(--card-border); margin-bottom: 15px;
+        }
+        .matching-item { font-family: var(--en-font); direction: ltr; font-weight: 700; font-size: 17px; }
+        .matching-arrow { color: var(--text-muted); font-size: 20px; text-align: center; }
+
         @media print {
             body { background-color: #fff; color: #000; }
             .container { max-width: 100%; }
@@ -161,90 +161,21 @@
 
     <div class="container">
         <div class="header-section">
-            <h1>پێداچوونەوەی ئینگلیزی (وەرزی دووەم)</h1>
+            <h1>پوختەی ٢ پەڕەی ئینگلیزی</h1>
+            <div class="subtitle">تایبەت بە تاقیکردنەوە بەپێی تێبینییەکان</div>
             
             <div class="teacher-note">
-                <span class="en" style="color: #b45309;">Dear Teacher,</span><br>
-                <span class="en" style="font-weight: 500; font-size: 16px; color: #451a03;">Please check the boxes (☑) next to the questions or topics that appeared in the exam. This will help me focus my studies.</span>
-                <br><br>
+                <span class="en" style="color: #b45309;">Dear Teacher, please check (☑) the items included in the exam.</span><br>
                 مامۆستای بەڕێز، تکایە کلیک لەو چوارگۆشانە (☑) بکە کە لە تاقیکردنەوەکەدا هاتوونەتەوە بۆ ئەوەی بۆم دیاری ببێت.
             </div>
         </div>
 
         <!-- بەشی یەکەم -->
         <div class="section-card">
-            <h2>🌍 بەشی یەکەم: سڵاوکردن و خوێندنەوەی ژمارە</h2>
-            
-            <h3>چۆنیەتی سڵاو دانەوە:</h3>
-            <table>
-                <tr>
-                    <th>دیاری بکە</th>
-                    <th>وڵات (Country)</th>
-                    <th>ڕووبەڕوو (Face to face)</th>
-                    <th>لەسەر تەلەفۆن (On the phone)</th>
-                </tr>
-                <tr class="check-container">
-                    <td><input type="checkbox" class="exam-check" onchange="toggleHighlight(this)"></td>
-                    <td class="en-td">Japan</td>
-                    <td class="en-td">Konnichiha</td>
-                    <td class="en-td">moshi moshi</td>
-                </tr>
-                <tr class="check-container">
-                    <td><input type="checkbox" class="exam-check" onchange="toggleHighlight(this)"></td>
-                    <td class="en-td">Spain</td>
-                    <td class="en-td">hola</td>
-                    <td class="en-td">digame</td>
-                </tr>
-            </table>
+            <h2>💬 بەشی یەکەم: پرسیارەکانی How و بانگهێشتکردن</h2>
 
-            <h3>چۆن ژمارەی تەلەفۆن بخوێنین؟</h3>
-            <div class="info-box box-yellow">
-                <ul>
-                    <li class="check-container"><input type="checkbox" class="exam-check" onchange="toggleHighlight(this)"> <span class="en">569</span> ➔ <span class="en">five, six, nine</span></li>
-                    <li class="check-container"><input type="checkbox" class="exam-check" onchange="toggleHighlight(this)"> <span class="en">362</span> ➔ <span class="en">Three, six, Two</span></li>
-                    <li class="check-container"><input type="checkbox" class="exam-check" onchange="toggleHighlight(this)"> ژمارە <span class="en">0</span> دەخوێندرێتەوە وەک <strong><span class="en">oh</span></strong>.</li>
-                    <li class="check-container"><input type="checkbox" class="exam-check" onchange="toggleHighlight(this)"> ئەگەر ژمارە دووبارە بوو (<span class="en">22</span>) دەخوێندرێتەوە <span class="en">Two Two</span> یان <strong><span class="en">double Two</span></strong>.</li>
-                </ul>
-            </div>
-        </div>
-
-        <!-- بەشی دووەم -->
-        <div class="section-card">
-            <h2>📞 بەشی دووەم: ڕێکارەکانی وەڵامدانەوەی تەلەفۆن</h2>
-            
-            <div class="info-box box-blue check-container">
-                <input type="checkbox" class="exam-check" onchange="toggleHighlight(this)">
-                <div>
-                    <strong>پرسیار: بۆچی گرنگە لە کاتی تەلەفۆندا زەردەخەنە بکەین؟</strong><br>
-                    <span class="en">A smile makes your voice sound friendly and polite.</span>
-                </div>
-            </div>
-
-            <h3>گەیاندنی دوو ڕستە بەیەک (Procedures):</h3>
-            <ul>
-                <li class="check-container"><input type="checkbox" class="exam-check" onchange="toggleHighlight(this)"> <span class="en">1- Answer the call promptly ➔ by the second or third ring.</span></li>
-                <li class="check-container"><input type="checkbox" class="exam-check" onchange="toggleHighlight(this)"> <span class="en">2- Identify yourself ➔ and your department.</span></li>
-                <li class="check-container"><input type="checkbox" class="exam-check" onchange="toggleHighlight(this)"> <span class="en">3- Avoid talking with anything in your mouth ➔ Such as gum or sweets.</span></li>
-                <li class="check-container"><input type="checkbox" class="exam-check" onchange="toggleHighlight(this)"> <span class="en">4- Learn the procedure ➔ for transferring calls.</span></li>
-                <li class="check-container"><input type="checkbox" class="exam-check" onchange="toggleHighlight(this)"> <span class="en">5- When taking messages ➔ use the official forms.</span></li>
-            </ul>
-
-            <h3>دەستەواژەی کێشەی هێڵ (Bad Lines):</h3>
-            <ul>
-                <li class="check-container"><input type="checkbox" class="exam-check" onchange="toggleHighlight(this)"> <span class="en">It's a really bad line.</span></li>
-                <li class="check-container"><input type="checkbox" class="exam-check" onchange="toggleHighlight(this)"> <span class="en">It's too noisy.</span></li>
-                <li class="check-container"><input type="checkbox" class="exam-check" onchange="toggleHighlight(this)"> <span class="en">I must have got the wrong number.</span></li>
-                <li class="check-container"><input type="checkbox" class="exam-check" onchange="toggleHighlight(this)"> <span class="en">My battery's very low.</span></li>
-                <li class="check-container"><input type="checkbox" class="exam-check" onchange="toggleHighlight(this)"> <span class="en">The line just went dead.</span></li>
-            </ul>
-        </div>
-
-        <!-- بەشی سێیەم -->
-        <div class="section-card">
-            <h2>💬 بەشی سێیەم: پرسیار، بانگهێشتکردن، و گفتوگۆ</h2>
-
-            <h3>وشەکانی دوای How:</h3>
-            <div class="info-box box-yellow">
+            <h3>ئەو وشانەی بە دوای How دا دێن:</h3>
+            <div class="info-box box-blue">
                 <ul>
                     <li class="check-container"><input type="checkbox" class="exam-check" onchange="toggleHighlight(this)"> <span class="en">1- How <span class="highlight">long</span> is it since we spoke?</span></li>
                     <li class="check-container"><input type="checkbox" class="exam-check" onchange="toggleHighlight(this)"> <span class="en">2- How <span class="highlight">are</span> you and the children?</span></li>
@@ -252,25 +183,89 @@
                 </ul>
             </div>
 
-            <h3>بانگهێشتکردن (فعلی سادە یان ing):</h3>
+            <h3>ئەم وشانە لە کوێدا دێن لە ڕستەدا:</h3>
+            <div class="info-box box-red">
+                <strong>💡 تێبینی گرنگ:</strong> بە دوای <span class="en">to</span> فیعلی سادە دێت.
+            </div>
             <ul>
                 <li class="check-container"><input type="checkbox" class="exam-check" onchange="toggleHighlight(this)"> <span class="en">1- Would you like to <span class="highlight">have</span> a drink?</span></li>
                 <li class="check-container"><input type="checkbox" class="exam-check" onchange="toggleHighlight(this)"> <span class="en">2- We'd like to <span class="highlight">come</span> over for lunch.</span></li>
-                <li class="check-container"><input type="checkbox" class="exam-check" onchange="toggleHighlight(this)"> <span class="en">3- How about <span class="highlight">meeting</span> for dinner?</span></li>
+                <li class="check-container"><input type="checkbox" class="exam-check" onchange="toggleHighlight(this)"> <span class="en">3- How about <span class="highlight">meeting</span> for dinner.</span></li>
                 <li class="check-container"><input type="checkbox" class="exam-check" onchange="toggleHighlight(this)"> <span class="en">4- Why don't you <span class="highlight">join</span> us at the restaurant?</span></li>
             </ul>
+        </div>
 
-            <h3>پرسیارکردن بۆ کاتی گونجاو:</h3>
+        <!-- بەشی دووەم -->
+        <div class="section-card">
+            <h2>📞 بەشی دووەم: بنەماکانی تەلەفۆن</h2>
+            
+            <div class="info-box box-green check-container">
+                <input type="checkbox" class="exam-check" onchange="toggleHighlight(this)">
+                <div>
+                    <strong>بۆچی گرنگە لە کاتی تەلەفۆندا زەردەخەنە بکەین؟</strong><br>
+                    <span class="en">a smile makes your voice sound friendly and polite.</span>
+                </div>
+            </div>
+
+            <h3>گەیاندنی دوو ڕستە بەیەک:</h3>
+            <div class="matching-grid">
+                <div class="matching-item check-container"><input type="checkbox" class="exam-check" onchange="toggleHighlight(this)"> 1- Answer the call Promptly</div>
+                <div class="matching-arrow">➔</div>
+                <div class="matching-item" style="color: var(--border-purple);">by the second or third ring.</div>
+
+                <div class="matching-item check-container"><input type="checkbox" class="exam-check" onchange="toggleHighlight(this)"> 2- Identify yourself</div>
+                <div class="matching-arrow">➔</div>
+                <div class="matching-item" style="color: var(--border-purple);">and your department.</div>
+
+                <div class="matching-item check-container"><input type="checkbox" class="exam-check" onchange="toggleHighlight(this)"> 3- Avoid talking with anything in your mouth</div>
+                <div class="matching-arrow">➔</div>
+                <div class="matching-item" style="color: var(--border-purple);">Such as gum or sweets.</div>
+
+                <div class="matching-item check-container"><input type="checkbox" class="exam-check" onchange="toggleHighlight(this)"> 4- Learn the Procedure</div>
+                <div class="matching-arrow">➔</div>
+                <div class="matching-item" style="color: var(--border-purple);">for transferring call.</div>
+
+                <div class="matching-item check-container"><input type="checkbox" class="exam-check" onchange="toggleHighlight(this)"> 5- When taking messages</div>
+                <div class="matching-arrow">➔</div>
+                <div class="matching-item" style="color: var(--border-purple);">Use the official forms.</div>
+            </div>
+        </div>
+
+        <!-- بەشی سێیەم -->
+        <div class="section-card">
+            <h2>⚠️ بەشی سێیەم: کێشەی هێڵ و ڕاستکردنەوە</h2>
+
+            <h3>دەستەواژەی کێشەی هێڵ (بەکارهێنانی پیتە بزوێنەکان):</h3>
             <ul>
-                <li class="check-container"><input type="checkbox" class="exam-check" onchange="toggleHighlight(this)"> <span class="en">Is this a good moment?</span></li>
-                <li class="check-container"><input type="checkbox" class="exam-check" onchange="toggleHighlight(this)"> <span class="en">Are you busy right now?</span></li>
-                <li class="check-container"><input type="checkbox" class="exam-check" onchange="toggleHighlight(this)"> <span class="en">Can we talk now or later?</span></li>
+                <li class="check-container"><input type="checkbox" class="exam-check" onchange="toggleHighlight(this)"> <span class="en">1- It's a really b<span style="color:red; text-decoration:underline;">a</span>d line.</span></li>
+                <li class="check-container"><input type="checkbox" class="exam-check" onchange="toggleHighlight(this)"> <span class="en">2- It's too n<span style="color:red; text-decoration:underline;">oi</span>sy.</span></li>
+                <li class="check-container"><input type="checkbox" class="exam-check" onchange="toggleHighlight(this)"> <span class="en">3- I must have got the wr<span style="color:red; text-decoration:underline;">o</span>ng number.</span></li>
+                <li class="check-container"><input type="checkbox" class="exam-check" onchange="toggleHighlight(this)"> <span class="en">4- My battery's very L<span style="color:red; text-decoration:underline;">o</span>w.</span></li>
+                <li class="check-container"><input type="checkbox" class="exam-check" onchange="toggleHighlight(this)"> <span class="en">5- The line just went d<span style="color:red; text-decoration:underline;">ea</span>d.</span></li>
             </ul>
+
+            <h3>ئەم ڕستانەی خوارەوە ڕاست بکەرەوە:</h3>
+            <div class="info-box box-purple">
+                <div class="check-container" style="margin-bottom: 10px;">
+                    <input type="checkbox" class="exam-check" onchange="toggleHighlight(this)">
+                    <div>
+                        <span class="en">1- sorry you up speak can?</span><br>
+                        ➔ <span class="en" style="color: var(--accent);">Sorry can you speak up?</span>
+                    </div>
+                </div>
+                <div class="check-container">
+                    <input type="checkbox" class="exam-check" onchange="toggleHighlight(this)">
+                    <div>
+                        <span class="en">2- calling try later again</span><br>
+                        ➔ <span class="en" style="color: var(--accent);">try calling again later.</span>
+                    </div>
+                </div>
+            </div>
         </div>
 
         <!-- بەشی چوارەم -->
         <div class="section-card">
-            <h2>📝 بەشی چوارەم: وشەسازی (Collocations)</h2>
+            <h2>📝 بەشی چوارەم: وشەسازی و ڕێزمان</h2>
 
             <h3>وشەی نافەرمی بەرامبەر فەرمی:</h3>
             <table>
@@ -281,61 +276,45 @@
                 </tr>
                 <tr class="check-container">
                     <td><input type="checkbox" class="exam-check" onchange="toggleHighlight(this)"></td>
-                    <td class="en-td">Check</td><td class="en-td">Verify</td>
+                    <td class="en-td">check</td><td class="en-td">Verify</td>
                 </tr>
                 <tr class="check-container">
                     <td><input type="checkbox" class="exam-check" onchange="toggleHighlight(this)"></td>
-                    <td class="en-td">Say sorry</td><td class="en-td">Apologize</td>
-                </tr>
-                <tr class="check-container">
-                    <td><input type="checkbox" class="exam-check" onchange="toggleHighlight(this)"></td>
-                    <td class="en-td">Tell</td><td class="en-td">Inform</td>
-                </tr>
-                <tr class="check-container">
-                    <td><input type="checkbox" class="exam-check" onchange="toggleHighlight(this)"></td>
-                    <td class="en-td">Help</td><td class="en-td">Assist</td>
+                    <td class="en-td">tell</td><td class="en-td">inform</td>
                 </tr>
             </table>
 
-            <h3>پێکەوەبەستنی وشەکان (Collocations):</h3>
+            <h3>پێکەوەبەستنی وشەکان:</h3>
             <ul>
-                <li class="check-container"><input type="checkbox" class="exam-check" onchange="toggleHighlight(this)"> <span class="en">Apply ➔ for a job</span></li>
-                <li class="check-container"><input type="checkbox" class="exam-check" onchange="toggleHighlight(this)"> <span class="en">Arrange ➔ a course</span></li>
-                <li class="check-container"><input type="checkbox" class="exam-check" onchange="toggleHighlight(this)"> <span class="en">Make ➔ a complaint</span></li>
-                <li class="check-container"><input type="checkbox" class="exam-check" onchange="toggleHighlight(this)"> <span class="en">Place ➔ an order</span></li>
-                <li class="check-container"><input type="checkbox" class="exam-check" onchange="toggleHighlight(this)"> <span class="en">Query ➔ an invoice</span></li>
-                <li class="check-container"><input type="checkbox" class="exam-check" onchange="toggleHighlight(this)"> <span class="en">Request ➔ a catalogue</span></li>
+                <li class="check-container"><input type="checkbox" class="exam-check" onchange="toggleHighlight(this)"> <span class="en">apply for ➔ a job</span></li>
+                <li class="check-container"><input type="checkbox" class="exam-check" onchange="toggleHighlight(this)"> <span class="en">place ➔ an order</span></li>
+                <li class="check-container"><input type="checkbox" class="exam-check" onchange="toggleHighlight(this)"> <span class="en">can you <span style="text-decoration: underline;">say</span> I'm arriving at eight?</span></li>
             </ul>
 
-            <h3>بەکارهێنانی (Tell, Ask, Say):</h3>
-            <ul>
-                <li class="check-container"><input type="checkbox" class="exam-check" onchange="toggleHighlight(this)"> <span class="en">Can you <span class="highlight">tell</span> her I rang?</span></li>
-                <li class="check-container"><input type="checkbox" class="exam-check" onchange="toggleHighlight(this)"> <span class="en">Can you <span class="highlight">ask</span> her to call me back?</span></li>
-                <li class="check-container"><input type="checkbox" class="exam-check" onchange="toggleHighlight(this)"> <span class="en">Can you <span class="highlight">say</span> I'm arriving at eight.</span></li>
-            </ul>
+            <h3>ئامرازە پەیوەندییەکان:</h3>
+            <div class="info-box box-yellow">
+                <div class="check-container"><input type="checkbox" class="exam-check" onchange="toggleHighlight(this)"> <span class="en"><strong>at</strong></span> ➔ بۆ کاتێکی دیاریکراوە.</div>
+                <div class="check-container"><input type="checkbox" class="exam-check" onchange="toggleHighlight(this)"> <span class="en"><strong>on</strong></span> ➔ بۆ ڕۆژ بەکاردێت.</div>
+            </div>
         </div>
 
         <!-- بەشی پێنجەم -->
         <div class="section-card">
-            <h2>⚙️ بەشی پێنجەم: ڕێزمان و هێماکان</h2>
+            <h2>🏷️ بەشی پێنجەم: کورتکراوەکان و پێناسەکان</h2>
 
-            <h3>بەکارهێنانی ئامرازەکانی کات (In, On, At):</h3>
-            <div class="info-box box-green">
-                <ul>
-                    <li class="check-container"><input type="checkbox" class="exam-check" onchange="toggleHighlight(this)"> <strong><span class="en">on</span> ➔</strong> بۆ ڕۆژ، بەروار، وە ڕۆژە تایبەتەکان <span class="en">(day, date)</span>.</li>
-                    <li class="check-container"><input type="checkbox" class="exam-check" onchange="toggleHighlight(this)"> <strong><span class="en">in</span> ➔</strong> بۆ مانگ، وەرز، ساڵ، بەشەکانی ڕۆژ <span class="en">(month, season, year)</span>.</li>
-                    <li class="check-container"><input type="checkbox" class="exam-check" onchange="toggleHighlight(this)"> <strong><span class="en">at</span> ➔</strong> بۆ کات <span class="en">(Time)</span>.</li>
-                </ul>
-            </div>
-
-            <h3>نیشانەکانی ئینتەرنێت:</h3>
+            <h3>جیاکردنەوەی جۆری دەستەواژە (S و D):</h3>
             <ul style="column-count: 2;">
-                <li class="check-container"><input type="checkbox" class="exam-check" onchange="toggleHighlight(this)"> <span class="en">@ = at</span></li>
-                <li class="check-container"><input type="checkbox" class="exam-check" onchange="toggleHighlight(this)"> <span class="en">. = dot</span></li>
-                <li class="check-container"><input type="checkbox" class="exam-check" onchange="toggleHighlight(this)"> <span class="en">/ = slash</span></li>
-                <li class="check-container"><input type="checkbox" class="exam-check" onchange="toggleHighlight(this)"> <span class="en">_ = underscore</span></li>
-                <li class="check-container"><input type="checkbox" class="exam-check" onchange="toggleHighlight(this)"> <span class="en">- = hyphen</span></li>
+                <li class="check-container"><input type="checkbox" class="exam-check" onchange="toggleHighlight(this)"> <span class="en">speak up ➔ S</span></li>
+                <li class="check-container"><input type="checkbox" class="exam-check" onchange="toggleHighlight(this)"> <span class="en">speak more ➔ D</span></li>
+                <li class="check-container"><input type="checkbox" class="exam-check" onchange="toggleHighlight(this)"> <span class="en">I didn't ➔ S</span></li>
+                <li class="check-container"><input type="checkbox" class="exam-check" onchange="toggleHighlight(this)"> <span class="en">can you read ➔ D</span></li>
             </ul>
+
+            <h3 style="margin-top: 20px;">لە ڕێگەی پرسیارەوە (دۆزینەوەی ئەرک):</h3>
+            <div class="info-box box-blue check-container">
+                <input type="checkbox" class="exam-check" onchange="toggleHighlight(this)">
+                <span class="en">To conduct ➔ Telephone interviewer</span>
+            </div>
         </div>
 
     </div>
@@ -345,7 +324,6 @@
             document.body.classList.toggle('dark-mode');
         }
 
-        // ئەم فەنکشنە بەرپرسە لە سەوزکردنی باکگراوەندی ئەو خاڵەی کە دیاری دەکرێت
         function toggleHighlight(checkbox) {
             const parent = checkbox.closest('.check-container');
             if(checkbox.checked) {
