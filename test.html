@@ -3,7 +3,7 @@
 <head>
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
-    <title>مەلزەمەی پێداچوونەوەی ئینگلیزی</title>
+    <title>مەلزەمەی گشتگیری ئینگلیزی</title>
     <style>
         @import url('https://fonts.googleapis.com/css2?family=Cairo:wght@400;600;800&family=Quicksand:wght@500;700&display=swap');
         
@@ -12,9 +12,9 @@
             --container-bg: #ffffff;
             --text-color: #1e293b;
             --text-muted: #64748b;
-            --primary-gradient: linear-gradient(135deg, #6366f1, #3b82f6);
-            --accent: #4f46e5;
-            --accent-light: #e0e7ff;
+            --primary-gradient: linear-gradient(135deg, #4f46e5, #ec4899);
+            --accent: #ec4899;
+            --accent-light: #fce7f3;
             --card-border: #e2e8f0;
             --en-font: 'Quicksand', sans-serif;
             --ku-font: 'Cairo', sans-serif;
@@ -34,9 +34,9 @@
             --container-bg: #1e293b;
             --text-color: #f1f5f9;
             --text-muted: #94a3b8;
-            --primary-gradient: linear-gradient(135deg, #818cf8, #60a5fa);
-            --accent: #818cf8;
-            --accent-light: #312e81;
+            --primary-gradient: linear-gradient(135deg, #6366f1, #f43f5e);
+            --accent: #f43f5e;
+            --accent-light: #4c1d95;
             --card-border: #334155;
             
             --box-blue: #172554;
@@ -55,7 +55,7 @@
             transition: all 0.3s ease;
         }
 
-        .container { max-width: 900px; margin: 0 auto; }
+        .container { max-width: 950px; margin: 0 auto; }
 
         .header-section {
             text-align: center;
@@ -78,7 +78,7 @@
 
         h1 {
             color: var(--accent);
-            font-size: 34px;
+            font-size: 36px;
             font-weight: 800;
             margin: 0 0 10px 0;
         }
@@ -125,7 +125,7 @@
             align-items: center;
             gap: 10px;
             color: var(--text-color);
-            font-size: 24px;
+            font-size: 26px;
             border-bottom: 2px solid var(--accent-light);
             padding-bottom: 15px;
             margin-top: 0;
@@ -155,7 +155,6 @@
             padding: 2px 8px;
             border-radius: 6px;
             margin: 0 4px;
-            border: 1px solid var(--accent);
         }
 
         .info-box {
@@ -174,6 +173,12 @@
         ul { padding-right: 20px; margin: 10px 0; }
         li { margin-bottom: 10px; font-size: 17px; }
 
+        .grid-2 {
+            display: grid;
+            grid-template-columns: 1fr 1fr;
+            gap: 15px;
+        }
+
         .matching-grid {
             display: grid;
             grid-template-columns: 1fr auto 1fr;
@@ -188,6 +193,7 @@
         
         .matching-item { font-family: var(--en-font); direction: ltr; font-weight: 700; font-size: 17px; }
         .matching-arrow { color: var(--text-muted); font-size: 20px; text-align: center; }
+        .matching-desc { font-size: 14px; color: var(--text-muted); font-family: var(--ku-font); }
 
         table {
             width: 100%;
@@ -201,15 +207,8 @@
             text-align: center;
             border: 1px solid var(--card-border);
         }
-        th { background-color: var(--accent-light); color: var(--text-color); }
+        th { background-color: var(--accent-light); color: var(--text-color); font-weight: 800;}
         td.en-td { font-family: var(--en-font); direction: ltr; font-weight: 700; color: var(--border-blue); }
-        
-        .cite {
-            font-size: 12px;
-            color: var(--text-muted);
-            opacity: 0.7;
-            margin-right: 5px;
-        }
 
         @media print {
             body { background-color: #fff; color: #000; }
@@ -217,7 +216,6 @@
             .controls { display: none; }
             .section-card { border: 1px solid #ccc; box-shadow: none; page-break-inside: avoid; }
             .info-box { border: 1px solid #ddd; border-right: 5px solid #666; }
-            .cite { display: none; } /* Hide citations in print if preferred */
         }
     </style>
 </head>
@@ -230,150 +228,60 @@
 
     <div class="container">
         <div class="header-section">
-            <h1>مەلزەمەی ئینگلیزی - پێداچوونەوە</h1>
-            <div class="subtitle">تەلەفۆن، ڕێزمان، وشەسازی، و زانیاری گشتی</div>
+            <h1>مەلزەمەی گشتگیری ئینگلیزی</h1>
+            <div class="subtitle">پوختەی تەواوی بابەتەکان: تەلەفۆن، ڕێزمان، کلتور، و وشەسازی</div>
         </div>
 
-        <!-- بەشی یەکەم: کلتور و ژمارەکان -->
+        <!-- بەشی یەکەم: کلتور، ژمارە، و نیشانەکان -->
         <div class="section-card">
-            <h2>🌍 بەشی یەکەم: سڵاوکردن و خوێندنەوەی ژمارە</h2>
+            <h2>🌍 بەشی یەکەم: کلتور، ژمارە، و نیشانەکان</h2>
             
-            <h3>چۆنیەتی سڵاو دانەوە:</h3>
-            <table>
-                <tr>
-                    <th>وڵات (Country)</th>
-                    <th>ڕووبەڕوو (Face to face)</th>
-                    <th>لەسەر تەلەفۆن (On the phone)</th>
-                </tr>
-                <tr>
-                    <td class="en-td">Japan</td>
-                    <td class="en-td">Konnichiha</td>
-                    <td class="en-td">moshi moshi</td>
-                </tr>
-                <tr>
-                    <td class="en-td">Spainsh</td>
-                    <td class="en-td">hola</td>
-                    <td class="en-td">digame</td>
-                </tr>
-            </table>
-            <span class="cite"></span>
-
-            <h3>چۆن ژمارەی تەلەفۆن بخوێنین؟</h3>
-            <div class="info-box box-yellow">
-                <ul>
-                    <li><span class="en">569</span> ➔ <span class="en">five, six, nine</span> <span class="cite"></span></li>
-                    <li><span class="en">362</span> ➔ <span class="en">Three, six, Two</span> <span class="cite"></span></li>
-                    <li>ژمارە <span class="en">0</span> دەخوێندرێتەوە وەک <strong><span class="en">oh</span></strong> (نەک Zero). <span class="cite"></span></li>
-                    <li>ئەگەر ژمارەیەکی دووبارە بوو وەکو <span class="en">22</span> دەخوێندرێتەوە <span class="en">Two Two</span> یان <strong><span class="en">double Two</span></strong>. <span class="cite"></span></li>
-                </ul>
+            <div class="grid-2">
+                <div>
+                    <h3>چۆنیەتی سڵاو دانەوە:</h3>
+                    <table>
+                        <tr>
+                            <th>وڵات</th>
+                            <th>ڕووبەڕوو</th>
+                            <th>لەسەر تەلەفۆن</th>
+                        </tr>
+                        <tr>
+                            <td class="en-td">Japan</td>
+                            <td class="en-td">Konnichiha</td>
+                            <td class="en-td">moshi moshi</td>
+                        </tr>
+                        <tr>
+                            <td class="en-td">Spain</td>
+                            <td class="en-td">hola</td>
+                            <td class="en-td">digame</td>
+                        </tr>
+                    </table>
+                </div>
+                <div>
+                    <h3>خوێندنەوەی ژمارەکان:</h3>
+                    <div class="info-box box-yellow">
+                        <ul>
+                            <li><span class="en">569</span> ➔ <span class="en">five, six, nine</span></li>
+                            <li><span class="en">362</span> ➔ <span class="en">Three, six, Two</span></li>
+                            <li>ژمارە <span class="en">0</span> دەخوێندرێتەوە <strong><span class="en">oh</span></strong>.</li>
+                            <li>ژمارەی دووبارە <span class="en">22</span> ➔ <strong><span class="en">double Two</span></strong>.</li>
+                        </ul>
+                    </div>
+                </div>
             </div>
-        </div>
-
-        <!-- بەشی دووەم: بنەماکانی تەلەفۆن -->
-        <div class="section-card">
-            <h2>📞 بەشی دووەم: ڕێکارەکانی وەڵامدانەوەی تەلەفۆن</h2>
-            
-            <div class="info-box box-blue">
-                <ul>
-                    <li><span class="en">Answer the call promptly ➔ by the second or third ring.</span> <span class="cite"></span></li>
-                    <li><span class="en">Identify yourself ➔ and your department.</span> <span class="cite"></span></li>
-                    <li><span class="en">Avoid talking with anything in your mouth ➔ Such as gum or Sweets.</span> <span class="cite"></span></li>
-                    <li><span class="en">Learn the procedure ➔ for transferring calls.</span> <span class="cite"></span></li>
-                    <li><span class="en">When taking messages ➔ use the official forms.</span> <span class="cite"></span></li>
-                </ul>
-            </div>
-
-            <h3>پرسیارکردن بۆ کاتی گونجاو لە تەلەفۆندا:</h3>
-            <ul>
-                <li><span class="en">Is This a good moment?</span> <span class="cite"></span></li>
-                <li><span class="en">are you busy right now?</span> <span class="cite"></span></li>
-                <li><span class="en">Do you have a second or do you want me to call later?</span> <span class="cite"></span></li>
-                <li><span class="en">have I rung you at a busy time?</span> <span class="cite"></span></li>
-                <li><span class="en">Can we Talk now or later?</span> <span class="cite"></span></li>
-            </ul>
-
-            <h3>دەستەواژەی کێشەی هێڵ (Bad Lines) و ڕێکخستنەوە:</h3>
-            <ul>
-                <li><span class="en">It's a really bad line.</span> <span class="cite"></span></li>
-                <li><span class="en">It's too noisy.</span> <span class="cite"></span></li>
-                <li><span class="en">I must have got the wrong number.</span> <span class="cite"></span></li>
-                <li><span class="en">my battery's very low.</span> <span class="cite"></span></li>
-                <li><span class="en">The line just went dead.</span> <span class="cite"></span></li>
-            </ul>
-            
-            <div class="info-box box-purple">
-                <span class="en">Sorry can you speak up?</span> <span class="cite"></span><br>
-                <span class="en">Try calling again later.</span> <span class="cite"></span><br>
-                <span class="en">Try him on extension 376.</span> <span class="cite"></span>
-            </div>
-            
-            <h3>کۆتایی هێنان بە پەیوەندی (End Message):</h3>
-            <ul>
-                <li><span class="en">Thanks Very much.</span> <span class="cite"></span></li>
-                <li><span class="en">Bye.</span> <span class="cite"></span></li>
-                <li><span class="en">See you.</span> <span class="cite"></span></li>
-            </ul>
-        </div>
-
-        <!-- بەشی سێیەم: وشەسازی -->
-        <div class="section-card">
-            <h2>📝 بەشی سێیەم: وشەسازی (Collocations & Phrases)</h2>
-
-            <h3>پێکەوەبەستنی وشەکان (Collocations):</h3>
-            <div class="matching-grid" style="grid-template-columns: auto auto auto;">
-                <div class="matching-item">Apply</div><div class="matching-arrow">➔</div><div class="matching-item">for a job <span class="cite"></span></div>
-                <div class="matching-item">arrange</div><div class="matching-arrow">➔</div><div class="matching-item">a course <span class="cite"></span></div>
-                <div class="matching-item">make</div><div class="matching-arrow">➔</div><div class="matching-item">a complaint <span class="cite"></span></div>
-                <div class="matching-item">place</div><div class="matching-arrow">➔</div><div class="matching-item">an order <span class="cite"></span></div>
-                <div class="matching-item">query</div><div class="matching-arrow">➔</div><div class="matching-item">an invoice <span class="cite"></span></div>
-                <div class="matching-item">Request</div><div class="matching-arrow">➔</div><div class="matching-item">a catalogue <span class="cite"></span></div>
-            </div>
-
-            <h3>بەکارهێنانی (Tell, Ask, Say):</h3>
-            <ul>
-                <li><span class="en">Can you <span class="highlight">tell</span> her I rang?</span> <span class="cite"></span></li>
-                <li><span class="en">Can you <span class="highlight">ask</span> her to call me back?</span> <span class="cite"></span></li>
-                <li><span class="en">Can you <span class="highlight">say</span> I'm arriving at eight.</span> <span class="cite"></span></li>
-            </ul>
-        </div>
-
-        <!-- بەشی چوارەم: ڕێزمان -->
-        <div class="section-card">
-            <h2>⚙️ بەشی چوارەم: ڕێزمان (Grammar)</h2>
-
-            <h3>بەکارهێنانی ئامرازەکانی کات (In, On, At):</h3>
-            <div class="info-box box-green">
-                <ul>
-                    <li><strong><span class="en">on</span> ➔</strong> بۆ ڕۆژ، بەروار، وە ڕۆژە تایبەتەکان <span class="en">(day, date, special days (Christmas day))</span>. <span class="cite"></span></li>
-                    <li><strong><span class="en">in</span> ➔</strong> بۆ مانگ، وەرز، ساڵ، بەشەکانی ڕۆژ <span class="en">(month, season, year, part of day)</span>. <span class="cite"></span></li>
-                    <li><strong><span class="en">at</span> ➔</strong> بۆ کات <span class="en">(Time)</span>. <span class="cite"></span></li>
-                </ul>
-            </div>
-
-            <h3>بەکارهێنانی (Some / Any / Information):</h3>
-            <ul>
-                <li><span class="en">we don't have <span class="highlight">any</span> tables left this evening.</span> <span class="cite"></span></li>
-                <li><span class="en">Could you give me some <span class="highlight">information</span>.</span> <span class="cite"></span></li>
-                <li><span class="en">I'd like to book <span class="highlight">some</span> Taxis for tomorrow.</span> <span class="cite"></span></li>
-            </ul>
-        </div>
-
-        <!-- بەشی پێنجەم: هێماکان، دەنگەکان و کاتەکان -->
-        <div class="section-card">
-            <h2>🔡 بەشی پێنجەم: هێماکان، دەنگەکان، و کاتەکان</h2>
 
             <h3>نیشانەکانی ئینتەرنێت و پیتەکان:</h3>
             <div class="info-box box-purple">
                 <ul style="column-count: 2;">
-                    <li><span class="en">@ = at</span> <span class="cite"></span></li>
-                    <li><span class="en">. = dot</span> <span class="cite"></span></li>
-                    <li><span class="en">/ = slash</span> <span class="cite"></span></li>
-                    <li><span class="en">_ = underscore</span> <span class="cite"></span></li>
-                    <li><span class="en">- = hyphen</span> <span class="cite"></span></li>
+                    <li><span class="en">@ = at</span></li>
+                    <li><span class="en">. = dot</span></li>
+                    <li><span class="en">/ = slash</span></li>
+                    <li><span class="en">_ = underscore</span></li>
+                    <li><span class="en">- = hyphen</span></li>
                 </ul>
                 <hr style="border: 0; border-top: 1px dashed var(--card-border); margin: 15px 0;">
-                <span class="en">sterligova = all lowercase</span> (سمۆڵ) <span class="cite"></span><br>
-                <span class="en">STERLIGOVA = all uppercase</span> (کەپیتاڵ) <span class="cite"></span>
+                <span class="en">sterligova = all lowercase</span> (پیتی بچووک)<br>
+                <span class="en">STERLIGOVA = all uppercase</span> (پیتی گەورە)
             </div>
 
             <h3>دەنگەکان (Vowel Sounds):</h3>
@@ -391,25 +299,188 @@
                     <td class="en-td">do, Q</td>
                 </tr>
             </table>
-            <span class="cite"></span>
-
+            
             <h3>ڕۆژەکان و مانگەکانی ساڵ:</h3>
             <ul>
-                <li><span class="en">Sunday, monday, Tuesday, wednesday, Thursday, friday, Saterday</span> <span class="cite"></span></li>
-                <li><span class="en">January, february, march, April, may, June, July, August, september, october, november, December</span> <span class="cite"></span></li>
+                <li><span class="en">Sunday, Monday, Tuesday, Wednesday, Thursday, Friday, Saturday</span></li>
+                <li><span class="en">January, February, March, April, May, June, July, August, September, October, November, December</span></li>
             </ul>
         </div>
 
-        <!-- بەشی شەشەم: ڕاست و هەڵە -->
+        <!-- بەشی دووەم: بنەماکانی تەلەفۆن و ڕاست/هەڵە -->
         <div class="section-card">
-            <h2>✅ بەشی شەشەم: ڕاست و هەڵە (True/False)</h2>
+            <h2>📞 بەشی دووەم: بنەماکانی تەلەفۆن (Telephone Manners)</h2>
+            
+            <div class="info-box box-blue">
+                <strong>پرسیار:</strong> <span class="en">Why is it important to smile?</span> (بۆچی گرنگە زەردەخەنە بکەیت؟)<br>
+                <strong>وەڵام:</strong> <span class="en">A smile makes your voice sound friendly and polite.</span>
+            </div>
+
+            <h3>ڕێکارەکانی وەڵامدانەوە (Procedures):</h3>
+            <ul>
+                <li><span class="en">Answer the call promptly ➔ by the second or third ring.</span></li>
+                <li><span class="en">Identify yourself ➔ and your department.</span></li>
+                <li><span class="en">Avoid talking with anything in your mouth ➔ such as gum or sweets.</span></li>
+                <li><span class="en">Learn the procedure ➔ for transferring calls.</span></li>
+                <li><span class="en">When taking messages ➔ use the official forms.</span></li>
+            </ul>
+
+            <h3>ئەرکەکان (Matching Roles):</h3>
+            <div class="matching-grid">
+                <div class="matching-item">To represent a well-known bank...</div>
+                <div class="matching-arrow">➔</div>
+                <div class="matching-item" style="color: var(--border-purple);">Telesales agent <br><span class="matching-desc">(بریکاری فرۆشتن)</span></div>
+
+                <div class="matching-item">A friendly and polite telephone manner is essential...</div>
+                <div class="matching-arrow">➔</div>
+                <div class="matching-item" style="color: var(--border-purple);">Customer Care Telephonist <br><span class="matching-desc">(چاودێری کڕیار)</span></div>
+
+                <div class="matching-item">To conduct market research...</div>
+                <div class="matching-arrow">➔</div>
+                <div class="matching-item" style="color: var(--border-purple);">Telephone interviewer <br><span class="matching-desc">(چاوپێکەوتنی تەلەفۆنی)</span></div>
+            </div>
+
+            <h3>ڕاست و هەڵە (True/False):</h3>
             <div class="info-box box-yellow">
                 <ul>
-                    <li>زۆربەی نەتەوەکان سڵاو دەکەن لە خەڵکی بەڵام بە جیاوازی لەسەر تەلەفۆن یان ڕووبەڕوو. <strong>[T] ڕاستە</strong> <span class="cite"></span></li>
-                    <li>ئیسپانیەکان بێ ڕێزن. <strong>[F] هەڵەیە</strong> <span class="cite"></span></li>
-                    <li>کاتێک ئیتالییەک تەلەفۆن هەڵدەگرێت یەکسەر سڵاو دەکات. <strong>[F] هەڵە</strong> <span class="cite"></span></li>
-                    <li>لە ئینگلتەرا وە زمانەکانی جیاواز بەکاردەهێنن بۆ چواب دانەوەی تەلەفۆن. <strong>[T] ڕاستە</strong> <span class="cite"></span></li>
+                    <li>زۆربەی نەتەوەکان سڵاو دەکەن لە خەڵکی بەڵام بە جیاوازی لەسەر تەلەفۆن یان ڕووبەڕوو. <strong>[T] ڕاستە</strong></li>
+                    <li>ئیسپانیەکان بێ ڕێزن. <strong>[F] هەڵەیە</strong></li>
+                    <li>کاتێک ئیتالییەک تەلەفۆن هەڵدەگرێت یەکسەر سڵاو دەکات. <strong>[F] هەڵە</strong></li>
+                    <li>لە ئینگلتەرا وە زمانەکانی جیاواز بەکاردەهێنن بۆ وەڵامدانەوەی تەلەفۆن. <strong>[T] ڕاستە</strong></li>
+                    <hr style="border: 0; border-top: 1px dashed var(--card-border); margin: 10px 0;">
+                    <li>قسەی کورت دەبێت لەسەر تەلەفۆن کورت بێت. <strong style="color: var(--border-green);">(T)</strong></li>
+                    <li>قسەی کورت بە شتێکی گرنگ دانانرێت. <strong style="color: #ef4444;">(F)</strong></li>
+                    <li>قسەی کورت یارمەتیت دەدات پەیوەندی باشتر لەگەڵ کڕیار دروست بکەیت. <strong style="color: var(--border-green);">(T)</strong></li>
                 </ul>
+            </div>
+        </div>
+
+        <!-- بەشی سێیەم: گفتوگۆ و کێشەکان -->
+        <div class="section-card">
+            <h2>💬 بەشی سێیەم: گفتوگۆ، بانگهێشت، و کێشەکانی هێڵ</h2>
+
+            <div class="grid-2">
+                <div>
+                    <h3>پرسیارکردن بۆ کاتی گونجاو:</h3>
+                    <ul>
+                        <li><span class="en">Is this a good moment?</span></li>
+                        <li><span class="en">Are you busy right now?</span></li>
+                        <li><span class="en">Do you have a second or do you want me to call later?</span></li>
+                        <li><span class="en">Have I rung you at a busy time?</span></li>
+                        <li><span class="en">Can we talk now or later?</span></li>
+                    </ul>
+                </div>
+                <div>
+                    <h3>بەکارهێنانی (How) لە پرسیاردا:</h3>
+                    <ul>
+                        <li><span class="en">How <span class="highlight">long</span> is it since we spoke?</span></li>
+                        <li><span class="en">How <span class="highlight">are</span> you and the children?</span></li>
+                        <li><span class="en">How <span class="highlight">was</span> your flight?</span></li>
+                    </ul>
+                </div>
+            </div>
+
+            <h3>کێشەی هێڵی تەلەفۆن (Bad Lines) و چارەسەر:</h3>
+            <ul>
+                <li><span class="en">It's a really <span class="highlight">bad</span> line.</span> (هێڵەکە زۆر خراپە)</li>
+                <li><span class="en">It's too <span class="highlight">noisy</span>.</span> (زۆر ژاوەژاوە)</li>
+                <li><span class="en">I must have got the <span class="highlight">wrong</span> number.</span> (ژمارەکەم هەڵە لێداوە)</li>
+                <li><span class="en">My battery's very <span class="highlight">low</span>.</span> (شەحنی مۆبایلەکەم کەمە)</li>
+                <li><span class="en">The line just went <span class="highlight">dead</span>.</span> (هێڵەکە پچڕا)</li>
+            </ul>
+            
+            <div class="info-box box-purple">
+                <strong>ڕێکخستنەوەی ڕستەکان بۆ وەڵامدانەوە:</strong><br>
+                <span class="en">Sorry, can you speak up?</span> (دەتوانیت دەنگت بەرز بکەیتەوە؟)<br>
+                <span class="en">Try calling again later.</span> (دواتر دووبارە پەیوەندی بکەرەوە)<br>
+                <span class="en">Try him on extension 376.</span> (لەسەر هێڵی ناوخۆیی 376 تاقی بکەرەوە)
+            </div>
+
+            <h3>دەربڕینی کاردانەوە (Reactions):</h3>
+            <ul>
+                <li><span class="en">Show you're listening</span> ➔ <span class="en">OK</span></li>
+                <li><span class="en">Show you understand</span> ➔ <span class="en">I see</span></li>
+                <li><span class="en">Show surprise</span> ➔ <span class="en">Really?</span></li>
+            </ul>
+        </div>
+
+        <!-- بەشی چوارەم: وشەسازی -->
+        <div class="section-card">
+            <h2>📝 بەشی چوارەم: وشەسازی (Collocations & Vocabulary)</h2>
+
+            <h3>وشەی نافەرمی بەرامبەر فەرمی:</h3>
+            <table>
+                <tr>
+                    <th>Informal (نافەرمی)</th>
+                    <th>Formal (فەرمی)</th>
+                </tr>
+                <tr><td class="en-td">Say sorry</td><td class="en-td">Apologize</td></tr>
+                <tr><td class="en-td">Tell</td><td class="en-td">Inform</td></tr>
+                <tr><td class="en-td">Help</td><td class="en-td">Assist</td></tr>
+                <tr><td class="en-td">Check</td><td class="en-td">Verify</td></tr>
+            </table>
+
+            <h3>پێکەوەبەستنی وشەکان (Collocations):</h3>
+            <div class="matching-grid" style="grid-template-columns: auto auto auto;">
+                <div class="matching-item">Apply</div><div class="matching-arrow">➔</div><div class="matching-item">for a job <span class="matching-desc">(داواکردنی کار)</span></div>
+                <div class="matching-item">Arrange</div><div class="matching-arrow">➔</div><div class="matching-item">a course <span class="matching-desc">(ڕێکخستنی کۆرس)</span></div>
+                <div class="matching-item">Make</div><div class="matching-arrow">➔</div><div class="matching-item">a complaint <span class="matching-desc">(سکاڵا کردن)</span></div>
+                <div class="matching-item">Place</div><div class="matching-arrow">➔</div><div class="matching-item">an order <span class="matching-desc">(داواکردنی کاڵا)</span></div>
+                <div class="matching-item">Query</div><div class="matching-arrow">➔</div><div class="matching-item">an invoice <span class="matching-desc">(پرسیارکردن لە وەسڵ)</span></div>
+                <div class="matching-item">Request</div><div class="matching-arrow">➔</div><div class="matching-item">a catalogue <span class="matching-desc">(داواکردنی کەتەلۆگ)</span></div>
+            </div>
+
+            <div class="info-box box-blue">
+                <strong>چەند دەستەواژەیەکی تر:</strong><br>
+                <span class="en">Please select one of the following <span class="highlight">options / choices</span>.</span><br>
+                <span class="en">We apologize for the <span class="highlight">wait / delay</span>.</span><br>
+                <strong>کۆتایی نامە:</strong> <span class="en">Thanks very much / Bye / See you.</span>
+            </div>
+        </div>
+
+        <!-- بەشی پێنجەم: ڕێزمان -->
+        <div class="section-card">
+            <h2>⚙️ بەشی پێنجەم: ڕێزمان (Grammar)</h2>
+
+            <h3>بەکارهێنانی (Some / Any / Information):</h3>
+            <ul>
+                <li><span class="en">We don't have <span class="highlight">any</span> tables left this evening.</span> (وشەی Any بۆ نەرێ و پرسیار بەکاردێت).</li>
+                <li><span class="en">Could you give me some <span class="highlight">information</span>.</span> (تێبینی: Information کۆ ناکرێتەوە و 's' وەرناگرێت).</li>
+                <li><span class="en">I'd like to book <span class="highlight">some</span> taxis for tomorrow.</span> (وشەی Some لە ڕستەی ئەرێنی بەکاردێت).</li>
+            </ul>
+
+            <h3>بەکارهێنانی ئامرازەکانی کات (In, On, At):</h3>
+            <div class="info-box box-green">
+                <ul>
+                    <li><strong><span class="en">on</span> ➔</strong> بۆ ڕۆژ، بەروار، وە ڕۆژە تایبەتەکان <span class="en">(day, date, special days (Christmas day))</span>.</li>
+                    <li><strong><span class="en">in</span> ➔</strong> بۆ مانگ، وەرز، ساڵ، بەشەکانی ڕۆژ <span class="en">(month, season, year, part of day)</span>.</li>
+                    <li><strong><span class="en">at</span> ➔</strong> بۆ کات <span class="en">(Time)</span>. وەک <span class="en">at midnight</span>.</li>
+                </ul>
+            </div>
+
+            <div class="grid-2">
+                <div>
+                    <h3>هەڵبژاردنی وشەی بانگهێشت:</h3>
+                    <ul>
+                        <li><span class="en">Would you like to <span class="highlight">have</span> a drink?</span></li>
+                        <li><span class="en">We'd like to <span class="highlight">come</span> over for lunch.</span></li>
+                        <li><span class="en">How about <span class="highlight">meeting</span> for dinner?</span></li>
+                        <li><span class="en">Why don't you <span class="highlight">join</span> us at the restaurant?</span></li>
+                    </ul>
+                    <div class="info-box box-yellow">
+                        <strong>وەڵامدانەوە:</strong><br>
+                        ڕازی بوون: <span class="en">I'd love to.</span><br>
+                        ڕەت کردنەوە: <span class="en">I'd love to but...</span>
+                    </div>
+                </div>
+                <div>
+                    <h3>بەکارهێنانی (Tell, Ask, Say):</h3>
+                    <ul>
+                        <li><span class="en">Can you <span class="highlight">tell</span> her I rang?</span></li>
+                        <li><span class="en">Can you <span class="highlight">ask</span> her to call me back?</span></li>
+                        <li><span class="en">Can you <span class="highlight">say</span> I'm arriving at eight.</span></li>
+                    </ul>
+                </div>
             </div>
         </div>
 
