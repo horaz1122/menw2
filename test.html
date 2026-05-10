@@ -3,20 +3,19 @@
 <head>
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
-    <title>مەلزەمەی فێربوونی Python</title>
+    <title>مەلزەمەی کوردۆلۆجی و زمانەوانی</title>
     <style>
-        @import url('https://fonts.googleapis.com/css2?family=Cairo:wght@400;600;800&family=Fira+Code:wght@400;500&display=swap');
+        @import url('https://fonts.googleapis.com/css2?family=Cairo:wght@400;600;800&display=swap');
         
         :root {
             --bg-color: #f8fafc;
             --container-bg: #ffffff;
             --text-color: #1e293b;
             --text-muted: #64748b;
-            --primary-gradient: linear-gradient(135deg, #f59e0b, #3b82f6); /* Python Colors: Yellow & Blue */
-            --accent: #2563eb;
-            --accent-light: #dbeafe;
+            --primary-gradient: linear-gradient(135deg, #10b981, #059669); /* Kurdish Flag Green Vibe */
+            --accent: #059669;
+            --accent-light: #d1fae5;
             --card-border: #e2e8f0;
-            --en-font: 'Fira Code', monospace;
             --ku-font: 'Cairo', sans-serif;
             
             --box-blue: #eff6ff; --border-blue: #3b82f6;
@@ -24,24 +23,26 @@
             --box-green: #f0fdf4; --border-green: #22c55e;
             --box-purple: #faf5ff; --border-purple: #a855f7;
             --box-red: #fef2f2; --border-red: #ef4444;
+            --box-bg: #f8fafc; --box-border: #cbd5e1;
         }
 
         .dark-mode {
             --bg-color: #0f172a; --container-bg: #1e293b;
             --text-color: #f1f5f9; --text-muted: #94a3b8;
-            --primary-gradient: linear-gradient(135deg, #fbbf24, #60a5fa);
+            --primary-gradient: linear-gradient(135deg, #34d399, #10b981);
+            --accent: #34d399; --accent-light: #064e3b;
             --card-border: #334155;
             
             --box-blue: #172554; --box-yellow: #45290a;
             --box-green: #052e16; --box-purple: #3b0764;
-            --box-red: #450a0a;
+            --box-red: #450a0a; --box-bg: #0f172a; --box-border: #475569;
         }
 
         body {
             font-family: var(--ku-font);
             background-color: var(--bg-color);
             color: var(--text-color);
-            line-height: 1.8;
+            line-height: 1.9;
             margin: 0;
             padding: 30px 15px;
             transition: all 0.3s ease;
@@ -50,15 +51,12 @@
         .container { max-width: 950px; margin: 0 auto; }
 
         .header-section {
-            text-align: center;
-            margin-bottom: 40px;
+            text-align: center; margin-bottom: 40px;
             background-color: var(--container-bg);
-            padding: 40px 30px;
-            border-radius: 20px;
+            padding: 40px 30px; border-radius: 16px;
             box-shadow: 0 10px 25px -5px rgba(0, 0, 0, 0.05);
             border: 1px solid var(--card-border);
-            position: relative;
-            overflow: hidden;
+            position: relative; overflow: hidden;
         }
         
         .header-section::before {
@@ -67,31 +65,30 @@
             background: var(--primary-gradient);
         }
 
-        h1 { color: #f59e0b; font-size: 36px; margin: 0 0 10px 0; text-shadow: 1px 1px 2px rgba(0,0,0,0.1); }
-        h1 span { color: #2563eb; }
+        h1 { color: var(--accent); font-size: 34px; margin: 0 0 10px 0; }
         .subtitle { color: var(--text-muted); font-size: 18px; font-weight: 600; }
 
         .controls { display: flex; justify-content: center; gap: 15px; margin-bottom: 30px; }
         .btn {
-            padding: 10px 25px; color: white; border: none; border-radius: 10px;
+            padding: 10px 25px; color: white; border: none; border-radius: 8px;
             font-size: 16px; font-weight: 700; cursor: pointer; font-family: var(--ku-font);
+            transition: transform 0.2s, box-shadow 0.2s;
         }
         .btn-print { background-color: #475569; }
         .btn-theme { background: var(--primary-gradient); }
+        .btn:hover { transform: translateY(-2px); box-shadow: 0 4px 12px rgba(0,0,0,0.15); }
 
         .section-card {
             background-color: var(--container-bg);
             border: 1px solid var(--card-border);
-            border-radius: 16px;
-            padding: 30px; margin-bottom: 30px;
+            border-radius: 16px; padding: 30px; margin-bottom: 30px;
             box-shadow: 0 4px 6px -1px rgba(0, 0, 0, 0.05);
         }
 
-        h2 { border-bottom: 2px solid var(--accent-light); padding-bottom: 15px; margin-top: 0; color: var(--text-color); display: flex; align-items: center; gap: 10px;}
-        h3 { color: var(--accent); margin-top: 25px; border-right: 4px solid var(--accent); padding-right: 15px; }
+        h2 { border-bottom: 2px solid var(--accent-light); padding-bottom: 12px; margin-top: 0; color: var(--text-color); }
+        h3 { color: var(--accent); margin-top: 25px; font-size: 20px; border-right: 4px solid var(--accent); padding-right: 15px; }
 
-        .en { font-family: var(--en-font); direction: ltr; display: inline-block; font-weight: 500; color: var(--border-blue); font-size: 16px; }
-        .highlight { background-color: var(--accent-light); color: var(--accent); padding: 2px 8px; border-radius: 6px; margin: 0 4px; font-family: var(--en-font); }
+        .highlight { background-color: var(--accent-light); color: var(--accent); padding: 2px 8px; border-radius: 6px; margin: 0 4px; font-weight: 600; }
 
         .info-box { padding: 15px 20px; border-radius: 10px; margin-bottom: 15px; border-right: 5px solid; font-size: 17px; }
         .box-blue { background-color: var(--box-blue); border-color: var(--border-blue); }
@@ -100,36 +97,34 @@
         .box-purple { background-color: var(--box-purple); border-color: var(--border-purple); }
         .box-red { background-color: var(--box-red); border-color: var(--border-red); }
 
-        ul { padding-right: 20px; margin: 10px 0; }
-        li { margin-bottom: 10px; font-size: 17px; }
+        ul, ol { padding-right: 25px; margin: 10px 0; }
+        li { margin-bottom: 12px; font-size: 17px; }
 
-        /* Code Window Styling */
-        .code-window {
-            background-color: #1e1e1e; border-radius: 10px; overflow: hidden;
-            margin: 15px 0; box-shadow: 0 4px 15px rgba(0,0,0,0.1);
+        .table-box {
+            width: 100%; border-collapse: collapse; margin: 15px 0;
+            background-color: var(--box-bg); border-radius: 8px; overflow: hidden;
+            border: 1px solid var(--box-border);
         }
-        .code-header {
-            background-color: #2d2d2d; padding: 10px 15px; display: flex; gap: 8px;
+        .table-box th, .table-box td {
+            padding: 12px; text-align: right; border: 1px solid var(--box-border);
         }
-        .dot { width: 12px; height: 12px; border-radius: 50%; }
-        .dot-red { background-color: #ff5f56; } .dot-yellow { background-color: #ffbd2e; } .dot-green { background-color: #27c93f; }
-        pre {
-            color: #d4d4d4; padding: 15px; margin: 0; direction: ltr; text-align: left;
-            font-family: var(--en-font); font-size: 15px; overflow-x: auto;
-        }
-        .code-comment { color: #6a9955; font-style: italic; font-family: var(--ku-font); }
+        .table-box th { background-color: var(--accent-light); color: var(--accent); text-align: center; }
 
-        .grid-2 { display: grid; grid-template-columns: 1fr 1fr; gap: 15px; }
-        
-        @media (max-width: 768px) { .grid-2 { grid-template-columns: 1fr; } }
-        
+        .note {
+            background-color: rgba(245, 158, 11, 0.1); border-right: 4px solid #f59e0b;
+            padding: 12px 15px; border-radius: 6px; margin: 15px 0; font-size: 17px;
+        }
+
+        .question { color: #b45309; font-weight: bold; }
+        .answer { color: #059669; }
+        .dark-mode .question { color: #fbbf24; }
+        .dark-mode .answer { color: #34d399; }
+
         @media print {
             body { background-color: #fff; color: #000; }
             .container { max-width: 100%; }
             .controls { display: none; }
             .section-card { border: 1px solid #ccc; box-shadow: none; page-break-inside: avoid; }
-            .code-window { border: 1px solid #ccc; }
-            pre { background-color: #f8f9fa; color: #000; }
         }
     </style>
 </head>
@@ -142,309 +137,181 @@
 
     <div class="container">
         <div class="header-section">
-            <h1>ڕێبەری <span>Python</span></h1>
-            <div class="subtitle">پوختەی دەفتەر: گۆڕاوەکان، داتاتایپ، ئۆپەرەیتەرەکان، سترینگ، مەرجەکان، لیست، دیکشنەری، و فەنکشن</div>
+            <h1>دەفتەری کوردۆلۆجی و زمانەوانی</h1>
+            <div class="subtitle">پوختەی دەفتەر: چەمکەکان، دیالێکت، جوگرافیا، و مێژووی زمان</div>
         </div>
 
         <div class="section-card">
-            <h2>🐍 بەشی یەکەم: خاڵەکانی پایتۆن و بەکارهێنانەکانی</h2>
+            <h2>📜 بەشی یەکەم: چەمکی کوردۆلۆجی و مێژووەکەی</h2>
             
-            <div class="grid-2">
-                <div class="info-box box-blue">
-                    <strong>بوارەکانی بەکارهێنانی پایتۆن:</strong>
-                    <ul>
-                        <li><span class="en">1. Shell Scripting</span></li>
-                        <li><span class="en">2. Task Automation</span></li>
-                        <li><span class="en">3. Web Development</span></li>
-                        <li><span class="en">4. Data Analysis</span></li>
-                        <li><span class="en">5. Machine Learning</span></li>
-                        <li><span class="en">6. Computer Science</span></li>
-                    </ul>
-                </div>
-                <div class="info-box box-green">
-                    <strong>زانیاری گشتی:</strong>
-                    <ul>
-                        <li>نووسینی پایتۆن زۆر ئاسانە.</li>
-                        <li>پایتۆن لەسەر هەموو سیستمێک دادەبەزێت و کار دەکات.</li>
-                    </ul>
-                    <hr style="border: 0; border-top: 1px dashed var(--border-green); margin: 10px 0;">
-                    <strong>زیانەکان (Cons):</strong><br>
-                    <span class="en">We can mention that you write less code, you have less help from the tools.</span>
-                </div>
-            </div>
-        </div>
-
-        <div class="section-card">
-            <h2>📦 بەشی دووەم: گۆڕاوەکان، کۆمێنت و سینتاکس (Variables)</h2>
-            
-            <p><strong>گۆڕاو (Variable):</strong> گۆڕاوەکان پێکدێن لە پیتەکان <span class="highlight">Characters</span> وە ژمارەکان <span class="highlight">Numbers</span>.</p>
-
-            <div class="grid-2">
-                <div class="info-box box-red">
-                    <strong>❌ ڕێگەپێدراو نییە (Invalid):</strong>
-                    <ul>
-                        <li>ناتوانیت بە ژمارە دەست پێ بکات: <span class="en">123</span></li>
-                        <li>ناکرێت هێماکانی تێدابێت: <span class="en">Test!</span> , <span class="en">Name%</span></li>
-                        <li>ناکرێت ئەم وشانە بەکاربهێنیت بۆ ناوی گۆڕاو: <span class="en">for, if, while, import</span></li>
-                    </ul>
-                </div>
-                <div class="info-box box-green">
-                    <strong>✅ ڕێگەپێدراوە (Valid):</strong>
-                    <ul>
-                        <li>دەتوانیت بە ئەندەرسکۆر دەست پێ بکات: <span class="en">_name</span></li>
-                        <li>دەکرێت پیتی گەورە و بچووک بێت: <span class="en">AGE</span> , <span class="en">aGE</span></li>
-                        <li>نموونەی تر: <span class="en">Name1</span> , <span class="en">a1111</span> , <span class="en">my_name</span></li>
-                    </ul>
-                </div>
-            </div>
-
-            <h3>تێبینییە گرنگەکانی سینتاکس:</h3>
-            <ul>
-                <li><strong>کۆمێنت:</strong> هاش تاگ <span class="highlight">#</span> بەکاردێت بۆ کۆمێنت (تێبینی نووسین لەناو کۆددا).</li>
-                <li><strong>بۆشاییەکان (Indentation):</strong> <span class="en">Indentation in Python is meaningful.</span> بەپێچەوانەی زمانەکانی تردا سپەیس مانادار نییە، بەڵام لە پایتۆن مانادارە و بۆ جیاکردنەوەی بلۆکەکان بەکاردێت.</li>
-            </ul>
-        </div>
-
-        <div class="section-card">
-            <h2>🗂️ بەشی سێیەم: جۆرەکانی داتا (Data Types) و ژمارەکان</h2>
-
             <div class="info-box box-blue">
-                <strong>پشکنینی جۆری داتا بە type:</strong>
-                <ul>
-                    <li><span class="en">type(name) == str</span> <span style="color: green; font-weight: bold;">(T)</span></li>
-                    <li><span class="en">type(age) == int</span> <span style="color: green; font-weight: bold;">(T)</span></li>
-                    <li><span class="en">type(age) == str</span> <span style="color: red; font-weight: bold;">(F)</span></li>
-                </ul>
+                <p><span class="question">١- پ/ چەمکی کوردۆلۆجی لە چی دەدوێ؟</span><br>
+                <span class="answer">وەڵام/</span> لە مێژووی نەتەوەی کورد و زمانی کوردی دەکۆڵێتەوە.</p>
+                <p>٢- کوردۆلۆجی لە ڕۆژهەڵات ناسی.</p>
             </div>
 
-            <p><strong>گۆڕینی داتا (Casting):</strong> بەکاردێت بۆ گۆڕینی داتاتایپێک بۆ یەکێکی تر.</p>
+            <div class="info-box box-green">
+                <p><span class="question">٣- پ/ کێ یەکەم کەس بوو وشەی کوردۆلۆجی بەکارهێنا و ساڵی چەند بوو؟</span><br>
+                <span class="answer">وەڵام/</span> د. عەبدوڵڵا جەودەت یەکەم کەس بوو وشەی کوردناسی لە ساڵی ١٩١٣ بەکار هێنا.</p>
+            </div>
 
-            <h3>جۆرەکانی داتاتایپ بریتین لە:</h3>
-            <p><span class="highlight">Complex</span> - <span class="highlight">bool</span> - <span class="highlight">list</span> - <span class="highlight">Tuple</span> - <span class="highlight">range</span> - <span class="highlight">dict</span> - <span class="highlight">set</span></p>
-
-            <h3>ژمارەکان لە پایتۆن (Numbers):</h3>
-            <p>سێ جۆری ژمارەمان هەیە:</p>
             <ul>
-                <li><strong><span class="highlight">int (Integer)</span>:</strong> ژمارەی تەواو نیشان دەدات بەبێ فاریزە (پۆینت).</li>
-                <li><strong><span class="highlight">float (Floating Point)</span>:</strong> بەکاردێت بۆ ژمارەی ڕێژەیی (پۆینتدار).</li>
-                <li><strong><span class="highlight">complex (Complex Number)</span>:</strong> ژمارە ئاڵۆزەکان، کە پێکدێت لە دوو بەش: بەشی ڕاستی وە بەشی خەیاڵی.
-                    <div class="code-window" style="margin-top: 10px;">
-                        <div class="code-header"><div class="dot dot-red"></div><div class="dot dot-yellow"></div><div class="dot dot-green"></div></div>
-<pre>
-<span class="code-comment"># بەشی خەیاڵی (imag)</span>
-Complex_number = 2 + 3j
-
-<span class="code-comment"># بەشی ڕاستی (real) بە فەنکشن</span>
-Complex_number = complex(2, 3)
-</pre>
-                    </div>
-                </li>
+                <li>٤- کوردستان و لایەنی ئاسیاییە.</li>
             </ul>
-        </div>
 
-        <div class="section-card">
-            <h2>➕ بەشی چوارەم: ئۆپەرەیتەرەکان (Operators)</h2>
-            
-            <h3>١. Arithmetic Operators (کردارە بیرکارییەکان)</h3>
-            <p>ئاماژە دەگرێتەوە بۆ: <span class="highlight">+ , - , * , / , % , ** , //</span></p>
+            <h3>دابەشبوونی هەرێمەکان و مێژووی وشەکان</h3>
+            <p>٦- لە کۆنەوە لقی کوردان بەسەر چەند هەرێمێک دابەش بووە:</p>
+            <ol>
+                <li>هەرێمی چیاکان (ئەقلیمی چیاکان)</li>
+                <li>هەرێمی عەرەبی (ئەقلیمی عەرەبی)</li>
+                <li>هەرێمی جەزیرەی فوڕات</li>
+                <li>هەرێمی ئازەربایجان</li>
+                <li>هەرێمی ئەرمەنیا</li>
+            </ol>
+
             <div class="info-box box-yellow">
-                <span class="en">+ is also used to concatenate string values:</span> هەروەها نیشانەی کۆکردنەوە بۆ لکاندنی (پێکەوەنانی) دوو سترینگیش بەکاردێت.
+                <p><span class="question">٧- پ/ بۆچی هەرێمی ئازەربایجان و ئەرمەنیا بە مەڵبەندی کوردۆلۆجی دادەنرێت؟</span><br>
+                <span class="answer">وەڵام/</span> <br>
+                ١- ژیانی کۆنی میللەتی کورد و ڕۆژهەڵات.<br>
+                ٢- دوژمنانی کورد.</p>
             </div>
 
-            <h3>٢. Assignment Operators (یەکسان کردن)</h3>
-            <p>بەکاردێت بۆ یەکسان کردنی نرخێک بە گۆڕاوێک.<br>
-            وەک: <span class="highlight">= , += , -= , *= , /= , %=</span> (نموونە: <span class="en">a = 4</span>)</p>
-
-            <h3>٣. Comparison Operators (بەراوردکارەکان)</h3>
-            <p>بۆ بەراوردکردن بەکاردێن: <span class="highlight">== , != , > , < , >= , <=</span> (نموونە: <span class="en">a == 2</span>)</p>
-
-            <h3>٤. Logical Operators (باری لۆژیکی / Boolean)</h3>
             <ul>
-                <li><strong><span class="highlight">and</span>:</strong> ئەگەر هەردووکیان <span class="en">True</span> بوو ئەنجام <span class="en">True</span> دەبێت.</li>
-                <li><strong><span class="highlight">or</span>:</strong> ئەگەر هەردووکیان <span class="en">False</span> بوو ئەنجام <span class="en">False</span> دەبێت (واتە ئەگەر یەکێکیان True بێت، ئەنجام True یە).</li>
-                <li><strong><span class="highlight">not</span>:</strong> پێچەوانەی دەکاتەوە.</li>
+                <li>مارکۆ پۆلۆ یەکەم کەس بوو وشەی کوردستانی هێناوە.</li>
+                <li>کتێبی (کلتوری کوردی) لە نووسراوە ئیتالیەکان خستیە ڕوو. <span class="answer">وەڵام/ میرێلا گالیتی</span></li>
+                <li>کێ یەکەم ڕۆژنامەی کوردی لە کوردستان دەرکرد؟ <span class="answer">وەڵام/ میجەر سۆن.</span> (بەڕێوەبەری ڕۆژنامە)</li>
+                <li>زەینەفۆن یەکەم ڕۆژئاواییە کە دوای هێرۆدۆتسی مێژوونووس شتی لە بارەی کوردەوە گوتبێت.</li>
             </ul>
-
-            <h3>٥. Bitwise Operators</h3>
-            <div class="grid-2">
-                <ul style="margin-top:0;">
-                    <li><span class="highlight">&</span> ➔ <span class="en">And</span></li>
-                    <li><span class="highlight">|</span> ➔ <span class="en">OR</span></li>
-                    <li><span class="highlight">^</span> ➔ <span class="en">XOR</span></li>
-                </ul>
-                <ul style="margin-top:0;">
-                    <li><span class="highlight">~</span> ➔ <span class="en">NOT</span></li>
-                    <li><span class="highlight"><<</span> ➔ <span class="en">Shift left</span></li>
-                    <li><span class="highlight">>></span> ➔ <span class="en">Shift Right</span></li>
-                </ul>
-            </div>
-
-            <h3>٦. Identity و Membership ئۆپەرەیتەرەکان</h3>
-            <ul>
-                <li><span class="highlight">is</span> : پێی دەوترێت <span class="en">Identity operator</span>. بەکاردێت بۆ بەراوردکردنی دوو ئۆبجێکت.</li>
-                <li><span class="highlight">in</span> : پێی دەوترێت <span class="en">Membership operator</span>. دەپشکنێت بزانێت قاڵبێک لەناو لیستێکدا هەیە یان نا.</li>
-            </ul>
-
-            <h3>٧. Ternary Operator</h3>
-            <p>سوودمەندە بۆ ئاسانکاری مەرجەکان (دوو شت بەیەکەوە دەبەسترێتەوە).</p>
         </div>
 
         <div class="section-card">
-            <h2>🔤 بەشی پێنجەم: سترینگ و فەنکشنەکانی (String Methods)</h2>
+            <h2>⛰️ بەشی دووەم: جوگرافیای کوردستان و گرنگی چیاکان</h2>
+            
+            <div class="info-box box-blue">
+                <p><span class="question">٩- نیوەی زیاتری تۆپۆگرافیای کوردستان لە چی پێک هاتووە؟</span><br>
+                <span class="answer">وەڵام/</span> چیا</p>
+
+                <p><span class="question">١٠- گرنگترین زنجیرە چیایەکانی کوردستان کوێیە؟</span><br>
+                <span class="answer">وەڵام/</span> زنجیرە چیای (زاگرۆس)</p>
+            </div>
+
+            <h3>١١- گرنگی چیاکانی کوردستان:</h3>
+            <ul>
+                <li>١- لە ڕووی سیاسی و عەسکەرییەوە بووەتە شۆرەیەکی قایم بە ڕووی دوژمنان.</li>
+                <li>٢- گەلێ کانزای گرنگ و جۆرەها ئاژەڵی کێوی لێ دەژین.</li>
+                <li>٣- هۆکاری باشی گەشتوگوزارن.</li>
+            </ul>
+        </div>
+
+        <div class="section-card">
+            <h2>🗣️ بەشی سێیەم: زمانەوانی و تیۆرییەکان</h2>
 
             <div class="info-box box-purple">
-                <strong>تێبینی:</strong> سترینگ دەتوانرێت بە جووت کۆتەیشن یان سینگڵ کۆتەیشن بنووسرێت بەپێی سینتاکسی تایبەت. وە <span class="en">str()</span> بەکاردێت بۆ گۆڕینی ژمارە بۆ سترینگ.
+                <p><span class="question">١٢- پ/ چۆمسکی دەڵێت:</span><br>
+                «زمان کۆمەڵە ڕستەیە کە ڕێزمان دەریاندەخات».</p>
+
+                <p><span class="question">١٣- مارتین دەڵێت:</span><br>
+                «زمان هۆکارێکە بۆ پەیوەندی کردن کە پێکهاتووە لە چەند دانەیەکی بچووک کە ئەو دانانەش خاوەنی واتای خۆیانن».</p>
+                
+                <p><span class="question">١٤- پێناسەی زمان:</span><br>
+                «گرنگترین ئامرازی پەیوەندییە و لێکتێگەیشتنی ئادەمیزادە».</p>
             </div>
 
-            <h3>میتۆدەکانی ناو سترینگ:</h3>
-            <div class="grid-2">
-                <ul>
-                    <li><span class="highlight">lower()</span>: گۆڕین بۆ سمۆڵ.</li>
-                    <li><span class="highlight">islower()</span>: چێک کردنی سمۆڵ (بزانێت سمۆڵە؟).</li>
-                    <li><span class="highlight">upper()</span>: گۆڕین بۆ کەپیتاڵ.</li>
-                    <li><span class="highlight">isupper()</span>: چێک کردنی کەپیتاڵ.</li>
-                </ul>
-                <ul>
-                    <li><span class="highlight">startswith()</span>: چێک دەکات ئایا سترینگ بەمە دەست پێدەکات.</li>
-                    <li><span class="highlight">split()</span>: دابەشکردنی یان بڕینی سترینگ.</li>
-                    <li><span class="highlight">len()</span>: بۆ حیساب کردنی درێژی سترینگ (ژمارەی پیتەکان).</li>
-                </ul>
-            </div>
+            <h3>١٥- ئەرکە مایکرۆییەکان بژمێرە و باسی دانەیەکیان بکە:</h3>
+            <ol>
+                <li>ئەرکی سایکۆلۆژی زمان.</li>
+                <li>لایەنی کۆمەڵایەتی.</li>
+                <li>دیاریکردنی ناسنامەی شتەکان.</li>
+                <li>ئەرکی دەربڕینی حەز.</li>
+                <li><strong>ئەرکی تۆمارکردنی پێشینان و مێژوو:</strong> بە تۆمارکردنی هەموو ڕووداوێک لە مێژوودا هەروەها زمان کەرەستەیەکی نووسراوە، کانی سۆمەرییەکان و ئاشوورییەکان بە هۆی زمانەوە شارەزایان دەبووین. ئەگەر زمان نەبووایە نەماندەزانی شارستانیەتی بابلییەکان چۆن بووە. بە بێ زمان نەدەتوانرا ئامرازەکانی مرۆڤایەتی لە نەوەیەکەوە بۆ نەوەیەکی تر بگوازرێتەوە.</li>
+            </ol>
 
-            <h3>نیشانەکانی ناو سترینگ (Escape Characters):</h3>
-            <ul>
-                <li><span class="highlight">\</span> ➔ بەکاردێت بۆ سڕینەوەی کاریگەری نیشانەکان (Escape).</li>
-                <li><span class="highlight">\"</span> ➔ بۆ بانگکردنی دەبڵ کۆتەیشن لە ناو سترینگدا.</li>
-                <li><span class="highlight">\t</span> یان <span class="highlight">\b</span> ➔ بۆ سپەیس و تاب.</li>
-            </ul>
+            <h3>تیۆری Bow - Bow</h3>
+            <div class="info-box box-red">
+                <p><strong>١٧- تیۆری Bow - Bow:</strong> ئەم تیۆرە پێی وایە زمان بۆ لاساییکردنەوەی دەنگی سروشتییەکانە.</p>
+                <p><strong>١٨- ڕەخنەگرانی ئەم تیۆرە:</strong><br>
+                ١- گرنگی نەداوە بە شتە بێدەنگەکان.<br>
+                ٢- دەنگی سروشتی لە هەموو جیهاندا یەکە.</p>
+            </div>
         </div>
 
         <div class="section-card">
-            <h2>✅ بەشی شەشەم: یاساکانی True و False و فەنکشنەکان</h2>
+            <h2>🌍 بەشی چوارەم: خێزانە زمانەکانی جیهان و دیالێکت</h2>
 
-            <div class="info-box box-blue">
-                <strong>یاساکانی باری لۆژیکی:</strong>
-                <ul>
-                    <li><strong>سفر (<span class="en">0</span>):</strong> هەمیشە فۆڵسە <span class="en">(False)</span>.</li>
-                    <li><strong>ڕەقەمەکان:</strong> هەموو ژمارەکانی تر تەنانەت ژمارە سالبەکانیش ترون <span class="en">(True)</span>.</li>
-                    <li><strong>سترینگ:</strong> سترینگ تەنها کاتێک فۆڵسە <span class="en">(False)</span> کە بەتاڵ بێت واتا هیچی تێدا نەبێت <span class="en">""</span>.</li>
-                </ul>
-            </div>
+            <h3>١- خێزانە زمانەکانی جیهان:</h3>
+            <p>زمانناسەکان خێزانە زمانەکانی جیهانیان بەسەر چوار خێزاندا دابەش کردووە:</p>
+            <ol>
+                <li><strong>یەکەم: خێزانی زمانی هیندوئەوروپی</strong> (کە زۆرترین خەڵک قسەی پێدەکات).
+                    <ul>
+                        <li>١- کۆمەڵەی ڕۆژهەڵاتی: بە زمانی هیندی و ئاری ناسراوە.</li>
+                        <li>٢- کۆمەڵەی ئێرانی: ئەم زمانانە دەگرێتەوە {فارسی کۆن، فارسی نوێ، کوردی}.</li>
+                    </ul>
+                </li>
+                <li><strong>دووەم: خێزانە زمانی سامی:</strong> ئەوە دەگرێتەوە کە لە وڵاتی مێزۆپۆتامیا و دوورگەی عەرەبین.</li>
+                <li><strong>سێیەم: خێزانە زمانی ئۆرالی:</strong> زمانی فینلەندی سەربەخێزانە زمانی ئۆرالییە.</li>
+                <li><strong>چوارەم: خێزانە زمانی ئاڵتایی.</strong></li>
+            </ol>
 
-            <h3>فەنکشنە پشکنەرەکان:</h3>
+            <hr style="border: 0; border-top: 1px dashed var(--card-border); margin: 20px 0;">
+
+            <h3>دیالێکت و زاراوەکان</h3>
+            <p><strong>زاراوەی دیالێکت:</strong> لە بنەڕەتدا زاراوەیەکی لاتینییە (بێژەیی).</p>
+            <p><strong>پێناسەی دیالێکت:</strong> بەو جیاوازیانە دەوترێت کە لە نێوان جۆرەکانی یەک زماندا هەن.</p>
+
+            <p><strong>جۆرەکانی دیالێکت بە پێی کۆمەڵگە و چینەکان دەگۆڕێت بە پێی ئەم خاڵانە:</strong></p>
             <ul>
-                <li><strong><span class="highlight">isinstance()</span>:</strong> فەنکشنێکە دەگەڕێتەوە کە ئایا دروستە/یەکێکە لە جۆرێکی دیاریکراو.</li>
-                <li><strong><span class="highlight">all()</span>:</strong> فەنکشنی all تروو <span class="en">(True)</span> دەگەڕێنێتەوە ئەگەر هەموو ئەندامەکانی ناوەکەی تروو بن (واتە هەمووی دەبێ تروو بێت).</li>
-            </ul>
-        </div>
-
-        <div class="section-card">
-            <h2>🛑 بەشی حەوتەم: کۆنستانت، ئینوم و ئینپوت (Constants, Enums, User Input)</h2>
-
-            <h3>کۆنستانتەکان (Constants)</h3>
-            <ul>
-                <li>هیچ ڕێگەیەک نییە کە بتوانیت بەکاربێنیت بۆ کۆنستانت لە پایتۆن. (T/F)</li>
-                <li>بە هیچ جۆرێک ناتوانیت دووبارە نرخ بدەیتەوە بە کۆنستانت.</li>
-            </ul>
-
-            <h3>ئینومەکان (Enums)</h3>
-            <p>لە شوێنی ئەوەی کۆنستانت بەکاربهێنیت، لە پایتۆن دەتوانیت <span class="highlight">Enum</span> بەکاربهێنیت. بۆ بەکارهێنانی دەبێت ئیمپورتی بکەین:</p>
-            <div class="code-window">
-                <div class="code-header"><div class="dot dot-red"></div><div class="dot dot-yellow"></div><div class="dot dot-green"></div></div>
-<pre>
-from enum import Enum
-
-<span class="code-comment"># دەتوانین بەم شێوازانە بەکاری بهێنین:</span>
-print(State(1))
-State.Active
-State['ACTIVE']
-</pre>
-            </div>
-
-            <h3>ئینپوت (User Input)</h3>
-            <p>لە ناو پایتۆن دەتوانیت کۆماندێکی تایبەت بەکاربهێنیت بۆ وەرگرتنی زانیاری لە بەکارهێنەر، بە بەکارهێنانی فەنکشنی <span class="highlight">input()</span>. دەتوانیت داتایەک دابنێیت لە ڕێگەی بەکارهێنەرەوە بە بەکارهێنانی ئەم فەنکشنە.</p>
-        </div>
-
-        <div class="section-card">
-            <h2>🔀 بەشی هەشتەم: کۆنترۆڵ ستەیتمێنت و لیستەکان (Control Statements & Lists)</h2>
-
-            <h3>کۆنترۆڵ ستەیتمێنت (Control Statements)</h3>
-            <ul>
-                <li>کاتێک مەرجێک دادەنێیت، ئەوا ئەو <span class="highlight">Block</span> ی مەرجەکە جێبەجێ دەبێت.</li>
-                <li><strong>بلۆک (Block) چییە؟</strong> بەشێکە لە ڕیزبەندییەک و جیا دەکرێتەوە بۆ دروستکردنی مانایەک. دەتوانیت جێبەجێی بکەیت لە یەک کاتدا یان دەتوانیت دواتر جێبەجێی بکەیت.</li>
-                <li><strong>else block:</strong> جێبەجێ دەبێت لە دوای <span class="en">if</span> ئەگەر مەرجی <span class="en">if</span> فۆڵس <span class="en">(False)</span> بێت.</li>
-                <li><strong>elif:</strong> دەتوانیت بەکاری بهێنیت لە نێواندا وەکو جێگرەوەیەک بۆ ئەو کاتەی کە <span class="en">if</span> جێبەجێ نەبوو، ئەم مەرجە جێبەجێ ببێت.</li>
+                <li>١- دیالێکتی کۆمەڵایەتی بە هۆی چینەکان.</li>
+                <li>٢- دیالێکتی پیشەیی بە هۆی پیشەکان.</li>
+                <li>٣- دیالێکتی پەتی.</li>
+                <li>٤- دیالێکتی ناوچەییەکان.</li>
             </ul>
 
-            <h3>لیستەکان (Lists)</h3>
-            <ul>
-                <li>ستراکتچەرێکی داتای تایبەت بە خۆی هەیە لە ناو پایتۆندا.</li>
-                <li>لە چوارچێوەی کەوانەیەکی شکاوەدا (کەوانەی چوارگۆشە <span class="en">[]</span>) ڕێکدەخرێت و کۆمەڵێک داتای جیاواز لەخۆ دەگرێت.</li>
-                <li>لیست دەتوانێت کۆمەڵێک ڤالوی جیاواز لەخۆ بگرێت. لە ڕێگەی کۆماوە جیا دەکرێنەوە، وە لە ناو لیستدا هەموو جۆرەکانی داتا دەکرێت هەبن یان نەبن.</li>
-                <li><strong>Index:</strong> دۆزینەوەی ئیندێکسی کاڵاکان یان ئایتمەکان لە ڕێگەی میتۆدی <span class="en">index</span> دەکرێت (ئەگەر ئایتمێک لە ناو لیستدا نەبێت ئێررۆر دەدات).</li>
-                <li><strong>Slices:</strong> بە مانای وەرگرتنی بەشێک لە لیستەکەمان لە ڕێگەی <span class="highlight">:</span>.</li>
-                <li><strong><span class="highlight">len()</span>:</strong> ژمارەی ئایتمەکان لە لیستەکەمان بۆ دەدۆزێتەوە.</li>
-                <li><strong><span class="highlight">append()</span>:</strong> دەتوانین میتۆدی ئەپێند بەکاربهێنین بۆ زیادکردنی ئایتمێک بۆ کۆتایی لیستەکەمان (نموونە: <span class="en">items.append("Test")</span>).</li>
-                <li><strong><span class="highlight">extend()</span>:</strong> بە هەمان شێوەی ئەپێند بۆ زیادکردنە، وە <span class="highlight">+=</span> ئۆپەرەیتەریش بۆ هەمان مەبەست بەکاردێت.</li>
-                <li><strong><span class="highlight">remove()</span>:</strong> فەنکشنی ڕیموڤ بەکاردێت بۆ سڕینەوەی ئایتمێک.</li>
-                <li><strong><span class="highlight">insert()</span>:</strong> زیادکردنی ئایتمێک لە ناوەڕاستی لیستەکەماندا (بە پێدانی شوێنەکەی).</li>
-                <li><strong><span class="highlight">sort()</span>:</strong> دەتوانین لیستەکانمان ڕیزبکەین لە ڕێگەی میتۆدی سۆرت.</li>
-            </ul>
-        </div>
-
-        <div class="section-card">
-            <h2>📦 بەشی نۆیەم: توپل، دیکشنەری، و سێت (Tuples, Dictionaries, Sets)</h2>
-
-            <h3>توپلەکان (Tuples)</h3>
-            <ul>
-                <li>پایتۆن وەکو گروپێک دایان دەنێت کە ڕێگە نادات دەستکاری بکرێت.</li>
-                <li>لە توپلەکاندا (کە پێچەوانەی لیستن) دەتوانیت توپل دروست بکەیت، بەڵام ناتوانیت هیچ داتایەکی لێ بسڕیتەوە یان زیادی بکەیت.</li>
-                <li>بە هەمان شێوەی لیست دروست دەکرێت، بەڵام لە جیاتی کەوانەی چوارگۆشە <span class="highlight">[]</span>، کەوانەی ئاسایی (بازنەیی) <span class="highlight">()</span> بەکاردێت.</li>
-            </ul>
             <div class="info-box box-yellow">
-                <strong>تێبینی:</strong> دەتوانیت توپلێکی تازە دروست بکەیت لە شێوەی زیادکردن وە بەکارهێنانی ئۆپەرەیتەری <span class="highlight">+</span>. وەکو توپلێکی تازە وایە نەک کۆنەکە زیاد بکرێت.
+                <strong>دیالێکتە ناوچەییەکان:</strong><br>
+                ١- هەموو ناوچەیەک لە گەڵ ناوچەیەکی تر شێوازی ئاخاوتنی جیاوازە.<br>
+                ٢- جۆرێک لە گۆڕانکاری لە ناوچەکان دروست دەبێت.<br>
+                ٣- هەندێک جار دەبێتە هۆی لێک تێنەگەیشتن.
             </div>
 
-            <h3>دیکشنەری (Dictionaries)</h3>
+            <h3>هۆکارەکانی پەیدابوونی دیالێکت:</h3>
             <ul>
-                <li>کاتێک لیستێکمان هەبێت کە کۆمەڵێک ڤالو بە یەکەوە دەبەستێتەوە، پێی دەوترێت دیکشنەری کە کۆمەڵێک کی و ڤالو (Key-Value) لەخۆ دەگرێت.</li>
-                <li>ناتوانین <span class="highlight">Key</span> بگۆڕین بەڵام دەتوانین ڤالوەکە بگۆڕین.</li>
-                <li><strong><span class="highlight">get()</span>:</strong> میتۆدێکە دەگەڕێت بۆ داتایەک بەپێی کییەکەی.</li>
-                <li><strong><span class="highlight">pop()</span>:</strong> ڕیموڤ میتۆدە بۆ سڕینەوەی داتایەک لەناو دیکشنەری.</li>
-                <li><strong><span class="highlight">popitem()</span>:</strong> بۆ سڕینەوەی کۆتا <span class="en">Key-Value</span> لەناو دیکشنەرییەکە.</li>
-                <li><strong><span class="highlight">in</span>:</strong> لە ڕێگەی <span class="en">in</span> چێک دەکەیتەوە کە ئایا هەیە یان نا.</li>
-                <li><strong><span class="highlight">keys()</span>:</strong> میتۆدی کییز بەکاردێت بۆ هێنانەوەی هەموو کییەکانی ناو دیکشنەرییەکە.</li>
-                <li><strong><span class="highlight">values()</span>:</strong> بۆ هێنانەوەی هەموو ڤالوەکانی ناو دیکشنەرییەکە بەکاردێت.</li>
-                <li><strong><span class="highlight">items()</span>:</strong> بۆ وەرگرتنەوەی هەردووکیان پێکەوە (<span class="en">Keys</span> و <span class="en">Values</span>) بەکاردێت.</li>
-                <li><strong><span class="highlight">len()</span>:</strong> بەکاردێت بۆ وەرگرتنەوەی درێژی تێکستەکە یان سترینگەکە، یان ئایتمەکانی ناو لیستەکان و دیکشنەرییەکان.</li>
-                <li><strong>بۆ زیادکردنی Value و Key:</strong> لە ڕێگەی ناوی دیکشنەرییەکەوە، بۆ نموونە <span class="en">dog['fav food'] = 'meat'</span>.</li>
-                <li><strong><span class="highlight">del</span>:</strong> بۆ سڕینەوەی <span class="en">Key</span> یەک لە دیکشنەریدا بەکاردێت.</li>
-                <li><strong><span class="highlight">copy()</span>:</strong> بۆ لەبەرگرتنەوە یان کۆپی کردنی دیکشنەرییەکە.</li>
+                <li>١- هۆکاری کۆمەڵایەتی</li>
+                <li>٢- هۆکاری جوگرافیا</li>
+                <li>٣- هۆکاری سیاسی: بە دوو لایەن دەگرێتەوە. هۆکاری یەکەم ئەوە کە میللەتێک خاوەنی حکومەتێکی سەربەخۆ نەبێت. هۆکاری دووەمیان ئەوەیە کە حکومەتی ناوەندی بۆی هەیە دەسەڵات بەسەر هەموو ناوچەکاندا بکێشێت.</li>
             </ul>
 
-            <h3>سێتەکان (Sets)</h3>
-            <ul>
-                <li>سێت جۆرێکی ترە لە کۆلێکشن کە ڕێگە نادات داتای دووبارەی تێدا بێت. (T/F)</li>
-                <li>گرنگترین تایبەتمەندی سێتەکان ئەوەیە کە داتای دووبارە قبوڵ ناکات.</li>
-                <li>وەکو دیکشنەری دەنووسرێت بەڵام <span class="highlight">Key</span> ی نییە.</li>
-                <li>سێتێکی تایبەتیش هەیە کە ناتوانرێت گۆڕانکاری تێدا بکرێت کە پێی دەوترێت <span class="highlight">frozenset</span>.</li>
-                <li><strong>سینتاکسی سێت:</strong> <span class="en">names = {"Roger", "Syd"}</span> کە لە جیاتی کەوانەی چوارگۆشە یان ئاسایی، کەوانەی لول (Curly Braces) بەکاردێت.</li>
-                <li><strong><span class="highlight">union()</span> یان <span class="highlight">|</span>:</strong> هەموو داتاکانی نێوان هەردوو سێتەکە دەخاتە ناو یەکەوە (بەبێ دووبارەبوونەوە). (نموونە: <span class="en">set1 | set2</span> یان <span class="en">set1.union(set2)</span>).</li>
-                <li><strong><span class="highlight">difference()</span> یان <span class="highlight">-</span>:</strong> جیاوازییەکانی نێوان دوو سێت دەدۆزێتەوە.</li>
-            </ul>
-        </div>
+            <h3>جیاوازی نێوان زمان و دیالێکت</h3>
+            <table class="table-box">
+                <tr>
+                    <th style="width: 50%;">زمان</th>
+                    <th style="width: 50%;">دیالێکت</th>
+                </tr>
+                <tr>
+                    <td>١- زمان لە ڕێگەی گشتی و مێژوویەوە دیاری کراوە جوگرافیای فراوان دەگرێتەوە.</td>
+                    <td>١- دیالێکت ناوچەیەکی جوگرافی دیاری کراو دەگرێتەوە واتا لە ڕێگەی ناوچەییەوە.</td>
+                </tr>
+                <tr>
+                    <td>٢- گۆڕی هەردووکیان و زمانە دەگرێتەوە کە لە نێوان...</td>
+                    <td>٢- لەسەر بنەمای جیاوازییەکان کە لە ناو زماندا هەیە.</td>
+                </tr>
+                <tr>
+                    <td>٣- زمان پەنا بۆ دیالێکت دەبات.</td>
+                    <td>٣- دیالێکت پەنا دەباتە بەر زمان.</td>
+                </tr>
+                <tr>
+                    <td>٤- دیالێکتەکانی زمانی لە بنەما شێوەزارییەکانە.</td>
+                    <td>٤- دیالێکت پێویستە بە زمان.</td>
+                </tr>
+            </table>
 
-        <div class="section-card">
-            <h2>⚙️ بەشی دەیەم: فەنکشنەکان (Functions)</h2>
-
-            <ul>
-                <li>دروستکردنی کۆمەڵێک کۆدە کە دەتوانین چەندین جار بانگی بکەین (بەکاری بهێنینەوە).</li>
-                <li>هیچ فەنکشنێک دروست نابێت بەبێ دەستپێکردن بە وشەی <span class="highlight">def</span>، وە دواتر ناوی فەنکشنەکە و پاشان کەوانە <span class="highlight">()</span> و لە کۆتاییدا دوو خاڵ <span class="highlight">:</span> دێت.</li>
-                <li>دەتوانین زیاتر لە جارێک <span class="highlight">Function</span> بانگ بکەینەوە بە پێدانی ناوەکەی.</li>
-                <li>لە <span class="highlight">Function</span> دا دەتوانیت پارامێتەرت هەبێت. پارامێتەرەکان وەکو گۆڕاو وان لەناو فەنکشنەکەدا و کاتی بانگکردنەوەی دەتوانیت داتایان پێ بدەیت.</li>
-                <li>پارامێتەرەکان وەکو ڕیفرێنسن و کاتی بانگکردنەوە دەبێت هەموو جۆرەکانی لەناو کەوانەدا بن، بەڵام دەکرێت گۆڕاوەکان لە دەرەوەی فەنکشنیشدابن و بانگ بکرێنەوە.</li>
-                <li><strong><span class="highlight">return</span>:</strong> دەتوانین نرخێک بگەڕێنینەوە لە ڕێگەی ووشەی ڕیتێرن. وە وشەی ڕیتێرن بەکاردێت لە کۆتایی فەنکشنەوە.</li>
-            </ul>
+            <h3>دابەشکردنی دیالێکتەکانی زمانی کوردی:</h3>
+            <div class="info-box box-green">
+                <strong>١- عەمەرە دۆخی دیالێکتەکانی چۆن دیاری کردووە:</strong><br>
+                ١- کرمانجی ، ٢- لۆڕ ، ٣- گۆران ، ٤- کەلهوڕ
+                <hr style="border: 0; border-top: 1px dashed var(--border-green); margin: 10px 0;">
+                <strong>٢- شێخ محەمەدی خاڵ دیالێکتەکانی دیاری کردووە:</strong><br>
+                ١- زازا ، ٢- کرمانجی دەستە چەپ ، ٣- کرمانجی دەستە ڕاست ، ٤- لۆڕ
+            </div>
         </div>
 
     </div>
