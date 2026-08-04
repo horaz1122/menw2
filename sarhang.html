@@ -2,71 +2,78 @@
 <html lang="ckb" dir="rtl">
 <head>
     <meta charset="UTF-8">
-    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0, maximum-scale=1.0, user-scalable=no">
     <title>بانگهێشتنامەی ڤیدیۆیی - ڕەوێن و سەبا</title>
     <!-- ئایکۆنەکان -->
     <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.4.0/css/all.min.css">
-    <!-- فۆنتەکان (فۆنتی Noto بۆ نووسینی ئاسایی، وە Aref Ruqaa بۆ ناوەکان کە شێوەی دەستنووسە) -->
     <style>
         @import url('https://fonts.googleapis.com/css2?family=Aref+Ruqaa:wght@400;700&family=Noto+Naskh+Arabic:wght@400;700&display=swap');
 
         :root {
-            --env-red: #cc001b; /* ڕەنگی سوری تۆخی زەرفەکە */
-            --env-dark: #8b0010; /* سێبەری زەرفەکە */
-            --bg-pink: #fde8ea; /* باکگراوندی پەمەیی کاڵ بۆ ناوەوە */
-            --card-header: #7b081c; /* ڕەنگی سەردێڕی کارتەکان وەک ڤیدیۆکە */
-            --text-dark: #333;
+            --env-red: #cc001b;
+            --env-dark: #8b0010;
+            --bg-pink: #fdf2f4; /* پەمەییەکی زۆر نەرمتر بۆ چاو */
+            --card-header: #8a1329;
+            --text-dark: #2c2c2c;
+            --gold: #d4af37;
         }
 
         * {
             box-sizing: border-box;
             margin: 0;
             padding: 0;
+            -webkit-tap-highlight-color: transparent; /* لادانی ڕەنگی شین لەکاتی کلیک کردن لە مۆبایل */
         }
 
-        body {
-            background-color: #111; /* تاریکی دەرەوە پێش چوونە ناوەوە */
+        body, html {
+            width: 100%;
+            height: 100%;
+            background-color: #0d0003;
             font-family: 'Noto Naskh Arabic', Tahoma, sans-serif;
-            overflow: hidden; /* سەرەتا سکرۆڵ قوفڵە */
-            width: 100vw;
-            height: 100vh;
+            overflow-x: hidden;
         }
 
-        /* ================= بەشی یەکەم: زەرفە سورەکە و جوڵەی زووم ================= */
+        /* قوفڵکردنی سکرۆڵ لە سەرەتادا */
+        body.locked {
+            overflow-y: hidden;
+        }
+
+        /* ================= دیمەنی یەکەم: زەرفە سورەکە ================= */
         #intro-scene {
             position: fixed;
-            top: 0; left: 0; width: 100%; height: 100%;
+            top: 0; left: 0; 
+            width: 100%; height: 100dvh; /* 100dvh بۆ مۆبایل زۆر باشترە */
             display: flex;
             justify-content: center;
             align-items: center;
             z-index: 100;
-            transition: opacity 0.8s ease;
+            background-color: #0d0003;
+            transition: opacity 1s ease, visibility 1s;
         }
 
         .envelope-wrapper {
             position: relative;
-            width: 340px;
-            height: 240px;
+            width: 85vw; /* گونجاندن لەگەڵ شاشەی مۆبایل */
+            max-width: 350px;
+            aspect-ratio: 1.4 / 1; /* ڕێژەی درێژی و پانی بۆ پاراستنی شێوەکەی */
             cursor: pointer;
-            filter: drop-shadow(0 20px 40px rgba(0,0,0,0.8));
-            /* جوڵەی زوومبوون بۆ ناوەوە */
-            transition: transform 1.2s cubic-bezier(0.77, 0, 0.175, 1);
+            filter: drop-shadow(0 15px 35px rgba(0,0,0,0.9));
+            transition: transform 1s cubic-bezier(0.77, 0, 0.175, 1), opacity 0.8s;
         }
 
-        /* کاتێک زووم دەبێتە ناوەوە */
+        /* جوڵەی زوومبوون بە شێوەیەکی نەرمتر بۆ مۆبایل */
         .envelope-wrapper.zoom {
-            transform: scale(40) translateY(10px);
+            transform: scale(15) translateY(5px);
+            opacity: 0;
         }
 
-        /* بەشی ناوەوەی زەرفەکە (ڕەنگی تاریک) */
-        .env-inside {
+        .env-layer {
             position: absolute;
             top: 0; left: 0; width: 100%; height: 100%;
-            background: #4a0008;
-            border-radius: 8px;
+            border-radius: 10px;
         }
 
-        /* نەخشی گوڵەکانی سەر زەرفەکە (بۆ ئەوەی لە قوماشی نەخشێنراو بچێت) */
+        /* نەخشی سەر زەرفەکە */
         .env-pattern {
             position: absolute;
             top: 0; left: 0; width: 100%; height: 100%;
@@ -77,45 +84,36 @@
             z-index: 10;
         }
 
-        /* لاپەڕەی خوارەوە */
+        .env-inside { background: #3d0007; }
+
         .env-bottom {
-            position: absolute;
-            bottom: 0; left: 0; width: 100%; height: 100%;
             background: linear-gradient(to top, var(--env-dark), var(--env-red));
             clip-path: polygon(0 100%, 50% 45%, 100% 100%);
             z-index: 4;
-            border-radius: 0 0 8px 8px;
+            border-radius: 0 0 10px 10px;
         }
 
-        /* لاپەڕەکانی ڕاست و چەپ */
         .env-left {
-            position: absolute;
-            top: 0; left: 0; width: 100%; height: 100%;
             background: linear-gradient(to right, var(--env-dark), var(--env-red));
             clip-path: polygon(0 0, 50% 50%, 0 100%);
             z-index: 3;
-            border-radius: 8px 0 0 8px;
+            border-radius: 10px 0 0 10px;
         }
 
         .env-right {
-            position: absolute;
-            top: 0; right: 0; width: 100%; height: 100%;
             background: linear-gradient(to left, var(--env-dark), var(--env-red));
             clip-path: polygon(100% 0, 50% 50%, 100% 100%);
             z-index: 3;
-            border-radius: 0 8px 8px 0;
+            border-radius: 0 10px 10px 0;
         }
 
-        /* سەرپۆشەکە (Flap) */
         .env-top {
-            position: absolute;
-            top: 0; left: 0; width: 100%; height: 100%;
-            background: linear-gradient(to bottom, #e3001e, var(--env-dark));
+            background: linear-gradient(to bottom, #f20020, var(--env-dark));
             clip-path: polygon(0 0, 100% 0, 50% 55%);
             transform-origin: top;
             transition: transform 0.6s cubic-bezier(0.4, 0, 0.2, 1);
             z-index: 5;
-            filter: drop-shadow(0 10px 10px rgba(0,0,0,0.6));
+            filter: drop-shadow(0 8px 10px rgba(0,0,0,0.5));
         }
 
         .envelope-wrapper.open .env-top {
@@ -123,15 +121,32 @@
             z-index: 1;
         }
 
-        /* ================= بەشی دووەم: زانیارییەکانی ناوەوە ================= */
+        /* نیشانەی کلیک کردن */
+        .tap-hint {
+            position: absolute;
+            bottom: -50px;
+            left: 50%;
+            transform: translateX(-50%);
+            color: rgba(255, 255, 255, 0.7);
+            font-size: 14px;
+            font-weight: bold;
+            white-space: nowrap;
+            animation: pulseHint 2s infinite;
+        }
+
+        @keyframes pulseHint { 0%, 100% { opacity: 0.4; } 50% { opacity: 1; } }
+
+        /* ================= دیمەنی دووەم: زانیارییەکان ================= */
         #main-scene {
             position: absolute;
-            top: 0; left: 0; width: 100%; min-height: 100vh;
-            background: linear-gradient(to bottom, #fce5e8, #f8ccd1);
+            top: 0; left: 0; 
+            width: 100%; 
+            min-height: 100dvh;
+            background: linear-gradient(to bottom, #ffffff, var(--bg-pink));
             display: flex;
             flex-direction: column;
             align-items: center;
-            padding: 40px 20px;
+            padding: 40px 15px; /* بۆشایی زیاتر بۆ لایەکانی مۆبایل */
             opacity: 0;
             visibility: hidden;
             transition: opacity 1s ease;
@@ -143,51 +158,51 @@
             visibility: visible;
         }
 
-        /* پەپوولەکە */
+        /* پەپوولە و پێشەکی */
         .butterfly {
-            width: 100px;
-            margin-bottom: 20px;
-            animation: floatFly 3s ease-in-out infinite;
-            filter: drop-shadow(0 5px 10px rgba(0,0,0,0.1));
+            width: 80px;
+            margin-bottom: 15px;
+            animation: floatFly 3.5s ease-in-out infinite;
         }
         @keyframes floatFly {
-            0%, 100% { transform: translateY(0); }
-            50% { transform: translateY(-15px); }
+            0%, 100% { transform: translateY(0) rotate(-2deg); }
+            50% { transform: translateY(-12px) rotate(2deg); }
         }
 
         .welcome-text {
-            font-size: 15px;
+            font-size: 14px;
             color: var(--text-dark);
             text-align: center;
             line-height: 1.8;
-            margin-bottom: 20px;
+            margin-bottom: 15px;
             font-weight: bold;
-            max-width: 320px;
+            max-width: 90%;
         }
 
-        /* ناوەکان وەک ڤیدیۆکە بە فۆنتی جوان */
         .couple-names {
             font-family: 'Aref Ruqaa', serif;
-            font-size: 55px;
-            color: #bd0a22;
+            font-size: clamp(40px, 12vw, 55px); /* فۆنتەکە بەپێی شاشە گەورە و بچووک دەبێت */
+            color: var(--card-header);
             font-weight: bold;
-            margin-bottom: 40px;
+            margin-bottom: 35px;
             text-align: center;
             line-height: 1.2;
-            text-shadow: 1px 1px 3px rgba(189, 10, 34, 0.2);
+            text-shadow: 1px 2px 4px rgba(138, 19, 41, 0.15);
         }
 
-        /* شێوازی کارتەکان */
+        /* کارتەکانی زانیاری */
         .info-card {
             width: 100%;
-            max-width: 360px;
-            border-radius: 15px;
-            margin-bottom: 25px;
-            box-shadow: 0 8px 25px rgba(0,0,0,0.06);
-            /* جوڵەی دەرکەوتن بە سکرۆڵ */
-            transform: translateY(40px);
+            max-width: 400px;
+            border-radius: 16px;
+            margin-bottom: 20px;
+            background: #fff;
+            box-shadow: 0 10px 30px rgba(0,0,0,0.04);
+            transform: translateY(30px);
             opacity: 0;
-            transition: all 0.8s ease-out;
+            transition: transform 0.8s ease-out, opacity 0.8s ease-out;
+            overflow: hidden;
+            border: 1px solid rgba(138, 19, 41, 0.05);
         }
 
         .info-card.fade-in {
@@ -198,32 +213,28 @@
         .card-header {
             background-color: var(--card-header);
             color: #fff;
-            padding: 15px;
+            padding: 14px;
             text-align: center;
-            font-size: 18px;
+            font-size: 16px;
             font-weight: bold;
-            border-radius: 15px 15px 0 0;
             display: flex;
             justify-content: center;
             align-items: center;
-            gap: 10px;
+            gap: 8px;
         }
 
         .card-body {
-            background-color: #fdf5f6;
-            padding: 20px;
+            padding: 20px 15px;
             text-align: center;
-            border-radius: 0 0 15px 15px;
-            border: 1px solid #f5d7db;
-            border-top: none;
+            background-color: #fafafa;
         }
 
-        /* ڕێکخستنی بەروار ڕێک وەک ڤیدیۆکە */
+        /* بەروار */
         .date-grid {
             display: flex;
             justify-content: center;
             align-items: center;
-            gap: 20px;
+            gap: 15px;
             margin-bottom: 15px;
         }
         
@@ -233,113 +244,118 @@
             align-items: center;
             color: var(--card-header);
             font-weight: bold;
-            font-size: 22px;
+            font-size: 20px;
         }
         
         .date-item span {
-            font-size: 12px;
-            color: #777;
-            font-weight: normal;
-            margin-top: 2px;
+            font-size: 11px;
+            color: #888;
+            margin-top: 3px;
         }
 
-        .date-divider { color: #d4af37; font-size: 20px; }
+        .date-divider { color: var(--gold); font-size: 18px; }
 
         .time-box {
             display: inline-flex;
             align-items: center;
             gap: 8px;
-            font-size: 15px;
+            font-size: 14px;
             color: var(--card-header);
             font-weight: bold;
             background: #fff;
-            padding: 8px 20px;
-            border-radius: 20px;
-            border: 1px solid #f5d7db;
-            margin-top: 10px;
+            padding: 10px 20px;
+            border-radius: 25px;
+            border: 1px solid rgba(138, 19, 41, 0.1);
+            box-shadow: 0 4px 10px rgba(0,0,0,0.02);
         }
 
-        /* وێنەی نەخشە */
+        /* نەخشە */
         .map-text {
-            font-size: 14px;
+            font-size: 13.5px;
             color: var(--text-dark);
             margin-bottom: 15px;
             font-weight: bold;
             line-height: 1.8;
+            padding: 0 10px;
         }
         
         .map-image {
             width: 100%;
-            height: 140px;
+            height: 130px;
             object-fit: cover;
-            border-radius: 10px;
+            border-radius: 12px;
             margin-bottom: 15px;
-            border: 1px solid #e0e0e0;
         }
 
+        /* دوگمەکان */
         .btn-action {
-            display: inline-flex;
+            display: flex;
             align-items: center;
             justify-content: center;
             gap: 8px;
             background-color: var(--card-header);
             color: #fff;
             text-decoration: none;
-            padding: 10px 25px;
-            border-radius: 25px;
+            padding: 12px 20px;
+            border-radius: 30px;
             font-weight: bold;
-            font-size: 15px;
+            font-size: 14px;
             width: 100%;
-            transition: 0.3s;
+            transition: background 0.3s, transform 0.2s;
+            box-shadow: 0 4px 15px rgba(138, 19, 41, 0.2);
+        }
+        
+        .btn-action:active {
+            transform: scale(0.97);
         }
 
-        /* بەشی خوارەوە بۆ ئایکۆنی سۆشیاڵ میدیا */
+        /* ئایکۆنی سۆشیاڵ میدیا */
         .social-icons {
             display: flex;
             justify-content: center;
-            gap: 15px;
-            margin-top: 15px;
+            gap: 20px;
+            margin-top: 18px;
         }
         .social-icons i {
-            font-size: 24px;
+            font-size: 22px;
             color: var(--card-header);
+            opacity: 0.8;
         }
 
     </style>
 </head>
-<body>
+<body class="locked">
 
     <!-- دیمەنی یەکەم: زەرفە سورەکە -->
     <div id="intro-scene">
         <div class="envelope-wrapper" id="envelope" onclick="startJourney()">
-            <!-- نەخشی گوڵ بۆ هەموو زەرفەکە -->
             <div class="env-pattern"></div>
             
-            <div class="env-inside"></div>
-            <div class="env-bottom"><div class="env-pattern"></div></div>
-            <div class="env-left"><div class="env-pattern"></div></div>
-            <div class="env-right"><div class="env-pattern"></div></div>
-            <div class="env-top"><div class="env-pattern"></div></div>
+            <div class="env-layer env-inside"></div>
+            <div class="env-layer env-bottom"><div class="env-pattern"></div></div>
+            <div class="env-layer env-left"><div class="env-pattern"></div></div>
+            <div class="env-layer env-right"><div class="env-pattern"></div></div>
+            <div class="env-layer env-top"><div class="env-pattern"></div></div>
+
+            <div class="tap-hint">کرتە بکە بۆ بینین</div>
         </div>
     </div>
 
-    <!-- دیمەنی دووەم: زانیارییەکان ڕێک وەک ڤیدیۆکە -->
+    <!-- دیمەنی دووەم: زانیارییەکان -->
     <div id="main-scene">
         
-        <!-- پەپوولە (وەک ڤیدیۆکە) -->
-        <img src="https://cdn-icons-png.flaticon.com/512/2926/2926017.png" alt="Butterfly" class="butterfly" style="filter: hue-rotate(320deg) drop-shadow(0 5px 5px rgba(0,0,0,0.1));">
+        <img src="https://cdn-icons-png.flaticon.com/512/2926/2926017.png" alt="Butterfly" class="butterfly" style="filter: hue-rotate(320deg);">
         
         <p class="welcome-text">
             بەوپەڕی خۆشحاڵییەوە بانگهێشتتان دەکەین بۆ ئامادەبوون لە ئاهەنگی هاوسەرگیریمان
         </p>
         
-        <!-- ناوەکان بە فۆنتی دەستنووس -->
         <h1 class="couple-names">ڕەوێن<br>و<br>سەبا</h1>
 
         <!-- کارتی 1: ڕۆژی ئاهەنگ -->
         <div class="info-card fade-element">
             <div class="card-header">
-                ڕۆژی ئاهەنگ <i class="fa-solid fa-heart" style="margin-right: 5px;"></i>
+                ڕۆژی ئاهەنگ <i class="fa-solid fa-heart" style="margin-right: 6px;"></i>
             </div>
             <div class="card-body">
                 <div class="date-grid">
@@ -358,17 +374,16 @@
         <!-- کارتی 2: شوێن -->
         <div class="info-card fade-element">
             <div class="card-header">
-                شوێن <i class="fa-solid fa-map-location-dot" style="margin-right: 5px;"></i>
+                شوێن <i class="fa-solid fa-map-location-dot" style="margin-right: 6px;"></i>
             </div>
             <div class="card-body">
                 <p class="map-text">
                     هۆڵی گەلەری جەمبور، کانی با هوتێل دووەم، سەروو مزگەوتی خێرخوازان
                 </p>
-                <!-- وێنەیەکی نەخشە وەک ڤیدیۆکە -->
                 <img src="https://media.wired.com/photos/59269cd37034dc5f91bec0f1/master/pass/GoogleMapTA.jpg" class="map-image" alt="نەخشە">
                 
                 <a href="#" class="btn-action">
-                    گرتە لێرە بکە <i class="fa-solid fa-location-arrow"></i>
+                    گرتە لێرە بکە بۆ نەخشە <i class="fa-solid fa-location-arrow"></i>
                 </a>
             </div>
         </div>
@@ -376,10 +391,10 @@
         <!-- کارتی 3: شێوازی جل لەبەرکردن -->
         <div class="info-card fade-element">
             <div class="card-header">
-                شێوازی جل لەبەرکردن <i class="fa-solid fa-shirt" style="margin-right: 5px;"></i>
+                شێوازی جل لەبەرکردن <i class="fa-solid fa-shirt" style="margin-right: 6px;"></i>
             </div>
             <div class="card-body">
-                <p style="font-size: 14px; color: #555; font-weight: bold; line-height: 1.8;">
+                <p style="font-size: 13.5px; color: #555; font-weight: bold; line-height: 1.8;">
                     بۆ زیاتر ڕازاندنەوەی ئاهەنگەکەمان، ئامادەبوونتان بە جلی کوردییەوە زیاتر خۆشحاڵمان دەکات.
                 </p>
             </div>
@@ -388,17 +403,16 @@
         <!-- کارتی 4: پەیوەندی -->
         <div class="info-card fade-element">
             <div class="card-header">
-                پەیوەندی <i class="fa-solid fa-phone" style="margin-right: 5px;"></i>
+                پەیوەندی <i class="fa-solid fa-phone" style="margin-right: 6px;"></i>
             </div>
             <div class="card-body">
-                <p style="font-size: 14px; color: #555; font-weight: bold; margin-bottom: 15px; line-height: 1.8;">
+                <p style="font-size: 13.5px; color: #555; font-weight: bold; margin-bottom: 15px; line-height: 1.8;">
                     بۆ زانیاری زیاتر و پشتڕاستکردنەوەی ئامادەبوونتان تکایە پەیوەندی بکەن.
                 </p>
                 <a href="tel:07500000000" class="btn-action">
                     پەیوەندیکردن <i class="fa-solid fa-phone-volume"></i>
                 </a>
                 
-                <!-- ئایکۆنەکانی خوارەوە وەک ڤیدیۆکە -->
                 <div class="social-icons">
                     <i class="fa-brands fa-instagram"></i>
                     <i class="fa-brands fa-facebook"></i>
@@ -415,36 +429,49 @@
             const mainScene = document.getElementById('main-scene');
 
             if (!envelope.classList.contains('open')) {
-                // هەنگاوی 1: کرانەوەی سەرپۆشەکە
+                // ١. کردنەوەی سەرپۆشەکە
                 envelope.classList.add('open');
 
-                // هەنگاوی 2: زوومکردن بۆ ناوەوە (دوای کەمێک)
+                // ٢. زوومکردن بۆ ناوەوە بە نەرمی دوای کەمێک
                 setTimeout(() => {
                     envelope.classList.add('zoom');
-                }, 700); 
+                }, 600); 
 
-                // هەنگاوی 3: دەرکەوتنی زانیارییەکان و ڕێگەدان بە سکرۆڵ
+                // ٣. شاردنەوەی دیمەنی یەکەم و دەرخستنی زانیارییەکان
                 setTimeout(() => {
-                    introScene.style.display = 'none'; // شاردنەوەی تەواوەتی زەرفەکە
-                    mainScene.classList.add('show'); // دەرخستنی بەشی ناوەوە
-                    document.body.style.overflowY = 'auto'; // کردنەوەی سکرۆڵ
+                    introScene.style.opacity = '0';
                     
-                    // چالاککردنی جوڵەی کارتەکان بە سکرۆڵ
-                    activateScrollAnimations();
-                }, 1600); // دەبێت چاوەڕێی تەواوبوونی زوومەکە بکات
+                    setTimeout(() => {
+                        introScene.style.display = 'none'; // تەواو لایدەبەین لەسەر شاشەکە
+                        mainScene.classList.add('show');
+                        document.body.classList.remove('locked'); // ڕێگەدان بە سکرۆڵ لە مۆبایل
+                        
+                        activateScrollAnimations();
+                    }, 500);
+                }, 1300);
             }
         }
 
-        // فەنکشنی دەرکەوتنی کارتەکان بە جوانی لەکاتی سکرۆڵکردن
+        // دەرکەوتنی کارتەکان یەک لە دوای یەک لەکاتی سکرۆڵ
         function activateScrollAnimations() {
             const elements = document.querySelectorAll('.fade-element');
+            
+            // پێدانی کەمێک دواکەوتن (Delay) بۆ کارتەکان تا یەک لە دوای یەک دەربکەون
+            elements.forEach((el, index) => {
+                el.style.transitionDelay = `${index * 0.15}s`;
+            });
+
             const observer = new IntersectionObserver((entries) => {
                 entries.forEach(entry => {
                     if (entry.isIntersecting) {
                         entry.target.classList.add('fade-in');
+                        // لابردنی delay دوای دەرکەوتنی یەکەم جار
+                        setTimeout(() => {
+                            entry.target.style.transitionDelay = '0s';
+                        }, 1000);
                     }
                 });
-            }, { threshold: 0.15 });
+            }, { threshold: 0.1 }); // 0.1 وا دەکات خێراتر دەربکەوێت لە مۆبایل
 
             elements.forEach(el => observer.observe(el));
         }
