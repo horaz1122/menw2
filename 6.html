@@ -1,0 +1,483 @@
+<!DOCTYPE html>
+<html lang="ckb" dir="rtl">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0, maximum-scale=1.0, user-scalable=no">
+    <title>بانگهێشتنامەی پەڕتووکی خەیاڵی</title>
+    <!-- ئایکۆنەکان -->
+    <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.4.0/css/all.min.css">
+    <style>
+        @import url('https://fonts.googleapis.com/css2?family=Aref+Ruqaa:wght@400;700&family=Noto+Naskh+Arabic:wght@400;700&display=swap');
+
+        :root {
+            --bg-magic: #0b0c10; /* تاریکی شەو */
+            --book-cover: #2a1124; /* ڕەنگی بەرگی پەڕتووکەکە (مۆری تاریک) */
+            --book-page: #fdf6e9; /* ڕەنگی پەڕەی ناوەوە */
+            --gold: #d4af37;
+            --text-vintage: #3e2723; /* قاوەیی تاریک بۆ نووسینی سەر پەڕەکە */
+        }
+
+        * {
+            box-sizing: border-box;
+            margin: 0;
+            padding: 0;
+            -webkit-tap-highlight-color: transparent;
+        }
+
+        body, html {
+            width: 100%;
+            height: 100%;
+            background-color: var(--bg-magic);
+            font-family: 'Noto Naskh Arabic', Tahoma, sans-serif;
+            overflow-x: hidden;
+        }
+
+        body.locked { overflow-y: hidden; }
+
+        /* ================= دیمەنی یەکەم: پەڕتووکەکە ================= */
+        #intro-scene {
+            position: fixed;
+            top: 0; left: 0;
+            width: 100%; height: 100dvh;
+            display: flex;
+            justify-content: center;
+            align-items: center;
+            z-index: 100;
+            background: radial-gradient(circle at center, #1f1423, #0b0c10);
+            perspective: 1500px;
+            transition: opacity 1.5s ease;
+        }
+
+        /* تەنۆلکەی سیحراوی لە دەوری پەڕتووکەکە */
+        .magic-dust {
+            position: absolute;
+            width: 100%; height: 100%;
+            pointer-events: none;
+            z-index: 1;
+        }
+
+        .book-wrapper {
+            position: relative;
+            width: 220px;
+            height: 320px;
+            cursor: pointer;
+            z-index: 10;
+            transform-style: preserve-3d;
+            transition: transform 1.5s cubic-bezier(0.68, -0.15, 0.265, 1.55);
+            box-shadow: -20px 20px 30px rgba(0,0,0,0.8);
+            border-radius: 5px 15px 15px 5px;
+        }
+
+        /* کاتێک کامێراکە دەچێتە ناو پەڕتووکەکە */
+        .book-wrapper.zoom-in {
+            transform: scale(8) translateX(20px);
+            opacity: 0;
+            pointer-events: none;
+        }
+
+        /* پەڕەی ناوەوەی پەڕتووکەکە (پشت بەرگەکە) */
+        .book-page-inside {
+            position: absolute;
+            top: 5px; right: 5px; bottom: 5px; left: 15px;
+            background: #ffeac7;
+            border-radius: 3px 10px 10px 3px;
+            box-shadow: inset 10px 0 20px rgba(0,0,0,0.1);
+            z-index: 1;
+            display: flex;
+            justify-content: center;
+            align-items: center;
+            overflow: hidden;
+        }
+
+        /* ڕووناکییەکی زێڕین کە لە ناوەوە هەڵدێت کاتێک دەکرێتەوە */
+        .glowing-light {
+            position: absolute;
+            width: 100%; height: 100%;
+            background: radial-gradient(circle, rgba(255,235,150,1) 0%, rgba(255,215,0,0) 70%);
+            opacity: 0;
+            transition: opacity 1s ease 0.5s;
+        }
+
+        .book-wrapper.opened .glowing-light { opacity: 1; }
+
+        /* بەرگی پەڕتووکەکە */
+        .book-cover {
+            position: absolute;
+            top: 0; left: 0;
+            width: 100%; height: 100%;
+            background: var(--book-cover);
+            background-image: url('https://www.transparenttextures.com/patterns/leather.png');
+            border-radius: 5px 15px 15px 5px;
+            z-index: 5;
+            transform-origin: right center; /* لە ڕاستەوە دەکرێتەوە چونکە کوردییە */
+            transition: transform 1.2s cubic-bezier(0.4, 0, 0.2, 1);
+            transform-style: preserve-3d;
+            border-left: 2px solid rgba(255,255,255,0.1);
+            border-top: 2px solid rgba(255,255,255,0.1);
+            display: flex;
+            flex-direction: column;
+            justify-content: center;
+            align-items: center;
+            padding: 20px;
+            box-shadow: -5px 0 15px rgba(0,0,0,0.5);
+        }
+
+        /* چوارچێوەی زێڕینی سەر بەرگەکە */
+        .book-cover::before {
+            content: '';
+            position: absolute;
+            top: 15px; left: 15px; right: 15px; bottom: 15px;
+            border: 2px solid var(--gold);
+            border-radius: 5px;
+            opacity: 0.8;
+        }
+
+        /* کاتێک پەڕتووکەکە دەکرێتەوە */
+        .book-wrapper.opened .book-cover {
+            transform: rotateY(160deg);
+            box-shadow: 10px 0 20px rgba(0,0,0,0.5);
+        }
+
+        .cover-title {
+            font-family: 'Aref Ruqaa', serif;
+            font-size: 28px;
+            color: var(--gold);
+            text-align: center;
+            text-shadow: 0 2px 4px rgba(0,0,0,0.8);
+            line-height: 1.4;
+            z-index: 2;
+        }
+
+        .cover-icon {
+            font-size: 35px;
+            color: var(--gold);
+            margin-bottom: 20px;
+            z-index: 2;
+        }
+
+        .tap-hint {
+            position: absolute;
+            bottom: -50px;
+            color: rgba(255,255,255,0.6);
+            font-size: 14px;
+            font-weight: bold;
+            animation: pulseHint 2s infinite;
+        }
+
+        @keyframes pulseHint { 0%, 100% { opacity: 0.4; } 50% { opacity: 1; } }
+
+
+        /* ================= دیمەنی دووەم: ناوەوەی پەڕتووکەکە ================= */
+        #main-content {
+            position: absolute;
+            top: 0; left: 0;
+            width: 100%;
+            min-height: 100dvh;
+            background-color: #1a1a1a;
+            display: flex;
+            flex-direction: column;
+            align-items: center;
+            padding: 30px 15px;
+            opacity: 0;
+            visibility: hidden;
+            transition: opacity 1.5s ease;
+            z-index: 10;
+        }
+
+        #main-content.show {
+            opacity: 1;
+            visibility: visible;
+        }
+
+        /* شێوەی پەڕەیەکی کۆن (Parchment Paper) */
+        .story-page {
+            width: 100%;
+            max-width: 450px;
+            background-color: var(--book-page);
+            background-image: url('https://www.transparenttextures.com/patterns/cream-paper.png');
+            border-radius: 8px;
+            padding: 50px 25px;
+            box-shadow: 0 0 40px rgba(0,0,0,0.5), inset 0 0 50px rgba(139, 69, 19, 0.1);
+            position: relative;
+            text-align: center;
+            transform: translateY(30px);
+            transition: transform 1s ease-out;
+        }
+
+        #main-content.show .story-page { transform: translateY(0); }
+
+        /* نەخشی گۆشەکانی پەڕەکە */
+        .corner-ornament {
+            position: absolute;
+            width: 50px;
+            height: 50px;
+            border: 2px solid #b58d3c;
+            opacity: 0.5;
+        }
+        .co-tl { top: 15px; left: 15px; border-right: none; border-bottom: none; }
+        .co-tr { top: 15px; right: 15px; border-left: none; border-bottom: none; }
+        .co-bl { bottom: 15px; left: 15px; border-right: none; border-top: none; }
+        .co-br { bottom: 15px; right: 15px; border-left: none; border-top: none; }
+
+        .chapter-title {
+            font-size: 14px;
+            color: #8b5a2b;
+            font-weight: bold;
+            letter-spacing: 2px;
+            margin-bottom: 20px;
+            text-transform: uppercase;
+        }
+
+        .names {
+            font-family: 'Aref Ruqaa', serif;
+            font-size: clamp(42px, 12vw, 55px);
+            color: var(--text-vintage);
+            font-weight: bold;
+            line-height: 1.2;
+            margin-bottom: 25px;
+        }
+
+        .names span {
+            color: #b58d3c;
+            font-size: 30px;
+            margin: 0 10px;
+        }
+
+        .divider {
+            width: 60px;
+            height: 3px;
+            background: #b58d3c;
+            margin: 0 auto 30px auto;
+            border-radius: 2px;
+        }
+
+        .story-text {
+            font-size: 15px;
+            color: var(--text-vintage);
+            line-height: 2.2;
+            margin-bottom: 40px;
+            font-weight: bold;
+        }
+
+        /* زانیارییەکان */
+        .info-section {
+            display: flex;
+            flex-direction: column;
+            gap: 20px;
+            position: relative;
+        }
+
+        .info-row {
+            display: flex;
+            align-items: center;
+            justify-content: center;
+            gap: 12px;
+            opacity: 0;
+            transform: translateY(15px);
+            transition: all 0.6s ease;
+        }
+
+        .info-row.fade-in {
+            opacity: 1;
+            transform: translateY(0);
+        }
+
+        .info-icon {
+            color: #b58d3c;
+            font-size: 20px;
+        }
+
+        .info-text {
+            color: var(--text-vintage);
+            font-weight: bold;
+            font-size: 16px;
+        }
+
+        /* دوگمەکان */
+        .btn-container {
+            display: flex;
+            gap: 15px;
+            margin-top: 40px;
+            opacity: 0;
+            transition: opacity 1s ease 0.5s;
+        }
+        
+        .btn-container.fade-in { opacity: 1; }
+
+        .btn {
+            flex: 1;
+            padding: 12px 10px;
+            border-radius: 5px;
+            font-weight: bold;
+            font-size: 15px;
+            text-decoration: none;
+            display: flex;
+            justify-content: center;
+            align-items: center;
+            gap: 8px;
+            transition: 0.3s;
+            border: 1px solid #b58d3c;
+        }
+
+        .btn-vintage {
+            background: #b58d3c;
+            color: #fff;
+            box-shadow: 0 4px 10px rgba(181, 141, 60, 0.3);
+        }
+        .btn-vintage:active { transform: scale(0.95); }
+
+        .btn-outline {
+            background: transparent;
+            color: var(--text-vintage);
+        }
+
+    </style>
+</head>
+<body class="locked">
+
+    <!-- دیمەنی یەکەم: پەڕتووکەکە -->
+    <div id="intro-scene">
+        
+        <!-- تەنۆلکەی ئەستێرە لە پشت پەڕتووکەکەوە -->
+        <div class="magic-dust" id="dust-container"></div>
+
+        <div class="book-wrapper" id="book" onclick="openBook()">
+            
+            <!-- پەڕەی ناوەوەی پەڕتووکەکە -->
+            <div class="book-page-inside">
+                <div class="glowing-light"></div>
+            </div>
+
+            <!-- بەرگی پەڕتووکەکە -->
+            <div class="book-cover">
+                <i class="fa-solid fa-book-journal-whills cover-icon"></i>
+                <div class="cover-title">چیرۆکی<br>خۆشەویستی<br>ئێمە</div>
+            </div>
+
+            <div class="tap-hint" id="hint">بۆ خوێندنەوەی چیرۆکەکە کرتە بکە</div>
+        </div>
+    </div>
+
+    <!-- دیمەنی دووەم: پەڕەی بانگهێشتنامەکە -->
+    <div id="main-content">
+        <div class="story-page">
+            
+            <!-- نەخشی گۆشەکان -->
+            <div class="corner-ornament co-tl"></div>
+            <div class="corner-ornament co-tr"></div>
+            <div class="corner-ornament co-bl"></div>
+            <div class="corner-ornament co-br"></div>
+
+            <div class="chapter-title">بەشی یەکەم: یەکگرتن</div>
+            
+            <div class="names">
+                ئەحمەد <span>&</span> سارا
+            </div>
+            
+            <div class="divider"></div>
+            
+            <p class="story-text">
+                هەر چیرۆکێکی جوان دەستپێکێکی هەیە، بەڵام چیرۆکی ئێمە کۆتایی نایەت. بەوپەڕی خۆشحاڵییەوە بانگهێشتتان دەکەین بۆ ئامادەبوون لە جوانترین ڕۆژی ژیانمان.
+            </p>
+
+            <div class="info-section">
+                <!-- ڕۆژ -->
+                <div class="info-row fade-element">
+                    <i class="fa-regular fa-calendar-check info-icon"></i>
+                    <span class="info-text">پێنج شەممە - ٢٥ / ٨ / ٢٠٢٦</span>
+                </div>
+                
+                <!-- کات -->
+                <div class="info-row fade-element">
+                    <i class="fa-regular fa-clock info-icon"></i>
+                    <span class="info-text">کاتژمێر ٤:٣٠ ی پاش نیوەڕۆ</span>
+                </div>
+
+                <!-- شوێن -->
+                <div class="info-row fade-element">
+                    <i class="fa-solid fa-location-dot info-icon"></i>
+                    <span class="info-text">هۆڵی تەلاری زێڕین - سلێمانی</span>
+                </div>
+            </div>
+
+            <div class="btn-container fade-element">
+                <a href="tel:07500000000" class="btn btn-vintage">
+                    <i class="fa-solid fa-phone"></i> پەیوەندی
+                </a>
+                <a href="#" class="btn btn-outline">
+                    <i class="fa-solid fa-map-location-dot"></i> نەخشە
+                </a>
+            </div>
+
+        </div>
+    </div>
+
+    <script>
+        // دروستکردنی تەنۆلکەی سیحراوی دەوری پەڕتووکەکە
+        function createMagicDust() {
+            const container = document.getElementById('dust-container');
+            for(let i=0; i<30; i++) {
+                let dust = document.createElement('div');
+                dust.style.position = 'absolute';
+                dust.style.width = Math.random() * 3 + 1 + 'px';
+                dust.style.height = dust.style.width;
+                dust.style.backgroundColor = '#d4af37';
+                dust.style.borderRadius = '50%';
+                dust.style.boxShadow = '0 0 10px 2px rgba(212, 175, 55, 0.5)';
+                dust.style.left = Math.random() * 100 + 'vw';
+                dust.style.top = Math.random() * 100 + 'vh';
+                
+                // جوڵەی هەڕەمەکی بۆ ئەستێرەکان
+                dust.style.animation = `pulseHint ${Math.random() * 3 + 1.5}s infinite alternate`;
+                container.appendChild(dust);
+            }
+        }
+        createMagicDust();
+
+        // فەنکشنی کردنەوەی پەڕتووکەکە
+        function openBook() {
+            const book = document.getElementById('book');
+            const intro = document.getElementById('intro-scene');
+            const main = document.getElementById('main-content');
+            const hint = document.getElementById('hint');
+
+            if (!book.classList.contains('opened')) {
+                // شاردنەوەی نووسینەکە
+                hint.style.display = 'none';
+
+                // ١. کردنەوەی بەرگی پەڕتووکەکە
+                book.classList.add('opened');
+
+                // ٢. دوای کەمێک، زووم دەکاتە ناو پەڕتووکەکە
+                setTimeout(() => {
+                    book.classList.add('zoom-in');
+                }, 1000); 
+
+                // ٣. شاردنەوەی دیمەنی یەکەم و دەرخستنی پەڕەی بانگهێشتنامەکە
+                setTimeout(() => {
+                    intro.style.opacity = '0';
+                    
+                    setTimeout(() => {
+                        intro.style.display = 'none';
+                        main.classList.add('show');
+                        document.body.classList.remove('locked');
+                        
+                        // دەرکەوتنی زانیارییەکان بەڕیز
+                        activateAnimations();
+                    }, 800);
+                }, 1800);
+            }
+        }
+
+        function activateAnimations() {
+            const elements = document.querySelectorAll('.fade-element');
+            elements.forEach((el, index) => {
+                setTimeout(() => {
+                    el.classList.add('fade-in');
+                }, index * 200 + 500); // دواکەوتنێک بۆ ئەوەی دوای دەرکەوتنی پەڕەکە دەست پێبکات
+            });
+        }
+    </script>
+
+</body>
+</html>

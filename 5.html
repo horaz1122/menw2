@@ -1,0 +1,509 @@
+<!DOCTYPE html>
+<html lang="ckb" dir="rtl">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0, maximum-scale=1.0, user-scalable=no">
+    <title>بانگهێشتنامەی دیاری</title>
+    <!-- ئایکۆنەکان -->
+    <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.4.0/css/all.min.css">
+    <style>
+        @import url('https://fonts.googleapis.com/css2?family=Aref+Ruqaa:wght@400;700&family=Noto+Naskh+Arabic:wght@400;700&display=swap');
+
+        :root {
+            --bg-intro: radial-gradient(circle, #1e293b, #0f172a);
+            --bg-main: #fffafb;
+            --rose-gold: #b76e79;
+            --rose-light: #e6c5ca;
+            --gold: #d4af37;
+            --text-dark: #333333;
+            --text-gray: #777777;
+        }
+
+        * {
+            box-sizing: border-box;
+            margin: 0;
+            padding: 0;
+            -webkit-tap-highlight-color: transparent;
+        }
+
+        body, html {
+            width: 100%;
+            height: 100%;
+            font-family: 'Noto Naskh Arabic', Tahoma, sans-serif;
+            overflow-x: hidden;
+            background: var(--bg-intro);
+        }
+
+        body.locked { overflow-y: hidden; }
+
+        /* ================= دیمەنی یەکەم: قوتووی دیاری ================= */
+        #intro-scene {
+            position: fixed;
+            top: 0; left: 0;
+            width: 100%; height: 100dvh;
+            display: flex;
+            justify-content: center;
+            align-items: center;
+            z-index: 100;
+            background: var(--bg-intro);
+            transition: opacity 1s ease;
+        }
+
+        .gift-container {
+            position: relative;
+            width: 160px;
+            height: 140px;
+            cursor: pointer;
+            transition: transform 0.3s;
+        }
+
+        .gift-container:active { transform: scale(0.95); }
+
+        /* بەشی دواوەی قوتووەکە */
+        .box-back {
+            position: absolute;
+            bottom: 0; left: 0;
+            width: 100%; height: 110px;
+            background: #90505a;
+            border-radius: 8px;
+        }
+
+        /* کارتی ناوەوە کە دێتە دەرەوە */
+        .mini-card {
+            position: absolute;
+            bottom: 10px; left: 15px; right: 15px;
+            height: 90px;
+            background: #ffffff;
+            z-index: 2;
+            border-radius: 5px;
+            display: flex;
+            justify-content: center;
+            align-items: center;
+            font-size: 35px;
+            color: var(--rose-gold);
+            border: 2px solid var(--rose-light);
+            box-shadow: 0 -5px 15px rgba(0,0,0,0.2);
+            transition: transform 1s cubic-bezier(0.25, 1, 0.5, 1) 0.1s;
+        }
+
+        /* بەشی پێشەوەی قوتووەکە */
+        .box-front {
+            position: absolute;
+            bottom: 0; left: 0;
+            width: 100%; height: 110px;
+            background: var(--rose-gold);
+            border-radius: 8px;
+            z-index: 3;
+            box-shadow: 0 15px 30px rgba(0,0,0,0.4);
+        }
+
+        /* شریتەکانی سەر قوتووەکە */
+        .ribbon-h {
+            position: absolute;
+            top: 50%; left: 0;
+            width: 100%; height: 20px;
+            background: #fdfdfd;
+            transform: translateY(-50%);
+            box-shadow: 0 2px 5px rgba(0,0,0,0.1);
+        }
+
+        .ribbon-v {
+            position: absolute;
+            top: 0; left: 50%;
+            width: 20px; height: 100%;
+            background: #fdfdfd;
+            transform: translateX(-50%);
+            box-shadow: 2px 0 5px rgba(0,0,0,0.1);
+        }
+
+        /* سەرپۆشی قوتووەکە */
+        .box-lid {
+            position: absolute;
+            top: 10px; left: -5px; right: -5px;
+            height: 35px;
+            background: #c97e8a;
+            border-radius: 5px;
+            z-index: 4;
+            transition: transform 1s ease-in-out, opacity 1s;
+            box-shadow: 0 8px 15px rgba(0,0,0,0.2);
+        }
+
+        .box-lid .ribbon-v { height: 100%; }
+
+        .bow {
+            position: absolute;
+            top: -42px; left: 50%;
+            transform: translateX(-50%);
+            font-size: 48px;
+            color: #fdfdfd;
+            text-shadow: 0 3px 5px rgba(0,0,0,0.2);
+        }
+
+        .tap-hint {
+            position: absolute;
+            bottom: -60px; left: 50%;
+            transform: translateX(-50%);
+            width: 200px;
+            text-align: center;
+            color: #fff;
+            font-size: 15px;
+            font-weight: bold;
+            animation: pulseHint 2s infinite;
+            z-index: 10;
+        }
+
+        @keyframes pulseHint { 0%, 100% { opacity: 0.5; } 50% { opacity: 1; } }
+
+        /* ئەنیمەیشنی کرانەوە */
+        .gift-container.opened .box-lid {
+            transform: translateY(-130px) rotate(20deg);
+            opacity: 0;
+        }
+        .gift-container.opened .mini-card {
+            transform: translateY(-80px) scale(1.1);
+        }
+        .gift-container.opened .tap-hint { display: none; }
+
+        /* تەنۆلکەی تەقینەوە (Confetti) */
+        .confetti {
+            position: absolute;
+            width: 10px; height: 10px;
+            z-index: 100;
+            animation: pop 1.2s cubic-bezier(0.25, 1, 0.5, 1) forwards;
+        }
+
+        @keyframes pop {
+            0% { transform: translate(-50%, -50%) scale(1) rotate(0deg); opacity: 1; }
+            100% { transform: translate(var(--tx), var(--ty)) scale(0.3) rotate(360deg); opacity: 0; }
+        }
+
+
+        /* ================= دیمەنی دووەم: بانگهێشتنامە مۆدێرنەکە ================= */
+        #main-content {
+            position: absolute;
+            top: 0; left: 0;
+            width: 100%;
+            min-height: 100dvh;
+            background: var(--bg-main);
+            display: flex;
+            flex-direction: column;
+            align-items: center;
+            padding: 40px 15px;
+            opacity: 0;
+            visibility: hidden;
+            transition: opacity 1s ease;
+            z-index: 10;
+        }
+
+        #main-content.show {
+            opacity: 1;
+            visibility: visible;
+        }
+
+        .wedding-card {
+            width: 100%;
+            max-width: 420px;
+            background: #ffffff;
+            border-radius: 20px;
+            padding: 40px 25px;
+            box-shadow: 0 15px 35px rgba(183, 110, 121, 0.08);
+            border: 1px solid rgba(183, 110, 121, 0.1);
+            text-align: center;
+            display: flex;
+            flex-direction: column;
+            align-items: center;
+        }
+
+        /* وێنەی گوڵی سەرەوە */
+        .top-flower {
+            width: 70px;
+            margin-bottom: 20px;
+            opacity: 0.8;
+            filter: hue-rotate(330deg) drop-shadow(0 2px 4px rgba(0,0,0,0.05));
+        }
+
+        .bismillah {
+            font-size: 15px;
+            color: var(--text-gray);
+            margin-bottom: 15px;
+            font-weight: bold;
+        }
+
+        .names {
+            font-family: 'Aref Ruqaa', serif;
+            font-size: clamp(40px, 11vw, 50px);
+            color: var(--rose-gold);
+            font-weight: bold;
+            line-height: 1.2;
+        }
+
+        .names span {
+            color: var(--gold);
+            font-size: 25px;
+            margin: 0 10px;
+        }
+
+        .divider {
+            display: flex;
+            align-items: center;
+            justify-content: center;
+            width: 100%;
+            margin: 20px 0 25px 0;
+            color: var(--rose-light);
+            font-size: 18px;
+        }
+        .divider::before, .divider::after {
+            content: '';
+            flex: 1;
+            height: 1px;
+            background: var(--rose-light);
+            margin: 0 15px;
+        }
+
+        .story-text {
+            font-size: 14.5px;
+            color: var(--text-dark);
+            line-height: 2.2;
+            margin-bottom: 30px;
+            font-weight: bold;
+        }
+
+        /* بۆکسی زانیارییەکان */
+        .details-box {
+            width: 100%;
+            background: #fdf8f9;
+            border-radius: 15px;
+            padding: 20px;
+            border: 1px dashed var(--rose-light);
+            transform: translateY(20px);
+            opacity: 0;
+            transition: all 0.8s ease;
+        }
+
+        .details-box.fade-in {
+            transform: translateY(0);
+            opacity: 1;
+        }
+
+        .detail-row {
+            display: flex;
+            align-items: center;
+            gap: 15px;
+            margin-bottom: 20px;
+        }
+        .detail-row:last-child { margin-bottom: 0; }
+
+        .icon-box {
+            width: 40px; height: 40px;
+            background: #ffffff;
+            border-radius: 50%;
+            display: flex;
+            justify-content: center;
+            align-items: center;
+            color: var(--rose-gold);
+            box-shadow: 0 4px 10px rgba(183, 110, 121, 0.15);
+            font-size: 18px;
+        }
+
+        .detail-text {
+            display: flex;
+            flex-direction: column;
+            text-align: right;
+        }
+
+        .detail-text span { font-size: 11px; color: var(--text-gray); margin-bottom: 3px; font-weight: bold;}
+        .detail-text strong { font-size: 14px; color: var(--text-dark); }
+
+        /* دوگمەکان */
+        .btn-container {
+            display: flex;
+            gap: 10px;
+            width: 100%;
+            margin-top: 30px;
+            transform: translateY(20px);
+            opacity: 0;
+            transition: all 0.8s ease 0.2s;
+        }
+
+        .btn-container.fade-in {
+            transform: translateY(0);
+            opacity: 1;
+        }
+
+        .btn {
+            flex: 1;
+            display: flex;
+            justify-content: center;
+            align-items: center;
+            gap: 8px;
+            padding: 14px 10px;
+            border-radius: 30px;
+            font-weight: bold;
+            font-size: 14px;
+            text-decoration: none;
+            transition: 0.3s;
+        }
+
+        .btn-rose {
+            background: var(--rose-gold);
+            color: #fff;
+            box-shadow: 0 5px 15px rgba(183, 110, 121, 0.3);
+        }
+        .btn-rose:active { transform: scale(0.95); }
+
+        .btn-outline {
+            background: transparent;
+            color: var(--rose-gold);
+            border: 1.5px solid var(--rose-gold);
+        }
+
+    </style>
+</head>
+<body class="locked">
+
+    <!-- دیمەنی یەکەم: قوتووی دیاری -->
+    <div id="intro-scene">
+        <div class="gift-container" id="gift" onclick="openGift()">
+            <div class="box-back"></div>
+            
+            <div class="mini-card" id="miniCard">
+                <i class="fa-solid fa-envelope-open-text"></i>
+            </div>
+            
+            <div class="box-front">
+                <div class="ribbon-h"></div>
+                <div class="ribbon-v"></div>
+            </div>
+            
+            <div class="box-lid" id="lid">
+                <div class="bow"><i class="fa-solid fa-ribbon"></i></div>
+                <div class="ribbon-v"></div>
+            </div>
+            
+            <div class="tap-hint" id="hint">کرتە لە دیارییەکە بکە</div>
+        </div>
+    </div>
+
+    <!-- دیمەنی دووەم: بانگهێشتنامەی فەرمی -->
+    <div id="main-content">
+        <div class="wedding-card">
+            
+            <!-- لۆگۆی گوڵ -->
+            <img src="https://cdn-icons-png.flaticon.com/512/3503/3503798.png" class="top-flower" alt="flower">
+            
+            <div class="bismillah">بِسْمِ اللَّهِ الرَّحْمَنِ الرَّحِيمِ</div>
+            
+            <div class="names">
+                ئەحمەد <span>&</span> سارا
+            </div>
+            
+            <div class="divider">
+                <i class="fa-solid fa-heart"></i>
+            </div>
+            
+            <p class="story-text">
+                جوانترین دیاری ژیان، دۆزینەوەی ئەو کەسەیە کە ڕۆحت ئارام دەکاتەوە. بەوپەڕی خۆشحاڵییەوە بانگهێشتتان دەکەین بۆ ئاهەنگی یەکگرتنمان.
+            </p>
+
+            <div class="details-box fade-element">
+                <!-- بەروار -->
+                <div class="detail-row">
+                    <div class="icon-box"><i class="fa-regular fa-calendar"></i></div>
+                    <div class="detail-text">
+                        <span>ڕۆژ و بەروار</span>
+                        <strong>پێنج شەممە - ٢٥ / ٨ / ٢٠٢٦</strong>
+                    </div>
+                </div>
+                
+                <!-- کات -->
+                <div class="detail-row">
+                    <div class="icon-box"><i class="fa-regular fa-clock"></i></div>
+                    <div class="detail-text">
+                        <span>کاتی ئامادەبوون</span>
+                        <strong>٤:٣٠ ی پاش نیوەڕۆ</strong>
+                    </div>
+                </div>
+                
+                <!-- شوێن -->
+                <div class="detail-row">
+                    <div class="icon-box"><i class="fa-solid fa-map-pin"></i></div>
+                    <div class="detail-text">
+                        <span>ناونیشان</span>
+                        <strong>هۆڵی تەلاری زێڕین - سلێمانی</strong>
+                    </div>
+                </div>
+            </div>
+
+            <div class="btn-container fade-element">
+                <a href="tel:07500000000" class="btn btn-rose">
+                    <i class="fa-solid fa-phone"></i> پەیوەندی
+                </a>
+                <a href="#" class="btn btn-outline">
+                    <i class="fa-solid fa-location-arrow"></i> نەخشە
+                </a>
+            </div>
+
+        </div>
+    </div>
+
+    <script>
+        function openGift() {
+            const gift = document.getElementById('gift');
+            const introScene = document.getElementById('intro-scene');
+            const mainContent = document.getElementById('main-content');
+
+            if (!gift.classList.contains('opened')) {
+                // ١. کردنەوەی قوتووەکە
+                gift.classList.add('opened');
+                
+                // ٢. دروستکردنی تەنۆلکەی تەقینەوە (Confetti)
+                createConfetti();
+
+                // ٣. دوای کەمێک، گواستنەوە بۆ بانگهێشتنامەکە
+                setTimeout(() => {
+                    introScene.style.opacity = '0';
+                    document.body.style.background = '#fffafb'; // گۆڕینی باکگراوندی پشتەوە بۆ ڕەنگی ڕووناک
+                    
+                    setTimeout(() => {
+                        introScene.style.display = 'none';
+                        mainContent.classList.add('show');
+                        document.body.classList.remove('locked');
+                        
+                        // کارپێکردنی جوڵەی هاتنە سەرەوەی بۆکسەکان
+                        document.querySelectorAll('.fade-element').forEach(el => {
+                            el.classList.add('fade-in');
+                        });
+                    }, 800);
+                }, 2200); // دەبێت ماوەیەک بدەین تا میوانەکە چێژ لە کرانەوەی دیارییەکە ببینێت
+            }
+        }
+
+        // فەنکشنی دروستکردنی Confetti کە لە ناوەڕاستەوە دەتەقێتەوە
+        function createConfetti() {
+            const colors = ['#d4af37', '#b76e79', '#ffffff', '#e6c5ca'];
+            const intro = document.getElementById('intro-scene');
+            
+            for(let i = 0; i < 50; i++) {
+                let conf = document.createElement('div');
+                conf.className = 'confetti';
+                conf.style.left = '50%';
+                conf.style.top = '50%';
+                conf.style.backgroundColor = colors[Math.floor(Math.random() * colors.length)];
+                
+                // هەندێکیان با خڕ بن
+                if(Math.random() > 0.5) conf.style.borderRadius = '50%';
+                
+                // ئاڕاستەی تەقینەوە هەڕەمەکی بۆ سەرەوە و لاینەکان
+                let tx = (Math.random() - 0.5) * 500 + 'px';
+                let ty = (Math.random() - 1.2) * 500 + 'px'; // زیاتر بۆ سەرەوە
+                
+                conf.style.setProperty('--tx', tx);
+                conf.style.setProperty('--ty', ty);
+                
+                intro.appendChild(conf);
+            }
+        }
+    </script>
+
+</body>
+</html>

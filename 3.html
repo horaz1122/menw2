@@ -1,0 +1,429 @@
+<!DOCTYPE html>
+<html lang="ckb" dir="rtl">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0, maximum-scale=1.0, user-scalable=no">
+    <title>بانگهێشتنامەی نامەی پاشایەتی</title>
+    <!-- ئایکۆنەکان -->
+    <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.4.0/css/all.min.css">
+    <!-- فۆنتەکان -->
+    <style>
+        @import url('https://fonts.googleapis.com/css2?family=Aref+Ruqaa:wght@400;700&family=Noto+Naskh+Arabic:wght@400;700&display=swap');
+
+        :root {
+            --bg-dark: #0a0b10; /* پاشبنەمای تاریکی دەرەوە */
+            --paper-color: #fdf6e3; /* ڕەنگی کاغەزە کلاسیکییەکە */
+            --gold-light: #fcf6ba;
+            --gold-mid: #d4af37;
+            --gold-dark: #aa771c;
+            --text-royal: #3b2505; /* ڕەنگی قاوەیی تۆخ بۆ نووسین */
+            --seal-red: #9e0b0f;
+        }
+
+        * {
+            box-sizing: border-box;
+            margin: 0;
+            padding: 0;
+            -webkit-tap-highlight-color: transparent;
+        }
+
+        body, html {
+            width: 100%;
+            height: 100%;
+            background: radial-gradient(circle at center, #1c2331 0%, var(--bg-dark) 100%);
+            font-family: 'Noto Naskh Arabic', Tahoma, sans-serif;
+            overflow-x: hidden;
+            display: flex;
+            justify-content: center;
+            align-items: center;
+        }
+
+        /* قوفڵکردنی سکرۆڵ پێش کردنەوەی نامەکە */
+        body.locked {
+            overflow-y: hidden;
+        }
+
+        /* ================= تەنۆلکەی زێڕین (پاشبنەما) ================= */
+        .magic-dust {
+            position: fixed;
+            top: 0; left: 0;
+            width: 100%; height: 100%;
+            pointer-events: none;
+            z-index: 1;
+            overflow: hidden;
+        }
+
+        .dust-particle {
+            position: absolute;
+            background: var(--gold-light);
+            border-radius: 50%;
+            box-shadow: 0 0 8px 2px rgba(212, 175, 55, 0.6);
+            animation: floatDust linear infinite;
+        }
+
+        @keyframes floatDust {
+            0% { transform: translateY(110vh) scale(0.5); opacity: 0; }
+            20% { opacity: 1; }
+            80% { opacity: 1; }
+            100% { transform: translateY(-10vh) scale(1.2); opacity: 0; }
+        }
+
+        /* ================= نامە پاشایەتییەکە (The Scroll) ================= */
+        .scroll-wrapper {
+            position: relative;
+            width: 90vw;
+            max-width: 420px;
+            display: flex;
+            flex-direction: column;
+            align-items: center;
+            z-index: 10;
+            margin-top: 50px;
+            margin-bottom: 50px;
+        }
+
+        /* لولە زێڕینەکانی سەرەوە و خوارەوە (Rollers) */
+        .roller {
+            width: 100%;
+            height: 25px;
+            background: linear-gradient(to bottom, var(--gold-dark), var(--gold-light) 40%, var(--gold-mid) 70%, var(--gold-dark));
+            border-radius: 12px;
+            position: relative;
+            z-index: 5;
+            box-shadow: 0 10px 20px rgba(0,0,0,0.6), inset 0 2px 5px rgba(255,255,255,0.5);
+        }
+
+        /* سەری لولەکان بۆ جوانی زیاتر (Knobs) */
+        .roller::before, .roller::after {
+            content: '';
+            position: absolute;
+            top: -4px;
+            width: 20px;
+            height: 33px;
+            background: linear-gradient(to right, var(--gold-dark), var(--gold-light), var(--gold-dark));
+            border-radius: 5px;
+            box-shadow: 0 5px 10px rgba(0,0,0,0.5);
+        }
+        .roller::before { left: -10px; }
+        .roller::after { right: -10px; }
+
+        /* مۆری پاشایەتی (Wax Seal) */
+        .wax-seal {
+            position: absolute;
+            top: 50%;
+            left: 50%;
+            transform: translate(-50%, -50%);
+            width: 70px;
+            height: 70px;
+            background: radial-gradient(circle at 30% 30%, #d11317, var(--seal-red));
+            border-radius: 50%;
+            z-index: 20;
+            display: flex;
+            justify-content: center;
+            align-items: center;
+            color: var(--gold-light);
+            font-size: 30px;
+            cursor: pointer;
+            box-shadow: 0 5px 15px rgba(0,0,0,0.8), inset 0 0 10px rgba(0,0,0,0.5);
+            transition: all 0.5s ease;
+            animation: pulseSeal 2s infinite;
+        }
+
+        .wax-seal::before {
+            content: '';
+            position: absolute;
+            width: 55px;
+            height: 55px;
+            border: 2px dashed rgba(252, 246, 186, 0.4);
+            border-radius: 50%;
+        }
+
+        @keyframes pulseSeal {
+            0%, 100% { box-shadow: 0 5px 15px rgba(0,0,0,0.8), 0 0 10px rgba(158, 11, 15, 0.5); transform: translate(-50%, -50%) scale(1); }
+            50% { box-shadow: 0 5px 15px rgba(0,0,0,0.8), 0 0 30px rgba(209, 19, 23, 0.8); transform: translate(-50%, -50%) scale(1.05); }
+        }
+
+        .tap-text {
+            position: absolute;
+            bottom: -35px;
+            width: 150px;
+            text-align: center;
+            left: 50%;
+            transform: translateX(-50%);
+            color: var(--gold-mid);
+            font-size: 14px;
+            font-weight: bold;
+            letter-spacing: 1px;
+            opacity: 0.8;
+            pointer-events: none;
+            transition: opacity 0.5s;
+        }
+
+        /* کاتێک نامەکە دەکرێتەوە، مۆرەکە دەشکێت/ون دەبێت */
+        .scroll-wrapper.open .wax-seal {
+            opacity: 0;
+            transform: translate(-50%, -50%) scale(2);
+            pointer-events: none;
+        }
+        .scroll-wrapper.open .tap-text {
+            opacity: 0;
+        }
+
+        /* کاغەزی ناوەوە (The Paper) - بەکارهێنانی CSS Grid بۆ جوڵەی کرانەوە */
+        .paper-container {
+            display: grid;
+            grid-template-rows: 0fr;
+            transition: grid-template-rows 2s cubic-bezier(0.4, 0, 0.2, 1);
+            width: 92%;
+            z-index: 2;
+        }
+
+        /* کاتێک کلاسی open وەردەگرێت، کاغەزەکە گەورە دەبێت */
+        .scroll-wrapper.open .paper-container {
+            grid-template-rows: 1fr;
+        }
+
+        .paper {
+            min-height: 0;
+            overflow: hidden;
+            background-color: var(--paper-color);
+            background-image: url('https://www.transparenttextures.com/patterns/cream-paper.png');
+            box-shadow: inset 0 0 30px rgba(0,0,0,0.3);
+            border-left: 2px solid rgba(212, 175, 55, 0.3);
+            border-right: 2px solid rgba(212, 175, 55, 0.3);
+        }
+
+        /* ================= ناوەڕۆکی بانگهێشتنامەکە ================= */
+        .paper-content {
+            padding: 40px 20px;
+            display: flex;
+            flex-direction: column;
+            align-items: center;
+            text-align: center;
+            opacity: 0;
+            transition: opacity 1s 1.5s ease; /* پاش کرانەوەی کاغەزەکە دەردەکەوێت */
+        }
+
+        .scroll-wrapper.open .paper-content {
+            opacity: 1;
+        }
+
+        .bismillah {
+            font-family: 'Aref Ruqaa', serif;
+            font-size: 24px;
+            color: var(--text-royal);
+            margin-bottom: 20px;
+        }
+
+        .subtitle {
+            font-size: 14px;
+            color: #664b22;
+            font-weight: bold;
+            margin-bottom: 15px;
+            letter-spacing: 1px;
+        }
+
+        .names {
+            font-family: 'Aref Ruqaa', serif;
+            font-size: clamp(40px, 12vw, 55px);
+            color: #8b0000;
+            font-weight: bold;
+            line-height: 1.3;
+            margin-bottom: 25px;
+            text-shadow: 1px 1px 2px rgba(139, 0, 0, 0.1);
+        }
+
+        .names span {
+            color: var(--gold-mid);
+            font-size: clamp(25px, 6vw, 30px);
+            margin: 0 10px;
+        }
+
+        .divider-ornament {
+            width: 80%;
+            height: 15px;
+            background-image: radial-gradient(circle, var(--gold-mid) 2px, transparent 2px);
+            background-size: 10px 10px;
+            background-position: center;
+            margin-bottom: 25px;
+            opacity: 0.6;
+        }
+
+        .invitation-text {
+            font-size: 15px;
+            color: var(--text-royal);
+            line-height: 2;
+            margin-bottom: 35px;
+            font-weight: bold;
+        }
+
+        /* زانیارییەکان بە شێوازی کلاسیک */
+        .info-section {
+            width: 100%;
+            border-top: 1px dashed var(--gold-mid);
+            border-bottom: 1px dashed var(--gold-mid);
+            padding: 20px 0;
+            margin-bottom: 30px;
+            display: flex;
+            flex-direction: column;
+            gap: 15px;
+        }
+
+        .info-row {
+            display: flex;
+            align-items: center;
+            justify-content: center;
+            gap: 12px;
+            color: var(--text-royal);
+            font-weight: bold;
+            font-size: 15px;
+        }
+
+        .info-icon {
+            color: #8b0000;
+            font-size: 18px;
+        }
+
+        /* دوگمەکان */
+        .btn-group {
+            display: flex;
+            flex-direction: column;
+            gap: 15px;
+            width: 100%;
+        }
+
+        .btn-royal {
+            background: linear-gradient(to right, var(--gold-dark), var(--gold-mid), var(--gold-dark));
+            color: #fff;
+            border: none;
+            padding: 14px 20px;
+            border-radius: 30px;
+            font-family: inherit;
+            font-size: 15px;
+            font-weight: bold;
+            display: flex;
+            justify-content: center;
+            align-items: center;
+            gap: 10px;
+            text-decoration: none;
+            box-shadow: 0 5px 15px rgba(170, 119, 28, 0.4);
+            transition: 0.3s;
+        }
+
+        .btn-royal:active { transform: scale(0.96); }
+
+    </style>
+</head>
+<body class="locked">
+
+    <!-- تەنۆلکەی زێڕینی پاشبنەما -->
+    <div class="magic-dust" id="magic-dust"></div>
+
+    <!-- نامە پاشایەتییەکە -->
+    <div class="scroll-wrapper" id="scroll-wrapper">
+        
+        <!-- مۆری سور -->
+        <div class="wax-seal" id="wax-seal" onclick="openScroll()">
+            <i class="fa-solid fa-gem"></i>
+            <div class="tap-text">بۆ کردنەوە پەنجەی لێبدە</div>
+        </div>
+
+        <!-- لولەی سەرەوە -->
+        <div class="roller top-roller"></div>
+        
+        <!-- بەشی کاغەزەکە کە درێژ دەبێتەوە -->
+        <div class="paper-container">
+            <div class="paper">
+                
+                <!-- ناوەڕۆکی بانگهێشتنامەکە -->
+                <div class="paper-content">
+                    <div class="bismillah">بِسْمِ اللَّهِ الرَّحْمَنِ الرَّحِيمِ</div>
+                    
+                    <div class="subtitle">چیرۆکێکی نوێ دەست پێدەکات...</div>
+                    
+                    <div class="names">
+                        ئەحمەد <span>&</span> سارا
+                    </div>
+                    
+                    <div class="divider-ornament"></div>
+                    
+                    <p class="invitation-text">
+                        بە دڵێکی پڕ لە خۆشەویستییەوە، بانگهێشتتان دەکەین بۆ ئامادەبوون لە ئاهەنگی هاوسەرگیریمان. ئامادەبوونتان لەم ڕۆژە تایبەتەدا جێگەی شانازیمانە.
+                    </p>
+
+                    <div class="info-section">
+                        <div class="info-row">
+                            <i class="fa-regular fa-calendar-check info-icon"></i>
+                            <span>پێنج شەممە، ٢٥ / ٨ / ٢٠٢٦</span>
+                        </div>
+                        <div class="info-row">
+                            <i class="fa-regular fa-clock info-icon"></i>
+                            <span>کاتژمێر ٤:٠٠ ی پاش نیوەڕۆ</span>
+                        </div>
+                        <div class="info-row">
+                            <i class="fa-solid fa-location-dot info-icon"></i>
+                            <span>هۆڵی تەلاری زێڕین - سلێمانی</span>
+                        </div>
+                    </div>
+
+                    <div class="btn-group">
+                        <a href="tel:07500000000" class="btn-royal">
+                            <i class="fa-solid fa-phone-volume"></i> پەیوەندیکردن
+                        </a>
+                        <a href="#" class="btn-royal" style="background: transparent; color: #8b0000; border: 2px solid #8b0000; box-shadow: none;">
+                            <i class="fa-solid fa-map-location-dot"></i> نەخشەی شوێن
+                        </a>
+                    </div>
+                    
+                </div>
+            </div>
+        </div>
+
+        <!-- لولەی خوارەوە -->
+        <div class="roller bottom-roller"></div>
+        
+    </div>
+
+    <script>
+        // فەنکشنی کردنەوەی نامەکە
+        function openScroll() {
+            const wrapper = document.getElementById('scroll-wrapper');
+            
+            // ئەگەر پێشتر نەکرابووەوە، بیکەرەوە
+            if (!wrapper.classList.contains('open')) {
+                wrapper.classList.add('open');
+                
+                // لادانی قوفڵی سکرۆڵ بۆ ئەوەی دوای کرانەوە بەکارهێنەر بتوانێت بیباتە خوارەوە
+                setTimeout(() => {
+                    document.body.classList.remove('locked');
+                }, 2000); // چاوەڕێ دەکات تا کاغەزەکە بە تەواوی دەکرێتەوە
+            }
+        }
+
+        // دروستکردنی تەنۆلکەی زێڕین بۆ پاشبنەما
+        function createDust() {
+            const container = document.getElementById('magic-dust');
+            const particleCount = 30;
+
+            for (let i = 0; i < particleCount; i++) {
+                let particle = document.createElement('div');
+                particle.className = 'dust-particle';
+                
+                // دیاریکردنی شوێن و خێرایی هەڕەمەکی
+                particle.style.left = Math.random() * 100 + 'vw';
+                particle.style.animationDuration = (Math.random() * 6 + 4) + 's';
+                particle.style.animationDelay = (Math.random() * 5) + 's';
+                
+                let size = Math.random() * 4 + 2;
+                particle.style.width = size + 'px';
+                particle.style.height = size + 'px';
+
+                container.appendChild(particle);
+            }
+        }
+
+        // کارپێکردنی تەنۆلکەکان لە کاتی کردنەوەی سایتەکە
+        createDust();
+    </script>
+
+</body>
+</html>

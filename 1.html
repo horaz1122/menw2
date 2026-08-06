@@ -1,0 +1,495 @@
+<!DOCTYPE html>
+<html lang="ckb" dir="rtl">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0, maximum-scale=1.0, user-scalable=no">
+    <title>بانگهێشتنامەی دەرگای شاهانە</title>
+    <!-- ئایکۆنەکان -->
+    <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.4.0/css/all.min.css">
+    <style>
+        @import url('https://fonts.googleapis.com/css2?family=Aref+Ruqaa:wght@400;700&family=Noto+Naskh+Arabic:wght@400;700&display=swap');
+
+        :root {
+            --emerald: #06402B; /* سەوزی زمڕوتی */
+            --emerald-dark: #032418;
+            --gold: #D4AF37;
+            --gold-light: #F9E596;
+            --bg-cream: #FCFBF8;
+            --text-main: #1A1A1A;
+        }
+
+        * {
+            box-sizing: border-box;
+            margin: 0;
+            padding: 0;
+            -webkit-tap-highlight-color: transparent;
+        }
+
+        body, html {
+            width: 100%;
+            height: 100%;
+            background-color: var(--emerald-dark);
+            font-family: 'Noto Naskh Arabic', Tahoma, sans-serif;
+            overflow-x: hidden;
+        }
+
+        body.locked {
+            overflow-y: hidden;
+        }
+
+        /* ================= ١. بەشی دەرگاکان (Intro) ================= */
+        #intro-scene {
+            position: fixed;
+            top: 0; left: 0;
+            width: 100%; height: 100dvh;
+            z-index: 100;
+            display: flex;
+            justify-content: center;
+            align-items: center;
+            perspective: 1200px; /* قووڵی بۆ کرانەوەی 3D */
+            background-color: var(--emerald-dark);
+            transition: visibility 2s;
+        }
+
+        /* دەرگای ڕاست و چەپ */
+        .door {
+            position: absolute;
+            top: 0;
+            width: 50%;
+            height: 100%;
+            background: linear-gradient(135deg, var(--emerald), var(--emerald-dark));
+            transition: transform 1.8s cubic-bezier(0.64, 0, 0.18, 1);
+            z-index: 2;
+            display: flex;
+            justify-content: center;
+            align-items: center;
+            overflow: hidden;
+        }
+
+        /* نەخشی سەر دەرگاکان */
+        .door::before {
+            content: '';
+            position: absolute;
+            top: 0; left: 0; width: 200%; height: 100%;
+            background-image: url('https://www.transparenttextures.com/patterns/arabesque.png');
+            background-blend-mode: color-dodge;
+            opacity: 0.4;
+        }
+
+        .door-right {
+            right: 0;
+            transform-origin: right;
+            border-left: 3px solid var(--gold);
+            box-shadow: -5px 0 20px rgba(0,0,0,0.5);
+        }
+
+        .door-left {
+            left: 0;
+            transform-origin: left;
+            border-right: 3px solid var(--gold);
+            box-shadow: 5px 0 20px rgba(0,0,0,0.5);
+        }
+
+        /* نەخشی ناوەڕاستی دەرگاکان (کە یەکدەگرن) */
+        .center-mandala {
+            position: absolute;
+            width: 120px;
+            height: 120px;
+            border-radius: 50%;
+            border: 4px solid var(--gold);
+            background: var(--emerald);
+            z-index: 3;
+            display: flex;
+            justify-content: center;
+            align-items: center;
+            transition: opacity 0.5s ease, transform 1s ease;
+        }
+
+        .mandala-half {
+            position: absolute;
+            width: 60px;
+            height: 120px;
+            overflow: hidden;
+        }
+        .mandala-half-right { right: 0; }
+        .mandala-half-left { left: 0; }
+
+        /* کاتێک دەرگاکە دەکرێتەوە */
+        #intro-scene.open .door-right { transform: rotateY(-110deg); }
+        #intro-scene.open .door-left { transform: rotateY(110deg); }
+        #intro-scene.open .center-mandala { opacity: 0; transform: scale(1.5); pointer-events: none; }
+        
+        #intro-scene.hidden { visibility: hidden; }
+
+        /* دوگمەی کلیل بۆ کردنەوە */
+        .open-btn {
+            position: absolute;
+            z-index: 10;
+            background: var(--gold);
+            color: var(--emerald-dark);
+            border: none;
+            padding: 12px 25px;
+            border-radius: 30px;
+            font-family: inherit;
+            font-size: 16px;
+            font-weight: bold;
+            display: flex;
+            gap: 10px;
+            align-items: center;
+            cursor: pointer;
+            box-shadow: 0 5px 15px rgba(212, 175, 55, 0.4);
+            animation: pulseBtn 2s infinite;
+            bottom: 15%;
+        }
+
+        @keyframes pulseBtn {
+            0%, 100% { transform: scale(1); box-shadow: 0 5px 15px rgba(212, 175, 55, 0.4); }
+            50% { transform: scale(1.05); box-shadow: 0 5px 25px rgba(212, 175, 55, 0.8); }
+        }
+
+        #intro-scene.open .open-btn { opacity: 0; pointer-events: none; }
+
+
+        /* ================= ٢. بەشی ناوەوەی کۆشکەکە (Content) ================= */
+        #main-content {
+            position: absolute;
+            top: 0; left: 0;
+            width: 100%;
+            min-height: 100dvh;
+            background-color: var(--bg-cream);
+            padding: 40px 20px;
+            display: flex;
+            flex-direction: column;
+            align-items: center;
+            opacity: 0;
+            visibility: hidden;
+            transition: opacity 2s ease;
+            /* پاشبنەمایەکی زۆر کاڵی گوڵدار لە ناوەوە */
+            background-image: url('https://www.transparenttextures.com/patterns/cream-paper.png');
+            z-index: 10;
+        }
+
+        #main-content.show { opacity: 1; visibility: visible; }
+
+        /* چوارچێوەی زێڕینی ناوەوە */
+        .invitation-frame {
+            width: 100%;
+            max-width: 420px;
+            border: 2px solid var(--gold);
+            padding: 3px;
+            border-radius: 20px;
+            background: #fff;
+            box-shadow: 0 15px 40px rgba(0,0,0,0.08);
+            position: relative;
+            z-index: 2;
+        }
+
+        .frame-inner {
+            border: 1px dashed var(--gold);
+            border-radius: 16px;
+            padding: 40px 20px;
+            display: flex;
+            flex-direction: column;
+            align-items: center;
+            text-align: center;
+        }
+
+        /* لۆگۆی تاج یان گوڵ */
+        .royal-icon {
+            font-size: 40px;
+            color: var(--emerald);
+            margin-bottom: 15px;
+        }
+
+        .bismillah {
+            font-size: 16px;
+            color: var(--text-main);
+            margin-bottom: 25px;
+            opacity: 0.8;
+        }
+
+        .names {
+            font-family: 'Aref Ruqaa', serif;
+            font-size: clamp(35px, 10vw, 45px);
+            color: var(--emerald);
+            font-weight: bold;
+            line-height: 1.4;
+            margin-bottom: 20px;
+        }
+
+        .names span {
+            color: var(--gold);
+            font-size: clamp(25px, 6vw, 30px);
+            display: inline-block;
+            margin: 0 10px;
+        }
+
+        .invitation-text {
+            font-size: 15px;
+            color: var(--text-main);
+            line-height: 2;
+            margin-bottom: 30px;
+            font-weight: bold;
+        }
+
+        .divider {
+            width: 70%;
+            height: 2px;
+            background: linear-gradient(to right, transparent, var(--gold), transparent);
+            margin: 20px 0;
+        }
+
+        /* زانیارییەکان */
+        .info-grid {
+            display: grid;
+            grid-template-columns: 1fr;
+            gap: 20px;
+            width: 100%;
+            margin-top: 10px;
+        }
+
+        .info-box {
+            background: rgba(6, 64, 43, 0.04);
+            padding: 15px;
+            border-radius: 12px;
+            display: flex;
+            align-items: center;
+            gap: 15px;
+            border-right: 4px solid var(--gold);
+            transform: translateY(20px);
+            opacity: 0;
+            transition: all 0.6s ease;
+        }
+
+        .info-box.fade-in { transform: translateY(0); opacity: 1; }
+
+        .info-icon {
+            width: 40px;
+            height: 40px;
+            background: var(--emerald);
+            color: var(--gold);
+            border-radius: 50%;
+            display: flex;
+            justify-content: center;
+            align-items: center;
+            font-size: 18px;
+        }
+
+        .info-content {
+            text-align: right;
+            display: flex;
+            flex-direction: column;
+        }
+
+        .info-title { font-size: 12px; color: #777; margin-bottom: 3px; }
+        .info-value { font-size: 14px; font-weight: bold; color: var(--emerald); }
+
+        /* دوگمەکان */
+        .actions {
+            display: flex;
+            gap: 10px;
+            width: 100%;
+            margin-top: 30px;
+        }
+
+        .btn {
+            flex: 1;
+            padding: 12px 10px;
+            border-radius: 30px;
+            font-family: inherit;
+            font-size: 14px;
+            font-weight: bold;
+            display: flex;
+            justify-content: center;
+            align-items: center;
+            gap: 8px;
+            cursor: pointer;
+            text-decoration: none;
+            transition: 0.3s;
+        }
+
+        .btn-primary {
+            background: var(--emerald);
+            color: #fff;
+            border: none;
+            box-shadow: 0 4px 15px rgba(6, 64, 43, 0.3);
+        }
+        .btn-primary:active { transform: scale(0.95); }
+
+        .btn-outline {
+            background: transparent;
+            color: var(--emerald);
+            border: 2px solid var(--emerald);
+        }
+
+        /* ================= ٣. کرمە ڕووناکەکان (Fireflies) ================= */
+        .fireflies {
+            position: absolute;
+            top: 0; left: 0;
+            width: 100%; height: 100%;
+            pointer-events: none;
+            z-index: 1;
+            overflow: hidden;
+        }
+
+        .firefly {
+            position: absolute;
+            width: 4px; height: 4px;
+            background: var(--gold-light);
+            border-radius: 50%;
+            box-shadow: 0 0 10px 2px var(--gold);
+            animation: fly linear infinite;
+        }
+
+        @keyframes fly {
+            0% { transform: translateY(110vh) translateX(0); opacity: 0; }
+            20% { opacity: 1; }
+            80% { opacity: 1; }
+            100% { transform: translateY(-10vh) translateX(20px); opacity: 0; }
+        }
+
+    </style>
+</head>
+<body class="locked">
+
+    <!-- دیمەنی دەرگاکان -->
+    <div id="intro-scene">
+        <div class="door door-right"></div>
+        <div class="door door-left"></div>
+        
+        <!-- نەخشی ناوەڕاست کە دەرگاکان بەیەکەوە دەبەستێت -->
+        <div class="center-mandala">
+            <i class="fa-solid fa-gem" style="color: var(--gold); font-size: 40px;"></i>
+        </div>
+
+        <button class="open-btn" onclick="openGates()">
+            <i class="fa-solid fa-key"></i> دەرگاکە بکەرەوە
+        </button>
+    </div>
+
+    <!-- دیمەنی ناوەوە -->
+    <div id="main-content">
+        
+        <!-- تەنۆلکە زێڕینەکان کە لە ناوەوە دەفڕن -->
+        <div class="fireflies" id="fireflies"></div>
+
+        <div class="invitation-frame">
+            <div class="frame-inner">
+                
+                <i class="fa-solid fa-crown royal-icon"></i>
+                
+                <div class="bismillah">بِسْمِ اللَّهِ الرَّحْمَنِ الرَّحِيمِ</div>
+                
+                <div class="names">
+                    ئەحمەد <span>&</span> سارا
+                </div>
+                
+                <div class="divider"></div>
+                
+                <p class="invitation-text">
+                    بەوپەڕی خۆشحاڵییەوە و بە دڵێکی پڕ لە هیواوە، بانگهێشتتان دەکەین بۆ ئامادەبوون لە ئاهەنگی هاوسەرگیریمان. ئامادەبوونتان تاجێکە لەسەر سەرمان.
+                </p>
+
+                <div class="info-grid">
+                    <!-- ڕۆژ -->
+                    <div class="info-box fade-element">
+                        <div class="info-icon"><i class="fa-regular fa-calendar"></i></div>
+                        <div class="info-content">
+                            <span class="info-title">ڕۆژ و بەروار</span>
+                            <span class="info-value">پێنج شەممە - ٢٥ / ٨ / ٢٠٢٦</span>
+                        </div>
+                    </div>
+                    
+                    <!-- کات -->
+                    <div class="info-box fade-element">
+                        <div class="info-icon"><i class="fa-regular fa-clock"></i></div>
+                        <div class="info-content">
+                            <span class="info-title">کاتی ئامادەبوون</span>
+                            <span class="info-value">کاتژمێر ٣:٠٠ ی پاش نیوەڕۆ</span>
+                        </div>
+                    </div>
+
+                    <!-- شوێن -->
+                    <div class="info-box fade-element">
+                        <div class="info-icon"><i class="fa-solid fa-location-dot"></i></div>
+                        <div class="info-content">
+                            <span class="info-title">ناونیشان</span>
+                            <span class="info-value">سلێمانی - هۆڵی تەلاری زێڕین</span>
+                        </div>
+                    </div>
+                </div>
+
+                <div class="actions fade-element">
+                    <a href="tel:07500000000" class="btn btn-primary">
+                        <i class="fa-solid fa-phone-flip"></i> پەیوەندی
+                    </a>
+                    <a href="#" class="btn btn-outline">
+                        <i class="fa-solid fa-map"></i> نەخشە
+                    </a>
+                </div>
+
+            </div>
+        </div>
+    </div>
+
+    <script>
+        // فەنکشنی کردنەوەی دەرگاکان
+        function openGates() {
+            const intro = document.getElementById('intro-scene');
+            const main = document.getElementById('main-content');
+            
+            // ١. کردنەوەی دەرگاکان
+            intro.classList.add('open');
+
+            // ٢. دوای کەمێک، نیشاندانی ناوەوە و لادانی قوفڵی سکرۆڵ
+            setTimeout(() => {
+                main.classList.add('show');
+                document.body.classList.remove('locked');
+                
+                // چالاککردنی دەرکەوتنی زانیارییەکان
+                activateAnimations();
+                // دروستکردنی کرمە ڕووناکەکان
+                createFireflies();
+            }, 1000);
+
+            // ٣. شاردنەوەی تەواوەتی دەرگاکان لە پشتی شاشەکە بۆ ئەوەی کێشە بۆ کلیک دروست نەکەن
+            setTimeout(() => {
+                intro.classList.add('hidden');
+            }, 2000);
+        }
+
+        // فەنکشنی دەرکەوتنی بۆکسەکان یەک لە دوای یەک
+        function activateAnimations() {
+            const elements = document.querySelectorAll('.fade-element');
+            elements.forEach((el, index) => {
+                setTimeout(() => {
+                    el.classList.add('fade-in');
+                }, index * 200); // هەر یەکەیان بە جیاوازی 0.2 چرکە دەردەکەون
+            });
+        }
+
+        // دروستکردنی تەنۆلکەی زێڕین (Fireflies)
+        function createFireflies() {
+            const container = document.getElementById('fireflies');
+            const fireflyCount = 25;
+
+            for (let i = 0; i < fireflyCount; i++) {
+                let firefly = document.createElement('div');
+                firefly.className = 'firefly';
+                
+                // قەبارە، شوێن، و خێرایی هەڕەمەکی
+                firefly.style.left = Math.random() * 100 + 'vw';
+                firefly.style.animationDuration = (Math.random() * 5 + 4) + 's';
+                firefly.style.animationDelay = (Math.random() * 5) + 's';
+                
+                let size = Math.random() * 3 + 2;
+                firefly.style.width = size + 'px';
+                firefly.style.height = size + 'px';
+
+                container.appendChild(firefly);
+            }
+        }
+    </script>
+
+</body>
+</html>
