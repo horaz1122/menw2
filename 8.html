@@ -3,22 +3,19 @@
 <head>
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0, maximum-scale=1.0, user-scalable=no">
-    <title>بانگهێشتنامەی ئەسانسۆری شاهانە</title>
+    <title>بانگهێشتنامەی تەلیسکۆپی گەردوون</title>
     <!-- ئایکۆنەکان -->
     <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.4.0/css/all.min.css">
     <style>
         @import url('https://fonts.googleapis.com/css2?family=Aref+Ruqaa:wght@400;700&family=Noto+Naskh+Arabic:wght@400;700&display=swap');
 
         :root {
-            --elevator-bg: #1a1a1a;
-            --door-color: #2c2c2c;
-            --gold: #d4af37;
-            --gold-light: #fbe5b8;
-            --gold-dark: #8c6d1a;
-            --panel-bg: #0a0a0a;
-            --text-light: #ffffff;
-            --text-dark: #1a1a1a;
-            --led-red: #ff3333;
+            --space-bg: #02050f;
+            --lens-border: #1a233a;
+            --gold: #f9d423;
+            --gold-light: #ffeb99;
+            --neon-blue: #00f2fe;
+            --text-light: #e2e8f0;
         }
 
         * {
@@ -34,415 +31,447 @@
             background-color: #000;
             font-family: 'Noto Naskh Arabic', Tahoma, sans-serif;
             overflow: hidden; /* سکرۆڵ بە هیچ جۆرێک نییە */
+            color: var(--text-light);
         }
 
-        /* ================= چوارچێوەی ئەسانسۆرەکە ================= */
-        .elevator-wrapper {
-            position: absolute;
+        /* ================= دیمەنی یەکەم: عەدەسەی تەلیسکۆپ ================= */
+        #intro-scene {
+            position: fixed;
             top: 0; left: 0; width: 100%; height: 100%;
             display: flex;
-            flex-direction: column;
-            background: #111;
-            /* چوارچێوەی ئاڵتوونی دەوری ئەسانسۆرەکە */
-            border: 8px solid var(--gold-dark);
-            border-bottom: none;
-            box-shadow: inset 0 0 50px rgba(0,0,0,0.8);
+            justify-content: center;
+            align-items: center;
+            z-index: 100;
+            background: transparent;
+            pointer-events: none;
         }
 
-        /* ئیفێکتی لەرینەوەی ئەسانسۆر کاتێک دەڕوات */
-        .elevator-wrapper.moving {
-            animation: elevatorShake 0.4s infinite;
-        }
-
-        @keyframes elevatorShake {
-            0% { transform: translateY(0); }
-            50% { transform: translateY(2px); }
-            100% { transform: translateY(0); }
-        }
-
-        /* ================= شاشەی ژمارەی نهۆمەکان (LED Display) ================= */
-        .floor-display-container {
+        /* ئیفێکتی کردنەوەی عەدەسە (Iris Opening Effect) */
+        .telescope-lens {
             position: absolute;
-            top: 20px; left: 50%;
-            transform: translateX(-50%);
-            width: 80px; height: 40px;
-            background: #000;
-            border: 2px solid var(--gold-dark);
-            border-radius: 5px;
+            top: 50%; left: 50%;
+            transform: translate(-50%, -50%);
+            width: 80px; height: 80px;
+            border-radius: 50%;
+            /* ئەم سێبەرە ڕەشە هەموو شاشەکە دادەپۆشێت جگە لە ناوەڕاستەکەی */
+            box-shadow: 0 0 0 150vmax #000;
+            cursor: pointer;
+            pointer-events: auto;
             display: flex;
             justify-content: center;
             align-items: center;
-            z-index: 50;
-            box-shadow: 0 5px 15px rgba(0,0,0,0.5), inset 0 0 10px rgba(255, 51, 51, 0.2);
+            transition: all 1.5s cubic-bezier(0.65, 0, 0.05, 1);
+            border: 4px solid var(--gold);
+            background: rgba(0, 242, 254, 0.1);
         }
 
-        .led-number {
-            font-family: 'Courier New', Courier, monospace;
-            font-size: 24px;
-            color: var(--led-red);
+        .lens-center {
+            font-size: 30px;
+            color: var(--neon-blue);
+            animation: pulseLens 2s infinite alternate;
+        }
+
+        @keyframes pulseLens {
+            0% { transform: scale(0.9); text-shadow: 0 0 10px var(--neon-blue); }
+            100% { transform: scale(1.1); text-shadow: 0 0 20px var(--neon-blue); }
+        }
+
+        .tap-hint {
+            position: absolute;
+            bottom: -50px;
+            white-space: nowrap;
+            color: var(--gold);
             font-weight: bold;
-            text-shadow: 0 0 10px var(--led-red);
-            transition: all 0.3s;
+            font-size: 14px;
+            opacity: 0.8;
+            pointer-events: none;
         }
 
-        /* ================= دەرگاکانی ئەسانسۆر ================= */
-        .doors-container {
+        /* کاتێک تەلیسکۆپەکە دەکرێتەوە */
+        #intro-scene.opened .telescope-lens {
+            width: 250vmax; height: 250vmax;
+            border-width: 20px;
+            opacity: 0;
+            pointer-events: none;
+        }
+        #intro-scene.opened .lens-center, 
+        #intro-scene.opened .tap-hint {
+            display: none;
+        }
+
+
+        /* ================= دیمەنی دووەم: ئاسمان و گەڕان (The Panning Universe) ================= */
+        #telescope-ui {
             position: absolute;
-            top: 0; left: 0; width: 100%; height: calc(100% - 100px); /* 100px بۆ پەنێڵی خوارەوە جێدەهێڵین */
-            display: flex;
-            z-index: 20;
+            top: 0; left: 0; width: 100%; height: 100%;
             overflow: hidden;
+            background: var(--space-bg);
         }
 
-        .door {
-            width: 50%; height: 100%;
-            background: linear-gradient(to right, #333, #1a1a1a, #2a2a2a);
-            border: 1px solid #000;
-            position: relative;
+        /* چوارچێوەی بینینی تەلیسکۆپەکە (Vignette & Crosshair) */
+        .telescope-overlay {
+            position: absolute;
+            top: 0; left: 0; width: 100%; height: 100%;
+            box-shadow: inset 0 0 150px rgba(0,0,0,0.9), inset 0 0 50px rgba(0,0,0,0.8);
+            pointer-events: none;
+            z-index: 50;
+            border: 2px solid rgba(0, 242, 254, 0.1);
+        }
+
+        /* نیشانەی ناوەڕاستی تەلیسکۆپ */
+        .crosshair {
+            position: absolute;
+            top: 50%; left: 50%;
+            transform: translate(-50%, -50%);
+            width: 40px; height: 40px;
+            border: 1px solid rgba(0, 242, 254, 0.3);
+            border-radius: 50%;
+            pointer-events: none;
+            z-index: 50;
+        }
+        .crosshair::before {
+            content: ''; position: absolute;
+            top: -10px; bottom: -10px; left: 50%; width: 1px; background: rgba(0, 242, 254, 0.3);
+        }
+        .crosshair::after {
+            content: ''; position: absolute;
+            left: -10px; right: -10px; top: 50%; height: 1px; background: rgba(0, 242, 254, 0.3);
+        }
+
+        /* باکگراوندی گەورەی ئاسمان کە دەجوڵێت (300% ی شاشەیە) */
+        .universe {
+            position: absolute;
+            width: 300vw; height: 300vh;
+            /* لای چەپ و سەرەوە دەکەوێتە دەرەوەی شاشە بۆ ئەوەی ناوەڕاستەکەی بکەوێتە سەر شاشە */
+            top: -100vh; left: -100vw;
+            /* ئەنیمەیشنی جوڵە فیزیکییەکە */
             transition: transform 1.5s cubic-bezier(0.4, 0, 0.2, 1);
-            box-shadow: inset 0 0 30px rgba(0,0,0,0.8);
+            transform: translate(0, 0); /* سەرەتا لە ناوەڕاستە */
         }
 
-        /* هێڵی ئاڵتوونی سەر دەرگاکان */
-        .door::after {
-            content: '';
+        /* ئەستێرەکانی ناو ئاسمان */
+        .stars-layer {
             position: absolute;
-            top: 0; width: 2px; height: 100%;
-            background: var(--gold-dark);
+            top: 0; left: 0; width: 100%; height: 100%;
+            background-image: 
+                radial-gradient(1px 1px at 10% 10%, #fff 100%, transparent),
+                radial-gradient(1.5px 1.5px at 20% 30%, #fff 100%, transparent),
+                radial-gradient(2px 2px at 40% 70%, var(--gold) 100%, transparent),
+                radial-gradient(1px 1px at 60% 20%, #fff 100%, transparent),
+                radial-gradient(1.5px 1.5px at 80% 80%, var(--neon-blue) 100%, transparent),
+                radial-gradient(2px 2px at 90% 40%, #fff 100%, transparent);
+            background-size: 200px 200px;
+            opacity: 0.5;
         }
-        .door-left::after { right: 5px; }
-        .door-right::after { left: 5px; }
 
-        /* کاتێک دەرگاکان دەکرێنەوە */
-        .doors-container.open .door-left { transform: translateX(-100%); }
-        .doors-container.open .door-right { transform: translateX(100%); }
-
-        /* ================= ناوەوەی نهۆمەکان (ئەو شتانەی لە پشت دەرگاکەوەن) ================= */
-        .floors-content {
+        /* هێڵە زێڕینەکانی نێوان گەلەئەستێرەکان */
+        .constellation-line {
             position: absolute;
-            top: 0; left: 0; width: 100%; height: calc(100% - 100px);
-            background: url('https://www.transparenttextures.com/patterns/white-marble.png'), linear-gradient(135deg, #fdfbf7, #e8e3d8);
-            z-index: 10;
+            background: rgba(249, 212, 35, 0.2);
+            z-index: 1;
+        }
+        .line-center-right { top: 150vh; left: 150vw; width: 100vw; height: 1px; }
+        .line-center-left { top: 150vh; left: 50vw; width: 100vw; height: 1px; }
+        .line-center-down { top: 150vh; left: 150vw; width: 1px; height: 100vh; }
+
+
+        /* ================= خاڵەکانی زانیاری (The Constellation Nodes) ================= */
+        .node {
+            position: absolute;
+            width: 100vw; height: 100vh;
             display: flex;
             justify-content: center;
             align-items: center;
-            padding: 20px;
+            z-index: 10;
         }
 
-        /* هەموو نهۆمەکان شاردراونەتەوە سەرەتا جگە لەوەی ئەکتیڤە */
-        .floor-view {
-            width: 100%;
+        /* جێگیرکردنی هەر خاڵێک لە شوێنی خۆی لەناو ئاسمانە گەورەکەدا */
+        .node-center { top: 100vh; left: 100vw; } /* ناوەڕاست */
+        .node-right { top: 100vh; left: 200vw; } /* لای ڕاست */
+        .node-bottom { top: 200vh; left: 100vw; } /* خوارەوە */
+        .node-left { top: 100vh; left: 0; } /* لای چەپ */
+
+        /* دیزاینی ناوەوەی خاڵەکان (Hologram Cards) */
+        .hologram-card {
+            width: 90%;
             max-width: 400px;
-            background: rgba(255, 255, 255, 0.8);
-            border-radius: 15px;
+            background: rgba(2, 5, 15, 0.6);
+            backdrop-filter: blur(10px);
+            -webkit-backdrop-filter: blur(10px);
+            border: 1px solid rgba(0, 242, 254, 0.2);
+            border-radius: 20px;
             padding: 40px 20px;
             text-align: center;
-            border: 2px solid var(--gold);
-            box-shadow: 0 20px 40px rgba(0,0,0,0.1);
-            display: none; /* شاردراوەتەوە */
-            animation: fadeInFloor 0.5s ease forwards;
+            box-shadow: 0 0 30px rgba(0, 242, 254, 0.1), inset 0 0 20px rgba(249, 212, 35, 0.05);
+            /* ئیفێکتی دەرکەوتن کاتێک تەلیسکۆپ دەگاتە سەری */
+            transform: scale(0.8);
+            opacity: 0.5;
+            transition: all 1s ease;
         }
 
-        .floor-view.active {
-            display: block;
+        /* کاتێک خاڵەکە ئەکتیڤە (لە ناوەڕاستی شاشەدایە) */
+        .node.active .hologram-card {
+            transform: scale(1);
+            opacity: 1;
+            box-shadow: 0 0 50px rgba(0, 242, 254, 0.2), inset 0 0 20px rgba(249, 212, 35, 0.1);
         }
 
-        @keyframes fadeInFloor {
-            0% { opacity: 0; transform: scale(0.9); }
-            100% { opacity: 1; transform: scale(1); }
+        .node-icon {
+            font-size: 40px;
+            color: var(--gold);
+            margin-bottom: 20px;
+            filter: drop-shadow(0 0 10px var(--gold));
+            animation: floatIcon 3s ease-in-out infinite;
         }
 
-        /* دیزاینی دەقەکانی ناو نهۆمەکان */
-        .floor-icon {
-            font-size: 35px;
-            color: var(--gold-dark);
-            margin-bottom: 15px;
+        @keyframes floatIcon {
+            0%, 100% { transform: translateY(0); }
+            50% { transform: translateY(-10px); }
         }
 
         .names {
             font-family: 'Aref Ruqaa', serif;
-            font-size: 40px;
-            color: var(--text-dark);
+            font-size: 45px;
+            color: #fff;
+            text-shadow: 0 0 15px var(--neon-blue);
             margin-bottom: 20px;
         }
-        .names span { color: var(--gold); margin: 0 10px; font-size: 25px; }
 
-        .floor-title {
-            font-size: 18px;
-            color: var(--gold-dark);
+        .names span { color: var(--neon-blue); font-size: 25px; margin: 0 10px; }
+
+        .node-title {
+            font-size: 20px;
+            color: var(--neon-blue);
             margin-bottom: 15px;
             font-weight: bold;
-            border-bottom: 1px dashed var(--gold);
-            display: inline-block;
-            padding-bottom: 5px;
+            letter-spacing: 1px;
         }
 
-        .floor-text {
+        .node-text {
             font-size: 14.5px;
-            color: #333;
+            color: var(--text-light);
             line-height: 2;
             font-weight: bold;
         }
 
-        .highlight-box {
-            background: #fcfaf5;
-            border: 1px solid var(--gold-light);
+        .highlight-data {
+            background: rgba(249, 212, 35, 0.1);
+            border: 1px solid rgba(249, 212, 35, 0.3);
             border-radius: 10px;
             padding: 15px;
             margin-top: 20px;
-            font-size: 16px;
+            font-size: 20px;
             font-weight: bold;
-            color: var(--text-dark);
+            color: var(--gold-light);
         }
 
         .btn-action {
             display: inline-block;
-            margin-top: 20px;
+            margin-top: 25px;
             padding: 12px 30px;
-            background: var(--gold);
-            color: #fff;
+            background: transparent;
+            color: var(--gold);
+            border: 1px solid var(--gold);
             text-decoration: none;
             border-radius: 30px;
             font-weight: bold;
-            box-shadow: 0 5px 15px rgba(212, 175, 55, 0.4);
+            font-size: 15px;
+            transition: 0.3s;
+            box-shadow: 0 0 15px rgba(249, 212, 35, 0.2);
         }
+        .btn-action:hover, .btn-action:active { background: var(--gold); color: #000; }
 
-        /* ================= پەنێڵی کۆنترۆڵ لە خوارەوە ================= */
+        /* ================= پەنێڵی کۆنترۆڵی خوارەوە (Telescope Dashboard) ================= */
         .control-panel {
             position: absolute;
-            bottom: 0; left: 0; width: 100%; height: 100px;
-            background: var(--panel-bg);
-            border-top: 4px solid var(--gold-dark);
-            display: flex;
-            justify-content: center;
-            align-items: center;
-            gap: 15px;
-            z-index: 30;
-            box-shadow: 0 -10px 20px rgba(0,0,0,0.5);
-            background-image: url('https://www.transparenttextures.com/patterns/brushed-alum.png');
-        }
-
-        /* دوگمەکانی ئەسانسۆر */
-        .elv-btn {
-            width: 55px; height: 55px;
-            background: linear-gradient(135deg, #3a3a3a, #1a1a1a);
-            border: 3px solid #000;
-            border-radius: 50%;
-            display: flex;
-            justify-content: center;
-            align-items: center;
-            font-size: 20px;
-            font-weight: bold;
-            color: #888;
-            cursor: pointer;
-            box-shadow: 0 5px 10px rgba(0,0,0,0.8), inset 0 2px 2px rgba(255,255,255,0.1);
-            transition: all 0.3s;
-            position: relative;
-        }
-
-        /* ڕووناکبوونەوەی دوگمەکە کاتێک ئەکتیڤە */
-        .elv-btn.active-btn {
-            border-color: var(--gold);
-            color: var(--gold-light);
-            box-shadow: 0 0 15px rgba(212, 175, 55, 0.5), inset 0 2px 2px rgba(255,255,255,0.1);
-        }
-
-        /* ڕووناکییەکی بچووک لە ناوەندی دوگمەکە */
-        .elv-btn::after {
-            content: '';
-            position: absolute;
-            top: 5px; left: 50%;
+            bottom: 20px; left: 50%;
             transform: translateX(-50%);
-            width: 6px; height: 3px;
-            background: #888;
-            border-radius: 2px;
-            transition: 0.3s;
+            width: 90%;
+            max-width: 400px;
+            background: rgba(2, 5, 15, 0.8);
+            backdrop-filter: blur(10px);
+            border: 1px solid rgba(0, 242, 254, 0.3);
+            border-radius: 20px;
+            padding: 10px 15px;
+            display: flex;
+            justify-content: space-between;
+            align-items: center;
+            z-index: 60;
+            opacity: 0;
+            visibility: hidden;
+            transition: opacity 1s ease 1s; /* چاوەڕێ دەکات تا عەدەسەکە دەکرێتەوە */
         }
 
-        .elv-btn.active-btn::after {
-            background: var(--led-red);
-            box-shadow: 0 0 5px var(--led-red);
+        #intro-scene.opened ~ .control-panel {
+            opacity: 1; visibility: visible;
         }
 
-        .elv-btn:active { transform: scale(0.9); }
-
-        /* دوگمەی سەرەتایی بۆ چوونە ژوورەوە */
-        .start-overlay {
-            position: absolute;
-            top: 0; left: 0; width: 100%; height: 100%;
-            background: rgba(0,0,0,0.8);
-            z-index: 100;
+        .nav-btn {
             display: flex;
             flex-direction: column;
-            justify-content: center;
             align-items: center;
-            transition: opacity 0.5s ease;
-        }
-
-        .start-btn {
-            padding: 15px 40px;
-            background: var(--gold);
-            color: #000;
-            border: none;
-            border-radius: 30px;
-            font-size: 18px;
-            font-weight: bold;
+            gap: 5px;
+            color: #4a5568;
             cursor: pointer;
-            box-shadow: 0 0 20px rgba(212, 175, 55, 0.5);
-            animation: pulseHint 2s infinite;
+            transition: 0.3s;
+            padding: 5px;
         }
 
-        @keyframes pulseHint {
-            0%, 100% { transform: scale(1); }
-            50% { transform: scale(1.05); }
+        .nav-btn i { font-size: 20px; }
+        .nav-btn span { font-size: 10px; font-weight: bold; }
+
+        .nav-btn.active-btn {
+            color: var(--neon-blue);
+            transform: translateY(-5px);
+            filter: drop-shadow(0 0 8px var(--neon-blue));
         }
 
     </style>
 </head>
 <body>
 
-    <!-- چوارچێوەی سەرەکی ئەسانسۆرەکە -->
-    <div class="elevator-wrapper" id="elevator">
-        
-        <!-- شاشەی ژمارەکان لە سەرەوە -->
-        <div class="floor-display-container">
-            <div class="led-number" id="led-display">1</div>
+    <!-- دیمەنی یەکەم: عەدەسەی تەلیسکۆپ -->
+    <div id="intro-scene">
+        <div class="telescope-lens" onclick="lookThrough()">
+            <i class="fa-solid fa-eye lens-center"></i>
+            <div class="tap-hint">کرتە بکە بۆ سەیرکردنی ناو تەلیسکۆپەکە</div>
         </div>
-
-        <!-- دیمەنی پشتی دەرگاکان (زانیارییەکان) -->
-        <div class="floors-content">
-            
-            <!-- نهۆمی ١: چیرۆک -->
-            <div class="floor-view active" id="floor-1">
-                <i class="fa-solid fa-champagne-glasses floor-icon"></i>
-                <div class="names">ئەحمەد <span>&</span> سارا</div>
-                <p class="floor-text">
-                    بەخێربێن بۆ گەشتی ژیانمان. کاتێک دەرگاکانی دڵمان کرانەوە، بڕیارماندا تا کۆتایی پێکەوە بین. 
-                    ئامادەبوونتان لەم ئاهەنگەدا گەورەترین دیارییە بۆمان.
-                </p>
-                <div style="margin-top: 15px; color: var(--gold-dark); font-weight: bold;">(تکایە دوگمەکانی خوارەوە دابگرە بۆ گەشتکردن)</div>
-            </div>
-
-            <!-- نهۆمی ٢: کات -->
-            <div class="floor-view" id="floor-2">
-                <i class="fa-regular fa-calendar-check floor-icon"></i>
-                <div class="floor-title">نهۆمی کات و ساتی یەکگرتن</div>
-                <div class="highlight-box">
-                    <div style="color: var(--gold-dark); font-size: 20px; margin-bottom: 5px;">پێنج شەممە</div>
-                    <div>٢٥ / ٨ / ٢٠٢٦</div>
-                    <hr style="border: 0; border-top: 1px dashed var(--gold); margin: 10px 0;">
-                    <div style="font-size: 14px; color: #555;">کاتژمێر ٤:٣٠ ی پاش نیوەڕۆ</div>
-                </div>
-            </div>
-
-            <!-- نهۆمی ٣: شوێن -->
-            <div class="floor-view" id="floor-3">
-                <i class="fa-solid fa-map-location-dot floor-icon"></i>
-                <div class="floor-title">نهۆمی شوێن و ئاهەنگگێڕان</div>
-                <div class="highlight-box">
-                    <div style="font-size: 20px;">هۆڵی تەلاری زێڕین</div>
-                    <div style="font-size: 14px; color: #555; margin-top: 5px;">سلێمانی - شەقامی سەرەکی</div>
-                </div>
-                <a href="#" class="btn-action"><i class="fa-solid fa-location-arrow"></i> کردنەوە لە نەخشە</a>
-            </div>
-
-            <!-- نهۆمی ٤: پەیوەندی -->
-            <div class="floor-view" id="floor-4">
-                <i class="fa-solid fa-phone-volume floor-icon"></i>
-                <div class="floor-title">نهۆمی پەیوەندییەکان</div>
-                <p class="floor-text">
-                    بۆ زانیاری زیاتر یان پشتڕاستکردنەوەی ئامادەبوونتان پێش کاتی ئاهەنگەکە، تکایە پەیوەندی بکەن.
-                </p>
-                <a href="tel:07500000000" class="btn-action" style="font-size: 20px; padding: 15px 40px;">
-                    <i class="fa-solid fa-phone"></i> 0750 000 0000
-                </a>
-            </div>
-
-        </div>
-
-        <!-- دەرگاکانی ئەسانسۆر -->
-        <div class="doors-container" id="doors">
-            <div class="door door-left"></div>
-            <div class="door door-right"></div>
-        </div>
-
-        <!-- پەنێڵی دوگمەکان لە خوارەوە -->
-        <div class="control-panel">
-            <div class="elv-btn active-btn" onclick="goToFloor(1, this)"><i class="fa-solid fa-heart"></i></div>
-            <div class="elv-btn" onclick="goToFloor(2, this)">2</div>
-            <div class="elv-btn" onclick="goToFloor(3, this)">3</div>
-            <div class="elv-btn" onclick="goToFloor(4, this)"><i class="fa-solid fa-phone"></i></div>
-        </div>
-
     </div>
 
-    <!-- شاشەی سەرەتایی بۆ دەستپێکردن -->
-    <div class="start-overlay" id="start-screen">
-        <h2 style="color: var(--gold); margin-bottom: 30px; font-family: 'Aref Ruqaa', serif; font-size: 35px;">ئەسانسۆری ژیان</h2>
-        <button class="start-btn" onclick="startJourney()">بانگهێشتنامەکە بکەرەوە</button>
+    <!-- دیمەنی دووەم: ئاسمان و گەڕان -->
+    <div id="telescope-ui">
+        
+        <!-- چوارچێوەی لێواری تەلیسکۆپەکە -->
+        <div class="telescope-overlay"></div>
+        <div class="crosshair"></div>
+
+        <!-- باکگراوندە گەورەکە کە دەجوڵێت (The Universe) -->
+        <div class="universe" id="universe">
+            
+            <div class="stars-layer"></div>
+            
+            <!-- هێڵەکانی نێوان خاڵەکان -->
+            <div class="constellation-line line-center-right"></div>
+            <div class="constellation-line line-center-left"></div>
+            <div class="constellation-line line-center-down"></div>
+
+            <!-- خاڵی ناوەڕاست (چیرۆک) -->
+            <div class="node node-center active" id="node-0">
+                <div class="hologram-card">
+                    <i class="fa-solid fa-star card-icon node-icon"></i>
+                    <div class="names">ئەحمەد <span>&</span> سارا</div>
+                    <p class="node-text">
+                        لە گەردوونێکی بێسنووردا، چارەنووس دوو ئەستێرەی بەیەکەوە گرێدا. 
+                        بەوپەڕی خۆشحاڵییەوە بانگهێشتتان دەکەین بۆ ئاهەنگی درەوشانەوە و یەکگرتنمان.
+                    </p>
+                </div>
+            </div>
+
+            <!-- خاڵی ڕاست (کات) -->
+            <div class="node node-right" id="node-1">
+                <div class="hologram-card">
+                    <i class="fa-regular fa-hourglass-half node-icon" style="color: var(--neon-blue);"></i>
+                    <div class="node-title">کاتی درەوشانەوە</div>
+                    <p class="node-text">تکایە لەم ساتەدا ئامادەبن لەگەڵمان:</p>
+                    <div class="highlight-data">
+                        <div style="font-size: 16px; margin-bottom: 5px;">پێنج شەممە</div>
+                        ٢٥ / ٨ / ٢٠٢٦
+                    </div>
+                    <div style="margin-top: 15px; font-weight: bold; color: var(--text-light);">کاتژمێر ٤:٣٠ ی پاش نیوەڕۆ</div>
+                </div>
+            </div>
+
+            <!-- خاڵی خوارەوە (شوێن) -->
+            <div class="node node-bottom" id="node-2">
+                <div class="hologram-card">
+                    <i class="fa-solid fa-meteor node-icon" style="color: #ff7e67;"></i>
+                    <div class="node-title">گەلەئەستێرەی یەکگرتن</div>
+                    <p class="node-text">ئاهەنگەکەمان لەم شوێنە بەڕێوە دەچێت:</p>
+                    <div class="highlight-data" style="color: #ff7e67; border-color: #ff7e67; font-size: 24px;">
+                        هۆڵی تەلاری زێڕین
+                    </div>
+                    <div style="margin-top: 10px; color: var(--text-light);">سلێمانی - شەقامی سەرەکی</div>
+                    <a href="#" class="btn-action" style="border-color: #ff7e67; color: #ff7e67; margin-top: 20px;">
+                        <i class="fa-solid fa-location-arrow"></i> کردنەوە لە نەخشە
+                    </a>
+                </div>
+            </div>
+
+            <!-- خاڵی چەپ (پەیوەندی) -->
+            <div class="node node-left" id="node-3">
+                <div class="hologram-card">
+                    <i class="fa-solid fa-satellite-dish node-icon" style="color: #4facfe;"></i>
+                    <div class="node-title">پەیوەندییە گەردوونییەکان</div>
+                    <p class="node-text">بۆ هەر زانیارییەک یان پشتڕاستکردنەوەی ئامادەبوونتان پێش کاتی ئاهەنگەکە، پەیوەندیمان پێوە بکەن.</p>
+                    <a href="tel:07500000000" class="btn-action" style="background: var(--neon-blue); color: #000; border: none; margin-top: 30px;">
+                        <i class="fa-solid fa-phone"></i> 0750 000 0000
+                    </a>
+                </div>
+            </div>
+
+        </div>
+    </div>
+
+    <!-- پەنێڵی کۆنترۆڵ بۆ گەڕان بەناو ئاسماندا -->
+    <div class="control-panel">
+        <!-- تێبینی: لەبەر ئەوەی زمانی کوردی RTLە، لای چەپ دەکەوێتە کۆتایی -->
+        <div class="nav-btn active-btn" onclick="panTo(0, 0, 0, this)">
+            <i class="fa-solid fa-heart"></i>
+            <span>چیرۆک</span>
+        </div>
+        <div class="nav-btn" onclick="panTo(1, -100, 0, this)">
+            <i class="fa-regular fa-clock"></i>
+            <span>کات</span>
+        </div>
+        <div class="nav-btn" onclick="panTo(2, 0, -100, this)">
+            <i class="fa-solid fa-map-location-dot"></i>
+            <span>شوێن</span>
+        </div>
+        <div class="nav-btn" onclick="panTo(3, 100, 0, this)">
+            <i class="fa-solid fa-phone"></i>
+            <span>پەیوەندی</span>
+        </div>
     </div>
 
     <script>
-        let currentFloor = 1;
-        let isMoving = false;
-        const doors = document.getElementById('doors');
-        const elevator = document.getElementById('elevator');
-        const ledDisplay = document.getElementById('led-display');
+        let isLooking = false;
 
-        // فەنکشنی دەستپێک (کردنەوەی دەرگاکان بۆ یەکەم جار)
-        function startJourney() {
-            const startScreen = document.getElementById('start-screen');
-            startScreen.style.opacity = '0';
+        // فەنکشنی کردنەوەی عەدەسەی تەلیسکۆپەکە
+        function lookThrough() {
+            if (isLooking) return;
+            isLooking = true;
+
+            const intro = document.getElementById('intro-scene');
             
+            // عەدەسەکە گەورە دەبێت و شاشەکە دادەپۆشێت
+            intro.classList.add('opened');
+
+            // دوای ئەوەی گەورە بوو، دەیپارێزین لە ڕێگریکردن لە کلیکەکان
             setTimeout(() => {
-                startScreen.style.display = 'none';
-                // دەرگاکان دەکرێنەوە بۆ بینینی نهۆمی ١
-                doors.classList.add('open');
-            }, 500);
+                intro.style.display = 'none';
+            }, 1500);
         }
 
-        // فەنکشنی گەشتکردن بۆ نهۆمێکی تر
-        function goToFloor(targetFloor, btnElement) {
-            // ئەگەر ئەسانسۆرەکە لە جوڵەدابوو یان هەمان نهۆم بوو، هیچ مەکە
-            if (isMoving || currentFloor === targetFloor) return;
-            isMoving = true;
+        // فەنکشنی جوڵاندنی تەلیسکۆپەکە بەناو ئاسماندا (Panning)
+        function panTo(nodeIndex, x, y, btnElement) {
+            const universe = document.getElementById('universe');
+            const navButtons = document.querySelectorAll('.nav-btn');
+            const nodes = document.querySelectorAll('.node');
 
-            // ١. گۆڕینی ڕەنگی دوگمەکان
-            document.querySelectorAll('.elv-btn').forEach(btn => btn.classList.remove('active-btn'));
+            // ١. گۆڕینی دوگمەی ئەکتیڤ
+            navButtons.forEach(btn => btn.classList.remove('active-btn'));
             btnElement.classList.add('active-btn');
 
-            // ٢. داخستنی دەرگاکان
-            doors.classList.remove('open');
+            // ٢. لابردنی ئیفێکتی ئەکتیڤ لە هەموو خاڵەکان
+            nodes.forEach(node => node.classList.remove('active'));
 
-            // ٣. چاوەڕێکردن تا دەرگاکان بەتەواوی دادەخرێن (1.5s)
+            // ٣. جوڵاندنی ئاسمانە گەورەکە بۆ ئەو خاڵەی کە دیاریکراوە (بە بەکارهێنانی Translate)
+            universe.style.transform = `translate(${x}vw, ${y}vh)`;
+
+            // ٤. پاش ئەوەی تەلیسکۆپەکە گەیشتە شوێنی خۆی، کارتی ناو ئەو خاڵە گەورە دەبێت و دەدرەوشێتەوە
             setTimeout(() => {
-                
-                // ٤. دەستپێکردنی لەرینەوە (Moving effect) و گۆڕینی ژمارەی LED
-                elevator.classList.add('moving');
-                ledDisplay.innerText = targetFloor;
-
-                // شاردنەوەی هەموو نهۆمەکان لە پشتەوە
-                document.querySelectorAll('.floor-view').forEach(floor => floor.classList.remove('active'));
-
-                // ٥. دوای 1 چرکە لە ڕۆیشتن، ئەسانسۆرەکە دەوەستێت و زانیاری نوێ ئامادە دەبێت
-                setTimeout(() => {
-                    elevator.classList.remove('moving');
-                    
-                    // ئەکتیڤکردنی نهۆمە مەبەستەکە
-                    document.getElementById('floor-' + targetFloor).classList.add('active');
-                    
-                    // نوێکردنەوەی نهۆمی ئێستا
-                    currentFloor = targetFloor;
-
-                    // ٦. کردنەوەی دەرگاکان دووبارە
-                    setTimeout(() => {
-                        doors.classList.add('open');
-                        isMoving = false; // ڕێگەدان بە کلیکێکی تر
-                    }, 500);
-
-                }, 1000); // ماوەی ڕۆیشتنی ئەسانسۆرەکە
-
-            }, 1500); // ماوەی داخستنی دەرگاکان
+                document.getElementById('node-' + nodeIndex).classList.add('active');
+            }, 800); // نیوەی کاتی جوڵەکە
         }
     </script>
 
