@@ -1,0 +1,495 @@
+<!DOCTYPE html>
+<html lang="ckb" dir="rtl">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0, maximum-scale=1.0, user-scalable=no">
+    <title>بانگهێشتنامەی کارتەکانی چارەنووس</title>
+    <!-- ئایکۆنەکان -->
+    <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.4.0/css/all.min.css">
+    <style>
+        @import url('https://fonts.googleapis.com/css2?family=Aref+Ruqaa:wght@400;700&family=Noto+Naskh+Arabic:wght@400;700&display=swap');
+
+        :root {
+            --bg-void: #09090e;
+            --bg-accent: #1a1625;
+            --gold: #d4af37;
+            --gold-light: #fbe5b8;
+            --gold-dark: #aa771c;
+            --card-glass: rgba(255, 255, 255, 0.05);
+            --card-border: rgba(212, 175, 55, 0.3);
+            --text-light: #f8f9fa;
+        }
+
+        * {
+            box-sizing: border-box;
+            margin: 0;
+            padding: 0;
+            -webkit-tap-highlight-color: transparent;
+        }
+
+        body, html {
+            width: 100%;
+            height: 100%;
+            background-color: var(--bg-void);
+            font-family: 'Noto Naskh Arabic', Tahoma, sans-serif;
+            overflow: hidden; /* سکرۆڵ نییە بە هیچ جۆرێک */
+            color: var(--text-light);
+        }
+
+        /* ================= دیمەنی یەکەم: مۆری زێڕین ================= */
+        #intro-scene {
+            position: fixed;
+            top: 0; left: 0;
+            width: 100%; height: 100%;
+            display: flex;
+            justify-content: center;
+            align-items: center;
+            flex-direction: column;
+            z-index: 100;
+            background: radial-gradient(circle at center, var(--bg-accent) 0%, var(--bg-void) 100%);
+            transition: opacity 1.5s ease;
+        }
+
+        .seal-container {
+            position: relative;
+            cursor: pointer;
+            display: flex;
+            justify-content: center;
+            align-items: center;
+            width: 120px; height: 120px;
+        }
+
+        /* مۆری زێڕین */
+        .wax-seal {
+            width: 100px; height: 100px;
+            background: radial-gradient(circle, var(--gold-light), var(--gold-dark));
+            border-radius: 50%;
+            box-shadow: 0 10px 30px rgba(212, 175, 55, 0.4), inset 0 0 15px rgba(0,0,0,0.5);
+            display: flex;
+            justify-content: center;
+            align-items: center;
+            font-size: 40px;
+            color: #4a3308;
+            transition: all 0.3s;
+            position: relative;
+            z-index: 2;
+        }
+
+        .wax-seal::before {
+            content: '';
+            position: absolute;
+            width: 85px; height: 85px;
+            border: 2px dashed #4a3308;
+            border-radius: 50%;
+            opacity: 0.5;
+        }
+
+        .seal-container:active .wax-seal { transform: scale(0.9); }
+
+        /* لەرینەوەی ڕووناکی پشتی مۆرەکە */
+        .seal-glow {
+            position: absolute;
+            width: 100px; height: 100px;
+            background: var(--gold);
+            border-radius: 50%;
+            filter: blur(30px);
+            animation: pulseGlow 2s infinite alternate;
+            z-index: 1;
+        }
+
+        @keyframes pulseGlow {
+            0% { transform: scale(1); opacity: 0.5; }
+            100% { transform: scale(1.5); opacity: 0.8; }
+        }
+
+        /* تەقینەوەی مۆرەکە */
+        .seal-container.shatter .wax-seal,
+        .seal-container.shatter .seal-glow {
+            animation: explodeSeal 1s forwards cubic-bezier(0.1, 1, 0.3, 1);
+        }
+
+        @keyframes explodeSeal {
+            0% { transform: scale(1); opacity: 1; filter: blur(0); }
+            100% { transform: scale(5) rotate(45deg); opacity: 0; filter: blur(20px); }
+        }
+
+        .tap-hint {
+            margin-top: 40px;
+            color: var(--gold);
+            font-size: 15px;
+            font-weight: bold;
+            letter-spacing: 1px;
+            animation: pulseHint 2s infinite;
+        }
+        @keyframes pulseHint { 0%, 100% { opacity: 0.4; } 50% { opacity: 1; } }
+
+
+        /* ================= دیمەنی دووەم: کەڵەکەبوونی کارتەکان (Card Stack) ================= */
+        #main-content {
+            position: absolute;
+            top: 0; left: 0;
+            width: 100%; height: 100%;
+            display: flex;
+            justify-content: center;
+            align-items: center;
+            opacity: 0;
+            visibility: hidden;
+            transition: opacity 1s ease;
+            z-index: 10;
+            /* باکگراوندی ئەستێرەیی */
+            background-image: radial-gradient(circle at top right, rgba(212, 175, 55, 0.1) 0%, transparent 50%),
+                              radial-gradient(circle at bottom left, rgba(212, 175, 55, 0.1) 0%, transparent 50%);
+        }
+
+        #main-content.show {
+            opacity: 1;
+            visibility: visible;
+        }
+
+        /* دەفری کارتەکان */
+        .card-stack-container {
+            position: relative;
+            width: 90%;
+            max-width: 400px;
+            height: 500px;
+            perspective: 1000px; /* قووڵی سێ دووری */
+        }
+
+        /* دیزاینی گشتی کارتەکان */
+        .stack-card {
+            position: absolute;
+            top: 0; left: 0;
+            width: 100%; height: 100%;
+            background: var(--card-glass);
+            backdrop-filter: blur(20px);
+            -webkit-backdrop-filter: blur(20px);
+            border-radius: 20px;
+            padding: 40px 20px;
+            border: 1px solid var(--card-border);
+            text-align: center;
+            display: flex;
+            flex-direction: column;
+            justify-content: center;
+            align-items: center;
+            box-shadow: 0 30px 50px rgba(0,0,0,0.5), inset 0 0 20px rgba(212, 175, 55, 0.05);
+            /* ئەنیمەیشنی گۆڕانکاری کارتەکان */
+            transition: transform 0.6s cubic-bezier(0.34, 1.56, 0.64, 1), opacity 0.6s ease;
+        }
+
+        /* ================= حاڵەتەکانی کارتەکان (The 3D Stack Magic) ================= */
+        
+        /* کارتی یەکەم (چالاک - لە پێشەوەیە) */
+        .card-active {
+            transform: translateY(0) scale(1) translateZ(0);
+            opacity: 1;
+            z-index: 10;
+            pointer-events: auto;
+        }
+
+        /* کارتی دووەم (لە پشتەوەیە) */
+        .card-next-1 {
+            transform: translateY(30px) scale(0.9) translateZ(-50px);
+            opacity: 0.7;
+            z-index: 9;
+            pointer-events: none;
+            filter: brightness(0.7);
+        }
+
+        /* کارتی سێیەم (لە دواوەیە) */
+        .card-next-2 {
+            transform: translateY(60px) scale(0.8) translateZ(-100px);
+            opacity: 0.4;
+            z-index: 8;
+            pointer-events: none;
+            filter: brightness(0.4);
+        }
+
+        /* کارتی چوارەم (لە زۆر دواوەیە) */
+        .card-next-3 {
+            transform: translateY(90px) scale(0.7) translateZ(-150px);
+            opacity: 0.1;
+            z-index: 7;
+            pointer-events: none;
+            filter: brightness(0.2);
+        }
+
+        /* کاتێک کارتێک هەڵدەدرێتەوە (دەفڕێت بەرەو ئاسمان و ون دەبێت) */
+        .card-flown {
+            transform: translateY(-150%) scale(1.1) rotate(15deg) translateZ(100px);
+            opacity: 0;
+            z-index: 11;
+            pointer-events: none;
+        }
+
+
+        /* ================= دیزاینی ناوەوەی کارتەکان ================= */
+        .card-icon {
+            font-size: 40px;
+            color: var(--gold);
+            margin-bottom: 20px;
+            filter: drop-shadow(0 0 10px rgba(212, 175, 55, 0.5));
+        }
+
+        .names {
+            font-family: 'Aref Ruqaa', serif;
+            font-size: clamp(35px, 10vw, 45px);
+            color: var(--gold-light);
+            font-weight: bold;
+            line-height: 1.2;
+            margin-bottom: 15px;
+        }
+
+        .names span {
+            color: var(--text-light);
+            font-size: 20px;
+            margin: 0 10px;
+            opacity: 0.5;
+        }
+
+        .card-title {
+            font-size: 22px;
+            color: var(--gold);
+            font-weight: bold;
+            margin-bottom: 15px;
+            border-bottom: 1px dashed var(--gold);
+            padding-bottom: 10px;
+            display: inline-block;
+        }
+
+        .card-text {
+            font-size: 15px;
+            color: var(--text-light);
+            line-height: 2;
+            font-weight: bold;
+            opacity: 0.9;
+        }
+
+        .highlight-box {
+            background: rgba(212, 175, 55, 0.1);
+            border: 1px solid rgba(212, 175, 55, 0.3);
+            border-radius: 12px;
+            padding: 15px 25px;
+            margin-top: 20px;
+            color: var(--gold-light);
+            font-size: 22px;
+            font-weight: bold;
+        }
+
+        .sub-text {
+            font-size: 14px;
+            color: #94a3b8;
+            margin-top: 10px;
+            font-weight: normal;
+        }
+
+        /* دوگمەی کۆنترۆڵکردنی کارتەکان (هەڵدانەوە) */
+        .controls {
+            position: absolute;
+            bottom: -80px;
+            left: 50%;
+            transform: translateX(-50%);
+            width: 100%;
+            display: flex;
+            justify-content: center;
+            z-index: 20;
+        }
+
+        .btn-swipe {
+            padding: 15px 40px;
+            background: linear-gradient(45deg, var(--gold-dark), var(--gold));
+            color: var(--bg-void);
+            border: none;
+            border-radius: 30px;
+            font-size: 16px;
+            font-weight: bold;
+            cursor: pointer;
+            box-shadow: 0 10px 20px rgba(212, 175, 55, 0.3);
+            display: flex;
+            align-items: center;
+            gap: 10px;
+            transition: all 0.3s;
+        }
+
+        .btn-swipe:active { transform: scale(0.95); }
+        .btn-swipe:hover { box-shadow: 0 10px 30px rgba(212, 175, 55, 0.6); }
+
+        .btn-action {
+            display: inline-flex;
+            align-items: center;
+            gap: 8px;
+            margin-top: 25px;
+            padding: 12px 25px;
+            background: rgba(255,255,255,0.1);
+            color: var(--gold-light);
+            text-decoration: none;
+            border-radius: 30px;
+            border: 1px solid var(--gold);
+            font-weight: bold;
+            font-size: 14px;
+            transition: 0.3s;
+        }
+
+    </style>
+</head>
+<body>
+
+    <!-- دیمەنی یەکەم: مۆرە زێڕینەکە -->
+    <div id="intro-scene">
+        <div class="seal-container" id="seal" onclick="breakSeal()">
+            <div class="seal-glow"></div>
+            <div class="wax-seal">
+                <i class="fa-solid fa-envelope-open-text"></i>
+            </div>
+        </div>
+        <div class="tap-hint" id="hint">کرتە بکە بۆ شکاندی مۆرەکە...</div>
+    </div>
+
+    <!-- دیمەنی دووەم: کارتە کەڵەکەبووەکان (3D Stack) -->
+    <div id="main-content">
+        
+        <div class="card-stack-container" id="card-stack">
+            
+            <!-- کارتی 1: چیرۆک (لە پێشەوەیە) -->
+            <div class="stack-card card-active" data-index="0">
+                <i class="fa-solid fa-rings-wedding card-icon"></i>
+                <div class="names">ئەحمەد <span>&</span> سارا</div>
+                <p class="card-text">
+                    لەناو ملیۆنان چیرۆکی ئەم گەردوونەدا، چیرۆکی ئێمە گەیشتە جوانترین وێستگە.
+                    بەوپەڕی خۆشحاڵییەوە، بانگهێشتتان دەکەین بۆ ئامادەبوون لە ئاهەنگی هاوسەرگیریمان.
+                </p>
+            </div>
+
+            <!-- کارتی 2: کات (لە پشتەوەیە) -->
+            <div class="stack-card card-next-1" data-index="1">
+                <i class="fa-regular fa-clock card-icon"></i>
+                <div class="card-title">کاتی ئامادەبوون</div>
+                <p class="card-text">تکایە لەم بەروارەدا ئامادەبن لەگەڵمان:</p>
+                <div class="highlight-box">
+                    <div style="font-size: 16px; color: var(--gold);">پێنج شەممە</div>
+                    ٢٥ / ٨ / ٢٠٢٦
+                </div>
+                <div class="sub-text">کاتژمێر ٤:٣٠ ی پاش نیوەڕۆ</div>
+            </div>
+
+            <!-- کارتی 3: شوێن (لە دواترە) -->
+            <div class="stack-card card-next-2" data-index="2">
+                <i class="fa-solid fa-map-location-dot card-icon"></i>
+                <div class="card-title">ناونیشانی ئاهەنگ</div>
+                <p class="card-text">چاوەڕێتانین لە جوانترین هۆڵی شاردا:</p>
+                <div class="highlight-box" style="font-size: 20px;">
+                    هۆڵی تەلاری زێڕین
+                </div>
+                <div class="sub-text">سلێمانی - شەقامی سەرەکی</div>
+                <a href="#" class="btn-action"><i class="fa-solid fa-location-arrow"></i> کردنەوە لە نەخشە</a>
+            </div>
+
+            <!-- کارتی 4: پەیوەندی (لە کۆتاییدایە) -->
+            <div class="stack-card card-next-3" data-index="3">
+                <i class="fa-solid fa-headset card-icon"></i>
+                <div class="card-title">پەیوەندی کردن</div>
+                <p class="card-text">بۆ سەلماندنی ئامادەبوونتان یان هەر پرسیارێک، دەتوانن پەیوەندی بکەن بە:</p>
+                <a href="tel:07500000000" class="btn-action" style="background: var(--gold); color: #000; margin-top: 30px; font-size: 18px; padding: 15px 30px;">
+                    <i class="fa-solid fa-phone"></i> 0750 000 0000
+                </a>
+            </div>
+
+        </div>
+
+        <!-- دوگمەی هەڵدانەوەی کارتەکان -->
+        <div class="controls">
+            <button class="btn-swipe" id="swipe-btn" onclick="nextCard()">
+                کارتی داهاتوو <i class="fa-solid fa-arrow-up"></i>
+            </button>
+        </div>
+
+    </div>
+
+    <script>
+        let isOpened = false;
+
+        // فەنکشنی شکاندنی مۆرەکە و چوونە ژوورەوە
+        function breakSeal() {
+            if (isOpened) return;
+            isOpened = true;
+
+            const seal = document.getElementById('seal');
+            const hint = document.getElementById('hint');
+            const intro = document.getElementById('intro-scene');
+            const main = document.getElementById('main-content');
+
+            hint.style.opacity = '0';
+            seal.classList.add('shatter');
+
+            // دوای تەقینەوەکە دەچێتە ناوەوە
+            setTimeout(() => {
+                intro.style.opacity = '0';
+                setTimeout(() => {
+                    intro.style.display = 'none';
+                    main.classList.add('show');
+                }, 500);
+            }, 800);
+        }
+
+        // لۆجیکی کارتە کەڵەکەبووەکان (The Stack Logic)
+        const cards = document.querySelectorAll('.stack-card');
+        const swipeBtn = document.getElementById('swipe-btn');
+        let currentIndex = 0; // پێمان دەڵێت ئێستا کام کارت لە پێشەوەیە
+
+        function nextCard() {
+            // ئەگەر گەیشتینە کۆتایی، با دوبارە بگەڕێتەوە بۆ سەرەتا!
+            if (currentIndex >= cards.length - 1) {
+                resetCards();
+                return;
+            }
+
+            // ١. کارتی ئێستا دەفڕێت بەرەو سەرەوە و ون دەبێت
+            cards[currentIndex].className = 'stack-card card-flown';
+            
+            // ٢. زیادکردنی ئیندێکس بۆ کارتی داهاتوو
+            currentIndex++;
+
+            // ٣. نوێکردنەوەی کلاسەکانی کارتەکانی تر بۆ ئەوەی بێنە پێشەوە
+            updateCardClasses();
+
+            // ٤. گۆڕینی نووسینی دوگمەکە ئەگەر گەیشتە کۆتایی
+            if (currentIndex === cards.length - 1) {
+                swipeBtn.innerHTML = 'گەڕانەوە بۆ سەرەتا <i class="fa-solid fa-rotate-right"></i>';
+            }
+        }
+
+        // فەنکشنی گەڕانەوە بۆ سەرەتا (لە دوای کۆتا کارت)
+        function resetCards() {
+            currentIndex = 0;
+            updateCardClasses();
+            swipeBtn.innerHTML = 'کارتی داهاتوو <i class="fa-solid fa-arrow-up"></i>';
+        }
+
+        // فەنکشنی سەرەکی کە بەرپرسە لە پێدانی کلاسی دروست بە هەر کارتێک بەپێی شوێنەکەی
+        function updateCardClasses() {
+            cards.forEach((card, index) => {
+                // ئەگەر کارتەکە پێشتر فڕیبێت، وازی لێ بێنە مەگەر ڕیسێت بکرێت
+                if (index < currentIndex) {
+                    card.className = 'stack-card card-flown';
+                } 
+                // ئەگەر کارتەکە دەبێت ببێتە کارتی سەرەکی
+                else if (index === currentIndex) {
+                    card.className = 'stack-card card-active';
+                } 
+                // ئەگەر کارتەکە لە پشتەوەی یەکەمە
+                else if (index === currentIndex + 1) {
+                    card.className = 'stack-card card-next-1';
+                } 
+                // ئەگەر کارتەکە لە پشتەوەی دووەمە
+                else if (index === currentIndex + 2) {
+                    card.className = 'stack-card card-next-2';
+                } 
+                // ئەگەر کارتەکە لە پشتەوەی سێیەمە
+                else if (index === currentIndex + 3) {
+                    card.className = 'stack-card card-next-3';
+                }
+            });
+        }
+    </script>
+
+</body>
+</html>

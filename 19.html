@@ -1,0 +1,482 @@
+<!DOCTYPE html>
+<html lang="ckb" dir="rtl">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0, maximum-scale=1.0, user-scalable=no">
+    <title>بانگهێشتنامەی سینەمای ژیان</title>
+    <!-- ئایکۆنەکان -->
+    <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.4.0/css/all.min.css">
+    <style>
+        @import url('https://fonts.googleapis.com/css2?family=Aref+Ruqaa:wght@400;700&family=Noto+Naskh+Arabic:wght@400;700&display=swap');
+
+        :root {
+            --bg-dark: #0a0a0a; /* ژووری تاریکی سینەما */
+            --projector-beam: rgba(255, 245, 200, 0.8);
+            --film-bg: #111;
+            --screen-bg: #f5f0e1; /* ڕەنگی پەردەی سینەمای کۆن */
+            --sepia-text: #4a3b2c;
+            --gold: #d4af37;
+        }
+
+        * {
+            box-sizing: border-box;
+            margin: 0;
+            padding: 0;
+            -webkit-tap-highlight-color: transparent;
+        }
+
+        body, html {
+            width: 100%;
+            height: 100%;
+            background-color: var(--bg-dark);
+            font-family: 'Noto Naskh Arabic', Tahoma, sans-serif;
+            overflow: hidden; /* هیچ سکرۆڵێکی تێدا نییە */
+            color: #fff;
+        }
+
+        /* ================= دیمەنی یەکەم: پڕۆژێکتەری سینەما ================= */
+        #intro-scene {
+            position: fixed;
+            top: 0; left: 0;
+            width: 100%; height: 100%;
+            display: flex;
+            justify-content: center;
+            align-items: center;
+            flex-direction: column;
+            z-index: 100;
+            background: radial-gradient(circle at center, #1a1a1a 0%, #000 100%);
+            transition: opacity 1.5s ease;
+        }
+
+        .projector-icon {
+            font-size: 70px;
+            color: var(--gold);
+            cursor: pointer;
+            position: relative;
+            z-index: 2;
+            transition: transform 0.3s;
+        }
+
+        .projector-icon:active { transform: scale(0.9); }
+
+        /* تیشکی پڕۆژێکتەرەکە (سەرەتا شاراوەیە) */
+        .light-beam {
+            position: absolute;
+            top: 50%; left: 50%;
+            width: 0; height: 0;
+            /* دروستکردنی شێوەی قووچەکی تیشک بە CSS */
+            border-top: 150px solid transparent;
+            border-bottom: 150px solid transparent;
+            border-left: 300px solid var(--projector-beam);
+            transform: translate(-100%, -50%); /* ئاراستەکردن بەرەو چەپ */
+            opacity: 0;
+            pointer-events: none;
+            filter: blur(8px);
+        }
+
+        /* ئەنیمەیشنی داگیرسانی تیشکەکە (لەرینەوەی کلاسیک) */
+        .light-beam.on {
+            animation: flickerLight 2s ease-in forwards;
+        }
+
+        @keyframes flickerLight {
+            0% { opacity: 0; }
+            10% { opacity: 0.8; }
+            20% { opacity: 0.2; }
+            30% { opacity: 1; width: 0; }
+            100% { opacity: 0.9; width: 100vw; border-left: 150vw solid var(--projector-beam); } /* تیشکەکە شاشەکە دەگرێتەوە */
+        }
+
+        .tap-hint {
+            margin-top: 30px;
+            color: #888;
+            font-size: 14px;
+            font-weight: bold;
+            letter-spacing: 1px;
+            animation: pulseHint 2s infinite;
+        }
+
+        @keyframes pulseHint { 0%, 100% { opacity: 0.3; } 50% { opacity: 1; } }
+
+
+        /* ================= دیمەنی دووەم: پەردەی سینەما ================= */
+        #cinema-room {
+            position: absolute;
+            top: 0; left: 0;
+            width: 100%; height: 100%;
+            background: #000;
+            display: flex;
+            justify-content: center;
+            align-items: center;
+            opacity: 0;
+            visibility: hidden;
+            transition: opacity 1s ease;
+            z-index: 10;
+        }
+
+        #cinema-room.show {
+            opacity: 1;
+            visibility: visible;
+        }
+
+        /* ئیفێکتی خەز و هێڵی فیلمی کۆن لەسەر شاشەکە */
+        .old-film-effect {
+            position: absolute;
+            top: 0; left: 0; width: 100%; height: 100%;
+            pointer-events: none;
+            z-index: 50;
+            background-image: url('https://www.transparenttextures.com/patterns/dust.png');
+            opacity: 0.4;
+            animation: filmJitter 0.2s infinite;
+        }
+
+        @keyframes filmJitter {
+            0% { transform: translateY(0); }
+            50% { transform: translateY(1px) translateX(1px); }
+            100% { transform: translateY(0); }
+        }
+
+        /* ژماردنی پێچەوانەی سەرەتا (3.. 2.. 1..) */
+        .countdown-screen {
+            position: absolute;
+            width: 100%; height: 100%;
+            background: var(--screen-bg);
+            display: flex;
+            justify-content: center;
+            align-items: center;
+            z-index: 20;
+            opacity: 0;
+            visibility: hidden;
+            border-radius: 10px;
+        }
+
+        .countdown-screen.active {
+            opacity: 1;
+            visibility: visible;
+        }
+
+        .countdown-circle {
+            width: 150px; height: 150px;
+            border: 4px solid var(--sepia-text);
+            border-radius: 50%;
+            display: flex;
+            justify-content: center;
+            align-items: center;
+            font-size: 80px;
+            color: var(--sepia-text);
+            font-weight: bold;
+            position: relative;
+        }
+
+        .countdown-circle::before, .countdown-circle::after {
+            content: '';
+            position: absolute;
+            background: var(--sepia-text);
+        }
+        .countdown-circle::before { width: 100%; height: 2px; } /* هێڵی ئاسۆیی */
+        .circle::after { width: 2px; height: 100%; } /* هێڵی ستوونی */
+
+        /* شریتی فیلمەکە کە زانیارییەکانی تێدایە */
+        .film-strip-container {
+            width: 100%;
+            max-width: 500px;
+            background: var(--film-bg);
+            padding: 30px 0;
+            position: relative;
+            overflow: hidden; /* تەنها یەک دیمەن نیشان دەدات لە یەک کاتدا */
+            border-radius: 5px;
+            box-shadow: 0 0 50px rgba(255,255,255,0.1);
+        }
+
+        /* کونی لێوارەکانی شریتی فیلم (Film Holes) */
+        .film-strip-container::before, .film-strip-container::after {
+            content: '';
+            position: absolute;
+            left: 0;
+            width: 100%; height: 15px;
+            background-image: radial-gradient(circle, #f5f0e1 4px, transparent 5px);
+            background-size: 25px 15px;
+            z-index: 5;
+        }
+        .film-strip-container::before { top: 5px; }
+        .film-strip-container::after { bottom: 5px; }
+
+        /* تراکی فیلمەکە کە دەجوڵێت بۆ لای ڕاست و چەپ */
+        .film-track {
+            display: flex;
+            width: 100%;
+            transition: transform 0.8s cubic-bezier(0.25, 1, 0.5, 1);
+            /* لەبەر ئەوەی زمانی کوردی RTL ە، جوڵەکە بە ئاراستەی پێچەوانە دەبێت */
+        }
+
+        /* هەر سلایدێک (کادرێک) لە فیلمەکە */
+        .film-frame {
+            min-width: 100%;
+            padding: 0 20px;
+            display: flex;
+            flex-direction: column;
+            align-items: center;
+        }
+
+        /* پەردەی ناوەوەی کادرەکە */
+        .frame-content {
+            width: 100%;
+            background: var(--screen-bg);
+            border-radius: 8px;
+            padding: 30px 20px;
+            text-align: center;
+            position: relative;
+            border: 2px solid #333;
+            box-shadow: inset 0 0 30px rgba(74, 59, 44, 0.2);
+        }
+
+        .frame-title {
+            font-size: 16px;
+            color: #88674b;
+            letter-spacing: 2px;
+            margin-bottom: 20px;
+            font-weight: bold;
+            border-bottom: 1px dashed #88674b;
+            padding-bottom: 10px;
+            display: inline-block;
+        }
+
+        .names {
+            font-family: 'Aref Ruqaa', serif;
+            font-size: 45px;
+            color: var(--sepia-text);
+            font-weight: bold;
+            line-height: 1.2;
+            margin-bottom: 15px;
+        }
+
+        .names span {
+            color: #a37f5f;
+            font-size: 25px;
+            margin: 0 10px;
+        }
+
+        .story-text {
+            font-size: 14px;
+            color: var(--sepia-text);
+            line-height: 2;
+            font-weight: bold;
+            margin-bottom: 20px;
+        }
+
+        .highlight-data {
+            font-size: 22px;
+            color: var(--sepia-text);
+            font-weight: bold;
+            margin: 10px 0;
+            background: rgba(74, 59, 44, 0.1);
+            padding: 10px;
+            border-radius: 8px;
+        }
+
+        .sub-data {
+            font-size: 14px;
+            color: #665544;
+            font-weight: bold;
+        }
+
+        .btn-action {
+            display: inline-block;
+            margin-top: 15px;
+            padding: 12px 25px;
+            background: var(--sepia-text);
+            color: #fff;
+            text-decoration: none;
+            border-radius: 5px;
+            font-weight: bold;
+            font-size: 14px;
+            transition: 0.3s;
+        }
+        .btn-action:active { transform: scale(0.95); }
+
+        /* دوگمەکانی کۆنترۆڵکردنی فیلمەکە لە خوارەوە */
+        .controls {
+            display: flex;
+            justify-content: space-between;
+            width: 100%;
+            max-width: 500px;
+            margin-top: 20px;
+            padding: 0 20px;
+            position: relative;
+            z-index: 10;
+        }
+
+        .control-btn {
+            padding: 10px 20px;
+            background: rgba(255,255,255,0.1);
+            border: 1px solid rgba(255,255,255,0.3);
+            color: #fff;
+            border-radius: 20px;
+            cursor: pointer;
+            font-weight: bold;
+            transition: 0.3s;
+            display: flex;
+            align-items: center;
+            gap: 8px;
+        }
+
+        .control-btn:hover { background: rgba(255,255,255,0.2); }
+        .control-btn:disabled { opacity: 0.3; cursor: not-allowed; }
+
+    </style>
+</head>
+<body>
+
+    <!-- دیمەنی یەکەم: پڕۆژێکتەرەکە -->
+    <div id="intro-scene" onclick="playMovie()">
+        <!-- تیشکی پڕۆژێکتەرەکە -->
+        <div class="light-beam" id="beam"></div>
+        
+        <i class="fa-solid fa-video projector-icon"></i>
+        <div class="tap-hint" id="hint">کرتە بکە بۆ داگیرساندنی پڕۆژێکتەرەکە...</div>
+    </div>
+
+    <!-- دیمەنی دووەم: ژووری سینەما -->
+    <div id="cinema-room">
+        
+        <!-- ئیفێکتی خەز و کۆنی فیلم -->
+        <div class="old-film-effect"></div>
+
+        <!-- پەردەی ژماردنی پێچەوانە -->
+        <div class="countdown-screen" id="countdown-screen">
+            <div class="countdown-circle" id="countdown-num">3</div>
+        </div>
+
+        <!-- بەشی فیلمەکە کە دەرکەوت -->
+        <div style="display: flex; flex-direction: column; align-items: center; width: 100%; opacity: 0;" id="movie-content">
+            
+            <!-- شریتی فیلمەکە -->
+            <div class="film-strip-container">
+                <div class="film-track" id="film-track">
+                    
+                    <!-- کادری یەکەم: پاڵەوانەکان -->
+                    <div class="film-frame">
+                        <div class="frame-content">
+                            <div class="frame-title">دیمەنی یەکەم: پاڵەوانەکان</div>
+                            <div class="names">ئەحمەد <span>&</span> سارا</div>
+                            <p class="story-text">
+                                هەر فیلمێکی مەزن چیرۆکێکی مەزنی لەپشتە. 
+                                فیلمی ژیانی ئێمەش گەیشتە جوانترین دیمەن، کە ئەویش یەکگرتنی ڕۆحەکانمانە بۆ هەمیشە.
+                            </p>
+                            <div style="color: #88674b; font-size: 12px; margin-top: 10px;">ئامادەبوونتان جێگەی شانازیمانە</div>
+                        </div>
+                    </div>
+
+                    <!-- کادری دووەم: کاتی نمایش -->
+                    <div class="film-frame">
+                        <div class="frame-content">
+                            <div class="frame-title">دیمەنی دووەم: کاتی نمایش</div>
+                            <p class="story-text">بەوپەڕی خۆشحاڵییەوە چاوەڕێی ئامادەبوونتانین لەم کاتەدا:</p>
+                            <div class="highlight-data">پێنج شەممە</div>
+                            <div class="highlight-data" style="font-size: 18px;">٢٥ / ٨ / ٢٠٢٦</div>
+                            <div class="sub-data" style="margin-top: 15px;">کاتژمێر ٤:٣٠ ی پاش نیوەڕۆ</div>
+                        </div>
+                    </div>
+
+                    <!-- کادری سێیەم: شوێنی نمایش -->
+                    <div class="film-frame">
+                        <div class="frame-content">
+                            <div class="frame-title">دیمەنی سێیەم: سینەمای نمایش</div>
+                            <p class="story-text">ئاهەنگەکەمان لە یەکێک لە جوانترین هۆڵەکانی شار بەڕێوە دەچێت:</p>
+                            <div class="highlight-data" style="font-size: 18px;">هۆڵی تەلاری زێڕین</div>
+                            <div class="sub-data">سلێمانی - شەقامی سەرەکی</div>
+                            
+                            <div style="margin-top: 20px; display: flex; gap: 10px; justify-content: center;">
+                                <a href="tel:07500000000" class="btn-action"><i class="fa-solid fa-phone"></i> پەیوەندی</a>
+                                <a href="#" class="btn-action" style="background: transparent; border: 2px solid var(--sepia-text); color: var(--sepia-text);"><i class="fa-solid fa-map-location-dot"></i> بلیت (نەخشە)</a>
+                            </div>
+                        </div>
+                    </div>
+
+                </div>
+            </div>
+
+            <!-- دوگمەکانی کۆنترۆڵکردن لە خوارەوە -->
+            <div class="controls">
+                <!-- لە کوردی (ڕاست بۆ چەپ)، دوگمەی "پێشوو" دەکەوێتە ڕاست، "دواتر" دەکەوێتە چەپ -->
+                <button class="control-btn" id="btn-next" onclick="moveFilm(1)">دیمەنی دواتر <i class="fa-solid fa-arrow-left"></i></button>
+                <button class="control-btn" id="btn-prev" onclick="moveFilm(-1)" disabled><i class="fa-solid fa-arrow-right"></i> دیمەنی پێشوو</button>
+            </div>
+
+        </div>
+
+    </div>
+
+    <script>
+        let isPlaying = false;
+        let currentFrame = 0;
+        const totalFrames = 3;
+
+        // فەنکشنی داگیرساندنی پڕۆژێکتەرەکە
+        function playMovie() {
+            if (isPlaying) return;
+            isPlaying = true;
+
+            const beam = document.getElementById('beam');
+            const hint = document.getElementById('hint');
+            const intro = document.getElementById('intro-scene');
+            const cinema = document.getElementById('cinema-room');
+            const countdownScreen = document.getElementById('countdown-screen');
+            const countdownNum = document.getElementById('countdown-num');
+            const movieContent = document.getElementById('movie-content');
+
+            // 1. داگیرساندنی تیشکەکە
+            hint.style.opacity = '0';
+            beam.classList.add('on');
+
+            // 2. دوای ئەوەی تیشکەکە شاشەکەی گرتەوە (دوای 2 چرکە)، دەچینە ژووری سینەماکە
+            setTimeout(() => {
+                intro.style.display = 'none';
+                cinema.classList.add('show');
+                countdownScreen.classList.add('active');
+
+                // 3. ژماردنی پێچەوانە (3, 2, 1)
+                let count = 3;
+                let counterInterval = setInterval(() => {
+                    count--;
+                    if(count > 0) {
+                        countdownNum.innerText = count;
+                    } else {
+                        clearInterval(counterInterval);
+                        // 4. لابردنی ژماردنەکە و دەرخستنی شریتی فیلمەکە
+                        countdownScreen.style.opacity = '0';
+                        setTimeout(() => {
+                            countdownScreen.style.display = 'none';
+                            movieContent.style.transition = 'opacity 1s ease';
+                            movieContent.style.opacity = '1';
+                        }, 500);
+                    }
+                }, 1000); // هەر ژمارەیەک 1 چرکە دەخایەنێت
+
+            }, 2000);
+        }
+
+        // فەنکشنی جوڵاندنی شریتی فیلمەکە (Horizontal Slider)
+        function moveFilm(direction) {
+            currentFrame += direction;
+
+            // دڵنیابوون لەوەی لە چوارچێوە دەرناچێت
+            if(currentFrame < 0) currentFrame = 0;
+            if(currentFrame >= totalFrames) currentFrame = totalFrames - 1;
+
+            const track = document.getElementById('film-track');
+            const btnPrev = document.getElementById('btn-prev');
+            const btnNext = document.getElementById('btn-next');
+
+            // بەهۆی ئەوەی دیزاینەکە RTL ە، بۆ چوونه پێشەوە دەبێت سلایدەکە بۆ لای ڕاست (پۆزەتیڤ) بڕوات
+            // هەر کادرێک 100% پانی هەیە
+            track.style.transform = `translateX(${currentFrame * 100}%)`;
+
+            // چالاککردن و ناچالاککردنی دوگمەکان
+            btnPrev.disabled = (currentFrame === 0);
+            btnNext.disabled = (currentFrame === totalFrames - 1);
+        }
+    </script>
+
+</body>
+</html>

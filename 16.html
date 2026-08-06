@@ -1,0 +1,467 @@
+<!DOCTYPE html>
+<html lang="ckb" dir="rtl">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0, maximum-scale=1.0, user-scalable=no">
+    <title>بانگهێشتنامەی ئەپڵیکەیشنی زیرەک</title>
+    <!-- ئایکۆنەکان -->
+    <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.4.0/css/all.min.css">
+    <style>
+        @import url('https://fonts.googleapis.com/css2?family=Aref+Ruqaa:wght@400;700&family=Noto+Naskh+Arabic:wght@400;700&display=swap');
+
+        :root {
+            --bg-deep: #0f0c29;
+            --bg-mid: #302b63;
+            --bg-top: #24243e;
+            --accent-pink: #e94057;
+            --accent-orange: #f27121;
+            --glass-bg: rgba(255, 255, 255, 0.05);
+            --glass-border: rgba(255, 255, 255, 0.1);
+            --text-light: #ffffff;
+            --text-gray: #b0b8c4;
+        }
+
+        * {
+            box-sizing: border-box;
+            margin: 0;
+            padding: 0;
+            -webkit-tap-highlight-color: transparent;
+        }
+
+        body, html {
+            width: 100%;
+            height: 100%;
+            background: linear-gradient(135deg, var(--bg-deep), var(--bg-mid), var(--bg-top));
+            font-family: 'Noto Naskh Arabic', Tahoma, sans-serif;
+            overflow: hidden; /* سکرۆڵ بەتەواوی قوفڵە، چونکە شێوازی ئەپڵیکەیشنە */
+            color: var(--text-light);
+        }
+
+        /* ================= دیمەنی یەکەم: بلوورە جادووییەکە ================= */
+        #intro-scene {
+            position: fixed;
+            top: 0; left: 0;
+            width: 100%; height: 100%;
+            display: flex;
+            justify-content: center;
+            align-items: center;
+            flex-direction: column;
+            z-index: 100;
+            background: #05030f;
+            transition: opacity 1s ease;
+        }
+
+        /* بلووری دڵ */
+        .crystal-heart {
+            font-size: 80px;
+            color: #fff;
+            background: linear-gradient(45deg, var(--accent-pink), var(--accent-orange));
+            -webkit-background-clip: text;
+            -webkit-text-fill-color: transparent;
+            filter: drop-shadow(0 0 20px rgba(233, 64, 87, 0.6));
+            cursor: pointer;
+            animation: floatCrystal 3s ease-in-out infinite;
+            transition: transform 0.2s;
+        }
+
+        .crystal-heart:active { transform: scale(0.9); }
+
+        @keyframes floatCrystal {
+            0%, 100% { transform: translateY(0) scale(1); }
+            50% { transform: translateY(-15px) scale(1.05); filter: drop-shadow(0 0 40px rgba(242, 113, 33, 0.8)); }
+        }
+
+        .tap-hint {
+            margin-top: 40px;
+            color: var(--text-gray);
+            font-size: 15px;
+            font-weight: bold;
+            letter-spacing: 1px;
+            animation: pulseHint 2s infinite;
+        }
+
+        @keyframes pulseHint { 0%, 100% { opacity: 0.4; } 50% { opacity: 1; } }
+
+        /* تەنۆلکەی تەقینەوە (Wisps) */
+        .wisp {
+            position: absolute;
+            width: 8px; height: 8px;
+            background: #fff;
+            border-radius: 50%;
+            box-shadow: 0 0 15px 5px var(--accent-pink);
+            pointer-events: none;
+            opacity: 0;
+            z-index: 105;
+        }
+
+        @keyframes flyWisp {
+            0% { transform: translate(-50%, -50%) scale(1); opacity: 1; }
+            100% { transform: translate(var(--tx), var(--ty)) scale(0); opacity: 0; }
+        }
+
+
+        /* ================= دیمەنی دووەم: شێوازی ئەپڵیکەیشن (App UI) ================= */
+        #app-dashboard {
+            position: absolute;
+            top: 0; left: 0;
+            width: 100%; height: 100%;
+            display: flex;
+            flex-direction: column;
+            opacity: 0;
+            visibility: hidden;
+            transition: opacity 1.5s ease;
+            z-index: 10;
+        }
+
+        #app-dashboard.show {
+            opacity: 1;
+            visibility: visible;
+        }
+
+        /* بەشی سەرەوە (Header) */
+        .app-header {
+            padding: 40px 20px 20px 20px;
+            text-align: center;
+            background: linear-gradient(to bottom, rgba(15,12,41,0.9), transparent);
+            z-index: 5;
+        }
+
+        .names {
+            font-family: 'Aref Ruqaa', serif;
+            font-size: 45px;
+            background: linear-gradient(to right, #f27121, #e94057);
+            -webkit-background-clip: text;
+            -webkit-text-fill-color: transparent;
+            font-weight: bold;
+            margin-bottom: 5px;
+        }
+
+        .subtitle {
+            font-size: 13px;
+            color: var(--text-gray);
+            letter-spacing: 2px;
+        }
+
+        /* بەشی ناوەڕاست کە دەگۆڕێت (Dynamic Content Area) */
+        .content-area {
+            flex: 1;
+            position: relative;
+            width: 100%;
+            padding: 20px;
+            display: flex;
+            justify-content: center;
+            align-items: center;
+            overflow: hidden;
+        }
+
+        /* کارتی زانیارییەکان */
+        .tab-content {
+            position: absolute;
+            width: 90%;
+            max-width: 400px;
+            background: var(--glass-bg);
+            backdrop-filter: blur(15px);
+            -webkit-backdrop-filter: blur(15px);
+            border-radius: 25px;
+            padding: 30px 20px;
+            border: 1px solid var(--glass-border);
+            box-shadow: 0 15px 35px rgba(0,0,0,0.3);
+            text-align: center;
+            /* جوڵەی گۆڕانکاری تابلۆکان */
+            opacity: 0;
+            transform: scale(0.9) translateY(20px);
+            transition: all 0.5s cubic-bezier(0.4, 0, 0.2, 1);
+            pointer-events: none;
+        }
+
+        .tab-content.active {
+            opacity: 1;
+            transform: scale(1) translateY(0);
+            pointer-events: auto;
+            z-index: 2;
+        }
+
+        /* دیزاینی ناوەوەی کارتەکان */
+        .tab-icon-large {
+            font-size: 45px;
+            margin-bottom: 20px;
+            background: linear-gradient(45deg, var(--accent-pink), var(--accent-orange));
+            -webkit-background-clip: text;
+            -webkit-text-fill-color: transparent;
+        }
+
+        .tab-title {
+            font-size: 20px;
+            color: var(--text-light);
+            margin-bottom: 15px;
+            font-weight: bold;
+        }
+
+        .tab-text {
+            font-size: 15px;
+            color: var(--text-gray);
+            line-height: 2;
+            font-weight: bold;
+        }
+
+        .highlight-box {
+            background: rgba(233, 64, 87, 0.1);
+            border: 1px solid rgba(233, 64, 87, 0.3);
+            border-radius: 12px;
+            padding: 15px;
+            margin-top: 20px;
+            color: var(--text-light);
+            font-size: 16px;
+            font-weight: bold;
+        }
+
+        .btn-action {
+            display: inline-block;
+            margin-top: 20px;
+            padding: 12px 25px;
+            background: linear-gradient(to right, var(--accent-pink), var(--accent-orange));
+            color: #fff;
+            text-decoration: none;
+            border-radius: 30px;
+            font-weight: bold;
+            font-size: 14px;
+            box-shadow: 0 5px 15px rgba(233, 64, 87, 0.4);
+            transition: 0.3s;
+        }
+        .btn-action:active { transform: scale(0.95); }
+
+        /* ================= بەشی خوارەوە: مێنوی ئەپڵیکەیشن (Bottom Navigation) ================= */
+        .bottom-nav {
+            width: 100%;
+            background: rgba(15, 12, 41, 0.85);
+            backdrop-filter: blur(20px);
+            -webkit-backdrop-filter: blur(20px);
+            display: flex;
+            justify-content: space-around;
+            align-items: center;
+            padding: 15px 10px 25px 10px; /* بۆشایی خوارەوە بۆ مۆبایلە نوێیەکان */
+            border-top: 1px solid var(--glass-border);
+            z-index: 10;
+        }
+
+        .nav-item {
+            display: flex;
+            flex-direction: column;
+            align-items: center;
+            gap: 5px;
+            color: #64748b;
+            cursor: pointer;
+            transition: all 0.3s ease;
+            position: relative;
+            padding: 5px 10px;
+        }
+
+        .nav-icon {
+            font-size: 22px;
+            transition: transform 0.3s cubic-bezier(0.175, 0.885, 0.32, 1.275);
+        }
+
+        .nav-text {
+            font-size: 11px;
+            font-weight: bold;
+            opacity: 0.8;
+        }
+
+        /* کاتێک تابی خوارەوە دیاری دەکرێت */
+        .nav-item.active {
+            color: var(--text-light);
+        }
+
+        .nav-item.active .nav-icon {
+            transform: translateY(-8px);
+            color: var(--accent-orange);
+            filter: drop-shadow(0 0 8px rgba(242, 113, 33, 0.8));
+        }
+
+        /* خاڵی ڕووناکی ژێر ئایکۆنە ئەکتیڤەکە */
+        .nav-item::after {
+            content: '';
+            position: absolute;
+            bottom: -5px; left: 50%;
+            transform: translateX(-50%) scale(0);
+            width: 5px; height: 5px;
+            background: var(--accent-pink);
+            border-radius: 50%;
+            transition: transform 0.3s;
+        }
+
+        .nav-item.active::after {
+            transform: translateX(-50%) scale(1);
+        }
+
+    </style>
+</head>
+<body>
+
+    <!-- دیمەنی یەکەم: بلوورە جادووییەکە -->
+    <div id="intro-scene" onclick="shatterCrystal()">
+        <i class="fa-solid fa-heart crystal-heart" id="crystal"></i>
+        <div class="tap-hint" id="hint">کرتە لە دڵەکە بکە...</div>
+    </div>
+
+    <!-- دیمەنی دووەم: ئەپڵیکەیشنی زیرەک -->
+    <div id="app-dashboard">
+        
+        <!-- ناوی سەرەوە -->
+        <div class="app-header">
+            <div class="names">ئەحمەد و سارا</div>
+            <div class="subtitle">بانگهێشتنامەی هاوسەرگیری</div>
+        </div>
+
+        <!-- بەشی ناوەڕاست کە دەگۆڕێت -->
+        <div class="content-area">
+            
+            <!-- تابی 1: چیرۆک (سەرەتا ئەمە دیارە) -->
+            <div class="tab-content active" id="tab-story">
+                <i class="fa-solid fa-book-open tab-icon-large"></i>
+                <h2 class="tab-title">دەستپێکی چیرۆکەکەمان</h2>
+                <p class="tab-text">
+                    ژیان جوانترین دیارییە کاتێک لەگەڵ کەسێکدا بەشی دەکەیت کە ڕۆحت ئارام دەکاتەوە. 
+                    بەوپەڕی خۆشحاڵییەوە، دەمانەوێت ئێوەش شایەتحاڵی جوانترین ساتی یەکگرتنمان بن.
+                </p>
+                <div class="highlight-box">
+                    ئامادەبوونتان جێگەی شانازیمانە
+                </div>
+            </div>
+
+            <!-- تابی 2: کات و ڕۆژ -->
+            <div class="tab-content" id="tab-time">
+                <i class="fa-solid fa-hourglass-half tab-icon-large"></i>
+                <h2 class="tab-title">کاتی ئامادەبوون</h2>
+                <p class="tab-text">
+                    تکایە لەم کاتەدا لەگەڵمان بن بۆ دەستپێکردنی ئاهەنگەکەمان:
+                </p>
+                <div class="highlight-box" style="font-size: 18px; padding: 20px;">
+                    <div style="margin-bottom: 10px; color: var(--accent-orange);">پێنج شەممە</div>
+                    <div>٢٥ / ٨ / ٢٠٢٦</div>
+                    <div style="margin-top: 10px; font-size: 14px; color: var(--text-gray);">کاتژمێر ٤:٣٠ ی پاش نیوەڕۆ</div>
+                </div>
+            </div>
+
+            <!-- تابی 3: ناونیشان و شوێن -->
+            <div class="tab-content" id="tab-location">
+                <i class="fa-solid fa-map-location-dot tab-icon-large"></i>
+                <h2 class="tab-title">ناونیشانی ئاهەنگ</h2>
+                <p class="tab-text">
+                    ئاهەنگەکەمان لە یەکێک لە جوانترین هۆڵەکانی شار بەڕێوە دەچێت.
+                </p>
+                <div class="highlight-box">
+                    هۆڵی تەلاری زێڕین<br>
+                    <span style="font-size: 12px; color: var(--text-gray); font-weight: normal;">سلێمانی - شەقامی سەرەکی</span>
+                </div>
+                <a href="#" class="btn-action">
+                    <i class="fa-solid fa-location-arrow"></i> کردنەوە لە نەخشە
+                </a>
+            </div>
+
+            <!-- تابی 4: پەیوەندی -->
+            <div class="tab-content" id="tab-contact">
+                <i class="fa-solid fa-phone-flip tab-icon-large"></i>
+                <h2 class="tab-title">پەیوەندی کردن</h2>
+                <p class="tab-text">
+                    بۆ زانیاری زیاتر یان پشتڕاستکردنەوەی ئامادەبوونتان، تکایە پەیوەندیمان پێوە بکەن.
+                </p>
+                <a href="tel:07500000000" class="btn-action" style="margin-top: 30px; padding: 15px 40px; font-size: 18px;">
+                    <i class="fa-solid fa-phone"></i> 0750 000 0000
+                </a>
+            </div>
+
+        </div>
+
+        <!-- مێنوی خوارەوە (Bottom Navigation Bar) -->
+        <div class="bottom-nav">
+            <div class="nav-item active" onclick="switchTab('tab-story', this)">
+                <i class="fa-solid fa-heart nav-icon"></i>
+                <span class="nav-text">چیرۆک</span>
+            </div>
+            <div class="nav-item" onclick="switchTab('tab-time', this)">
+                <i class="fa-regular fa-calendar-check nav-icon"></i>
+                <span class="nav-text">کات</span>
+            </div>
+            <div class="nav-item" onclick="switchTab('tab-location', this)">
+                <i class="fa-solid fa-location-dot nav-icon"></i>
+                <span class="nav-text">شوێن</span>
+            </div>
+            <div class="nav-item" onclick="switchTab('tab-contact', this)">
+                <i class="fa-solid fa-phone nav-icon"></i>
+                <span class="nav-text">پەیوەندی</span>
+            </div>
+        </div>
+
+    </div>
+
+    <script>
+        let isOpened = false;
+
+        // فەنکشنی تەقینەوەی دڵەکە بە 30 تەنۆلکەی ڕووناک
+        function shatterCrystal() {
+            if (isOpened) return;
+            isOpened = true;
+
+            const intro = document.getElementById('intro-scene');
+            const app = document.getElementById('app-dashboard');
+            const crystal = document.getElementById('crystal');
+            const hint = document.getElementById('hint');
+
+            // شاردنەوەی دڵەکە و نووسینەکە
+            crystal.style.opacity = '0';
+            hint.style.opacity = '0';
+
+            // دروستکردنی تەقینەوەکە
+            for(let i=0; i<30; i++) {
+                let wisp = document.createElement('div');
+                wisp.className = 'wisp';
+                wisp.style.left = '50%';
+                wisp.style.top = '50%';
+                
+                // ئاڕاستەی هەڕەمەکی بۆ تەقینەوە
+                let tx = (Math.random() - 0.5) * 600 + 'px';
+                let ty = (Math.random() - 0.5) * 600 + 'px';
+                
+                wisp.style.setProperty('--tx', tx);
+                wisp.style.setProperty('--ty', ty);
+                wisp.style.animation = `flyWisp 1s cubic-bezier(0.25, 1, 0.5, 1) forwards`;
+                
+                intro.appendChild(wisp);
+            }
+
+            // گۆڕینی دیمەنەکە بۆ ناو ئەپڵیکەیشنەکە
+            setTimeout(() => {
+                intro.style.opacity = '0';
+                setTimeout(() => {
+                    intro.style.display = 'none';
+                    app.classList.add('show');
+                }, 500);
+            }, 600); // دوای تەقینەوەکە
+        }
+
+        // فەنکشنی گۆڕینی تابلۆکانی ناوەڕاست (شێوازی ئەپڵیکەیشن)
+        function switchTab(tabId, clickedElement) {
+            // 1. لابردنی کلاسی ئەکتیڤ لە هەموو دوگمەکانی خوارەوە
+            const navItems = document.querySelectorAll('.nav-item');
+            navItems.forEach(item => item.classList.remove('active'));
+
+            // 2. زیادکردنی کلاسی ئەکتیڤ بۆ ئەو دوگمەیەی کلیکی لێکراوە
+            clickedElement.classList.add('active');
+
+            // 3. شاردنەوەی هەموو کارتەکانی ناوەڕاست
+            const allTabs = document.querySelectorAll('.tab-content');
+            allTabs.forEach(tab => {
+                tab.classList.remove('active');
+            });
+
+            // 4. نیشاندانی ئەو کارتەی کە دیاریکراوە بەپێی ئایدییەکەی
+            const targetTab = document.getElementById(tabId);
+            if (targetTab) {
+                targetTab.classList.add('active');
+            }
+        }
+    </script>
+
+</body>
+</html>

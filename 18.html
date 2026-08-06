@@ -1,0 +1,437 @@
+<!DOCTYPE html>
+<html lang="ckb" dir="rtl">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0, maximum-scale=1.0, user-scalable=no">
+    <title>بانگهێشتنامەی قیبلەنومای زێڕین</title>
+    <!-- ئایکۆنەکان -->
+    <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.4.0/css/all.min.css">
+    <style>
+        @import url('https://fonts.googleapis.com/css2?family=Aref+Ruqaa:wght@400;700&family=Noto+Naskh+Arabic:wght@400;700&display=swap');
+
+        :root {
+            --bg-deep: #080c16; /* شینی زۆر تاریک وەک گەردوون */
+            --bg-ring: #0f182b;
+            --gold-bright: #f9d976;
+            --gold-mid: #d4af37;
+            --gold-dark: #8c6d1a;
+            --text-light: #e2e8f0;
+            --text-gold: #fde89c;
+        }
+
+        * {
+            box-sizing: border-box;
+            margin: 0;
+            padding: 0;
+            -webkit-tap-highlight-color: transparent;
+        }
+
+        body, html {
+            width: 100%;
+            height: 100%;
+            background-color: var(--bg-deep);
+            background-image: radial-gradient(circle at 50% 50%, #152238 0%, var(--bg-deep) 100%);
+            font-family: 'Noto Naskh Arabic', Tahoma, sans-serif;
+            overflow: hidden; /* سکرۆڵکردن بە تەواوی قوفڵکراوە، چونکە دیزاینەکە بازنەییە */
+            color: var(--text-light);
+            display: flex;
+            justify-content: center;
+            align-items: center;
+        }
+
+        /* باکگراوندی ئەستێرەیی */
+        .stars-bg {
+            position: absolute;
+            top: 0; left: 0; width: 100%; height: 100%;
+            pointer-events: none;
+            z-index: 0;
+            opacity: 0.6;
+        }
+        
+        .star {
+            position: absolute;
+            background: #fff;
+            border-radius: 50%;
+            animation: twinkle infinite alternate;
+        }
+
+        @keyframes twinkle {
+            0% { opacity: 0.2; transform: scale(0.8); }
+            100% { opacity: 1; transform: scale(1.2); box-shadow: 0 0 5px #fff; }
+        }
+
+        /* ================= دیمەنی یەکەم: سەرپۆشی قیبلەنوماکە ================= */
+        #intro-scene {
+            position: absolute;
+            top: 0; left: 0; width: 100%; height: 100%;
+            display: flex;
+            justify-content: center;
+            align-items: center;
+            flex-direction: column;
+            z-index: 100;
+            background-color: var(--bg-deep);
+            transition: opacity 1s ease, visibility 1s;
+        }
+
+        .compass-lid {
+            width: 200px; height: 200px;
+            background: radial-gradient(circle, var(--gold-bright), var(--gold-dark));
+            border-radius: 50%;
+            border: 6px solid #5a440c;
+            box-shadow: 0 20px 50px rgba(0,0,0,0.8), inset 0 0 40px rgba(0,0,0,0.6);
+            display: flex;
+            justify-content: center;
+            align-items: center;
+            cursor: pointer;
+            transition: transform 1s cubic-bezier(0.5, 0, 0.2, 1);
+            position: relative;
+            z-index: 2;
+        }
+
+        /* نەخشی سەر سەرپۆشەکە */
+        .compass-lid::before {
+            content: '';
+            position: absolute;
+            width: 170px; height: 170px;
+            border: 2px dashed rgba(0,0,0,0.3);
+            border-radius: 50%;
+        }
+
+        .compass-lid i {
+            font-size: 50px;
+            color: #4a380a;
+            filter: drop-shadow(0 2px 2px rgba(255,255,255,0.3));
+        }
+
+        .tap-hint {
+            margin-top: 40px;
+            color: var(--gold-mid);
+            font-size: 15px;
+            font-weight: bold;
+            animation: pulseHint 2s infinite;
+        }
+
+        @keyframes pulseHint { 0%, 100% { opacity: 0.4; } 50% { opacity: 1; } }
+
+        /* ئەنیمەیشنی کردنەوەی سەرپۆشەکە */
+        #intro-scene.opened .compass-lid {
+            transform: scale(2) translateY(-100vh);
+            opacity: 0;
+        }
+        #intro-scene.opened .tap-hint { opacity: 0; }
+
+
+        /* ================= دیمەنی دووەم: ئامێری قیبلەنوما (The Astrolabe UI) ================= */
+        #main-ui {
+            position: relative;
+            width: 340px;
+            height: 340px;
+            z-index: 10;
+            opacity: 0;
+            transform: scale(0.8);
+            transition: all 1.5s cubic-bezier(0.4, 0, 0.2, 1);
+        }
+
+        #main-ui.show {
+            opacity: 1;
+            transform: scale(1);
+        }
+
+        /* دوگمەکانی چواردەور (4 ئاڕاستەکە) */
+        .astro-btn {
+            position: absolute;
+            width: 50px; height: 50px;
+            background: var(--bg-ring);
+            border: 2px solid var(--gold-mid);
+            border-radius: 50%;
+            display: flex;
+            justify-content: center;
+            align-items: center;
+            color: var(--gold-mid);
+            font-size: 20px;
+            cursor: pointer;
+            z-index: 20;
+            box-shadow: 0 5px 15px rgba(0,0,0,0.5), inset 0 0 10px rgba(212, 175, 55, 0.1);
+            transition: all 0.3s ease;
+        }
+
+        .astro-btn:hover { background: var(--gold-dark); color: #fff; }
+        .astro-btn.active-btn { 
+            background: var(--gold-mid); color: #000; 
+            box-shadow: 0 0 20px var(--gold-bright);
+            transform: scale(1.1);
+        }
+
+        /* جێگیرکردنی دوگمەکان لە ٤ لاوە */
+        .btn-top { top: 0; left: 145px; }
+        .btn-bottom { bottom: 0; left: 145px; }
+        .btn-left { top: 145px; left: 0; }
+        .btn-right { top: 145px; right: 0; }
+
+        /* ئەڵقەی نیشاندەر کە دەسوڕێتەوە (The Rotating Pointer Ring) */
+        .pointer-ring {
+            position: absolute;
+            top: 25px; left: 25px;
+            width: 290px; height: 290px;
+            border-radius: 50%;
+            border: 2px dashed rgba(212, 175, 55, 0.4);
+            z-index: 15;
+            transition: transform 1s cubic-bezier(0.68, -0.15, 0.265, 1.55);
+        }
+
+        /* نیشتەجێی سەر ئەڵقەکە کە دەچێتە سەر دوگمەکان */
+        .pointer-notch {
+            position: absolute;
+            top: -6px; left: 50%;
+            transform: translateX(-50%);
+            width: 12px; height: 12px;
+            background: var(--gold-bright);
+            border-radius: 50%;
+            box-shadow: 0 0 15px var(--gold-bright), 0 0 30px var(--gold-mid);
+        }
+
+        /* شاشەی ناوەڕاستی ئامێرەکە (The Center Display) */
+        .center-screen {
+            position: absolute;
+            top: 50px; left: 50px;
+            width: 240px; height: 240px;
+            background: radial-gradient(circle, #101c30, #0a111f);
+            border-radius: 50%;
+            border: 4px solid var(--gold-dark);
+            box-shadow: inset 0 0 30px rgba(0,0,0,0.8), 0 0 30px rgba(0,0,0,0.5);
+            display: flex;
+            justify-content: center;
+            align-items: center;
+            z-index: 10;
+            overflow: hidden;
+        }
+
+        /* نەخشی ئەندازەیی لە باکگراوندی ناوەڕاست */
+        .center-screen::before {
+            content: '';
+            position: absolute;
+            width: 200%; height: 200%;
+            background-image: repeating-conic-gradient(from 0deg, transparent 0deg 10deg, rgba(212, 175, 55, 0.05) 10deg 20deg);
+            animation: spinSlow 30s linear infinite;
+        }
+
+        @keyframes spinSlow { 100% { transform: rotate(360deg); } }
+
+        /* دیزاینی زانیارییەکانی ناوەڕاست (Dynamic Content) */
+        .screen-content {
+            position: absolute;
+            width: 85%; height: 85%;
+            display: flex;
+            flex-direction: column;
+            justify-content: center;
+            align-items: center;
+            text-align: center;
+            opacity: 0;
+            transform: scale(0.5);
+            transition: all 0.6s cubic-bezier(0.175, 0.885, 0.32, 1.275);
+            pointer-events: none;
+            z-index: 2;
+        }
+
+        .screen-content.active {
+            opacity: 1;
+            transform: scale(1);
+            pointer-events: auto;
+        }
+
+        /* ستایلی دەقەکانی ناوەڕاست */
+        .content-title {
+            font-family: 'Aref Ruqaa', serif;
+            font-size: 26px;
+            color: var(--gold-bright);
+            margin-bottom: 10px;
+            text-shadow: 0 0 10px rgba(249, 217, 118, 0.5);
+            line-height: 1.2;
+        }
+
+        .content-text {
+            font-size: 13px;
+            color: var(--text-light);
+            line-height: 1.8;
+            font-weight: bold;
+        }
+
+        .highlight {
+            color: var(--text-gold);
+            font-size: 16px;
+            font-weight: bold;
+            margin: 10px 0;
+            background: rgba(212, 175, 55, 0.1);
+            padding: 5px 15px;
+            border-radius: 20px;
+            border: 1px dashed var(--gold-dark);
+        }
+
+        /* دوگمەی پەیوەندی لە ناوەڕاستدا */
+        .btn-call {
+            display: inline-block;
+            margin-top: 15px;
+            padding: 8px 20px;
+            background: var(--gold-mid);
+            color: #000;
+            text-decoration: none;
+            border-radius: 20px;
+            font-size: 12px;
+            font-weight: bold;
+            box-shadow: 0 4px 10px rgba(212, 175, 55, 0.3);
+            transition: 0.3s;
+        }
+        .btn-call:active { transform: scale(0.9); }
+
+        /* هێڵی جوانکاری ڕووناکی */
+        .beam {
+            position: absolute;
+            top: 50%; left: 50%;
+            width: 100vw; height: 1px;
+            background: linear-gradient(90deg, transparent, rgba(212,175,55,0.5), transparent);
+            transform: translate(-50%, -50%) rotate(45deg);
+            z-index: 1;
+            pointer-events: none;
+        }
+        .beam2 { transform: translate(-50%, -50%) rotate(-45deg); }
+
+    </style>
+</head>
+<body>
+
+    <!-- ئەستێرەی باکگراوند -->
+    <div class="stars-bg" id="stars"></div>
+    <div class="beam"></div>
+    <div class="beam beam2"></div>
+
+    <!-- دیمەنی یەکەم: سەرپۆشی قیبلەنوما -->
+    <div id="intro-scene" onclick="openAstrolabe()">
+        <div class="compass-lid">
+            <i class="fa-regular fa-compass"></i>
+        </div>
+        <div class="tap-hint">کرتە بکە بۆ کردنەوەی قیبلەنومای ژیان...</div>
+    </div>
+
+    <!-- دیمەنی دووەم: ئامێرە بازنەییەکە (The Astrolabe UI) -->
+    <div id="main-ui">
+        
+        <!-- ئەڵقەی نیشاندەر کە دەسوڕێتەوە -->
+        <div class="pointer-ring" id="pointer">
+            <div class="pointer-notch"></div>
+        </div>
+
+        <!-- ٤ دوگمەی چواردەور (Top: 0, Right: 90, Bottom: 180, Left: 270) -->
+        <button class="astro-btn btn-top active-btn" onclick="rotateAstrolabe(0, 0, this)"> 
+            <i class="fa-solid fa-heart"></i> 
+        </button>
+        <button class="astro-btn btn-right" onclick="rotateAstrolabe(1, 90, this)"> 
+            <i class="fa-regular fa-clock"></i> 
+        </button>
+        <button class="astro-btn btn-bottom" onclick="rotateAstrolabe(2, 180, this)"> 
+            <i class="fa-solid fa-map-location-dot"></i> 
+        </button>
+        <button class="astro-btn btn-left" onclick="rotateAstrolabe(3, 270, this)"> 
+            <i class="fa-solid fa-phone"></i> 
+        </button>
+
+        <!-- شاشەی ناوەڕاستی ئامێرەکە -->
+        <div class="center-screen">
+            
+            <!-- ١. بەشی ناوەکان و چیرۆک -->
+            <div class="screen-content active" id="content-0">
+                <div class="content-title">ئەحمەد<br>&<br>سارا</div>
+                <div class="content-text" style="margin-top: 10px;">
+                    وەک چۆن قیبلەنوما ڕێگەی ڕاست نیشان دەدات، خۆشەویستی ڕێگەی ئێمەی بەرەو یەکتر نیشاندا.
+                </div>
+            </div>
+
+            <!-- ٢. بەشی کات و بەروار -->
+            <div class="screen-content" id="content-1">
+                <i class="fa-regular fa-calendar-check" style="color: var(--gold-mid); font-size: 24px; margin-bottom: 5px;"></i>
+                <div class="content-title" style="font-size: 20px;">کاتی یەکگرتن</div>
+                <div class="highlight">٢٥ / ٨ / ٢٠٢٦</div>
+                <div class="content-text">ڕۆژی پێنج شەممە<br>کاتژمێر ٤:٣٠ ی پاش نیوەڕۆ</div>
+            </div>
+
+            <!-- ٣. بەشی شوێن -->
+            <div class="screen-content" id="content-2">
+                <i class="fa-solid fa-location-dot" style="color: var(--gold-mid); font-size: 24px; margin-bottom: 5px;"></i>
+                <div class="content-title" style="font-size: 20px;">ناونیشان</div>
+                <div class="highlight" style="font-size: 14px;">هۆڵی تەلاری زێڕین</div>
+                <div class="content-text">سلێمانی<br>شەقامی سەرەکی</div>
+                <a href="#" class="btn-call" style="margin-top: 10px;"><i class="fa-solid fa-location-arrow"></i> نەخشە</a>
+            </div>
+
+            <!-- ٤. بەشی پەیوەندی -->
+            <div class="screen-content" id="content-3">
+                <i class="fa-solid fa-headset" style="color: var(--gold-mid); font-size: 24px; margin-bottom: 5px;"></i>
+                <div class="content-title" style="font-size: 20px;">پەیوەندی</div>
+                <div class="content-text">بۆ سەلماندنی ئامادەبوونتان تکایە پەیوەندی بکەن:</div>
+                <a href="tel:07500000000" class="btn-call" style="font-size: 14px; padding: 10px 25px;"><i class="fa-solid fa-phone"></i> 0750 000 0000</a>
+            </div>
+
+        </div>
+
+    </div>
+
+    <script>
+        // دروستکردنی ئەستێرەی باکگراوند
+        const starsContainer = document.getElementById('stars');
+        for(let i = 0; i < 50; i++) {
+            let star = document.createElement('div');
+            star.className = 'star';
+            star.style.left = Math.random() * 100 + 'vw';
+            star.style.top = Math.random() * 100 + 'vh';
+            let size = Math.random() * 3 + 1;
+            star.style.width = size + 'px';
+            star.style.height = size + 'px';
+            star.style.animationDuration = (Math.random() * 3 + 1) + 's';
+            star.style.animationDelay = (Math.random() * 2) + 's';
+            starsContainer.appendChild(star);
+        }
+
+        let isOpened = false;
+
+        // فەنکشنی کردنەوەی سەرپۆشی قیبلەنوماکە
+        function openAstrolabe() {
+            if(isOpened) return;
+            isOpened = true;
+
+            const intro = document.getElementById('intro-scene');
+            const main = document.getElementById('main-ui');
+
+            intro.classList.add('opened');
+
+            setTimeout(() => {
+                intro.style.display = 'none';
+                main.classList.add('show');
+            }, 1000);
+        }
+
+        // فەنکشنی سوڕاندنی ئەڵقەکە و گۆڕینی زانیاری ناوەڕاست
+        function rotateAstrolabe(index, angle, btnElement) {
+            // 1. لابردنی کلاسی ئەکتیڤ لە هەموو دوگمەکان
+            const buttons = document.querySelectorAll('.astro-btn');
+            buttons.forEach(btn => btn.classList.remove('active-btn'));
+            
+            // 2. زیادکردنی کلاسی ئەکتیڤ بۆ دوگمەی کلیک کراو
+            btnElement.classList.add('active-btn');
+
+            // 3. سوڕاندنی ئەڵقەی نیشاندەر بۆ سەر گۆشەی دوگمەکە
+            const pointer = document.getElementById('pointer');
+            pointer.style.transform = `rotate(${angle}deg)`;
+
+            // 4. شاردنەوەی هەموو زانیارییەکانی ناوەڕاست
+            const contents = document.querySelectorAll('.screen-content');
+            contents.forEach(content => content.classList.remove('active'));
+
+            // 5. نیشاندانی زانیاری مەبەست بە ئەنیمەیشن
+            const activeContent = document.getElementById('content-' + index);
+            if(activeContent) {
+                activeContent.classList.add('active');
+            }
+        }
+    </script>
+
+</body>
+</html>

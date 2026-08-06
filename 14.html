@@ -1,0 +1,524 @@
+<!DOCTYPE html>
+<html lang="ckb" dir="rtl">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0, maximum-scale=1.0, user-scalable=no">
+    <title>بانگهێشتنامەی کاتژمێری زێڕین</title>
+    <!-- ئایکۆنەکان -->
+    <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.4.0/css/all.min.css">
+    <style>
+        @import url('https://fonts.googleapis.com/css2?family=Aref+Ruqaa:wght@400;700&family=Noto+Naskh+Arabic:wght@400;700&display=swap');
+
+        :root {
+            --bg-dark: #12100e; /* قاوەیی زۆر تاریک */
+            --bg-light: #fcfaf5;
+            --gold: #d4af37;
+            --gold-light: #f9e596;
+            --gold-dark: #aa771c;
+            --text-dark: #2a2015;
+            --text-gray: #7a6b5d;
+        }
+
+        * {
+            box-sizing: border-box;
+            margin: 0;
+            padding: 0;
+            -webkit-tap-highlight-color: transparent;
+        }
+
+        body, html {
+            width: 100%;
+            height: 100%;
+            background-color: var(--bg-dark);
+            font-family: 'Noto Naskh Arabic', Tahoma, sans-serif;
+            overflow-x: hidden;
+        }
+
+        body.locked { overflow-y: hidden; }
+
+        /* ================= دیمەنی یەکەم: کاتژمێرە زێڕینەکە ================= */
+        #intro-scene {
+            position: fixed;
+            top: 0; left: 0;
+            width: 100%; height: 100dvh;
+            display: flex;
+            justify-content: center;
+            align-items: center;
+            z-index: 100;
+            background: radial-gradient(circle at center, #2a2015, var(--bg-dark));
+            perspective: 1000px;
+            transition: opacity 1.5s ease;
+        }
+
+        /* جەستەی کاتژمێرەکە */
+        .watch-container {
+            position: relative;
+            width: 180px; height: 180px;
+            cursor: pointer;
+            transition: transform 0.3s;
+            animation: floatWatch 4s ease-in-out infinite;
+        }
+
+        @keyframes floatWatch {
+            0%, 100% { transform: translateY(0); }
+            50% { transform: translateY(-10px); }
+        }
+
+        /* ئەڵقەی هەڵواسینی کاتژمێرەکە لە سەرەوە */
+        .watch-ring {
+            position: absolute;
+            top: -30px; left: 50%;
+            transform: translateX(-50%);
+            width: 40px; height: 40px;
+            border: 5px solid var(--gold);
+            border-radius: 50%;
+            z-index: 1;
+            box-shadow: 0 5px 10px rgba(0,0,0,0.5);
+        }
+
+        /* ناوەوەی کاتژمێرەکە (ڕووخسارەکە) */
+        .watch-face {
+            position: absolute;
+            top: 0; left: 0; width: 100%; height: 100%;
+            background: #fff8eb;
+            border-radius: 50%;
+            border: 10px solid var(--gold-dark);
+            box-shadow: inset 0 0 20px rgba(0,0,0,0.5), 0 20px 40px rgba(0,0,0,0.8);
+            display: flex;
+            justify-content: center;
+            align-items: center;
+            z-index: 2;
+            background-image: radial-gradient(circle, #fff 0%, #fbe9cd 100%);
+        }
+
+        /* ژمارە ڕۆمانییەکان یان خاڵەکانی کاتژمێر (بە سادەیی وەک بازنەیەک) */
+        .watch-face::before {
+            content: '';
+            position: absolute;
+            width: 130px; height: 130px;
+            border: 1px dashed var(--gold-dark);
+            border-radius: 50%;
+            opacity: 0.5;
+        }
+
+        /* میلەکانی کاتژمێر */
+        .hand {
+            position: absolute;
+            bottom: 50%; left: 50%;
+            background: var(--text-dark);
+            transform-origin: bottom center;
+            border-radius: 5px;
+            z-index: 5;
+        }
+
+        .hour-hand { width: 4px; height: 35px; transform: translateX(-50%) rotate(45deg); }
+        .minute-hand { width: 3px; height: 50px; transform: translateX(-50%) rotate(320deg); }
+        
+        .center-dot {
+            position: absolute;
+            top: 50%; left: 50%;
+            transform: translate(-50%, -50%);
+            width: 12px; height: 12px;
+            background: var(--gold-dark);
+            border-radius: 50%;
+            z-index: 6;
+            box-shadow: 0 0 5px rgba(0,0,0,0.5);
+        }
+
+        /* سەرپۆشی کاتژمێرەکە */
+        .watch-lid {
+            position: absolute;
+            top: 0; left: 0; width: 100%; height: 100%;
+            background: radial-gradient(circle at 30% 30%, var(--gold-light), var(--gold-dark));
+            border-radius: 50%;
+            z-index: 10;
+            transform-origin: top center;
+            transition: transform 1.5s cubic-bezier(0.4, 0, 0.2, 1);
+            box-shadow: 0 10px 20px rgba(0,0,0,0.6);
+            display: flex;
+            justify-content: center;
+            align-items: center;
+            /* نەخشی سەرپۆشەکە */
+            background-image: repeating-radial-gradient(circle at center, transparent, transparent 5px, rgba(0,0,0,0.1) 6px, transparent 7px);
+        }
+
+        /* کاتێک کرتە دەکرێت، سەرپۆشەکە دەکرێتەوە */
+        .watch-container.opened .watch-lid {
+            transform: rotateX(150deg);
+        }
+
+        /* خێرا سوڕانەوەی میلەکان بۆ گەشتکردن بەناو کاتدا */
+        .watch-container.time-warp .hour-hand {
+            animation: spinFast 1s linear infinite;
+        }
+        .watch-container.time-warp .minute-hand {
+            animation: spinFast 0.2s linear infinite;
+        }
+
+        @keyframes spinFast {
+            100% { transform: translateX(-50%) rotate(360deg); }
+        }
+
+        /* ڕووناکییەکی کتوپڕ (Flash) کە شاشەکە دەگرێتەوە */
+        .time-flash {
+            position: absolute;
+            top: 50%; left: 50%;
+            transform: translate(-50%, -50%) scale(0);
+            width: 20px; height: 20px;
+            background: #fff;
+            border-radius: 50%;
+            box-shadow: 0 0 50px 50px #fff, 0 0 150px 100px var(--gold-light);
+            z-index: 20;
+            opacity: 0;
+            pointer-events: none;
+        }
+
+        .time-flash.burst {
+            animation: burstLight 2s ease forwards;
+        }
+
+        @keyframes burstLight {
+            0% { transform: translate(-50%, -50%) scale(0); opacity: 1; }
+            40% { transform: translate(-50%, -50%) scale(50); opacity: 1; }
+            100% { transform: translate(-50%, -50%) scale(150); opacity: 0; }
+        }
+
+        .tap-hint {
+            position: absolute;
+            bottom: -60px; left: 50%;
+            transform: translateX(-50%);
+            color: var(--gold-light);
+            font-size: 15px;
+            font-weight: bold;
+            letter-spacing: 1px;
+            animation: pulseHint 2s infinite;
+            white-space: nowrap;
+        }
+
+        @keyframes pulseHint { 0%, 100% { opacity: 0.4; } 50% { opacity: 1; } }
+
+
+        /* ================= دیمەنی دووەم: بانگهێشتنامەکە ================= */
+        #main-content {
+            position: absolute;
+            top: 0; left: 0;
+            width: 100%;
+            min-height: 100dvh;
+            background: var(--bg-light);
+            background-image: url('https://www.transparenttextures.com/patterns/cream-paper.png');
+            display: flex;
+            flex-direction: column;
+            align-items: center;
+            padding: 40px 15px;
+            opacity: 0;
+            visibility: hidden;
+            transition: opacity 1.5s ease;
+            z-index: 10;
+        }
+
+        #main-content.show {
+            opacity: 1;
+            visibility: visible;
+        }
+
+        .royal-card {
+            width: 100%;
+            max-width: 420px;
+            background: #ffffff;
+            border-radius: 12px;
+            padding: 40px 25px;
+            box-shadow: 0 20px 40px rgba(42, 32, 21, 0.08);
+            border: 1px solid rgba(212, 175, 55, 0.3);
+            text-align: center;
+            position: relative;
+        }
+
+        /* چوارچێوەی ناوەوەی کارتەکە */
+        .royal-card::before {
+            content: '';
+            position: absolute;
+            top: 10px; left: 10px; right: 10px; bottom: 10px;
+            border: 1px solid rgba(212, 175, 55, 0.4);
+            border-radius: 8px;
+            pointer-events: none;
+        }
+
+        .top-icon {
+            font-size: 32px;
+            color: var(--gold-dark);
+            margin-bottom: 20px;
+        }
+
+        .bismillah {
+            font-size: 14px;
+            color: var(--text-gray);
+            margin-bottom: 20px;
+            font-weight: bold;
+        }
+
+        .names {
+            font-family: 'Aref Ruqaa', serif;
+            font-size: clamp(40px, 11vw, 55px);
+            color: var(--text-dark);
+            font-weight: bold;
+            line-height: 1.2;
+            margin-bottom: 25px;
+        }
+
+        .names span {
+            color: var(--gold-dark);
+            font-size: 25px;
+            margin: 0 10px;
+        }
+
+        .divider {
+            width: 60px;
+            height: 2px;
+            background: var(--gold);
+            margin: 0 auto 30px auto;
+            border-radius: 2px;
+            position: relative;
+        }
+        
+        .divider::after {
+            content: '';
+            position: absolute;
+            top: -4px; left: 50%;
+            transform: translateX(-50%) rotate(45deg);
+            width: 10px; height: 10px;
+            background: var(--gold-dark);
+        }
+
+        .story-text {
+            font-size: 14.5px;
+            color: var(--text-dark);
+            line-height: 2.2;
+            margin-bottom: 35px;
+            font-weight: bold;
+        }
+
+        /* زانیارییەکان */
+        .info-grid {
+            display: flex;
+            flex-direction: column;
+            gap: 12px;
+            position: relative;
+            z-index: 2;
+        }
+
+        .info-item {
+            background: rgba(212, 175, 55, 0.05);
+            padding: 15px;
+            border-radius: 8px;
+            display: flex;
+            align-items: center;
+            gap: 15px;
+            border-right: 3px solid var(--gold);
+            transform: translateY(20px);
+            opacity: 0;
+            transition: all 0.6s ease;
+        }
+
+        .info-item.fade-in {
+            transform: translateY(0);
+            opacity: 1;
+        }
+
+        .info-icon {
+            width: 35px; height: 35px;
+            background: #ffffff;
+            color: var(--gold-dark);
+            border-radius: 50%;
+            display: flex;
+            justify-content: center;
+            align-items: center;
+            font-size: 16px;
+            border: 1px solid rgba(212, 175, 55, 0.2);
+        }
+
+        .info-details {
+            display: flex;
+            flex-direction: column;
+            text-align: right;
+        }
+
+        .info-details span { font-size: 11px; color: var(--text-gray); margin-bottom: 3px; font-weight: bold; }
+        .info-details strong { font-size: 14px; color: var(--text-dark); }
+
+        /* دوگمەکان */
+        .actions {
+            display: flex;
+            gap: 10px;
+            width: 100%;
+            margin-top: 35px;
+            transform: translateY(20px);
+            opacity: 0;
+            transition: all 0.8s ease 0.2s;
+            position: relative;
+            z-index: 2;
+        }
+
+        .actions.fade-in {
+            transform: translateY(0);
+            opacity: 1;
+        }
+
+        .btn {
+            flex: 1;
+            padding: 14px 10px;
+            border-radius: 30px;
+            font-weight: bold;
+            font-size: 14px;
+            text-decoration: none;
+            display: flex;
+            justify-content: center;
+            align-items: center;
+            gap: 8px;
+            transition: 0.3s;
+        }
+
+        .btn-gold {
+            background: linear-gradient(to right, #d4af37, #f9e596, #d4af37);
+            color: var(--bg-dark);
+            box-shadow: 0 5px 15px rgba(212, 175, 55, 0.3);
+        }
+        .btn-gold:active { transform: scale(0.95); }
+
+        .btn-outline {
+            background: transparent;
+            color: var(--gold-dark);
+            border: 1.5px solid var(--gold-dark);
+        }
+
+    </style>
+</head>
+<body class="locked">
+
+    <!-- دیمەنی یەکەم: کاتژمێرە زێڕینەکە -->
+    <div id="intro-scene">
+        
+        <div class="watch-container" id="watch" onclick="openTime()">
+            <div class="watch-ring"></div>
+            
+            <div class="watch-face">
+                <div class="hand hour-hand"></div>
+                <div class="hand minute-hand"></div>
+                <div class="center-dot"></div>
+            </div>
+            
+            <!-- سەرپۆشی کاتژمێرەکە -->
+            <div class="watch-lid"></div>
+            
+            <div class="tap-hint" id="hint">کرتە بکە بۆ وەستاندنی کات...</div>
+        </div>
+
+        <!-- ڕووناکییە کتوپڕەکە -->
+        <div class="time-flash" id="flash"></div>
+
+    </div>
+
+    <!-- دیمەنی دووەم: بانگهێشتنامەی فەرمی -->
+    <div id="main-content">
+        <div class="royal-card">
+            
+            <i class="fa-solid fa-hourglass-half top-icon"></i>
+            
+            <div class="bismillah">بِسْمِ اللَّهِ الرَّحْمَنِ الرَّحِيمِ</div>
+            
+            <div class="names">
+                ئەحمەد <span>&</span> سارا
+            </div>
+            
+            <div class="divider"></div>
+            
+            <p class="story-text">
+                هەموو چرکەیەکمان بەرەو ئەم ساتە دەهێنا. کاتی ئەوە هاتووە ڕۆحەکانمان بۆ هەمیشە یەکبگرن. بەوپەڕی خۆشحاڵییەوە بانگهێشتتان دەکەین بۆ ئاهەنگی هاوسەرگیریمان.
+            </p>
+
+            <div class="info-grid">
+                <div class="info-item fade-element">
+                    <div class="info-icon"><i class="fa-regular fa-calendar-check"></i></div>
+                    <div class="info-details">
+                        <span>ڕۆژ و بەروار</span>
+                        <strong>پێنج شەممە - ٢٥ / ٨ / ٢٠٢٦</strong>
+                    </div>
+                </div>
+                
+                <div class="info-item fade-element">
+                    <div class="info-icon"><i class="fa-regular fa-clock"></i></div>
+                    <div class="info-details">
+                        <span>کاتی ئامادەبوون</span>
+                        <strong>٤:٣٠ ی پاش نیوەڕۆ</strong>
+                    </div>
+                </div>
+
+                <div class="info-item fade-element">
+                    <div class="info-icon"><i class="fa-solid fa-map-location-dot"></i></div>
+                    <div class="info-details">
+                        <span>ناونیشان</span>
+                        <strong>هۆڵی تەلاری زێڕین - سلێمانی</strong>
+                    </div>
+                </div>
+            </div>
+
+            <div class="actions fade-element">
+                <a href="tel:07500000000" class="btn btn-gold">
+                    <i class="fa-solid fa-phone"></i> پەیوەندی
+                </a>
+                <a href="#" class="btn btn-outline">
+                    <i class="fa-solid fa-location-arrow"></i> نەخشە
+                </a>
+            </div>
+
+        </div>
+    </div>
+
+    <script>
+        let isOpened = false;
+
+        function openTime() {
+            if (isOpened) return;
+            isOpened = true;
+
+            const watch = document.getElementById('watch');
+            const flash = document.getElementById('flash');
+            const intro = document.getElementById('intro-scene');
+            const main = document.getElementById('main-content');
+            const hint = document.getElementById('hint');
+
+            // ١. شاردنەوەی نووسینەکە و کردنەوەی سەرپۆشی کاتژمێرەکە
+            hint.style.opacity = '0';
+            watch.classList.add('opened');
+
+            // ٢. پاش ئەوەی سەرپۆشەکە کرایەوە (دوای 1.5 چرکە)، میلەکان دەست دەکەن بە خێرا سوڕانەوە
+            setTimeout(() => {
+                watch.classList.add('time-warp');
+                
+                // ٣. دوای کەمێک سوڕانەوە، تیشکێکی سپی دەتەقێتەوە (Flash)
+                setTimeout(() => {
+                    flash.classList.add('burst');
+                    
+                    // ٤. گۆڕینی دیمەنەکان لە پشتی تیشکەکەوە
+                    setTimeout(() => {
+                        intro.style.opacity = '0';
+                        
+                        setTimeout(() => {
+                            intro.style.display = 'none';
+                            main.classList.add('show');
+                            document.body.classList.remove('locked');
+                            
+                            // کارپێکردنی ئەنیمەیشنی دەرکەوتنی بۆکسەکان بەڕیز
+                            document.querySelectorAll('.fade-element').forEach((el, index) => {
+                                setTimeout(() => {
+                                    el.classList.add('fade-in');
+                                }, index * 150 + 300);
+                            });
+                        }, 500); // نیوەی کاتی فەیدبوونی تیشکەکە
+                    }, 800); // چاوەڕێ دەکات تا تیشکەکە تەواوی شاشەکە دەگرێتەوە
+                }, 1500); // کاتی مانەوەی میلەکان بە خێرایی
+            }, 1000); // چاوەڕێ دەکات تا سەرپۆشەکە بەتەواوی دەکرێتەوە
+        }
+    </script>
+
+</body>
+</html>

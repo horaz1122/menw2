@@ -1,0 +1,502 @@
+<!DOCTYPE html>
+<html lang="ckb" dir="rtl">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0, maximum-scale=1.0, user-scalable=no">
+    <title>بانگهێشتنامەی پەنجەمۆری خۆشەویستی</title>
+    <!-- ئایکۆنەکان -->
+    <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.4.0/css/all.min.css">
+    <style>
+        @import url('https://fonts.googleapis.com/css2?family=Aref+Ruqaa:wght@400;700&family=Noto+Naskh+Arabic:wght@400;700&display=swap');
+
+        :root {
+            --bg-deep: #050a15; /* شینی زۆر تاریک نزیک لە ڕەش */
+            --bg-card: rgba(15, 23, 42, 0.6);
+            --gold: #dfb36b;
+            --gold-light: #fbe5b8;
+            --text-main: #e2e8f0;
+            --text-muted: #94a3b8;
+        }
+
+        * {
+            box-sizing: border-box;
+            margin: 0;
+            padding: 0;
+            -webkit-tap-highlight-color: transparent;
+        }
+
+        body, html {
+            width: 100%;
+            height: 100%;
+            background-color: var(--bg-deep);
+            font-family: 'Noto Naskh Arabic', Tahoma, sans-serif;
+            overflow-x: hidden;
+            color: var(--text-main);
+        }
+
+        body.locked { overflow-y: hidden; }
+
+        /* ================= دیمەنی یەکەم: پەنجەمۆرەکە ================= */
+        #intro-scene {
+            position: fixed;
+            top: 0; left: 0;
+            width: 100%; height: 100dvh;
+            display: flex;
+            justify-content: center;
+            align-items: center;
+            flex-direction: column;
+            z-index: 100;
+            background: radial-gradient(circle at center, #111a2e 0%, var(--bg-deep) 100%);
+            transition: opacity 1s ease;
+        }
+
+        .fingerprint-container {
+            position: relative;
+            width: 120px;
+            height: 140px;
+            display: flex;
+            justify-content: center;
+            align-items: center;
+            cursor: pointer;
+        }
+
+        /* ئایکۆنی پەنجەمۆر و دڵ */
+        .fp-icon, .heart-icon {
+            position: absolute;
+            font-size: 80px;
+            color: rgba(223, 179, 107, 0.4);
+            transition: all 0.5s ease;
+        }
+
+        /* ئیفێکتی بریقەداربوون لەکاتی سکانکردندا */
+        .fp-icon.glowing {
+            color: var(--gold);
+            filter: drop-shadow(0 0 15px var(--gold));
+        }
+
+        /* شاردنەوەی ئایکۆنەکان */
+        .icon-hidden {
+            opacity: 0;
+            transform: scale(0.5);
+            pointer-events: none;
+        }
+
+        /* لێدانی دڵ */
+        .heart-icon.beat {
+            color: #e63946;
+            filter: drop-shadow(0 0 20px rgba(230, 57, 70, 0.6));
+            animation: heartBeat 1s ease-in-out infinite;
+        }
+
+        @keyframes heartBeat {
+            0%, 100% { transform: scale(1); }
+            20% { transform: scale(1.2); }
+            40% { transform: scale(1); }
+            60% { transform: scale(1.2); }
+        }
+
+        /* تەقینەوەی دڵەکە */
+        .heart-icon.expand {
+            animation: explodeHeart 1s cubic-bezier(0.5, 0, 0.2, 1) forwards;
+        }
+
+        @keyframes explodeHeart {
+            0% { transform: scale(1); opacity: 1; }
+            40% { transform: scale(0.8); opacity: 1; }
+            100% { transform: scale(40); opacity: 0; filter: drop-shadow(0 0 50px #fff); }
+        }
+
+        /* لێزەری سکانکردن */
+        .scanner-line {
+            position: absolute;
+            top: 0; left: -10%;
+            width: 120%; height: 3px;
+            background: var(--gold-light);
+            box-shadow: 0 0 15px var(--gold), 0 0 30px var(--gold);
+            border-radius: 5px;
+            display: none;
+            z-index: 10;
+        }
+
+        .scanner-line.active {
+            display: block;
+            animation: scanAnim 1.5s cubic-bezier(0.4, 0, 0.2, 1) infinite;
+        }
+
+        @keyframes scanAnim {
+            0% { top: 0; opacity: 0; }
+            10% { opacity: 1; }
+            90% { opacity: 1; }
+            100% { top: 100%; opacity: 0; }
+        }
+
+        .tap-hint {
+            margin-top: 40px;
+            color: var(--text-muted);
+            font-size: 15px;
+            font-weight: bold;
+            letter-spacing: 1px;
+            animation: pulseHint 2s infinite;
+            transition: opacity 0.5s;
+        }
+
+        @keyframes pulseHint { 0%, 100% { opacity: 0.5; } 50% { opacity: 1; } }
+
+
+        /* ================= دیمەنی دووەم: بانگهێشتنامەی فەرمی ================= */
+        #main-content {
+            position: absolute;
+            top: 0; left: 0;
+            width: 100%;
+            min-height: 100dvh;
+            background: var(--bg-deep);
+            display: flex;
+            flex-direction: column;
+            align-items: center;
+            padding: 40px 15px;
+            opacity: 0;
+            visibility: hidden;
+            transition: opacity 1s ease;
+            z-index: 10;
+        }
+
+        #main-content.show {
+            opacity: 1;
+            visibility: visible;
+        }
+
+        /* تەنۆلکەی جوڵاو لە باکگراوند */
+        .particles-bg {
+            position: absolute;
+            top: 0; left: 0; width: 100%; height: 100%;
+            pointer-events: none;
+            z-index: 0;
+        }
+
+        .particle {
+            position: absolute;
+            background: var(--gold);
+            border-radius: 50%;
+            opacity: 0.4;
+            animation: floatParticle linear infinite;
+        }
+
+        @keyframes floatParticle {
+            0% { transform: translateY(0) scale(1); opacity: 0; }
+            50% { opacity: 0.6; }
+            100% { transform: translateY(-100px) scale(0.5); opacity: 0; }
+        }
+
+        /* چوارچێوەی شووشەیی (Dark Glassmorphism) */
+        .luxury-card {
+            width: 100%;
+            max-width: 420px;
+            background: var(--bg-card);
+            backdrop-filter: blur(16px);
+            -webkit-backdrop-filter: blur(16px);
+            border-radius: 20px;
+            padding: 45px 25px;
+            box-shadow: 0 20px 40px rgba(0,0,0,0.6), inset 0 0 0 1px rgba(223, 179, 107, 0.15);
+            text-align: center;
+            position: relative;
+            z-index: 2;
+        }
+
+        .top-icon {
+            font-size: 30px;
+            color: var(--gold);
+            margin-bottom: 20px;
+        }
+
+        .bismillah {
+            font-size: 14px;
+            color: var(--text-muted);
+            margin-bottom: 25px;
+            font-weight: bold;
+        }
+
+        .names {
+            font-family: 'Aref Ruqaa', serif;
+            font-size: clamp(40px, 12vw, 55px);
+            color: var(--gold-light);
+            font-weight: bold;
+            line-height: 1.2;
+            margin-bottom: 20px;
+            text-shadow: 0 0 15px rgba(223, 179, 107, 0.2);
+        }
+
+        .names span {
+            color: var(--text-muted);
+            font-size: 25px;
+            margin: 0 10px;
+        }
+
+        .divider {
+            display: flex;
+            align-items: center;
+            justify-content: center;
+            gap: 15px;
+            margin-bottom: 30px;
+            color: var(--gold);
+            font-size: 10px;
+        }
+        .divider::before, .divider::after {
+            content: '';
+            width: 50px; height: 1px;
+            background: linear-gradient(to right, transparent, var(--gold), transparent);
+        }
+
+        .story-text {
+            font-size: 14.5px;
+            color: var(--text-main);
+            line-height: 2.2;
+            margin-bottom: 35px;
+            font-weight: bold;
+        }
+
+        /* زانیارییەکان */
+        .info-grid {
+            display: flex;
+            flex-direction: column;
+            gap: 12px;
+        }
+
+        .info-item {
+            display: flex;
+            align-items: center;
+            gap: 15px;
+            padding: 15px;
+            background: rgba(255, 255, 255, 0.02);
+            border-radius: 12px;
+            border-right: 2px solid var(--gold);
+            transform: translateY(20px);
+            opacity: 0;
+            transition: all 0.6s ease;
+        }
+
+        .info-item.fade-in {
+            transform: translateY(0);
+            opacity: 1;
+        }
+
+        .info-icon {
+            width: 40px; height: 40px;
+            background: rgba(223, 179, 107, 0.08);
+            color: var(--gold);
+            border-radius: 50%;
+            display: flex;
+            justify-content: center;
+            align-items: center;
+            font-size: 18px;
+            border: 1px solid rgba(223, 179, 107, 0.2);
+        }
+
+        .info-details {
+            display: flex;
+            flex-direction: column;
+            text-align: right;
+        }
+
+        .info-details span { font-size: 11px; color: var(--text-muted); margin-bottom: 3px; font-weight: bold; }
+        .info-details strong { font-size: 14px; color: var(--text-main); }
+
+        /* دوگمەکان */
+        .actions {
+            display: flex;
+            gap: 12px;
+            width: 100%;
+            margin-top: 35px;
+            transform: translateY(20px);
+            opacity: 0;
+            transition: all 0.8s ease 0.2s;
+        }
+
+        .actions.fade-in {
+            transform: translateY(0);
+            opacity: 1;
+        }
+
+        .btn {
+            flex: 1;
+            padding: 14px 10px;
+            border-radius: 30px;
+            font-weight: bold;
+            font-size: 14px;
+            text-decoration: none;
+            display: flex;
+            justify-content: center;
+            align-items: center;
+            gap: 8px;
+            transition: 0.3s;
+        }
+
+        .btn-gold {
+            background: linear-gradient(to right, #c5974c, #e6c587, #c5974c);
+            color: var(--bg-deep);
+            box-shadow: 0 5px 15px rgba(223, 179, 107, 0.2);
+        }
+        .btn-gold:active { transform: scale(0.95); }
+
+        .btn-outline {
+            background: transparent;
+            color: var(--gold);
+            border: 1px solid var(--gold);
+        }
+
+    </style>
+</head>
+<body class="locked">
+
+    <!-- دیمەنی یەکەم: پەنجەمۆرەکە -->
+    <div id="intro-scene" onclick="unlockLove()">
+        <div class="fingerprint-container">
+            <!-- ئایکۆنی پەنجەمۆر -->
+            <i class="fa-solid fa-fingerprint fp-icon" id="fp-icon"></i>
+            
+            <!-- ئایکۆنی دڵ (سەرەتا شاراوەیە) -->
+            <i class="fa-solid fa-heart heart-icon icon-hidden" id="heart-icon"></i>
+            
+            <!-- لێزەری سکانکردن -->
+            <div class="scanner-line" id="scanner"></div>
+        </div>
+
+        <div class="tap-hint" id="hint">بۆ سەلماندنی ئامادەبوونت، پەنجە دابنێ...</div>
+    </div>
+
+    <!-- دیمەنی دووەم: بانگهێشتنامەی فەرمی -->
+    <div id="main-content">
+        
+        <!-- تەنۆلکەی جوڵاوی باکگراوند -->
+        <div class="particles-bg" id="particles"></div>
+
+        <div class="luxury-card">
+            
+            <i class="fa-solid fa-gem top-icon"></i>
+            
+            <div class="bismillah">بِسْمِ اللَّهِ الرَّحْمَنِ الرَّحِيمِ</div>
+            
+            <div class="names">
+                ئەحمەد <span>&</span> سارا
+            </div>
+            
+            <div class="divider">
+                <i class="fa-solid fa-diamond"></i>
+            </div>
+            
+            <p class="story-text">
+                خۆشەویستی وەک مۆرێک وایە لەسەر دڵەکانمان نەخشاوە. بەوپەڕی خۆشحاڵییەوە بانگهێشتتان دەکەین بۆ ئاهەنگی یەکگرتنی دڵەکانمان.
+            </p>
+
+            <div class="info-grid">
+                <div class="info-item fade-element">
+                    <div class="info-icon"><i class="fa-regular fa-calendar-check"></i></div>
+                    <div class="info-details">
+                        <span>ڕۆژ و بەروار</span>
+                        <strong>پێنج شەممە - ٢٥ / ٨ / ٢٠٢٦</strong>
+                    </div>
+                </div>
+                
+                <div class="info-item fade-element">
+                    <div class="info-icon"><i class="fa-regular fa-clock"></i></div>
+                    <div class="info-details">
+                        <span>کاتی ئامادەبوون</span>
+                        <strong>٤:٣٠ ی پاش نیوەڕۆ</strong>
+                    </div>
+                </div>
+
+                <div class="info-item fade-element">
+                    <div class="info-icon"><i class="fa-solid fa-map-location-dot"></i></div>
+                    <div class="info-details">
+                        <span>ناونیشان</span>
+                        <strong>هۆڵی تەلاری زێڕین - سلێمانی</strong>
+                    </div>
+                </div>
+            </div>
+
+            <div class="actions fade-element">
+                <a href="tel:07500000000" class="btn btn-gold">
+                    <i class="fa-solid fa-phone"></i> پەیوەندی
+                </a>
+                <a href="#" class="btn btn-outline">
+                    <i class="fa-solid fa-location-arrow"></i> نەخشە
+                </a>
+            </div>
+
+        </div>
+    </div>
+
+    <script>
+        // دروستکردنی تەنۆلکەی جوڵاو بۆ باکگراوندی کارتەکە
+        function createParticles() {
+            const container = document.getElementById('particles');
+            for(let i=0; i<40; i++) {
+                let p = document.createElement('div');
+                p.className = 'particle';
+                p.style.left = Math.random() * 100 + 'vw';
+                p.style.top = Math.random() * 100 + 'vh';
+                
+                let size = Math.random() * 4 + 1;
+                p.style.width = size + 'px';
+                p.style.height = size + 'px';
+                
+                p.style.animationDuration = (Math.random() * 4 + 3) + 's';
+                p.style.animationDelay = (Math.random() * 3) + 's';
+                container.appendChild(p);
+            }
+        }
+        createParticles();
+
+        let isUnlocking = false;
+
+        function unlockLove() {
+            if(isUnlocking) return;
+            isUnlocking = true;
+
+            const fpIcon = document.getElementById('fp-icon');
+            const heartIcon = document.getElementById('heart-icon');
+            const scanner = document.getElementById('scanner');
+            const hint = document.getElementById('hint');
+            const intro = document.getElementById('intro-scene');
+            const main = document.getElementById('main-content');
+
+            // ١. دەستپێکردنی پشکنین (Scanning)
+            hint.style.opacity = '0';
+            scanner.classList.add('active');
+            fpIcon.classList.add('glowing'); // درەوشانەوەی پەنجەمۆرەکە
+
+            // ٢. دوای 1.5 چرکە، پەنجەمۆرەکە دەبێت بە دڵ
+            setTimeout(() => {
+                scanner.classList.remove('active');
+                fpIcon.classList.add('icon-hidden');
+                
+                heartIcon.classList.remove('icon-hidden');
+                heartIcon.classList.add('beat'); // دەست دەکات بە لێدان
+
+                // ٣. دوای 1 چرکە لە لێدانی دڵەکە، دڵەکە گەورە دەبێت و دەتەقێتەوە
+                setTimeout(() => {
+                    heartIcon.classList.add('expand');
+
+                    // ٤. گۆڕینی دیمەنەکان
+                    setTimeout(() => {
+                        intro.style.opacity = '0';
+                        
+                        setTimeout(() => {
+                            intro.style.display = 'none';
+                            main.classList.add('show');
+                            document.body.classList.remove('locked');
+
+                            // دەرکەوتنی زانیارییەکان بەڕیز
+                            document.querySelectorAll('.fade-element').forEach((el, index) => {
+                                setTimeout(() => {
+                                    el.classList.add('fade-in');
+                                }, index * 150 + 200);
+                            });
+                        }, 500);
+                    }, 800); // چاوەڕێی تەقینەوەی دڵەکە دەکات
+                }, 1200);
+            }, 1500); // ماوەی سکانکردنەکە
+        }
+    </script>
+
+</body>
+</html>
