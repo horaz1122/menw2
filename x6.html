@@ -1,0 +1,644 @@
+<!DOCTYPE html>
+<html lang="ku" dir="rtl">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0, maximum-scale=1.0, user-scalable=no">
+    <title>بانگهێشتنامەی خەنەبەندان - زومڕودی شاهانە</title>
+    <!-- ئایکۆنەکان -->
+    <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.4.0/css/all.min.css">
+    <style>
+        @import url('https://fonts.googleapis.com/css2?family=Aref+Ruqaa:wght@400;700&family=Tajawal:wght@400;700;900&display=swap');
+
+        :root {
+            /* ڕەنگە سەوزە زومڕودییە زۆر تاریکەکان (Black Emerald) */
+            --emerald-darkest: #01120b;
+            --emerald-dark: #042418;
+            --emerald-light: #0a4d35;
+            
+            /* ڕەنگە زێڕینەکان */
+            --gold-main: #d4af37;
+            --gold-light: #f9e596;
+            --gold-dark: #aa771c;
+            
+            --text-light: #fefefe;
+            --glass-bg: rgba(4, 36, 24, 0.4);
+            --glass-border: rgba(212, 175, 55, 0.3);
+        }
+
+        * {
+            box-sizing: border-box;
+            margin: 0;
+            padding: 0;
+            -webkit-tap-highlight-color: transparent;
+        }
+
+        body, html {
+            width: 100%;
+            height: 100%;
+            background-color: #000;
+            font-family: 'Tajawal', Tahoma, sans-serif;
+            color: var(--text-light);
+            display: flex;
+            justify-content: center;
+            align-items: center;
+            overflow: hidden;
+        }
+
+        /* چوارچێوەی مۆبایل */
+        .app-frame {
+            width: 100%;
+            max-width: 420px;
+            height: 100dvh;
+            background: linear-gradient(135deg, var(--emerald-darkest) 0%, var(--emerald-dark) 50%, var(--emerald-light) 100%);
+            position: relative;
+            overflow: hidden;
+            box-shadow: 0 0 50px rgba(212, 175, 55, 0.15);
+            @media (min-height: 850px) {
+                height: 85vh;
+                border-radius: 45px;
+                border: 8px solid #111;
+                box-shadow: 0 20px 60px rgba(0,0,0,0.9), 0 0 0 10px #222;
+            }
+        }
+
+        /* چوارچێوەی زێڕینی ناوەوە */
+        .inner-gold-frame {
+            position: absolute;
+            top: 15px; left: 15px; right: 15px; bottom: 90px; /* جێهێشتنی شوێن بۆ باڕی خوارەوە */
+            border: 1px solid rgba(212, 175, 55, 0.2);
+            border-radius: 30px;
+            pointer-events: none;
+            z-index: 2;
+        }
+        .inner-gold-frame::before, .inner-gold-frame::after {
+            content: '✧';
+            position: absolute;
+            color: var(--gold-main);
+            font-size: 20px;
+            left: 50%;
+            transform: translateX(-50%);
+            text-shadow: 0 0 10px var(--gold-main);
+        }
+        .inner-gold-frame::before { top: -12px; }
+        .inner-gold-frame::after { bottom: -12px; }
+
+        /* باکگراوندی داینامیکی نەخشی ئیسلامی */
+        .bg-pattern {
+            position: absolute;
+            top: 0; left: 0; width: 100%; height: 100%;
+            background-image: url('https://www.transparenttextures.com/patterns/arabesque.png');
+            opacity: 0.15;
+            mix-blend-mode: color-dodge;
+            z-index: 1;
+            animation: bgDrift 60s linear infinite;
+        }
+
+        @keyframes bgDrift {
+            0% { background-position: 0 0; }
+            100% { background-position: 400px 400px; }
+        }
+
+        /* گەڵا زێڕینە هەڵفڕیوەکان */
+        #particles {
+            position: absolute;
+            top: 0; left: 0; width: 100%; height: 100%;
+            z-index: 2;
+            pointer-events: none;
+        }
+        .particle {
+            position: absolute;
+            background: linear-gradient(135deg, var(--gold-light), var(--gold-dark));
+            clip-path: polygon(50% 0%, 100% 50%, 50% 100%, 0% 50%); /* شێوەی ئەڵماس/گەڵا */
+            opacity: 0;
+            animation: floatUp infinite cubic-bezier(0.4, 0, 0.2, 1);
+            box-shadow: 0 0 10px var(--gold-main);
+        }
+
+        @keyframes floatUp {
+            0% { transform: translateY(100vh) rotate(0deg) scale(0); opacity: 0; }
+            20% { opacity: 0.6; }
+            80% { opacity: 0.6; }
+            100% { transform: translateY(-10vh) rotate(360deg) scale(1); opacity: 0; }
+        }
+
+        /* ================= باڕی خوارەوە (App Tab Bar) ================= */
+        .tab-bar {
+            position: absolute;
+            bottom: 20px; left: 20px; right: 20px;
+            height: 65px;
+            background: rgba(4, 36, 24, 0.6);
+            backdrop-filter: blur(20px);
+            -webkit-backdrop-filter: blur(20px);
+            border: 1px solid var(--glass-border);
+            border-radius: 35px;
+            display: flex;
+            justify-content: space-around;
+            align-items: center;
+            z-index: 100;
+            box-shadow: 0 10px 30px rgba(0,0,0,0.5), inset 0 0 15px rgba(212,175,55,0.1);
+        }
+
+        .tab-item {
+            display: flex;
+            flex-direction: column;
+            align-items: center;
+            justify-content: center;
+            width: 60px;
+            height: 100%;
+            color: rgba(255,255,255,0.4);
+            cursor: pointer;
+            transition: all 0.4s cubic-bezier(0.4, 0, 0.2, 1);
+            position: relative;
+        }
+
+        .tab-item i {
+            font-size: 20px;
+            margin-bottom: 4px;
+            transition: all 0.4s;
+        }
+
+        .tab-item span {
+            font-size: 10px;
+            font-weight: 700;
+            opacity: 0;
+            transform: translateY(10px);
+            transition: all 0.4s;
+        }
+
+        /* ئەنیمەیشنی تابی چالاک */
+        .tab-item.active {
+            color: var(--gold-main);
+            transform: translateY(-5px);
+        }
+
+        .tab-item.active i {
+            transform: translateY(-2px);
+            filter: drop-shadow(0 0 8px var(--gold-main));
+        }
+
+        .tab-item.active span {
+            opacity: 1;
+            transform: translateY(0);
+        }
+
+        /* خاڵی درەوشاوەی ژێر تابی چالاک */
+        .tab-indicator {
+            position: absolute;
+            bottom: -5px;
+            width: 5px; height: 5px;
+            background: var(--gold-main);
+            border-radius: 50%;
+            box-shadow: 0 0 10px var(--gold-main);
+            opacity: 0;
+            transition: all 0.4s;
+        }
+        .tab-item.active .tab-indicator { opacity: 1; }
+
+        /* ================= سیستەمی سلایدەکان ================= */
+        .slides-wrapper {
+            position: absolute;
+            top: 0; left: 0; width: 100%; bottom: 90px;
+            z-index: 10;
+        }
+
+        .slide {
+            position: absolute;
+            top: 0; left: 0;
+            width: 100%; height: 100%;
+            padding: 40px 25px;
+            display: flex;
+            flex-direction: column;
+            align-items: center;
+            justify-content: center;
+            opacity: 0;
+            visibility: hidden;
+            /* ئیفێکتی بلور و زووم بۆ گۆڕینی سلایدەکان */
+            transform: scale(0.9);
+            filter: blur(10px);
+            transition: all 0.6s cubic-bezier(0.4, 0, 0.2, 1);
+        }
+
+        .slide.active {
+            opacity: 1;
+            visibility: visible;
+            transform: scale(1);
+            filter: blur(0);
+        }
+
+        /* ئەنیمەیشنی ناوەوەی سلایدەکان */
+        .slide .stagger {
+            opacity: 0;
+            transform: translateY(30px);
+            transition: all 0.6s cubic-bezier(0.25, 1, 0.5, 1);
+        }
+        .slide.active .stagger {
+            opacity: 1;
+            transform: translateY(0);
+        }
+        
+        .slide.active .delay-1 { transition-delay: 0.1s; }
+        .slide.active .delay-2 { transition-delay: 0.2s; }
+        .slide.active .delay-3 { transition-delay: 0.3s; }
+        .slide.active .delay-4 { transition-delay: 0.4s; }
+
+        /* ================= دیزاینی شووشەیی (Glass Panel) ================= */
+        .glass-panel {
+            background: var(--glass-bg);
+            backdrop-filter: blur(15px);
+            -webkit-backdrop-filter: blur(15px);
+            border: 1px solid var(--glass-border);
+            border-radius: 24px;
+            padding: 25px 20px;
+            width: 100%;
+            box-shadow: 0 15px 35px rgba(0,0,0,0.4), inset 0 0 15px rgba(212,175,55,0.05);
+            position: relative;
+            overflow: hidden;
+            margin-bottom: 20px;
+        }
+
+        /* ================= سلایدی ١: دەستپێک ================= */
+        .welcome-text {
+            text-align: center;
+            font-size: 16px;
+            line-height: 2.4;
+            color: var(--gold-light);
+            text-shadow: 0 2px 5px rgba(0,0,0,0.8);
+            font-weight: 700;
+        }
+
+        .icon-stage {
+            position: relative;
+            width: 130px; height: 130px;
+            margin: 25px 0;
+            display: flex; justify-content: center; align-items: center;
+        }
+        
+        /* بازنەی سەوز و زێڕین دەوری ئایکۆنەکە */
+        .icon-stage::before {
+            content: ''; position: absolute; width: 100%; height: 100%;
+            border-radius: 50%;
+            border: 2px dashed var(--gold-main);
+            animation: spinSlow 12s linear infinite;
+        }
+        .icon-stage::after {
+            content: ''; position: absolute; width: 85%; height: 85%;
+            border-radius: 50%;
+            background: radial-gradient(circle, rgba(10, 77, 53, 0.6) 0%, transparent 70%);
+            animation: pulseGlow 2s infinite alternate;
+        }
+
+        .dress-icon {
+            font-size: 65px;
+            color: var(--gold-main); /* ئایکۆن زێڕین کراوە بۆ گونجان لەگەڵ زومڕودی */
+            z-index: 2;
+            filter: drop-shadow(0 0 15px rgba(212, 175, 55, 0.6));
+        }
+
+        .bride-name {
+            font-family: 'Aref Ruqaa', serif;
+            font-size: 45px;
+            margin-bottom: 20px;
+            background: linear-gradient(to right, #b38728, #fcf6ba, #d4af37, #fcf6ba, #b38728);
+            background-size: 200% auto;
+            color: #000;
+            background-clip: text;
+            -webkit-background-clip: text;
+            -webkit-text-fill-color: transparent;
+            animation: shine 3s linear infinite;
+            filter: drop-shadow(0 5px 10px rgba(0,0,0,0.6));
+        }
+
+        @keyframes shine { to { background-position: 200% center; } }
+        @keyframes spinSlow { 100% { transform: rotate(360deg); } }
+        @keyframes pulseGlow { 0% { transform: scale(0.9); opacity: 0.6; } 100% { transform: scale(1.1); opacity: 1; } }
+
+        /* ================= سلایدی ٢: کات ================= */
+        .section-header {
+            font-family: 'Aref Ruqaa', serif;
+            font-size: 30px;
+            color: var(--gold-main);
+            margin-bottom: 20px;
+            text-align: center;
+            text-shadow: 0 2px 10px rgba(0,0,0,0.8);
+        }
+
+        .cal-grid {
+            display: grid; grid-template-columns: repeat(7, 1fr); gap: 6px; direction: ltr; text-align: center;
+        }
+        .cal-day { font-size: 12px; color: var(--gold-main); font-weight: 900; margin-bottom: 5px; }
+        .cal-num { padding: 6px 0; color: #ccc; font-size: 14px; position: relative; font-weight: 700;}
+        
+        .cal-num.heart {
+            background: var(--gold-main);
+            color: var(--emerald-darkest);
+            border-radius: 8px;
+            box-shadow: 0 0 15px rgba(212, 175, 55, 0.5);
+            transform: scale(1.15);
+            z-index: 2;
+        }
+        .cal-num.heart::after {
+            content: '\f004'; font-family: 'Font Awesome 6 Free'; font-weight: 900;
+            position: absolute; top: -8px; right: -8px;
+            font-size: 14px; color: #ff3344;
+            filter: drop-shadow(0 0 5px rgba(0,0,0,0.8));
+            animation: pulseGlow 1.5s infinite alternate;
+        }
+
+        /* ژمێریاری بازنەیی مۆدێرن */
+        .timer-display {
+            display: flex; justify-content: center; gap: 12px; direction: ltr; margin-top: 5px;
+        }
+        .time-ring {
+            display: flex; flex-direction: column; align-items: center; justify-content: center;
+            width: 60px; height: 60px;
+            border-radius: 50%;
+            background: rgba(0,0,0,0.4);
+            border: 1px solid var(--glass-border);
+            box-shadow: inset 0 0 10px rgba(0,0,0,0.8);
+        }
+        .time-val {
+            font-family: 'Courier New', monospace; font-size: 20px; font-weight: 900; color: var(--gold-light);
+        }
+        .time-lbl { font-size: 8px; color: #aaa; font-weight: 700; margin-top: 2px;}
+
+        /* ================= سلایدی ٣: شوێن ================= */
+        .arch-mask {
+            position: relative; width: 100%; height: 160px;
+            border-radius: 80px 80px 15px 15px;
+            overflow: hidden;
+            border: 2px solid var(--gold-main);
+            margin-bottom: 20px;
+            box-shadow: 0 15px 30px rgba(0,0,0,0.8);
+        }
+        .arch-mask img { width: 100%; height: 100%; object-fit: cover; opacity: 0.9; transition: transform 4s ease;}
+        .arch-mask:hover img { transform: scale(1.1); }
+        .arch-overlay {
+            position: absolute; top: 0; left: 0; width: 100%; height: 100%;
+            background: linear-gradient(to top, rgba(4,36,24,0.9), transparent);
+            display: flex; flex-direction: column; justify-content: flex-end; align-items: center; padding-bottom: 15px;
+        }
+        .venue-name { font-family: 'Aref Ruqaa', serif; font-size: 26px; color: var(--gold-light); text-shadow: 0 2px 10px rgba(0,0,0,0.9);}
+
+        /* خشتەی کاتەکان (Elegant Vertical) */
+        .timeline-vertical {
+            width: 100%; position: relative; padding-right: 20px; text-align: right;
+            border-right: 2px solid rgba(212,175,55,0.2);
+        }
+        .time-point-v {
+            position: relative; margin-bottom: 15px;
+        }
+        .time-point-v:last-child { margin-bottom: 0; }
+        .time-point-v::before {
+            content: ''; position: absolute; right: -25px; top: 5px;
+            width: 8px; height: 8px; background: var(--gold-main);
+            border-radius: 50%; box-shadow: 0 0 10px var(--gold-main);
+        }
+        .t-val-v { font-size: 12px; font-weight: bold; color: var(--gold-main); margin-bottom: 2px; font-family: monospace; direction: ltr; display: inline-block;}
+        .t-event-v { font-size: 13px; color: var(--text-light); font-weight: bold; }
+
+        /* دوگمەی نەخشە */
+        .btn-map {
+            width: 100%;
+            background: linear-gradient(135deg, var(--gold-main), var(--gold-dark));
+            color: var(--emerald-darkest);
+            border: none;
+            padding: 14px;
+            border-radius: 20px;
+            font-size: 15px;
+            font-weight: 900;
+            font-family: 'Tajawal', sans-serif;
+            cursor: pointer;
+            box-shadow: 0 10px 20px rgba(212, 175, 55, 0.3);
+            display: flex; justify-content: center; align-items: center; gap: 10px;
+        }
+        .btn-map:active { transform: scale(0.97); }
+
+        /* مۆسیقا دوگمەی بچووک لە سەرەوە ڕاست */
+        .music-btn {
+            position: absolute; top: 25px; right: 25px;
+            width: 35px; height: 35px;
+            border-radius: 50%; background: var(--glass-bg);
+            border: 1px solid var(--gold-main);
+            display: flex; justify-content: center; align-items: center;
+            color: var(--gold-main); font-size: 14px; cursor: pointer;
+            z-index: 100; backdrop-filter: blur(10px);
+        }
+        .music-btn.playing i { animation: spinSlow 3s linear infinite; }
+
+    </style>
+</head>
+<body>
+
+    <div class="app-frame">
+        
+        <!-- باکگراوند و ئیفێکتەکان -->
+        <div class="bg-pattern"></div>
+        <div id="particles"></div>
+        <div class="inner-gold-frame"></div>
+
+        <!-- مۆسیقا -->
+        <audio id="bgMusic" loop>
+            <source src="https://www.soundhelix.com/examples/mp3/SoundHelix-Song-2.mp3" type="audio/mpeg">
+        </audio>
+        <div class="music-btn" id="musicBtn" onclick="toggleMusic()">
+            <i class="fa-solid fa-music"></i>
+        </div>
+
+        <div class="slides-wrapper">
+            
+            <!-- ================= سلایدی ١ ================= -->
+            <div class="slide active" id="slide-1">
+                <div class="glass-panel stagger delay-1" style="padding: 30px 15px;">
+                    <div class="welcome-text">
+                        بەخشینی کاتەکانتان نیشانەی<br>
+                        خۆشەویستییە بۆ ئێمە، بە ئامادەبوونتان<br>
+                        ئاهەنگەکەمان گەرموگوڕتر دەبێت.<br>
+                        بەخێربێن بۆ ئاهەنگی خەنەبەندانی<br>
+                        بووکەکەمان
+                    </div>
+                </div>
+                
+                <div class="icon-stage stagger delay-2">
+                    <i class="fa-solid fa-person-dress dress-icon"></i>
+                </div>
+                
+                <div class="bride-name stagger delay-3">( بارین )</div>
+            </div>
+
+            <!-- ================= سلایدی ٢ ================= -->
+            <div class="slide" id="slide-2">
+                <div class="section-header stagger delay-1">بەروار و کات</div>
+                
+                <div class="glass-panel stagger delay-2" style="padding: 15px;">
+                    <div class="cal-grid">
+                        <div class="cal-day">S</div><div class="cal-day">M</div><div class="cal-day">T</div><div class="cal-day">W</div><div class="cal-day">T</div><div class="cal-day">F</div><div class="cal-day">S</div>
+                        <div class="cal-num">1</div><div class="cal-num">2</div><div class="cal-num">3</div><div class="cal-num">4</div><div class="cal-num">5</div><div class="cal-num">6</div><div class="cal-num">7</div>
+                        <div class="cal-num">8</div><div class="cal-num">9</div><div class="cal-num">10</div><div class="cal-num">11</div><div class="cal-num">12</div><div class="cal-num">13</div><div class="cal-num">14</div>
+                        <div class="cal-num">15</div><div class="cal-num">16</div><div class="cal-num">17</div><div class="cal-num">18</div><div class="cal-num heart">19</div><div class="cal-num">20</div><div class="cal-num">21</div>
+                        <div class="cal-num">22</div><div class="cal-num">23</div><div class="cal-num">24</div><div class="cal-num">25</div><div class="cal-num">26</div><div class="cal-num">27</div><div class="cal-num">28</div>
+                        <div class="cal-num">29</div><div class="cal-num">30</div><div class="cal-num">31</div>
+                    </div>
+                </div>
+
+                <div class="glass-panel stagger delay-3" style="padding: 15px;">
+                    <div style="text-align: center; color: var(--gold-light); font-weight: bold; font-size: 13px; margin-bottom: 5px;">کاتی ماوە بۆ ئاهەنگەکە</div>
+                    <div class="timer-display">
+                        <div class="time-ring"><span class="time-val" id="d">00</span><span class="time-lbl">ڕۆژ</span></div>
+                        <div class="time-ring"><span class="time-val" id="h">00</span><span class="time-lbl">کاتژمێر</span></div>
+                        <div class="time-ring"><span class="time-val" id="m">00</span><span class="time-lbl">خولەک</span></div>
+                        <div class="time-ring"><span class="time-val" id="s">00</span><span class="time-lbl">چرکە</span></div>
+                    </div>
+                </div>
+            </div>
+
+            <!-- ================= سلایدی ٣ ================= -->
+            <div class="slide" id="slide-3">
+                <div class="section-header stagger delay-1">شوێنی ئاهەنگ</div>
+                
+                <div class="arch-mask stagger delay-2">
+                    <img src="https://images.unsplash.com/photo-1519225421980-715cb0215aed?q=80&w=600&auto=format&fit=crop" alt="Venue">
+                    <div class="arch-overlay">
+                        <div class="venue-name">Lily Garden</div>
+                    </div>
+                </div>
+
+                <div class="glass-panel stagger delay-3" style="padding: 20px 15px;">
+                    <div class="timeline-vertical">
+                        <div class="time-point-v">
+                            <div class="t-val-v">07:00 PM</div>
+                            <div class="t-event-v">کردنەوەی دەرگا</div>
+                        </div>
+                        <div class="time-point-v">
+                            <div class="t-val-v">08:00 PM</div>
+                            <div class="t-event-v">کاتی نانخواردن</div>
+                        </div>
+                        <div class="time-point-v">
+                            <div class="t-val-v">09:00 PM</div>
+                            <div class="t-event-v">ئاهەنگ و هەڵپەڕکێ</div>
+                        </div>
+                        <div class="time-point-v">
+                            <div class="t-val-v">10:00 PM</div>
+                            <div class="t-event-v">هێنانی خەنە</div>
+                        </div>
+                    </div>
+                </div>
+
+                <div class="stagger delay-4" style="width: 100%;">
+                    <button class="btn-map" onclick="openMap()">
+                        نەخشەی شوێن <i class="fa-solid fa-map-location-dot"></i>
+                    </button>
+                </div>
+            </div>
+
+        </div>
+
+        <!-- ================= باڕی خوارەوە (Tab Navigation) ================= -->
+        <div class="tab-bar">
+            <div class="tab-item active" id="tab-1" onclick="switchTab(1)">
+                <i class="fa-solid fa-house-chimney"></i>
+                <span>سەرەتا</span>
+                <div class="tab-indicator"></div>
+            </div>
+            <div class="tab-item" id="tab-2" onclick="switchTab(2)">
+                <i class="fa-solid fa-calendar-days"></i>
+                <span>کات</span>
+                <div class="tab-indicator"></div>
+            </div>
+            <div class="tab-item" id="tab-3" onclick="switchTab(3)">
+                <i class="fa-solid fa-location-dot"></i>
+                <span>شوێن</span>
+                <div class="tab-indicator"></div>
+            </div>
+        </div>
+
+    </div>
+
+    <script>
+        // دروستکردنی گەڵا زێڕینەکان
+        function createParticles() {
+            const container = document.getElementById('particles');
+            for (let i = 0; i < 20; i++) {
+                let particle = document.createElement('div');
+                particle.className = 'particle';
+                let size = Math.random() * 8 + 4; // گەورەتر بۆ شێوەی گەڵا
+                particle.style.width = size + 'px';
+                particle.style.height = (size * 1.5) + 'px';
+                particle.style.left = Math.random() * 100 + '%';
+                
+                let duration = Math.random() * 8 + 8;
+                let delay = Math.random() * 5;
+                particle.style.animationDuration = duration + 's';
+                particle.style.animationDelay = delay + 's';
+                
+                // جوڵەی ئاڵۆزتر (بەرەو سەرەوە و سوڕانەوە)
+                particle.animate([
+                    { transform: `translateY(100vh) rotate(0deg) scale(0)`, opacity: 0 },
+                    { opacity: Math.random() * 0.5 + 0.2, offset: 0.2 },
+                    { transform: `translateY(-10vh) rotate(${Math.random() * 360}deg) scale(1)`, opacity: 0 }
+                ], {
+                    duration: duration * 1000,
+                    iterations: Infinity,
+                    delay: delay * 1000
+                });
+
+                container.appendChild(particle);
+            }
+        }
+        createParticles();
+
+        // فەنکشنی گۆڕینی تابەکان و سلایدەکان (بە ئەنیمەیشنی بلور)
+        function switchTab(tabIndex) {
+            // ڕێکخستنی تابەکان
+            document.querySelectorAll('.tab-item').forEach(tab => tab.classList.remove('active'));
+            document.getElementById('tab-' + tabIndex).classList.add('active');
+
+            // ڕێکخستنی سلایدەکان
+            document.querySelectorAll('.slide').forEach(slide => slide.classList.remove('active'));
+            document.getElementById('slide-' + tabIndex).classList.add('active');
+        }
+
+        // فەنکشنی مۆسیقا
+        function toggleMusic() {
+            const btn = document.getElementById('musicBtn');
+            const audio = document.getElementById('bgMusic');
+            
+            if (btn.classList.contains('playing')) {
+                btn.classList.remove('playing');
+                audio.pause();
+            } else {
+                btn.classList.add('playing');
+                audio.volume = 0.4;
+                audio.play().catch(e => console.log("پلەی ڕاگیرا"));
+            }
+        }
+
+        // فەنکشنی کردنەوەی نەخشە
+        function openMap() {
+            window.open('https://maps.google.com/?q=Lily+garden+hall', '_blank');
+        }
+
+        // ژمێریاری کات
+        const targetDate = new Date();
+        targetDate.setDate(targetDate.getDate() + 15);
+        targetDate.setHours(targetDate.getHours() + 14);
+
+        setInterval(() => {
+            const now = new Date().getTime();
+            const distance = targetDate.getTime() - now;
+
+            if (distance < 0) return;
+
+            let days = Math.floor(distance / (1000 * 60 * 60 * 24));
+            let hours = Math.floor((distance % (1000 * 60 * 60 * 24)) / (1000 * 60 * 60));
+            let minutes = Math.floor((distance % (1000 * 60 * 60)) / (1000 * 60));
+            let seconds = Math.floor((distance % (1000 * 60)) / 1000);
+
+            document.getElementById("d").innerText = days < 10 ? "0" + days : days;
+            document.getElementById("h").innerText = hours < 10 ? "0" + hours : hours;
+            document.getElementById("m").innerText = minutes < 10 ? "0" + minutes : minutes;
+            document.getElementById("s").innerText = seconds < 10 ? "0" + seconds : seconds;
+        }, 1000);
+    </script>
+
+</body>
+</html>
