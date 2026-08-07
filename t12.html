@@ -1,0 +1,672 @@
+<!DOCTYPE html>
+<html lang="ckb" dir="rtl">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0, maximum-scale=1.0, user-scalable=no">
+    <title>بانگهێشتنامەی پلاتینیۆم و سەفایەر</title>
+    
+    <!-- فۆنتەکان و ئایکۆنەکان -->
+    <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.4.0/css/all.min.css">
+    <style>
+        @import url('https://fonts.googleapis.com/css2?family=Amiri:ital,wght@0,400;0,700;1,400&family=Tajawal:wght@300;400;500;700&display=swap');
+        @import url('https://fonts.googleapis.com/css2?family=Aref+Ruqaa:wght@400;700&display=swap');
+
+        :root {
+            --sapphire-darkest: #02050a;  /* شینی زۆر تاریک نزیک لە ڕەش */
+            --sapphire-dark: #050d1f;     /* سەفایەری تاریک */
+            --sapphire-main: #0a193b;     /* سەفایەری شاهانە */
+            --sapphire-light: #162c5e;    /* سەفایەری کاڵ */
+            
+            --platinum-light: #ffffff;    /* سپی بریقەدار */
+            --platinum-main: #e0e5ec;     /* زیوینی درەوشاوە */
+            --platinum-dark: #9ba4b5;     /* زیوینی تاریک */
+            
+            --platinum-gradient: linear-gradient(135deg, #ffffff 0%, #d1d5db 50%, #9ca3af 100%);
+            
+            --text-light: #f8fafc;
+            --text-muted: #cbd5e1;
+            
+            --glass-bg: rgba(22, 44, 94, 0.4);
+            --glass-border: rgba(224, 229, 236, 0.3);
+        }
+
+        * {
+            box-sizing: border-box;
+            margin: 0;
+            padding: 0;
+            -webkit-tap-highlight-color: transparent;
+        }
+
+        body, html {
+            width: 100%;
+            background-color: var(--sapphire-darkest); 
+            font-family: 'Tajawal', Tahoma, sans-serif;
+            color: var(--text-light);
+            overflow-x: hidden;
+            scroll-behavior: smooth;
+        }
+
+        body.locked {
+            overflow: hidden;
+        }
+
+        .app-container {
+            width: 100%;
+            max-width: 450px;
+            min-height: 100vh;
+            margin: 0 auto;
+            background: linear-gradient(135deg, var(--sapphire-darkest) 0%, var(--sapphire-main) 100%);
+            position: relative;
+            box-shadow: 0 0 50px rgba(0,0,0,0.9);
+            overflow: hidden;
+            background-image: url('https://www.transparenttextures.com/patterns/stardust.png');
+        }
+
+        /* ئیفێکتی پڕیشکی ئەڵماسی (Diamond Particles) */
+        #particles-container {
+            position: fixed;
+            top: 0; left: 0; width: 100%; height: 100%;
+            pointer-events: none;
+            z-index: 999;
+        }
+        .particle {
+            position: absolute;
+            background: #fff;
+            border-radius: 50%;
+            opacity: 0;
+            box-shadow: 0 0 10px #fff, 0 0 20px var(--platinum-main);
+            animation: diamondFloat 6s infinite linear;
+        }
+        @keyframes diamondFloat {
+            0% { transform: translateY(100vh) scale(0) rotate(0deg); opacity: 0; }
+            20% { opacity: 0.9; }
+            80% { opacity: 0.4; }
+            100% { transform: translateY(-10vh) scale(1.2) rotate(45deg); opacity: 0; }
+        }
+
+        #envelope-wrapper {
+            position: fixed;
+            top: 0; left: 0; width: 100%; height: 100%;
+            background: linear-gradient(135deg, var(--sapphire-darkest) 0%, #030814 100%);
+            display: flex;
+            justify-content: center;
+            align-items: center;
+            z-index: 1000;
+            perspective: 2500px;
+            transition: opacity 1.5s ease 1s, visibility 1.5s ease 1s;
+        }
+
+        .envelope-box {
+            position: relative;
+            width: 320px;
+            height: 200px;
+            transform-style: preserve-3d;
+            transition: transform 1.5s cubic-bezier(0.4, 0, 0.2, 1);
+            filter: drop-shadow(0 30px 40px rgba(0,0,0,0.8));
+        }
+
+        .env-back {
+            position: absolute;
+            top: 0; left: 0; width: 100%; height: 100%;
+            background: var(--sapphire-light);
+            border-radius: 5px;
+            box-shadow: inset 0 0 20px rgba(0,0,0,0.5);
+        }
+
+        /* نامەی ناوەوە */
+        .env-letter {
+            position: absolute;
+            top: 5px; left: 5px; right: 5px; bottom: 5px;
+            background: #ffffff;
+            background-image: url('https://www.transparenttextures.com/patterns/white-marble.png');
+            border-radius: 5px;
+            display: flex;
+            flex-direction: column;
+            justify-content: center;
+            align-items: center;
+            z-index: 2;
+            transition: transform 1.5s cubic-bezier(0.4, 0, 0.2, 1) 0.8s;
+            border: 2px solid var(--platinum-dark);
+            box-shadow: inset 0 0 15px rgba(0,0,0,0.1);
+        }
+        .env-letter h2 {
+            font-family: 'Aref Ruqaa', serif;
+            color: var(--sapphire-main);
+            font-size: 32px;
+            margin-bottom: 5px;
+        }
+        .env-letter p {
+            font-family: 'Tajawal', sans-serif;
+            font-size: 13px;
+            letter-spacing: 2px;
+            color: var(--platinum-dark);
+            font-weight: bold;
+        }
+
+        .env-front {
+            position: absolute;
+            top: 0; left: 0; width: 100%; height: 100%;
+            z-index: 3;
+            pointer-events: none;
+        }
+        .env-front::before {
+            content: ''; position: absolute; top: 0; left: 0; width: 0; height: 0;
+            border-top: 100px solid transparent; border-bottom: 100px solid transparent;
+            border-left: 160px solid var(--sapphire-main);
+        }
+        .env-front::after {
+            content: ''; position: absolute; top: 0; right: 0; width: 0; height: 0;
+            border-top: 100px solid transparent; border-bottom: 100px solid transparent;
+            border-right: 160px solid var(--sapphire-main);
+        }
+        .env-bottom {
+            position: absolute; bottom: 0; left: 0; width: 0; height: 0;
+            border-left: 160px solid transparent; border-right: 160px solid transparent;
+            border-bottom: 120px solid var(--sapphire-dark);
+            z-index: 4;
+            filter: drop-shadow(0 -4px 5px rgba(0,0,0,0.5));
+        }
+
+        .env-top {
+            position: absolute;
+            top: 0; left: 0; width: 0; height: 0;
+            border-left: 160px solid transparent; border-right: 160px solid transparent;
+            border-top: 120px solid var(--sapphire-light);
+            z-index: 6;
+            transform-origin: top;
+            transition: transform 1.2s cubic-bezier(0.4, 0, 0.2, 1);
+            filter: drop-shadow(0 5px 10px rgba(0,0,0,0.7));
+        }
+
+        /* مۆری پلاتینیۆمی (Platinum Wax Seal) */
+        .wax-seal {
+            position: absolute;
+            top: 120px; left: 50%;
+            transform: translate(-50%, -50%);
+            width: 85px; height: 85px;
+            background: var(--platinum-gradient);
+            border-radius: 50%;
+            z-index: 10;
+            display: flex;
+            flex-direction: column;
+            justify-content: center;
+            align-items: center;
+            cursor: pointer;
+            box-shadow: 0 10px 20px rgba(0,0,0,0.8), inset 0 0 15px rgba(255,255,255,0.9);
+            transition: all 0.3s ease;
+            animation: silverPulse 2s infinite;
+        }
+
+        .wax-seal h3 {
+            font-family: 'Aref Ruqaa', serif;
+            color: var(--sapphire-darkest);
+            font-size: 28px;
+            margin-bottom: -8px;
+            text-shadow: 1px 1px 2px rgba(255,255,255,0.5);
+        }
+
+        .wax-seal span {
+            font-size: 11px;
+            color: var(--platinum-light);
+            font-weight: bold;
+            background: var(--sapphire-main);
+            padding: 3px 12px;
+            border-radius: 12px;
+            margin-top: 5px;
+            letter-spacing: 1px;
+            box-shadow: 0 2px 5px rgba(0,0,0,0.3);
+        }
+
+        @keyframes silverPulse {
+            0% { box-shadow: 0 0 0 0 rgba(224, 229, 236, 0.6), 0 10px 20px rgba(0,0,0,0.8); }
+            70% { box-shadow: 0 0 0 20px rgba(224, 229, 236, 0), 0 10px 20px rgba(0,0,0,0.8); }
+            100% { box-shadow: 0 0 0 0 rgba(224, 229, 236, 0), 0 10px 20px rgba(0,0,0,0.8); }
+        }
+
+        .envelope-box.open .env-top {
+            transform: rotateX(180deg);
+            z-index: 1; 
+        }
+        .envelope-box.open .wax-seal {
+            opacity: 0;
+            transform: translate(-50%, -50%) scale(0) rotate(180deg);
+        }
+        .envelope-box.open .env-letter {
+            transform: translateY(-200px) scale(1.2);
+            z-index: 5;
+            box-shadow: 0 30px 60px rgba(0,0,0,0.9), 0 0 30px rgba(255,255,255,0.2);
+        }
+        .envelope-box.zoom-in {
+            transform: scale(5);
+            opacity: 0;
+        }
+        #envelope-wrapper.hide {
+            opacity: 0;
+            visibility: hidden;
+        }
+
+        /* ================= ناوەڕۆکی سەرەکی ================= */
+        #main-content {
+            display: none; 
+            width: 100%;
+            opacity: 0;
+            transform: scale(0.95);
+            transition: all 1.5s cubic-bezier(0.2, 0.8, 0.2, 1);
+        }
+        #main-content.show { display: block; opacity: 1; transform: scale(1); }
+
+        .reveal {
+            opacity: 0;
+            transform: translateY(50px);
+            transition: all 1.2s cubic-bezier(0.2, 0.8, 0.2, 1);
+        }
+        .reveal.active { opacity: 1; transform: translateY(0); }
+
+        .hero-section {
+            position: relative;
+            width: 100%;
+            height: 480px;
+            background-image: url('https://images.unsplash.com/photo-1543884877-00994f3b063d?q=80&w=800&auto=format&fit=crop');
+            background-size: cover;
+            background-position: center;
+            clip-path: ellipse(130% 100% at 50% 0%);
+            border-bottom: 2px solid var(--platinum-dark);
+        }
+        .hero-overlay {
+            position: absolute; top: 0; left: 0; width: 100%; height: 100%;
+            background: linear-gradient(to bottom, rgba(5,13,31,0.2) 0%, rgba(5,13,31,1) 100%);
+            display: flex; flex-direction: column; justify-content: flex-end; align-items: center; padding-bottom: 60px;
+        }
+
+        .platinum-text {
+            background: var(--platinum-gradient);
+            -webkit-background-clip: text;
+            -webkit-text-fill-color: transparent;
+            text-shadow: 0 0 20px rgba(255,255,255,0.1);
+        }
+
+        .bismillah-hero {
+            font-family: 'Aref Ruqaa', serif;
+            font-size: 24px;
+            margin-bottom: 15px;
+        }
+
+        .couple-names-hero {
+            font-family: 'Aref Ruqaa', serif;
+            font-size: 60px;
+            display: flex; align-items: center; gap: 15px; line-height: 1;
+            filter: drop-shadow(0 5px 10px rgba(0,0,0,0.8));
+        }
+        .couple-names-hero span { font-size: 28px; color: var(--platinum-main); -webkit-text-fill-color: var(--platinum-main); }
+
+        .content-container { padding: 20px 25px 80px 25px; text-align: center; position: relative; }
+
+        .intro-text {
+            font-family: 'Amiri', serif; font-size: 17px; line-height: 2.2; color: var(--text-muted); margin: 30px 0 50px 0; padding: 0 10px;
+        }
+        .intro-text strong { color: var(--platinum-light); font-size: 20px; text-shadow: 0 0 10px rgba(255,255,255,0.4);}
+
+        /* ناونیشانی بەشەکان */
+        .section-title {
+            position: relative; font-family: 'Aref Ruqaa', serif; font-size: 32px;
+            margin-bottom: 40px; display: inline-block;
+        }
+        .section-title::before, .section-title::after {
+            content: '❖'; color: var(--platinum-dark); font-size: 14px; position: absolute; top: 50%; transform: translateY(-50%);
+        }
+        .section-title::before { right: -30px; }
+        .section-title::after { left: -30px; }
+
+        .glass-panel {
+            background: var(--glass-bg);
+            backdrop-filter: blur(15px);
+            -webkit-backdrop-filter: blur(15px);
+            border: 1px solid var(--glass-border);
+            border-radius: 20px;
+            padding: 30px 20px;
+            box-shadow: 0 20px 40px rgba(0,0,0,0.6), inset 0 0 20px rgba(255,255,255,0.05);
+            margin-bottom: 50px;
+            position: relative;
+            overflow: hidden;
+        }
+        .glass-panel::before {
+            content: ''; position: absolute; top: -50%; left: -50%; width: 200%; height: 200%;
+            background: radial-gradient(circle, rgba(255,255,255,0.05) 0%, transparent 60%);
+            pointer-events: none;
+        }
+
+        /* ڕۆژمێر (Calendar) */
+        .cal-header { font-size: 20px; font-weight: 700; color: var(--platinum-light); margin-bottom: 20px; }
+        .cal-grid { display: grid; grid-template-columns: repeat(7, 1fr); gap: 8px; direction: ltr; }
+        .cal-day-name { font-size: 13px; color: var(--platinum-dark); font-weight: 700; padding-bottom: 10px;}
+        .cal-num { font-size: 15px; color: var(--text-muted); padding: 10px 0; border-radius: 50%; transition: 0.3s;}
+        .cal-active {
+            background: var(--platinum-gradient);
+            color: var(--sapphire-darkest) !important;
+            font-weight: bold;
+            box-shadow: 0 10px 20px rgba(255,255,255,0.3);
+            transform: scale(1.15);
+        }
+
+        /* ژمێریاری کات */
+        .countdown-wrapper { display: flex; justify-content: center; gap: 12px; direction: ltr; margin-top: 30px; }
+        .time-box {
+            width: 75px; height: 85px;
+            background: rgba(0,0,0,0.4);
+            border: 1px solid var(--glass-border);
+            border-radius: 16px;
+            display: flex; flex-direction: column; justify-content: center; align-items: center;
+            box-shadow: inset 0 0 15px rgba(255,255,255,0.05);
+            position: relative;
+        }
+        .time-val { font-family: 'Aref Ruqaa', serif; font-size: 32px; line-height: 1; text-shadow: 0 0 15px rgba(255,255,255,0.4);}
+        .time-label { font-size: 11px; color: var(--platinum-dark); font-weight: 700; text-transform: uppercase; margin-top: 5px;}
+
+        .timeline { text-align: right; padding-right: 30px; border-right: 2px dashed var(--platinum-dark); margin-right: 15px; margin-bottom: 20px; }
+        .timeline-item { position: relative; margin-bottom: 40px; }
+        .timeline-item:last-child { margin-bottom: 0; }
+        .timeline-item::before {
+            content: ''; position: absolute; right: -38px; top: 0;
+            width: 14px; height: 14px; background: var(--sapphire-darkest);
+            border-radius: 50%; border: 3px solid var(--platinum-main);
+            box-shadow: 0 0 10px rgba(255,255,255,0.5);
+        }
+        .tl-time {
+            font-family: 'Tahoma', sans-serif; font-size: 14px; color: var(--sapphire-darkest); font-weight: bold;
+            background: var(--platinum-gradient); padding: 2px 12px; border-radius: 12px;
+            display: inline-block; margin-bottom: 8px; direction: ltr; box-shadow: 0 5px 10px rgba(255,255,255,0.2);
+        }
+        .tl-title { font-size: 18px; font-weight: 700; color: var(--platinum-light); }
+        .tl-desc { font-size: 14px; color: var(--text-muted); margin-top: 5px; line-height: 1.6;}
+
+        /* وێنەی کەوانەیی ئەڵماسی */
+        .arch-image {
+            width: 100%; height: 400px; border-radius: 200px 200px 10px 10px; overflow: hidden; margin-bottom: 50px;
+            border: 3px solid var(--platinum-main); box-shadow: 0 25px 50px rgba(0,0,0,0.8), 0 0 20px rgba(255,255,255,0.1);
+            position: relative;
+        }
+        .arch-image img { width: 100%; height: 100%; object-fit: cover; filter: contrast(1.1) brightness(0.9); }
+
+        /* نەخشە */
+        .map-wrapper {
+            width: 100%; height: 250px; border-radius: 15px; overflow: hidden;
+            border: 1px solid var(--glass-border); box-shadow: 0 15px 30px rgba(0,0,0,0.5); margin-bottom: 20px;
+        }
+        .map-wrapper iframe { filter: invert(90%) hue-rotate(200deg) contrast(120%) brightness(80%); } /* فلتەری نەخشەی سەفایەر */
+
+        /* دوگمەی ئەڵماسی */
+        .btn-platinum {
+            display: inline-flex; align-items: center; justify-content: center;
+            background: var(--platinum-gradient); color: var(--sapphire-darkest) !important;
+            padding: 15px 40px; border-radius: 30px; font-size: 16px; font-weight: 900;
+            text-decoration: none; box-shadow: 0 15px 30px rgba(255,255,255,0.15); transition: all 0.3s; cursor: pointer; gap: 10px;
+        }
+        .btn-platinum:active { transform: translateY(2px); box-shadow: 0 5px 15px rgba(255,255,255,0.15); }
+
+        .notes-list li { list-style: none; font-size: 14px; line-height: 2; margin-bottom: 15px; display: flex; align-items: flex-start; gap: 10px; }
+        .notes-list i { color: var(--platinum-main); margin-top: 6px; font-size: 14px; text-shadow: 0 0 5px rgba(255,255,255,0.5);}
+
+        .music-player {
+            position: fixed; bottom: 30px; left: 30px; width: 55px; height: 55px;
+            background: rgba(10,25,59,0.8); backdrop-filter: blur(10px);
+            border-radius: 50%; border: 2px solid var(--platinum-main);
+            display: flex; justify-content: center; align-items: center;
+            color: var(--platinum-light); font-size: 20px;
+            z-index: 100; box-shadow: 0 10px 25px rgba(0,0,0,0.8), 0 0 15px rgba(255,255,255,0.2);
+            cursor: pointer; opacity: 0; transition: opacity 1s ease;
+        }
+        .music-player::after {
+            content: ''; position: absolute; width: 14px; height: 14px; background: var(--platinum-gradient); border-radius: 50%;
+        }
+        .music-player i { z-index: 2; color: var(--sapphire-darkest); font-size: 10px; }
+        .music-player.show { opacity: 1; }
+        .music-player.playing { animation: spinRecord 4s linear infinite; }
+        @keyframes spinRecord { 100% { transform: rotate(360deg); } }
+
+    </style>
+</head>
+<body class="locked">
+
+    <div id="envelope-wrapper">
+        <div id="particles-container"></div>
+        
+        <div class="envelope-box" id="envelope-box">
+            <div class="env-back"></div>
+            
+            <div class="env-letter">
+                <i class="fa-solid fa-gem" style="color: var(--sapphire-main); font-size: 32px; margin-bottom: 15px; filter: drop-shadow(0 5px 5px rgba(0,0,0,0.1));"></i>
+                <h2>بانگهێشتنامە</h2>
+                <p>DIAMOND EDITION</p>
+            </div>
+            
+            <div class="env-front"></div>
+            <div class="env-bottom"></div>
+            <div class="env-top"></div>
+            
+            <div class="wax-seal" onclick="openEnvelope()">
+                <h3>MB</h3>
+                <span>بیکەرەوە</span>
+            </div>
+        </div>
+    </div>
+
+    <!-- مۆسیقا -->
+    <audio id="bgMusic" loop>
+        <source src="https://www.soundhelix.com/examples/mp3/SoundHelix-Song-1.mp3" type="audio/mpeg">
+    </audio>
+    <div class="music-player" id="musicBtn" onclick="toggleMusic()">
+        <i class="fa-solid fa-music"></i>
+    </div>
+
+    <div class="app-container">
+        <div id="main-content">
+            
+            <div class="hero-section">
+                <div class="hero-overlay">
+                    <div class="bismillah-hero platinum-text">بِسْمِ اللَّهِ الرَّحْمَنِ الرَّحِيمِ</div>
+                    <div class="couple-names-hero platinum-text">مەهەند <span>و</span> بانوو</div>
+                </div>
+            </div>
+
+            <div class="content-container">
+                
+                <div class="reveal">
+                    <p class="intro-text">
+                        بە ناوی خوای گەورە و میهرەبان<br>
+                        لە ساتێکی پڕ لە درەوشانەوە و دڵسۆزیدا، شەرەفمەندین کە <strong>ئێوەی ئازیز</strong> هاوبەشی کاتەکانمان بن لە ئاهەنگی هاوسەرگیریمان.<br>
+                        ئامادەبوونتان وەکو ئەڵماسێک شەوەکەمان ڕووناک دەکاتەوە.
+                    </p>
+                </div>
+
+                <div class="reveal">
+                    <div class="arch-image">
+                        <img src="https://images.unsplash.com/photo-1544928147-79a2dbc1f389?q=80&w=800&auto=format&fit=crop" alt="Diamond Couple">
+                    </div>
+                </div>
+
+                <div class="reveal">
+                    <h2 class="section-title platinum-text">کاتی ئاهەنگ</h2>
+                    <div class="glass-panel">
+                        <div class="cal-header">تشرینی یەکەم ٢٠٢٦</div>
+                        <div class="cal-grid">
+                            <div class="cal-day-name">S</div><div class="cal-day-name">M</div><div class="cal-day-name">T</div><div class="cal-day-name">W</div><div class="cal-day-name">T</div><div class="cal-day-name">F</div><div class="cal-day-name">S</div>
+                            
+                            <div></div><div></div><div></div><div class="cal-num">1</div><div class="cal-num">2</div><div class="cal-num">3</div><div class="cal-num">4</div>
+                            <div class="cal-num">5</div><div class="cal-num">6</div><div class="cal-num">7</div><div class="cal-num">8</div><div class="cal-num">9</div><div class="cal-num">10</div><div class="cal-num">11</div>
+                            <div class="cal-num">12</div><div class="cal-num">13</div><div class="cal-num">14</div><div class="cal-num cal-active">15</div><div class="cal-num">16</div><div class="cal-num">17</div><div class="cal-num">18</div>
+                            <div class="cal-num">19</div><div class="cal-num">20</div><div class="cal-num">21</div><div class="cal-num">22</div><div class="cal-num">23</div><div class="cal-num">24</div><div class="cal-num">25</div>
+                        </div>
+                        
+                        <div class="countdown-wrapper" id="countdown">
+                            <div class="time-box"><span class="time-val platinum-text" id="days">00</span><span class="time-label">ڕۆژ</span></div>
+                            <div class="time-box"><span class="time-val platinum-text" id="hours">00</span><span class="time-label">کاتژمێر</span></div>
+                            <div class="time-box"><span class="time-val platinum-text" id="minutes">00</span><span class="time-label">خولەک</span></div>
+                            <div class="time-box"><span class="time-val platinum-text" id="seconds">00</span><span class="time-label">چرکە</span></div>
+                        </div>
+                    </div>
+                </div>
+
+                <div class="reveal">
+                    <h2 class="section-title platinum-text">بەرنامەی شەوەکە</h2>
+                    <div class="glass-panel" style="padding: 40px 20px;">
+                        <div class="timeline">
+                            <div class="timeline-item">
+                                <div class="tl-time">7:00 PM</div>
+                                <div class="tl-title">پێشوازی درەوشاوە</div>
+                                <div class="tl-desc">بەخێرهاتنی میوانەکانمان بە مۆسیقایەکی ئارام و خواردنەوەی تایبەت.</div>
+                            </div>
+                            <div class="timeline-item">
+                                <div class="tl-time">8:00 PM</div>
+                                <div class="tl-title">دەرکەوتنی بووک و زاوا</div>
+                                <div class="tl-desc">هاتنی شاهانە و دەستپێکی سەمای یەکەم لەژێر ڕووناکی پلاتینیۆم.</div>
+                            </div>
+                            <div class="timeline-item">
+                                <div class="tl-time">9:30 PM</div>
+                                <div class="tl-title">ژەمی ئێوارە</div>
+                                <div class="tl-desc">پێشکەشکردنی بوفەی کراوەی شاهانە بۆ ئازیزانمان.</div>
+                            </div>
+                        </div>
+                    </div>
+                </div>
+
+                <div class="reveal">
+                    <h2 class="section-title platinum-text">شوێنی ئاهەنگ</h2>
+                    <p style="font-family: 'Tajawal', sans-serif; font-size: 16px; color: var(--platinum-light); font-weight: 700; margin-bottom: 20px;">
+                        هۆڵی کۆشکی ئەڵماسی - ڕێگای سەرەکی
+                    </p>
+                    <div class="map-wrapper">
+                        <iframe src="https://www.google.com/maps/embed?pb=!1m18!1m12!1m3!1d3246.368819075355!2d45.4371404!3d35.5606117!2m3!1f0!2f0!3f0!3m2!1i1024!2i768!4f13.1!3m3!1m2!1s0x0%3A0x0!2zMzXCsDMzJzM4LjIiTiA0NcKwMjYnMTMuNyJF!5e0!3m2!1sen!2siq!4v1620000000000!5m2!1sen!2siq" width="100%" height="100%" style="border:0;" allowfullscreen="" loading="lazy"></iframe>
+                    </div>
+                    <a href="#" class="btn-platinum"><i class="fa-solid fa-map-location-dot"></i> کردنەوە لە نەخشە</a>
+                </div>
+
+                <div class="reveal">
+                    <div class="glass-panel" style="margin-top: 50px;">
+                        <h2 class="section-title platinum-text" style="font-size: 26px; margin-bottom: 30px;">تێبینی گرنگ</h2>
+                        <ul class="notes-list">
+                            <li><i class="fa-solid fa-gem"></i> ئامادەبوونتان لە کاتی خۆیدا ڕێزگرتنە لە کاتەکانمان و هێمای گەورەییتانە.</li>
+                            <li><i class="fa-solid fa-gem"></i> لەبەر تایبەتمەندی ئاهەنگەکەمان، وێنەگرتن بە مۆبایل بە توندی قەدەغەیە.</li>
+                            <li><i class="fa-solid fa-gem"></i> هیوای کاتێکی پڕ لە خۆشی و بیرەوەرییەکی درەوشاوە بۆ هەمووان دەخوازین.</li>
+                        </ul>
+                        
+                        <div style="margin-top: 40px; border-top: 1px solid var(--glass-border); padding-top: 30px;">
+                            <p style="font-size: 13px; color: var(--text-muted); margin-bottom: 20px;">بۆ پشتڕاستکردنەوەی ئامادەبوونتان:</p>
+                            <a href="tel:07500000000" class="btn-platinum" style="background: transparent; color: var(--platinum-light) !important; border: 1px solid var(--platinum-main);">
+                                <i class="fa-solid fa-phone"></i> پەیوەندی کردن
+                            </a>
+                        </div>
+                    </div>
+                </div>
+
+                <div class="reveal" style="margin-top: 40px; opacity: 0.6;">
+                    <i class="fa-regular fa-gem" style="color: var(--platinum-main); font-size: 24px; margin-bottom: 10px; filter: drop-shadow(0 0 5px rgba(255,255,255,0.5));"></i>
+                    <p style="font-size: 11px; color: var(--platinum-dark); letter-spacing: 3px; text-transform: uppercase;">Platinum & Sapphire Collection</p>
+                </div>
+
+            </div>
+        </div>
+    </div>
+
+    <script>
+        function createParticles() {
+            const container = document.getElementById('particles-container');
+            const particleCount = 40;
+            
+            for (let i = 0; i < particleCount; i++) {
+                let particle = document.createElement('div');
+                particle.className = 'particle';
+                
+                let size = Math.random() * 3 + 1;
+                let left = Math.random() * 100;
+                let delay = Math.random() * 6;
+                let duration = Math.random() * 4 + 3;
+                
+                particle.style.width = size + 'px';
+                particle.style.height = size + 'px';
+                particle.style.left = left + '%';
+                particle.style.animationDelay = delay + 's';
+                particle.style.animationDuration = duration + 's';
+                
+                container.appendChild(particle);
+            }
+        }
+        createParticles();
+
+        function openEnvelope() {
+            const envelopeBox = document.getElementById('envelope-box');
+            const envelopeWrapper = document.getElementById('envelope-wrapper');
+            const mainContent = document.getElementById('main-content');
+            const musicBtn = document.getElementById('musicBtn');
+            const audio = document.getElementById('bgMusic');
+            
+            envelopeBox.classList.add('open');
+            
+            if(audio) {
+                audio.volume = 0.5;
+                audio.play().then(() => { musicBtn.classList.add('playing'); }).catch(e => console.log("ئۆتۆپلەی ڕاگیراوە"));
+            }
+
+            setTimeout(() => {
+                envelopeBox.classList.add('zoom-in'); 
+                
+                setTimeout(() => {
+                    envelopeWrapper.style.display = 'none'; 
+                    document.body.classList.remove('locked'); 
+                    mainContent.classList.add('show'); 
+                    musicBtn.classList.add('show'); 
+                    
+                    triggerReveals();
+                }, 1000);
+
+            }, 2000);
+        }
+
+        function triggerReveals() {
+            const reveals = document.querySelectorAll('.reveal');
+            const windowHeight = window.innerHeight;
+            
+            reveals.forEach(reveal => {
+                const elementTop = reveal.getBoundingClientRect().top;
+                const elementVisible = 120;
+                
+                if (elementTop < windowHeight - elementVisible) {
+                    reveal.classList.add('active');
+                }
+            });
+        }
+        window.addEventListener('scroll', triggerReveals);
+
+        function toggleMusic() {
+            const btn = document.getElementById('musicBtn');
+            const audio = document.getElementById('bgMusic');
+            
+            if (btn.classList.contains('playing')) {
+                btn.classList.remove('playing');
+                audio.pause();
+            } else {
+                btn.classList.add('playing');
+                audio.play();
+            }
+        }
+
+        const countDownDate = new Date("Oct 15, 2026 19:00:00").getTime();
+        setInterval(function() {
+            const now = new Date().getTime();
+            const distance = countDownDate - now;
+
+            if (distance < 0) return;
+
+            const days = Math.floor(distance / (1000 * 60 * 60 * 24));
+            const hours = Math.floor((distance % (1000 * 60 * 60 * 24)) / (1000 * 60 * 60));
+            const minutes = Math.floor((distance % (1000 * 60 * 60)) / (1000 * 60));
+            const seconds = Math.floor((distance % (1000 * 60)) / 1000);
+
+            document.getElementById("days").innerHTML = days < 10 ? "0" + days : days;
+            document.getElementById("hours").innerHTML = hours < 10 ? "0" + hours : hours;
+            document.getElementById("minutes").innerHTML = minutes < 10 ? "0" + minutes : minutes;
+            document.getElementById("seconds").innerHTML = seconds < 10 ? "0" + seconds : seconds;
+        }, 1000);
+
+    </script>
+</body>
+</html>
