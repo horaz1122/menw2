@@ -1,29 +1,29 @@
 <!DOCTYPE html>
-<html lang="ckb" dir="rtl">
+<html lang="ku" dir="rtl">
 <head>
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0, maximum-scale=1.0, user-scalable=no">
-    <title>بانگهێشتنامەی خەنەبەندان - قاوەیی و زێڕین</title>
+    <title>بانگهێشتنامەی خەنەبەندان - سووری مەخمەلی و ڕۆزگۆڵد</title>
     <!-- ئایکۆنەکان -->
     <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.4.0/css/all.min.css">
+    
     <style>
         @import url('https://fonts.googleapis.com/css2?family=Aref+Ruqaa:wght@400;700&family=Tajawal:wght@400;700;900&display=swap');
 
         :root {
-            /* ڕەنگە قاوەییە تاریکەکان (Chocolate Brown) */
-            --bg-darkest: #1a0e08;
-            --bg-dark: #2a1610;
-            --bg-main: #4a2818;
-            --bg-light: #6b3e26;
+            /* ڕەنگە سوورە مەخمەلییە تاریکەکان (Velvet Red) */
+            --primary-darkest: #1a050b;
+            --primary-dark: #330a16;
+            --primary-light: #591025;
             
-            /* ڕەنگەکانی زێڕینی مس (Bronze Gold) */
-            --accent-glow: #f5d6b3;
-            --accent-main: #d49a5b;
-            --accent-dark: #a66e33; 
+            /* ڕەنگە درەوشاوەکانی ڕۆزگۆڵد (Rose Gold) */
+            --accent-main: #e8a0b3;
+            --accent-light: #fce1e8;
+            --accent-dark: #b86279;
             
-            --text-light: #fdf5eb;
-            --glass-bg: rgba(74, 40, 24, 0.45);
-            --glass-border: rgba(212, 154, 91, 0.3);
+            --text-light: #fdf5f7;
+            --glass-bg: rgba(51, 10, 22, 0.5);
+            --glass-border: rgba(232, 160, 179, 0.3);
         }
 
         * {
@@ -36,7 +36,7 @@
         body, html {
             width: 100%;
             height: 100%;
-            background-color: #0d0603;
+            background-color: #0d0205; /* باکگراوندی دەرەوەی مۆبایلەکە */
             font-family: 'Tajawal', Tahoma, sans-serif;
             color: var(--text-light);
             display: flex;
@@ -50,65 +50,153 @@
             width: 100%;
             max-width: 420px;
             height: 100dvh;
-            background: radial-gradient(circle at 50% 100%, var(--bg-main) 0%, var(--bg-dark) 50%, var(--bg-darkest) 100%);
+            background: linear-gradient(135deg, var(--primary-darkest) 0%, var(--primary-dark) 50%, var(--primary-light) 100%);
             position: relative;
             overflow: hidden;
-            box-shadow: 0 0 50px rgba(212, 154, 91, 0.15), inset 0 0 20px rgba(107, 62, 38, 0.5);
+            box-shadow: 0 0 50px rgba(232, 160, 179, 0.15);
             @media (min-height: 850px) {
                 height: 85vh;
                 border-radius: 45px;
-                border: 8px solid #111;
-                box-shadow: 0 20px 60px rgba(0,0,0,0.9), 0 0 0 12px #222;
+                border: 8px solid #1a050b;
+                box-shadow: 0 20px 60px rgba(0,0,0,0.9), 0 0 0 10px #2a0812;
             }
         }
 
-        /* باکگراوندی ماندالای سوڕاوە */
-        .magic-mandala {
+        /* چوارچێوەی ڕۆزگۆڵدی ناوەوە */
+        .inner-gold-frame {
             position: absolute;
-            top: 50%; left: 50%;
-            width: 160%; height: 160%;
-            /* گۆڕینی ڕەنگەکان بۆ قاوەیی و زێڕین */
-            background-image: url('data:image/svg+xml;utf8,<svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 100 100"><circle cx="50" cy="50" r="45" fill="none" stroke="%236b3e26" stroke-width="0.5" stroke-dasharray="1 3"/><path d="M50 5 L55 45 L95 50 L55 55 L50 95 L45 55 L5 50 L45 45 Z" fill="none" stroke="%23d49a5b" stroke-width="0.2" opacity="0.4"/><circle cx="50" cy="50" r="25" fill="none" stroke="%23d49a5b" stroke-width="0.3" opacity="0.5" stroke-dasharray="4 2"/></svg>');
-            background-size: contain;
-            background-repeat: no-repeat;
-            background-position: center;
-            transform: translate(-50%, -50%);
-            animation: spinMandala 50s linear infinite;
+            top: 15px; left: 15px; right: 15px; bottom: 90px;
+            border: 1px solid rgba(232, 160, 179, 0.2);
+            border-radius: 30px;
             pointer-events: none;
+            z-index: 2;
+        }
+        .inner-gold-frame::before, .inner-gold-frame::after {
+            content: '✿';
+            position: absolute;
+            color: var(--accent-main);
+            font-size: 18px;
+            left: 50%;
+            transform: translateX(-50%);
+            text-shadow: 0 0 10px var(--accent-main);
+        }
+        .inner-gold-frame::before { top: -11px; }
+        .inner-gold-frame::after { bottom: -11px; }
+
+        /* باکگراوندی داینامیکی نەخشی ئیسلامی */
+        .bg-pattern {
+            position: absolute;
+            top: 0; left: 0; width: 100%; height: 100%;
+            background-image: url('https://www.transparenttextures.com/patterns/arabesque.png');
+            opacity: 0.15;
+            mix-blend-mode: color-dodge;
             z-index: 1;
-            opacity: 0.6;
-            mix-blend-mode: screen;
+            animation: bgDrift 60s linear infinite;
         }
 
-        @keyframes spinMandala {
-            0% { transform: translate(-50%, -50%) rotate(0deg); }
-            100% { transform: translate(-50%, -50%) rotate(360deg); }
+        @keyframes bgDrift {
+            0% { background-position: 0 0; }
+            100% { background-position: 400px 400px; }
         }
 
-        #fairy-dust {
+        /* گەڵا ڕۆزگۆڵدە هەڵفڕیوەکان */
+        #particles {
             position: absolute;
             top: 0; left: 0; width: 100%; height: 100%;
             z-index: 2;
             pointer-events: none;
         }
-        .dust {
+        .particle {
             position: absolute;
-            background: #fff;
-            border-radius: 50%;
-            box-shadow: 0 0 8px var(--accent-glow), 0 0 15px var(--accent-main);
+            background: linear-gradient(135deg, var(--accent-light), var(--accent-dark));
+            clip-path: polygon(50% 0%, 100% 50%, 50% 100%, 0% 50%);
             opacity: 0;
-            animation: sparkle ease-in-out infinite;
-        }
-        @keyframes sparkle {
-            0% { opacity: 0; transform: scale(0) translateY(0); }
-            50% { opacity: 1; transform: scale(1) translateY(-20px); }
-            100% { opacity: 0; transform: scale(0) translateY(-40px); }
+            animation: floatUp infinite cubic-bezier(0.4, 0, 0.2, 1);
+            box-shadow: 0 0 10px var(--accent-main);
         }
 
-        /* ================= سیستەمی سلایدەکان (Circular Reveal) ================= */
+        @keyframes floatUp {
+            0% { transform: translateY(100vh) rotate(0deg) scale(0); opacity: 0; }
+            20% { opacity: 0.7; }
+            80% { opacity: 0.7; }
+            100% { transform: translateY(-10vh) rotate(360deg) scale(1.2); opacity: 0; }
+        }
+
+        /* ================= باڕی خوارەوە (App Tab Bar) ================= */
+        .tab-bar {
+            position: absolute;
+            bottom: 20px; left: 20px; right: 20px;
+            height: 65px;
+            background: rgba(26, 5, 11, 0.7);
+            backdrop-filter: blur(20px);
+            -webkit-backdrop-filter: blur(20px);
+            border: 1px solid var(--glass-border);
+            border-radius: 35px;
+            display: flex;
+            justify-content: space-around;
+            align-items: center;
+            z-index: 100;
+            box-shadow: 0 10px 30px rgba(0,0,0,0.6), inset 0 0 15px rgba(232, 160, 179, 0.1);
+        }
+
+        .tab-item {
+            display: flex;
+            flex-direction: column;
+            align-items: center;
+            justify-content: center;
+            width: 60px;
+            height: 100%;
+            color: rgba(255, 255, 255, 0.4);
+            cursor: pointer;
+            transition: all 0.4s cubic-bezier(0.4, 0, 0.2, 1);
+            position: relative;
+        }
+
+        .tab-item i {
+            font-size: 20px;
+            margin-bottom: 4px;
+            transition: all 0.4s;
+        }
+
+        .tab-item span {
+            font-size: 10px;
+            font-weight: 700;
+            opacity: 0;
+            transform: translateY(10px);
+            transition: all 0.4s;
+        }
+
+        .tab-item.active {
+            color: var(--accent-main);
+            transform: translateY(-5px);
+        }
+
+        .tab-item.active i {
+            transform: translateY(-2px);
+            filter: drop-shadow(0 0 8px var(--accent-main));
+        }
+
+        .tab-item.active span {
+            opacity: 1;
+            transform: translateY(0);
+        }
+
+        .tab-indicator {
+            position: absolute;
+            bottom: -5px;
+            width: 5px; height: 5px;
+            background: var(--accent-main);
+            border-radius: 50%;
+            box-shadow: 0 0 10px var(--accent-main);
+            opacity: 0;
+            transition: all 0.4s;
+        }
+        .tab-item.active .tab-indicator { opacity: 1; }
+
+        /* ================= سیستەمی سلایدەکان ================= */
         .slides-wrapper {
             position: absolute;
-            top: 0; left: 0; width: 100%; height: 100%;
+            top: 0; left: 0; width: 100%; bottom: 90px;
             z-index: 10;
         }
 
@@ -116,264 +204,218 @@
             position: absolute;
             top: 0; left: 0;
             width: 100%; height: 100%;
-            padding: 40px 25px 110px 25px;
+            padding: 40px 25px;
             display: flex;
             flex-direction: column;
             align-items: center;
             justify-content: center;
-            clip-path: circle(0% at 50% 90%);
-            background: radial-gradient(circle at 50% 50%, rgba(42, 22, 16, 0.6) 0%, transparent 100%);
             opacity: 0;
             visibility: hidden;
-            transition: clip-path 0.9s cubic-bezier(0.7, 0, 0.2, 1), opacity 0.5s ease;
+            transform: scale(0.95);
+            filter: blur(10px);
+            transition: all 0.6s cubic-bezier(0.4, 0, 0.2, 1);
         }
 
         .slide.active {
             opacity: 1;
             visibility: visible;
-            clip-path: circle(150% at 50% 90%);
-            z-index: 11;
+            transform: scale(1);
+            filter: blur(0);
         }
 
-        /* ئەنیمەیشنی ناوەوەی سلایدەکان */
         .slide .stagger {
             opacity: 0;
-            transform: translateY(30px) scale(0.95);
-            transition: all 0.7s cubic-bezier(0.25, 1, 0.5, 1);
+            transform: translateY(30px);
+            transition: all 0.6s cubic-bezier(0.25, 1, 0.5, 1);
         }
         .slide.active .stagger {
             opacity: 1;
-            transform: translateY(0) scale(1);
+            transform: translateY(0);
         }
         
-        .slide.active .delay-1 { transition-delay: 0.3s; }
-        .slide.active .delay-2 { transition-delay: 0.45s; }
-        .slide.active .delay-3 { transition-delay: 0.6s; }
-        .slide.active .delay-4 { transition-delay: 0.75s; }
+        .slide.active .delay-1 { transition-delay: 0.1s; }
+        .slide.active .delay-2 { transition-delay: 0.2s; }
+        .slide.active .delay-3 { transition-delay: 0.3s; }
+        .slide.active .delay-4 { transition-delay: 0.4s; }
 
-        /* ================= بۆکسی شوشەیی (Glass Panel) ================= */
-        .glass-neon {
+        .glass-panel {
             background: var(--glass-bg);
-            backdrop-filter: blur(20px);
-            -webkit-backdrop-filter: blur(20px);
-            border-radius: 28px;
-            padding: 30px 20px;
+            backdrop-filter: blur(15px);
+            -webkit-backdrop-filter: blur(15px);
+            border: 1px solid var(--glass-border);
+            border-radius: 24px;
+            padding: 25px 20px;
             width: 100%;
+            box-shadow: 0 15px 35px rgba(0,0,0,0.5), inset 0 0 15px rgba(232, 160, 179, 0.05);
             position: relative;
-            margin-bottom: 25px;
-            box-shadow: 0 15px 35px rgba(0,0,0,0.5), inset 0 0 20px rgba(212, 154, 91, 0.05);
-        }
-        
-        /* هێڵی درەوشاوەی دەرەوەی بۆکسەکە */
-        .glass-neon::before {
-            content: ''; position: absolute; top: -1px; left: -1px; right: -1px; bottom: -1px;
-            border-radius: 29px; z-index: -1;
-            background: linear-gradient(135deg, var(--accent-glow), transparent 40%, transparent 60%, var(--bg-light));
-            opacity: 0.7;
+            overflow: hidden;
+            margin-bottom: 20px;
         }
 
         /* ================= سلایدی ١: دەستپێک ================= */
         .welcome-text {
             text-align: center;
             font-size: 16px;
-            line-height: 2.3;
-            color: #fff;
-            text-shadow: 0 2px 10px rgba(0,0,0,0.8);
+            line-height: 2.4;
+            color: var(--accent-light);
+            text-shadow: 0 2px 5px rgba(0,0,0,0.8);
             font-weight: 700;
         }
 
         .icon-stage {
             position: relative;
-            width: 140px; height: 140px;
-            margin: 35px 0;
+            width: 130px; height: 130px;
+            margin: 25px 0;
             display: flex; justify-content: center; align-items: center;
         }
         
         .icon-stage::before {
             content: ''; position: absolute; width: 100%; height: 100%;
-            border-radius: 50%; border: 1px solid var(--accent-main);
-            box-shadow: 0 0 20px var(--accent-glow), inset 0 0 15px var(--bg-light);
-            animation: pulseGlow 2s infinite alternate;
+            border-radius: 50%;
+            border: 2px dashed var(--accent-main);
+            animation: spinSlow 12s linear infinite;
         }
         .icon-stage::after {
-            content: ''; position: absolute; width: 120%; height: 120%;
-            border-radius: 50%; border: 2px dashed rgba(212, 154, 91, 0.4);
-            animation: spinSlow 20s linear infinite;
+            content: ''; position: absolute; width: 85%; height: 85%;
+            border-radius: 50%;
+            background: radial-gradient(circle, rgba(232, 160, 179, 0.2) 0%, transparent 70%);
+            animation: pulseGlow 2s infinite alternate;
         }
 
         .dress-icon {
-            font-size: 70px;
-            color: var(--accent-glow);
+            font-size: 65px;
+            color: var(--accent-main);
             z-index: 2;
-            filter: drop-shadow(0 0 15px rgba(245, 214, 179, 0.8));
+            filter: drop-shadow(0 0 15px rgba(232, 160, 179, 0.5));
         }
 
         .bride-name {
             font-family: 'Aref Ruqaa', serif;
-            font-size: 48px;
-            background: linear-gradient(to right, #f5d6b3, #fff, #f5d6b3);
+            font-size: 45px;
+            margin-bottom: 20px;
+            background: linear-gradient(to right, #b86279, #fce1e8, #e8a0b3, #fce1e8, #b86279);
             background-size: 200% auto;
-            color: #000;
+            color: transparent;
             background-clip: text;
             -webkit-background-clip: text;
             -webkit-text-fill-color: transparent;
             animation: shine 3s linear infinite;
-            filter: drop-shadow(0 5px 15px rgba(0,0,0,0.6));
-            margin-bottom: 10px;
+            filter: drop-shadow(0 5px 10px rgba(0,0,0,0.6));
         }
 
         @keyframes shine { to { background-position: 200% center; } }
         @keyframes spinSlow { 100% { transform: rotate(360deg); } }
-        @keyframes pulseGlow { 0% { box-shadow: 0 0 10px var(--accent-main), inset 0 0 10px var(--bg-main); transform: scale(0.95);} 100% { box-shadow: 0 0 25px var(--accent-glow), inset 0 0 20px var(--bg-light); transform: scale(1.05);} }
+        @keyframes pulseGlow { 0% { transform: scale(0.9); opacity: 0.6; } 100% { transform: scale(1.1); opacity: 1; } }
 
         /* ================= سلایدی ٢: کات ================= */
         .section-header {
             font-family: 'Aref Ruqaa', serif;
-            font-size: 32px;
-            color: var(--accent-glow);
-            margin-bottom: 25px;
+            font-size: 30px;
+            color: var(--accent-main);
+            margin-bottom: 20px;
             text-align: center;
-            text-shadow: 0 0 15px rgba(212, 154, 91, 0.5);
+            text-shadow: 0 2px 10px rgba(0,0,0,0.8);
         }
 
-        .cal-grid { display: grid; grid-template-columns: repeat(7, 1fr); gap: 6px; direction: ltr; text-align: center; }
-        .cal-day { font-size: 13px; color: var(--accent-main); font-weight: 900; margin-bottom: 8px; }
-        .cal-num { padding: 8px 0; color: #f2e9dc; font-size: 15px; position: relative; font-weight: 700; transition: 0.3s;}
+        .cal-grid {
+            display: grid; grid-template-columns: repeat(7, 1fr); gap: 6px; direction: ltr; text-align: center;
+        }
+        .cal-day { font-size: 12px; color: var(--accent-main); font-weight: 900; margin-bottom: 5px; }
+        .cal-num { padding: 6px 0; color: #ddd; font-size: 14px; position: relative; font-weight: 700;}
         
         .cal-num.heart {
             background: var(--accent-main);
-            color: var(--bg-darkest);
-            border-radius: 12px;
-            box-shadow: 0 0 20px var(--accent-glow);
-            transform: scale(1.2);
+            color: var(--primary-darkest);
+            border-radius: 8px;
+            box-shadow: 0 0 15px rgba(232, 160, 179, 0.5);
+            transform: scale(1.15);
             z-index: 2;
         }
         .cal-num.heart::after {
             content: '\f004'; font-family: 'Font Awesome 6 Free'; font-weight: 900;
-            position: absolute; top: -10px; right: -10px;
-            font-size: 15px; color: #ff4d4d;
-            filter: drop-shadow(0 0 8px rgba(255,77,77,0.8));
-            animation: pulseGlow 1s infinite alternate;
+            position: absolute; top: -8px; right: -8px;
+            font-size: 14px; color: #ff3344;
+            filter: drop-shadow(0 0 5px rgba(0,0,0,0.8));
+            animation: pulseGlow 1.5s infinite alternate;
         }
 
-        /* ژمێریاری (Glowing Orb Timer) */
-        .timer-display { display: flex; justify-content: center; gap: 12px; direction: ltr; margin-top: 10px; }
-        .time-orb {
+        .timer-display {
+            display: flex; justify-content: center; gap: 12px; direction: ltr; margin-top: 5px;
+        }
+        .time-ring {
             display: flex; flex-direction: column; align-items: center; justify-content: center;
-            width: 65px; height: 65px;
+            width: 60px; height: 60px;
             border-radius: 50%;
-            background: radial-gradient(circle, rgba(74, 40, 24, 0.8) 0%, rgba(42, 22, 16, 1) 100%);
-            border: 1px solid var(--accent-dark);
-            box-shadow: 0 0 15px rgba(212, 154, 91, 0.3), inset 0 0 10px rgba(245, 214, 179, 0.2);
-            position: relative;
+            background: rgba(0,0,0,0.5);
+            border: 1px solid var(--glass-border);
+            box-shadow: inset 0 0 10px rgba(0,0,0,0.8);
         }
-        .time-orb::before {
-            content:''; position: absolute; top: 2px; left: 2px; right: 2px; bottom: 2px;
-            border-radius: 50%; border: 1px dashed rgba(255,255,255,0.2); animation: spinSlow 10s linear infinite reverse;
+        .time-val {
+            font-family: 'Courier New', monospace; font-size: 20px; font-weight: 900; color: var(--accent-light);
         }
-        .time-val { font-family: 'Courier New', monospace; font-size: 22px; font-weight: 900; color: #fff; text-shadow: 0 0 8px var(--accent-glow);}
-        .time-lbl { font-size: 10px; color: var(--accent-main); font-weight: 900; margin-top: 2px;}
+        .time-lbl { font-size: 8px; color: #bbb; font-weight: 700; margin-top: 2px;}
 
         /* ================= سلایدی ٣: شوێن ================= */
         .arch-mask {
-            position: relative; width: 100%; height: 170px;
-            border-radius: 100px 100px 20px 20px;
+            position: relative; width: 100%; height: 160px;
+            border-radius: 80px 80px 15px 15px;
             overflow: hidden;
             border: 2px solid var(--accent-main);
-            margin-bottom: 25px;
-            box-shadow: 0 15px 30px rgba(0,0,0,0.6), 0 0 20px rgba(212, 154, 91, 0.2);
+            margin-bottom: 20px;
+            box-shadow: 0 15px 30px rgba(0,0,0,0.8);
         }
-        .arch-mask img { width: 100%; height: 100%; object-fit: cover; opacity: 0.9; transition: transform 5s ease;}
-        .arch-mask:hover img { transform: scale(1.15); }
+        .arch-mask img { width: 100%; height: 100%; object-fit: cover; opacity: 0.85; transition: transform 4s ease;}
+        .arch-mask:hover img { transform: scale(1.1); }
         .arch-overlay {
             position: absolute; top: 0; left: 0; width: 100%; height: 100%;
-            background: linear-gradient(to top, rgba(26, 14, 8, 1), transparent);
+            background: linear-gradient(to top, rgba(26, 5, 11, 0.95), transparent);
             display: flex; flex-direction: column; justify-content: flex-end; align-items: center; padding-bottom: 15px;
         }
-        .venue-name { font-family: 'Aref Ruqaa', serif; font-size: 30px; color: var(--accent-glow); text-shadow: 0 5px 15px rgba(0,0,0,1);}
+        .venue-name { font-family: 'Aref Ruqaa', serif; font-size: 26px; color: var(--accent-light); text-shadow: 0 2px 10px rgba(0,0,0,0.9);}
 
-        /* خشتەی کاتەکان */
         .timeline-vertical {
-            width: 100%; position: relative; padding-right: 25px; text-align: right;
-            border-right: 2px solid rgba(212, 154, 91, 0.3);
+            width: 100%; position: relative; padding-right: 20px; text-align: right;
+            border-right: 2px solid rgba(232, 160, 179, 0.2);
         }
-        .time-point-v { position: relative; margin-bottom: 18px; }
+        .time-point-v {
+            position: relative; margin-bottom: 15px;
+        }
         .time-point-v:last-child { margin-bottom: 0; }
         .time-point-v::before {
-            content: '✦'; position: absolute; right: -36px; top: 0;
-            width: 20px; height: 20px; color: var(--accent-glow); font-size: 16px;
-            display: flex; justify-content: center; align-items: center;
-            background: var(--bg-darkest); border-radius: 50%;
-            box-shadow: 0 0 10px var(--accent-main);
+            content: ''; position: absolute; right: -25px; top: 5px;
+            width: 8px; height: 8px; background: var(--accent-main);
+            border-radius: 50%; box-shadow: 0 0 10px var(--accent-main);
         }
-        .t-val-v { font-size: 13px; font-weight: 900; color: #fff; margin-bottom: 3px; font-family: monospace; direction: ltr; display: inline-block; background: var(--bg-light); padding: 2px 10px; border-radius: 10px;}
-        .t-event-v { font-size: 14px; color: #f2e9dc; font-weight: bold; }
+        .t-val-v { font-size: 12px; font-weight: bold; color: var(--accent-main); margin-bottom: 2px; font-family: monospace; direction: ltr; display: inline-block;}
+        .t-event-v { font-size: 13px; color: var(--text-light); font-weight: bold; }
 
-        .btn-magic {
-            width: 100%; background: linear-gradient(135deg, var(--accent-main), var(--accent-glow));
-            color: var(--bg-darkest); border: none; padding: 15px; border-radius: 25px;
-            font-size: 16px; font-weight: 900; font-family: 'Tajawal', sans-serif; cursor: pointer;
-            box-shadow: 0 10px 25px rgba(212, 154, 91, 0.3);
-            display: flex; justify-content: center; align-items: center; gap: 10px; transition: 0.3s;
-        }
-        .btn-magic:active { transform: scale(0.96); box-shadow: 0 5px 10px rgba(212, 154, 91, 0.3); }
-
-        /* ================= باڕی هەڵواسراو (Floating Dock) ================= */
-        .dock-bar {
-            position: absolute;
-            bottom: 25px; left: 50%; transform: translateX(-50%);
-            width: 85%; height: 70px;
-            background: rgba(42, 22, 16, 0.75);
-            backdrop-filter: blur(25px);
-            -webkit-backdrop-filter: blur(25px);
-            border: 1px solid rgba(212, 154, 91, 0.3);
-            border-radius: 40px;
-            display: flex;
-            justify-content: space-evenly;
-            align-items: center;
-            z-index: 100;
-            box-shadow: 0 20px 40px rgba(0,0,0,0.6), inset 0 0 15px rgba(107, 62, 38, 0.5);
-            padding: 0 10px;
-        }
-
-        .dock-item {
-            display: flex; flex-direction: column; align-items: center; justify-content: center;
-            width: 65px; height: 55px;
-            color: rgba(255,255,255,0.4);
-            cursor: pointer;
-            transition: all 0.4s cubic-bezier(0.4, 0, 0.2, 1);
-            position: relative;
+        .btn-map {
+            width: 100%;
+            background: linear-gradient(135deg, var(--accent-main), var(--accent-dark));
+            color: var(--primary-darkest);
+            border: none;
+            padding: 14px;
             border-radius: 20px;
+            font-size: 15px;
+            font-weight: 900;
+            font-family: 'Tajawal', sans-serif;
+            cursor: pointer;
+            box-shadow: 0 10px 20px rgba(232, 160, 179, 0.3);
+            display: flex; justify-content: center; align-items: center; gap: 10px;
+            transition: transform 0.2s;
         }
+        .btn-map:active { transform: scale(0.97); }
 
-        .dock-item i { font-size: 22px; transition: all 0.4s; z-index: 2;}
-        .dock-item span { font-size: 9px; font-weight: 900; opacity: 0; transform: translateY(10px) scale(0.8); transition: all 0.4s; position: absolute; bottom: 5px; z-index: 2;}
-
-        /* ئەکتیڤ بوونی ئایکۆن بە ئیفێکتی درەوشاوە */
-        .dock-item.active { color: var(--bg-darkest); transform: translateY(-15px); }
-        .dock-item.active i { transform: translateY(-8px); }
-        .dock-item.active span { opacity: 1; transform: translateY(0) scale(1); }
-
-        /* باکگراوندی زێڕینی ئایکۆنی ئەکتیڤ */
-        .dock-item::before {
-            content: ''; position: absolute; width: 55px; height: 55px;
-            background: linear-gradient(135deg, var(--accent-glow), var(--accent-main));
-            border-radius: 50%; opacity: 0; transition: all 0.4s;
-            box-shadow: 0 10px 20px rgba(212, 154, 91, 0.4); z-index: 1;
-        }
-        .dock-item.active::before { opacity: 1; transform: scale(1.1); }
-
-        /* مۆسیقا دوگمەی سەرەوە */
         .music-btn {
-            position: absolute; top: 25px; left: 25px;
-            width: 40px; height: 40px;
-            border-radius: 50%; background: rgba(0,0,0,0.3);
-            border: 1px solid var(--accent-main); box-shadow: 0 0 15px rgba(212, 154, 91, 0.2);
+            position: absolute; top: 25px; right: 25px;
+            width: 35px; height: 35px;
+            border-radius: 50%; background: var(--glass-bg);
+            border: 1px solid var(--accent-main);
             display: flex; justify-content: center; align-items: center;
-            color: var(--accent-glow); font-size: 16px; cursor: pointer;
-            z-index: 100; backdrop-filter: blur(10px); transition: 0.3s;
+            color: var(--accent-main); font-size: 14px; cursor: pointer;
+            z-index: 100; backdrop-filter: blur(10px);
+            box-shadow: 0 5px 15px rgba(0,0,0,0.5);
         }
-        .music-btn.playing { background: var(--accent-main); color: var(--bg-darkest); box-shadow: 0 0 25px var(--accent-glow);}
         .music-btn.playing i { animation: spinSlow 3s linear infinite; }
 
     </style>
@@ -382,13 +424,14 @@
 
     <div class="app-frame">
         
-        <!-- باکگراوندە ئەفسوناوییەکان -->
-        <div class="magic-mandala"></div>
-        <div id="fairy-dust"></div>
+        <!-- باکگراوند و ئیفێکتەکان -->
+        <div class="bg-pattern"></div>
+        <div id="particles"></div>
+        <div class="inner-gold-frame"></div>
 
         <!-- مۆسیقا -->
         <audio id="bgMusic" loop>
-            <source src="https://www.soundhelix.com/examples/mp3/SoundHelix-Song-3.mp3" type="audio/mpeg">
+            <source src="https://www.soundhelix.com/examples/mp3/SoundHelix-Song-2.mp3" type="audio/mpeg">
         </audio>
         <div class="music-btn" id="musicBtn" onclick="toggleMusic()">
             <i class="fa-solid fa-music"></i>
@@ -398,7 +441,7 @@
             
             <!-- ================= سلایدی ١ ================= -->
             <div class="slide active" id="slide-1">
-                <div class="glass-neon stagger delay-1" style="padding: 35px 20px;">
+                <div class="glass-panel stagger delay-1" style="padding: 30px 15px;">
                     <div class="welcome-text">
                         بەخشینی کاتەکانتان نیشانەی<br>
                         خۆشەویستییە بۆ ئێمە، بە ئامادەبوونتان<br>
@@ -419,7 +462,7 @@
             <div class="slide" id="slide-2">
                 <div class="section-header stagger delay-1">بەروار و کات</div>
                 
-                <div class="glass-neon stagger delay-2" style="padding: 20px 15px;">
+                <div class="glass-panel stagger delay-2" style="padding: 15px;">
                     <div class="cal-grid">
                         <div class="cal-day">S</div><div class="cal-day">M</div><div class="cal-day">T</div><div class="cal-day">W</div><div class="cal-day">T</div><div class="cal-day">F</div><div class="cal-day">S</div>
                         <div class="cal-num">1</div><div class="cal-num">2</div><div class="cal-num">3</div><div class="cal-num">4</div><div class="cal-num">5</div><div class="cal-num">6</div><div class="cal-num">7</div>
@@ -430,13 +473,13 @@
                     </div>
                 </div>
 
-                <div class="glass-neon stagger delay-3" style="padding: 20px 5px;">
-                    <div style="text-align: center; color: #fff; font-weight: 900; font-size: 14px; margin-bottom: 15px; letter-spacing: 1px;">کاتی ماوە بۆ ئاهەنگەکە</div>
+                <div class="glass-panel stagger delay-3" style="padding: 15px;">
+                    <div style="text-align: center; color: var(--accent-light); font-weight: bold; font-size: 13px; margin-bottom: 5px;">کاتی ماوە بۆ ئاهەنگەکە</div>
                     <div class="timer-display">
-                        <div class="time-orb"><span class="time-val" id="d">00</span><span class="time-lbl">ڕۆژ</span></div>
-                        <div class="time-orb"><span class="time-val" id="h">00</span><span class="time-lbl">کاتژمێر</span></div>
-                        <div class="time-orb"><span class="time-val" id="m">00</span><span class="time-lbl">خولەک</span></div>
-                        <div class="time-orb"><span class="time-val" id="s">00</span><span class="time-lbl">چرکە</span></div>
+                        <div class="time-ring"><span class="time-val" id="d">00</span><span class="time-lbl">ڕۆژ</span></div>
+                        <div class="time-ring"><span class="time-val" id="h">00</span><span class="time-lbl">کاتژمێر</span></div>
+                        <div class="time-ring"><span class="time-val" id="m">00</span><span class="time-lbl">خولەک</span></div>
+                        <div class="time-ring"><span class="time-val" id="s">00</span><span class="time-lbl">چرکە</span></div>
                     </div>
                 </div>
             </div>
@@ -452,7 +495,7 @@
                     </div>
                 </div>
 
-                <div class="glass-neon stagger delay-3" style="padding: 25px 20px;">
+                <div class="glass-panel stagger delay-3" style="padding: 20px 15px;">
                     <div class="timeline-vertical">
                         <div class="time-point-v">
                             <div class="t-val-v">07:00 PM</div>
@@ -474,7 +517,7 @@
                 </div>
 
                 <div class="stagger delay-4" style="width: 100%;">
-                    <button class="btn-magic" onclick="openMap()">
+                    <button class="btn-map" onclick="openMap()">
                         نەخشەی شوێن <i class="fa-solid fa-map-location-dot"></i>
                     </button>
                 </div>
@@ -482,63 +525,66 @@
 
         </div>
 
-        <!-- ================= باڕی هەڵواسراو (Floating Dock Navigation) ================= -->
-        <div class="dock-bar">
-            <div class="dock-item active" id="tab-1" onclick="switchSlide(1)">
-                <i class="fa-solid fa-sparkles"></i>
+        <!-- ================= باڕی خوارەوە (Tab Navigation) ================= -->
+        <div class="tab-bar">
+            <div class="tab-item active" id="tab-1" onclick="switchTab(1)">
+                <i class="fa-solid fa-house-chimney"></i>
                 <span>سەرەتا</span>
+                <div class="tab-indicator"></div>
             </div>
-            <div class="dock-item" id="tab-2" onclick="switchSlide(2)">
-                <i class="fa-regular fa-calendar-heart"></i>
+            <div class="tab-item" id="tab-2" onclick="switchTab(2)">
+                <i class="fa-solid fa-calendar-days"></i>
                 <span>کات</span>
+                <div class="tab-indicator"></div>
             </div>
-            <div class="dock-item" id="tab-3" onclick="switchSlide(3)">
-                <i class="fa-solid fa-map-pin"></i>
+            <div class="tab-item" id="tab-3" onclick="switchTab(3)">
+                <i class="fa-solid fa-location-dot"></i>
                 <span>شوێن</span>
+                <div class="tab-indicator"></div>
             </div>
         </div>
 
     </div>
 
     <script>
-        // دروستکردنی تۆزی ئەفسوناوی (Fairy Dust Particles)
-        function createDust() {
-            const container = document.getElementById('fairy-dust');
-            for (let i = 0; i < 40; i++) {
-                let dust = document.createElement('div');
-                dust.className = 'dust';
-                let size = Math.random() * 4 + 1; // 1 to 5px
-                dust.style.width = size + 'px';
-                dust.style.height = size + 'px';
-                dust.style.left = Math.random() * 100 + '%';
-                dust.style.top = Math.random() * 100 + '%';
+        // دروستکردنی گەڵا ڕۆزگۆڵدەکان
+        function createParticles() {
+            const container = document.getElementById('particles');
+            for (let i = 0; i < 20; i++) {
+                let particle = document.createElement('div');
+                particle.className = 'particle';
+                let size = Math.random() * 8 + 4;
+                particle.style.width = size + 'px';
+                particle.style.height = (size * 1.5) + 'px';
+                particle.style.left = Math.random() * 100 + '%';
                 
-                let duration = Math.random() * 3 + 2; // 2s to 5s
+                let duration = Math.random() * 8 + 8;
                 let delay = Math.random() * 5;
-                dust.style.animationDuration = duration + 's';
-                dust.style.animationDelay = delay + 's';
+                particle.style.animationDuration = duration + 's';
+                particle.style.animationDelay = delay + 's';
                 
-                container.appendChild(dust);
+                particle.animate([
+                    { transform: `translateY(100vh) rotate(0deg) scale(0)`, opacity: 0 },
+                    { opacity: Math.random() * 0.5 + 0.2, offset: 0.2 },
+                    { transform: `translateY(-10vh) rotate(${Math.random() * 360}deg) scale(1)`, opacity: 0 }
+                ], {
+                    duration: duration * 1000,
+                    iterations: Infinity,
+                    delay: delay * 1000
+                });
+
+                container.appendChild(particle);
             }
         }
-        createDust();
+        createParticles();
 
-        // فەنکشنی گۆڕینی سلایدەکان (بە ئەنیمەیشنی بازنەیی - Circular Reveal)
-        function switchSlide(index) {
-            // گۆڕینی ئەکتیڤ بۆ باڕی خوارەوە
-            document.querySelectorAll('.dock-item').forEach(item => item.classList.remove('active'));
-            document.getElementById('tab-' + index).classList.add('active');
+        // فەنکشنی گۆڕینی تابەکان و سلایدەکان
+        function switchTab(tabIndex) {
+            document.querySelectorAll('.tab-item').forEach(tab => tab.classList.remove('active'));
+            document.getElementById('tab-' + tabIndex).classList.add('active');
 
-            // گۆڕینی سلایدەکان بە Clip-path
-            document.querySelectorAll('.slide').forEach(slide => {
-                // کاتێک سلایدێک لادەبەین، خێرا زەدی (z-index) کەم دەکەینەوە بۆ ئەوەی سلایدی نوێ بێتە سەری
-                slide.style.zIndex = "10";
-                slide.classList.remove('active');
-            });
-            
-            const newSlide = document.getElementById('slide-' + index);
-            newSlide.style.zIndex = "12"; // دێتە پێشەوەی هەموویان
-            newSlide.classList.add('active');
+            document.querySelectorAll('.slide').forEach(slide => slide.classList.remove('active'));
+            document.getElementById('slide-' + tabIndex).classList.add('active');
         }
 
         // فەنکشنی مۆسیقا
@@ -561,7 +607,7 @@
             window.open('https://maps.google.com/?q=Lily+garden+hall', '_blank');
         }
 
-        // ژمێریاری کات (بەرواری داینامیکی بۆ ئەوەی کار بکات)
+        // ژمێریاری کات
         const targetDate = new Date();
         targetDate.setDate(targetDate.getDate() + 15);
         targetDate.setHours(targetDate.getHours() + 14);
