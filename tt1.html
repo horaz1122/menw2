@@ -1,0 +1,513 @@
+<!DOCTYPE html>
+<html lang="ku" dir="rtl">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0, maximum-scale=1.0, user-scalable=no">
+    <title>بانگهێشتنامەی خەنەبەندان - VIP</title>
+    <!-- ئایکۆنەکان -->
+    <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.4.0/css/all.min.css">
+    <style>
+        @import url('https://fonts.googleapis.com/css2?family=Aref+Ruqaa:wght@400;700&family=Noto+Naskh+Arabic:wght@400;700&display=swap');
+
+        :root {
+            --bg-dark-red: #2b020c; /* سووری زۆر تاریک بۆ باکگراوند */
+            --bg-gradient: linear-gradient(135deg, #4a0414 0%, #1a0107 100%);
+            --gold: #d4af37;
+            --gold-light: #fbe5b8;
+            --gold-gradient: linear-gradient(135deg, #d4af37 0%, #ffdf73 50%, #b38728 100%);
+            --text-light: #ffffff;
+            --glass-bg: rgba(74, 4, 20, 0.4);
+            --glass-border: rgba(212, 175, 55, 0.3);
+        }
+
+        * {
+            box-sizing: border-box;
+            margin: 0;
+            padding: 0;
+            -webkit-tap-highlight-color: transparent;
+        }
+
+        body, html {
+            width: 100%;
+            height: 100%;
+            background-color: #000;
+            font-family: 'Noto Naskh Arabic', Tahoma, sans-serif;
+            color: var(--text-light);
+            display: flex;
+            justify-content: center;
+            align-items: center;
+            overflow: hidden;
+        }
+
+        /* چوارچێوەی ئەپەکە (وەک شاشەی مۆبایل) */
+        .app-frame {
+            width: 100%;
+            max-width: 400px;
+            height: 100dvh; /* پڕکردنەوەی شاشەی مۆبایل بەتەواوی */
+            background: var(--bg-gradient);
+            position: relative;
+            overflow: hidden;
+            box-shadow: 0 0 50px rgba(212, 175, 55, 0.15);
+            /* ئەگەر لەسەر کۆمپیوتەر کرایەوە، شێوەی مۆبایل دەدات */
+            @media (min-height: 800px) {
+                height: 85vh;
+                border-radius: 40px;
+                border: 8px solid #111;
+            }
+        }
+
+        /* ================= باکگراوندی ئەفسوناوی ================= */
+        .bg-pattern {
+            position: absolute;
+            top: 0; left: 0; width: 100%; height: 100%;
+            background-image: url('https://www.transparenttextures.com/patterns/black-scales.png');
+            opacity: 0.5;
+            z-index: 1;
+        }
+
+        #particles {
+            position: absolute;
+            top: 0; left: 0; width: 100%; height: 100%;
+            z-index: 2;
+            pointer-events: none;
+        }
+        .particle {
+            position: absolute;
+            background: var(--gold);
+            border-radius: 50%;
+            opacity: 0;
+            animation: floatUp 8s infinite linear;
+            box-shadow: 0 0 10px var(--gold);
+        }
+        @keyframes floatUp {
+            0% { transform: translateY(100vh) scale(0); opacity: 0; }
+            20% { opacity: 0.6; }
+            80% { opacity: 0.3; }
+            100% { transform: translateY(-10vh) scale(1); opacity: 0; }
+        }
+
+        /* نەخشە زێڕینەکانی سەرەوە و خوارەوە (Mandala) */
+        .ornament {
+            position: absolute;
+            left: 0; width: 100%; height: 150px;
+            background-size: cover;
+            background-position: center;
+            z-index: 3;
+            pointer-events: none;
+        }
+        .ornament-top {
+            top: -30px;
+            background-image: radial-gradient(circle at top, rgba(212,175,55,0.15) 0%, transparent 60%);
+            border-top: 5px solid var(--gold);
+        }
+        .ornament-bottom {
+            bottom: -30px;
+            background-image: radial-gradient(circle at bottom, rgba(212,175,55,0.15) 0%, transparent 60%);
+            border-bottom: 5px solid var(--gold);
+        }
+
+        /* ================= سیستەمی سلایدەکان ================= */
+        .slide {
+            position: absolute;
+            top: 0; left: 0;
+            width: 100%; height: 100%;
+            padding: 50px 25px;
+            display: flex;
+            flex-direction: column;
+            align-items: center;
+            justify-content: center;
+            opacity: 0;
+            visibility: hidden;
+            transform: scale(0.95); /* گۆڕانکاری بۆ زووم */
+            transition: all 0.6s cubic-bezier(0.4, 0, 0.2, 1);
+            z-index: 10;
+        }
+
+        .slide.active {
+            opacity: 1;
+            visibility: visible;
+            transform: scale(1);
+        }
+
+        /* بۆ ئەنیمەیشنی ناوەوەی سلایدەکان */
+        .slide .animate-item {
+            opacity: 0;
+            transform: translateY(20px);
+            transition: all 0.6s ease;
+        }
+        .slide.active .animate-item {
+            opacity: 1;
+            transform: translateY(0);
+        }
+        /* دیلەیکردنی توخمەکان بەدوای یەکدا */
+        .slide.active .delay-1 { transition-delay: 0.2s; }
+        .slide.active .delay-2 { transition-delay: 0.4s; }
+        .slide.active .delay-3 { transition-delay: 0.6s; }
+        .slide.active .delay-4 { transition-delay: 0.8s; }
+
+        /* ================= دیزاینی شووشەیی (Glassmorphism) بۆکسەکان ================= */
+        .glass-box {
+            background: var(--glass-bg);
+            backdrop-filter: blur(12px);
+            -webkit-backdrop-filter: blur(12px);
+            border: 1px solid var(--glass-border);
+            border-radius: 20px;
+            padding: 25px 20px;
+            width: 100%;
+            box-shadow: 0 15px 35px rgba(0,0,0,0.4), inset 0 0 15px rgba(212,175,55,0.05);
+            margin-bottom: 25px;
+            position: relative;
+            overflow: hidden;
+        }
+        /* درەوشانەوەی ناو بۆکسەکە */
+        .glass-box::before {
+            content: ''; position: absolute; top: -50%; left: -50%; width: 200%; height: 200%;
+            background: radial-gradient(circle, rgba(212,175,55,0.1) 0%, transparent 60%);
+            pointer-events: none;
+        }
+
+        /* ================= سلایدی ١: دەستپێک ================= */
+        .main-text {
+            text-align: center;
+            font-size: 16px;
+            line-height: 2.2;
+            color: var(--text-light);
+            text-shadow: 0 2px 5px rgba(0,0,0,0.8);
+        }
+
+        .dress-icon-wrapper {
+            position: relative;
+            width: 120px; height: 120px;
+            margin: 30px 0;
+            display: flex; justify-content: center; align-items: center;
+        }
+        /* بازنەی درەوشاوەی دەوری ئایکۆنەکە */
+        .dress-icon-wrapper::before {
+            content: ''; position: absolute; width: 100%; height: 100%;
+            border-radius: 50%; border: 2px dashed var(--gold);
+            animation: spin 10s linear infinite;
+        }
+        @keyframes spin { 100% { transform: rotate(360deg); } }
+
+        .dress-icon {
+            font-size: 60px;
+            color: #ff3344;
+            filter: drop-shadow(0 0 15px rgba(255,51,68,0.6));
+            animation: pulse 2s ease-in-out infinite alternate;
+        }
+        @keyframes pulse {
+            0% { transform: scale(1); filter: drop-shadow(0 0 10px rgba(255,51,68,0.4)); }
+            100% { transform: scale(1.1); filter: drop-shadow(0 0 25px rgba(255,51,68,0.8)); }
+        }
+
+        .bride-name {
+            font-family: 'Aref Ruqaa', serif;
+            font-size: 40px;
+            background: var(--gold-gradient);
+            -webkit-background-clip: text;
+            -webkit-text-fill-color: transparent;
+            margin-bottom: 30px;
+            filter: drop-shadow(0 2px 4px rgba(0,0,0,0.5));
+        }
+
+        /* ================= دوگمەکان ================= */
+        .btn-gold {
+            background: var(--gold-gradient);
+            color: #000;
+            border: none;
+            padding: 15px 35px;
+            border-radius: 30px;
+            font-size: 15px;
+            font-weight: bold;
+            font-family: 'Noto Naskh Arabic', sans-serif;
+            cursor: pointer;
+            box-shadow: 0 10px 20px rgba(212, 175, 55, 0.3);
+            transition: all 0.3s;
+            display: inline-flex;
+            align-items: center;
+            gap: 10px;
+            text-decoration: none;
+        }
+        .btn-gold:active { transform: translateY(3px); box-shadow: 0 5px 10px rgba(212, 175, 55, 0.3); }
+
+        /* ================= سلایدی ٢: مێژوو و کات ================= */
+        .title-fancy {
+            font-family: 'Aref Ruqaa', serif;
+            font-size: 30px;
+            color: var(--gold-light);
+            margin-bottom: 20px;
+            text-align: center;
+            position: relative;
+            display: inline-block;
+        }
+        .title-fancy::after {
+            content: ''; position: absolute; bottom: -5px; left: 50%; transform: translateX(-50%);
+            width: 40px; height: 2px; background: var(--gold);
+        }
+
+        .cal-grid {
+            display: grid; grid-template-columns: repeat(7, 1fr); gap: 8px; direction: ltr; text-align: center; font-family: sans-serif;
+        }
+        .cal-day { font-size: 12px; color: var(--gold); font-weight: bold; margin-bottom: 5px; }
+        .cal-num { padding: 6px 0; color: #ddd; font-size: 14px; position: relative;}
+        
+        .cal-num.heart {
+            background: var(--gold-gradient);
+            color: #000;
+            font-weight: bold;
+            border-radius: 5px;
+            box-shadow: 0 0 15px rgba(212,175,55,0.4);
+            transform: scale(1.1);
+        }
+        .cal-num.heart::after {
+            content: '\f004'; font-family: 'Font Awesome 6 Free'; font-weight: 900;
+            position: absolute; top: -8px; right: -8px;
+            font-size: 14px; color: #ff3344;
+            filter: drop-shadow(0 2px 2px rgba(0,0,0,0.5));
+        }
+
+        /* ژمێریاری (Digital Clock Style) */
+        .countdown-title {
+            font-size: 14px; color: var(--gold); margin: 10px 0 15px; font-weight: bold; text-align: center;
+        }
+        .timer-display {
+            display: flex; justify-content: center; gap: 15px; direction: ltr;
+        }
+        .time-block {
+            display: flex; flex-direction: column; align-items: center;
+            background: rgba(0,0,0,0.5);
+            border: 1px solid rgba(212,175,55,0.2);
+            border-radius: 12px;
+            width: 65px; padding: 10px 0;
+            box-shadow: inset 0 0 10px rgba(0,0,0,0.5);
+        }
+        .time-val {
+            font-family: 'Courier New', monospace; font-size: 24px; font-weight: bold; color: var(--gold-light);
+            text-shadow: 0 0 10px rgba(212,175,55,0.4);
+        }
+        .time-lbl { font-size: 9px; color: #999; margin-top: 5px; letter-spacing: 1px;}
+
+        /* ================= سلایدی ٣: شوێن و بەرنامە ================= */
+        .arch-wrapper {
+            position: relative; width: 100%; height: 160px;
+            border-radius: 100px 100px 10px 10px;
+            overflow: hidden;
+            border: 2px solid var(--gold);
+            margin-bottom: 25px;
+            box-shadow: 0 15px 30px rgba(0,0,0,0.5);
+        }
+        .arch-wrapper img { width: 100%; height: 100%; object-fit: cover; opacity: 0.8; }
+        .arch-overlay {
+            position: absolute; top: 0; left: 0; width: 100%; height: 100%;
+            background: linear-gradient(to top, var(--bg-dark-red), transparent);
+            display: flex; flex-direction: column; justify-content: flex-end; align-items: center; padding-bottom: 20px;
+        }
+        .venue-name { font-family: 'Aref Ruqaa', serif; font-size: 28px; color: var(--gold-light); text-shadow: 0 5px 10px rgba(0,0,0,0.8);}
+
+        /* خشتەی کاتەکان (Premium Timeline) */
+        .timeline-horizontal {
+            display: flex; justify-content: space-between; width: 100%; position: relative;
+            margin-bottom: 30px; direction: ltr; padding: 0 10px;
+        }
+        /* هێڵی ناوەڕاستی درەوشاوە */
+        .timeline-horizontal::before {
+            content: ''; position: absolute; top: 35px; left: 10%; width: 80%; height: 2px;
+            background: linear-gradient(90deg, transparent, var(--gold), transparent);
+        }
+        .time-point {
+            display: flex; flex-direction: column; align-items: center; z-index: 1; width: 25%;
+        }
+        .t-val { font-size: 13px; font-weight: bold; color: var(--text-light); margin-bottom: 8px; font-family: monospace;}
+        .t-dot {
+            width: 14px; height: 14px; background: var(--bg-dark-red);
+            border: 2px solid var(--gold); border-radius: 50%; margin-bottom: 8px;
+            box-shadow: 0 0 10px var(--gold);
+            transition: 0.3s;
+        }
+        .time-point:hover .t-dot { transform: scale(1.3); background: var(--gold); }
+        .t-event { font-size: 11px; color: var(--gold-light); font-weight: bold; text-align: center; line-height: 1.4;}
+
+        /* پێشاندەری خوارەوە (Dots Indicator) */
+        .slide-indicators {
+            position: absolute; bottom: 30px; left: 0; width: 100%;
+            display: flex; justify-content: center; gap: 8px; z-index: 20;
+        }
+        .dot {
+            width: 8px; height: 8px; border-radius: 50%;
+            background: rgba(255,255,255,0.3); transition: 0.3s;
+        }
+        .dot.active { background: var(--gold); width: 20px; border-radius: 10px; box-shadow: 0 0 10px var(--gold);}
+
+    </style>
+</head>
+<body>
+
+    <div class="app-frame">
+        
+        <div class="bg-pattern"></div>
+        <div id="particles"></div>
+        
+        <div class="ornament ornament-top"></div>
+        <div class="ornament ornament-bottom"></div>
+
+        <!-- ================= سلایدی ١ ================= -->
+        <div class="slide active" id="slide-1">
+            <div class="glass-box animate-item delay-1">
+                <div class="main-text">
+                    بەخشن خەمایێ نیشانا<br>
+                    خۆشیێ یە ب ئامادەبوونا هەوە<br>
+                    گۆڤەندا مە گەرمتر لێ دهێت<br>
+                    ب خێر بێن بۆ خەنەملاندنا خەنایا<br>
+                    بویکا مە
+                </div>
+            </div>
+            
+            <div class="dress-icon-wrapper animate-item delay-2">
+                <i class="fa-solid fa-person-dress dress-icon"></i>
+            </div>
+            
+            <div class="bride-name animate-item delay-3">(بارین)</div>
+            
+            <button class="btn-gold animate-item delay-4" onclick="goToSlide(2)">
+                دیتنا کات و مێژوو <i class="fa-solid fa-arrow-left"></i>
+            </button>
+        </div>
+
+        <!-- ================= سلایدی ٢ ================= -->
+        <div class="slide" id="slide-2">
+            <div class="title-fancy animate-item delay-1">مێژوو و دەم</div>
+            
+            <div class="glass-box animate-item delay-2">
+                <div class="cal-grid">
+                    <div class="cal-day">S</div><div class="cal-day">M</div><div class="cal-day">T</div><div class="cal-day">W</div><div class="cal-day">T</div><div class="cal-day">F</div><div class="cal-day">S</div>
+                    <!-- ژمارەکان -->
+                    <div class="cal-num">1</div><div class="cal-num">2</div><div class="cal-num">3</div><div class="cal-num">4</div><div class="cal-num">5</div><div class="cal-num">6</div><div class="cal-num">7</div>
+                    <div class="cal-num">8</div><div class="cal-num">9</div><div class="cal-num">10</div><div class="cal-num">11</div><div class="cal-num">12</div><div class="cal-num">13</div><div class="cal-num">14</div>
+                    <div class="cal-num">15</div><div class="cal-num">16</div><div class="cal-num">17</div><div class="cal-num">18</div><div class="cal-num heart">19</div><div class="cal-num">20</div><div class="cal-num">21</div>
+                    <div class="cal-num">22</div><div class="cal-num">23</div><div class="cal-num">24</div><div class="cal-num">25</div><div class="cal-num">26</div><div class="cal-num">27</div><div class="cal-num">28</div>
+                    <div class="cal-num">29</div><div class="cal-num">30</div><div class="cal-num">31</div>
+                </div>
+            </div>
+
+            <div class="glass-box animate-item delay-3" style="padding: 15px;">
+                <div class="countdown-title">دەمی مای بۆ ئاهەنگێ</div>
+                <div class="timer-display">
+                    <div class="time-block"><span class="time-val" id="d">00</span><span class="time-lbl">DAYS</span></div>
+                    <div class="time-block"><span class="time-val" id="h">00</span><span class="time-lbl">HOURS</span></div>
+                    <div class="time-block"><span class="time-val" id="m">00</span><span class="time-lbl">MINS</span></div>
+                    <div class="time-block"><span class="time-val" id="s">00</span><span class="time-lbl">SECS</span></div>
+                </div>
+            </div>
+
+            <button class="btn-gold animate-item delay-4" onclick="goToSlide(3)">
+                جهێ ئاهەنگێ <i class="fa-solid fa-map-location-dot"></i>
+            </button>
+        </div>
+
+        <!-- ================= سلایدی ٣ ================= -->
+        <div class="slide" id="slide-3">
+            <div class="title-fancy animate-item delay-1">جهێ ئاهەنگێ</div>
+            
+            <div class="arch-wrapper animate-item delay-2">
+                <img src="https://images.unsplash.com/photo-1519225421980-715cb0215aed?q=80&w=600&auto=format&fit=crop" alt="Venue">
+                <div class="arch-overlay">
+                    <div class="venue-name">Lily Garden</div>
+                </div>
+            </div>
+
+            <div class="glass-box animate-item delay-3" style="padding: 20px 10px;">
+                <div class="countdown-title" style="margin-top:0;">بەرنامێ شەڤێ</div>
+                <div class="timeline-horizontal">
+                    <div class="time-point">
+                        <div class="t-val">07:00</div><div class="t-dot"></div><div class="t-event">دەرگەهـ<br>ڤەکرن</div>
+                    </div>
+                    <div class="time-point">
+                        <div class="t-val">08:00</div><div class="t-dot"></div><div class="t-event">خوارن</div>
+                    </div>
+                    <div class="time-point">
+                        <div class="t-val">09:00</div><div class="t-dot"></div><div class="t-event">دیلان</div>
+                    </div>
+                    <div class="time-point">
+                        <div class="t-val">10:00</div><div class="t-dot"></div><div class="t-event">دەرکەفتنا<br>خەنایێ</div>
+                    </div>
+                </div>
+            </div>
+
+            <div class="animate-item delay-4" style="display: flex; gap:15px; width: 100%;">
+                <button class="btn-gold" style="flex:1; justify-content: center;" onclick="openMap()">
+                    نەخشە <i class="fa-solid fa-location-arrow"></i>
+                </button>
+                <button class="btn-gold" style="background: transparent; border: 1px solid var(--gold); color: var(--gold); padding: 15px;" onclick="goToSlide(1)">
+                    <i class="fa-solid fa-rotate-right"></i>
+                </button>
+            </div>
+        </div>
+
+        <!-- پێشاندەری خوارەوە -->
+        <div class="slide-indicators">
+            <div class="dot active" id="dot-1"></div>
+            <div class="dot" id="dot-2"></div>
+            <div class="dot" id="dot-3"></div>
+        </div>
+
+    </div>
+
+    <script>
+        // دروستکردنی پڕیشکە ئاڵتوونییەکان بۆ باکگراوند
+        function createParticles() {
+            const container = document.getElementById('particles');
+            for (let i = 0; i < 25; i++) {
+                let particle = document.createElement('div');
+                particle.className = 'particle';
+                let size = Math.random() * 4 + 1;
+                particle.style.width = size + 'px';
+                particle.style.height = size + 'px';
+                particle.style.left = Math.random() * 100 + '%';
+                particle.style.animationDelay = Math.random() * 8 + 's';
+                particle.style.animationDuration = Math.random() * 4 + 4 + 's';
+                container.appendChild(particle);
+            }
+        }
+        createParticles();
+
+        // فەنکشنی گۆڕینی سلایدەکان بە ئەنیمەیشنەوە
+        function goToSlide(slideIndex) {
+            // لابردنی ئەکتیڤ لە هەموو سلاید و خاڵەکان
+            document.querySelectorAll('.slide').forEach(slide => slide.classList.remove('active'));
+            document.querySelectorAll('.dot').forEach(dot => dot.classList.remove('active'));
+            
+            // دانانی ئەکتیڤ بۆ سلاید و خاڵی دیاریکراو
+            document.getElementById('slide-' + slideIndex).classList.add('active');
+            document.getElementById('dot-' + slideIndex).classList.add('active');
+        }
+
+        // فەنکشنی کردنەوەی نەخشە
+        function openMap() {
+            window.open('https://maps.google.com/?q=Lily+garden+hall', '_blank');
+        }
+
+        // ژمێریاری کات (Digital Clock Style)
+        const targetDate = new Date();
+        targetDate.setDate(targetDate.getDate() + 15);
+        targetDate.setHours(targetDate.getHours() + 14);
+
+        setInterval(() => {
+            const now = new Date().getTime();
+            const distance = targetDate.getTime() - now;
+
+            if (distance < 0) return;
+
+            let days = Math.floor(distance / (1000 * 60 * 60 * 24));
+            let hours = Math.floor((distance % (1000 * 60 * 60 * 24)) / (1000 * 60 * 60));
+            let minutes = Math.floor((distance % (1000 * 60 * 60)) / (1000 * 60));
+            let seconds = Math.floor((distance % (1000 * 60)) / 1000);
+
+            document.getElementById("d").innerText = days < 10 ? "0" + days : days;
+            document.getElementById("h").innerText = hours < 10 ? "0" + hours : hours;
+            document.getElementById("m").innerText = minutes < 10 ? "0" + minutes : minutes;
+            document.getElementById("s").innerText = seconds < 10 ? "0" + seconds : seconds;
+        }, 1000);
+    </script>
+
+</body>
+</html>

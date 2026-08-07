@@ -1,0 +1,733 @@
+<!DOCTYPE html>
+<html lang="ckb" dir="rtl">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0, maximum-scale=1.0, user-scalable=no">
+    <title>بانگهێشتنامەی ڕەش و زێڕین</title>
+    
+    <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.4.0/css/all.min.css">
+    <style>
+        @import url('https://fonts.googleapis.com/css2?family=Amiri:ital,wght@0,400;0,700;1,400&family=Tajawal:wght@300;400;500;700&display=swap');
+        @import url('https://fonts.googleapis.com/css2?family=Aref+Ruqaa:wght@400;700&display=swap');
+
+        :root {
+            --bg-black: #0a0a0a;
+            --card-dark: #141414;
+            --gold-light: #FBF5B7;
+            --gold-main: #d4af37;
+            --gold-dark: #AA771C;
+            --gold-gradient: linear-gradient(135deg, #BF953F, #FCF6BA, #B38728, #FBF5B7, #AA771C);
+            --text-light: #f5f5f5;
+            --text-gray: #a0a0a0;
+        }
+
+        * {
+            box-sizing: border-box;
+            margin: 0;
+            padding: 0;
+            -webkit-tap-highlight-color: transparent;
+        }
+
+        body, html {
+            width: 100%;
+            background-color: var(--bg-black);
+            font-family: 'Tajawal', Tahoma, sans-serif;
+            color: var(--text-light);
+            overflow-x: hidden;
+            scroll-behavior: smooth;
+        }
+
+        body.locked {
+            overflow: hidden;
+        }
+
+        /* ستایلی سەرەکی ئەپەکە */
+        .app-container {
+            width: 100%;
+            max-width: 450px;
+            min-height: 100vh;
+            margin: 0 auto;
+            background-color: var(--bg-black);
+            position: relative;
+            box-shadow: 0 0 50px rgba(0,0,0,1);
+            overflow: hidden;
+            background-image: url('https://www.transparenttextures.com/patterns/stardust.png');
+        }
+
+        #particles-container {
+            position: fixed;
+            top: 0; left: 0; width: 100%; height: 100%;
+            pointer-events: none;
+            z-index: 999;
+        }
+        .particle {
+            position: absolute;
+            background: var(--gold-main);
+            border-radius: 50%;
+            opacity: 0;
+            box-shadow: 0 0 10px var(--gold-main), 0 0 20px var(--gold-light);
+            animation: floatUp 10s infinite linear;
+        }
+        @keyframes floatUp {
+            0% { transform: translateY(100vh) scale(0); opacity: 0; }
+            20% { opacity: 0.6; }
+            80% { opacity: 0.3; }
+            100% { transform: translateY(-10vh) scale(1); opacity: 0; }
+        }
+
+        #envelope-wrapper {
+            position: fixed;
+            top: 0; left: 0; width: 100%; height: 100%;
+            background: radial-gradient(circle at center, #1a1a1a 0%, #000000 100%);
+            display: flex;
+            justify-content: center;
+            align-items: center;
+            z-index: 1000;
+            perspective: 2000px;
+            transition: opacity 1s ease 1.5s, visibility 1s ease 1.5s;
+        }
+
+        .envelope-box {
+            position: relative;
+            width: 320px;
+            height: 210px;
+            transform-style: preserve-3d;
+            transition: transform 1.5s cubic-bezier(0.4, 0, 0.2, 1);
+            filter: drop-shadow(0 40px 50px rgba(212, 175, 55, 0.15));
+        }
+
+        /* پشتی زەرفەکە */
+        .env-back {
+            position: absolute;
+            top: 0; left: 0; width: 100%; height: 100%;
+            background: #111;
+            border: 1px solid var(--gold-dark);
+            border-radius: 4px;
+        }
+
+        /* نامەی ناوەوە */
+        .env-letter {
+            position: absolute;
+            top: 5px; left: 5px; right: 5px; bottom: 5px;
+            background: var(--card-dark);
+            border: 2px solid var(--gold-main);
+            border-radius: 4px;
+            display: flex;
+            flex-direction: column;
+            justify-content: center;
+            align-items: center;
+            z-index: 2;
+            transition: all 1.5s cubic-bezier(0.4, 0, 0.2, 1) 0.8s;
+            background-image: url('https://www.transparenttextures.com/patterns/stardust.png');
+        }
+        
+        /* نەخشی ناو نامەکە */
+        .env-letter::before {
+            content: ''; position: absolute; top: 10px; left: 10px; right: 10px; bottom: 10px;
+            border: 1px dashed var(--gold-dark); pointer-events: none; opacity: 0.5;
+        }
+
+        .env-letter h2 {
+            font-family: 'Aref Ruqaa', serif;
+            background: var(--gold-gradient);
+            -webkit-background-clip: text;
+            -webkit-text-fill-color: transparent;
+            font-size: 34px;
+            margin-bottom: 5px;
+        }
+
+        .env-front {
+            position: absolute;
+            top: 0; left: 0; width: 100%; height: 100%;
+            z-index: 3;
+            pointer-events: none;
+        }
+        .env-front::before {
+            content: ''; position: absolute; top: 0; left: 0; width: 0; height: 0;
+            border-top: 105px solid transparent; border-bottom: 105px solid transparent;
+            border-left: 160px solid #1a1a1a;
+            filter: drop-shadow(2px 0 2px rgba(0,0,0,0.8));
+        }
+        .env-front::after {
+            content: ''; position: absolute; top: 0; right: 0; width: 0; height: 0;
+            border-top: 105px solid transparent; border-bottom: 105px solid transparent;
+            border-right: 160px solid #1a1a1a;
+            filter: drop-shadow(-2px 0 2px rgba(0,0,0,0.8));
+        }
+        .env-bottom {
+            position: absolute; bottom: 0; left: 0; width: 0; height: 0;
+            border-left: 160px solid transparent; border-right: 160px solid transparent;
+            border-bottom: 120px solid #151515;
+            z-index: 4;
+            filter: drop-shadow(0 -3px 5px rgba(0,0,0,0.5));
+        }
+
+        /* باڵی سەرەوە */
+        .env-top {
+            position: absolute;
+            top: 0; left: 0; width: 0; height: 0;
+            border-left: 160px solid transparent; border-right: 160px solid transparent;
+            border-top: 120px solid #1f1f1f;
+            z-index: 6;
+            transform-origin: top;
+            transition: transform 1.2s cubic-bezier(0.4, 0, 0.2, 1);
+            filter: drop-shadow(0 5px 10px rgba(0,0,0,0.8));
+        }
+        /* هێڵی زێڕینی باڵی سەرەوە */
+        .env-top::after {
+            content: ''; position: absolute; top: -120px; left: -160px;
+            width: 0; height: 0;
+            border-left: 160px solid transparent; border-right: 160px solid transparent;
+            border-top: 120px solid transparent;
+            border-top-color: rgba(212, 175, 55, 0.2);
+        }
+
+        .wax-seal {
+            position: absolute;
+            top: 120px; left: 50%;
+            transform: translate(-50%, -50%);
+            width: 80px; height: 80px;
+            background: var(--gold-gradient);
+            border-radius: 50%;
+            z-index: 10;
+            display: flex;
+            flex-direction: column;
+            justify-content: center;
+            align-items: center;
+            cursor: pointer;
+            box-shadow: 0 10px 20px rgba(0,0,0,0.8), inset 0 0 15px rgba(255,255,255,0.6);
+            transition: all 0.3s ease;
+        }
+        
+        .wax-seal::before {
+            content: ''; position: absolute; top: -10px; left: -10px; right: -10px; bottom: -10px;
+            border: 1px solid var(--gold-main); border-radius: 50%;
+            animation: pulseRing 2s infinite;
+        }
+
+        .wax-seal h3 {
+            font-family: 'Aref Ruqaa', serif;
+            color: #000;
+            font-size: 28px;
+            margin-bottom: -5px;
+        }
+
+        .wax-seal span {
+            font-size: 10px;
+            color: #000;
+            font-weight: 700;
+            letter-spacing: 1px;
+        }
+
+        @keyframes pulseRing {
+            0% { transform: scale(0.8); opacity: 1; }
+            100% { transform: scale(1.5); opacity: 0; }
+        }
+
+        .envelope-box.open .env-top {
+            transform: rotateX(180deg);
+            z-index: 1; 
+        }
+        .envelope-box.open .wax-seal {
+            opacity: 0;
+            transform: translate(-50%, -50%) scale(0);
+        }
+        /* نامەکە دێتە دەرەوە و گەورە دەبێت بۆ پڕکردنەوەی شاشەکە */
+        .envelope-box.open .env-letter {
+            transform: translateY(-120px) scale(1.3);
+            z-index: 7;
+            box-shadow: 0 20px 50px rgba(0,0,0,0.9);
+        }
+        /* دواتر شاشەکە زووم دەبێت بۆ ناو نامەکە */
+        .envelope-box.zoom-in .env-letter {
+            transform: translateY(-100px) scale(5);
+            opacity: 0;
+        }
+        #envelope-wrapper.hide {
+            opacity: 0;
+            visibility: hidden;
+        }
+
+        #main-content {
+            display: none; 
+            width: 100%;
+            opacity: 0;
+            transform: scale(0.95);
+            transition: all 1.5s cubic-bezier(0.2, 0.8, 0.2, 1);
+            position: relative;
+            z-index: 10;
+        }
+        #main-content.show {
+            display: block;
+            opacity: 1;
+            transform: scale(1);
+        }
+
+        .reveal {
+            opacity: 0;
+            transform: translateY(40px);
+            transition: all 1s cubic-bezier(0.2, 0.8, 0.2, 1);
+        }
+        .reveal.active {
+            opacity: 1;
+            transform: translateY(0);
+        }
+
+        /* هێدەری وێنەدار */
+        .hero-section {
+            position: relative;
+            width: 100%;
+            height: 500px;
+            background-image: url('https://images.unsplash.com/photo-1520854221256-17451cc331bf?q=80&w=800&auto=format&fit=crop');
+            background-size: cover;
+            background-position: center;
+            background-attachment: fixed; /* Parallax effect */
+            clip-path: polygon(0 0, 100% 0, 100% 90%, 50% 100%, 0 90%);
+        }
+        .hero-overlay {
+            position: absolute; top: 0; left: 0; width: 100%; height: 100%;
+            background: linear-gradient(to bottom, rgba(10,10,10,0.3) 0%, rgba(10,10,10,1) 100%);
+            display: flex;
+            flex-direction: column;
+            justify-content: flex-end;
+            align-items: center;
+            padding-bottom: 60px;
+        }
+
+        .bismillah-hero {
+            font-family: 'Aref Ruqaa', serif;
+            font-size: 24px;
+            background: var(--gold-gradient);
+            -webkit-background-clip: text;
+            -webkit-text-fill-color: transparent;
+            margin-bottom: 15px;
+        }
+
+        .couple-names-hero {
+            font-family: 'Aref Ruqaa', serif;
+            font-size: 65px;
+            color: var(--text-light);
+            text-shadow: 0 5px 20px rgba(0,0,0,0.8);
+            display: flex;
+            align-items: center;
+            gap: 15px;
+            line-height: 1;
+        }
+        .couple-names-hero span { font-size: 28px; color: var(--gold-main); }
+
+        .content-container {
+            padding: 20px 25px 80px 25px;
+            text-align: center;
+            position: relative;
+        }
+
+        .intro-text {
+            font-family: 'Amiri', serif;
+            font-size: 18px;
+            line-height: 2.2;
+            color: var(--text-gray);
+            margin: 20px 0 50px 0;
+            padding: 0 10px;
+        }
+        .intro-text strong { color: var(--gold-light); font-size: 20px; }
+
+        .section-title {
+            position: relative;
+            font-family: 'Aref Ruqaa', serif;
+            font-size: 32px;
+            background: var(--gold-gradient);
+            -webkit-background-clip: text;
+            -webkit-text-fill-color: transparent;
+            margin-bottom: 40px;
+            display: inline-block;
+        }
+        .section-title::after {
+            content: ''; position: absolute; bottom: -10px; left: 50%; transform: translateX(-50%);
+            width: 40px; height: 2px; background: var(--gold-main);
+        }
+
+        /* بۆکسی شوشەیی تاریک (Dark Glass Card) */
+        .glass-card {
+            background: rgba(20, 20, 20, 0.6);
+            backdrop-filter: blur(10px);
+            -webkit-backdrop-filter: blur(10px);
+            border-radius: 20px;
+            padding: 30px 20px;
+            border: 1px solid rgba(212, 175, 55, 0.2);
+            box-shadow: 0 20px 40px rgba(0,0,0,0.5);
+            margin-bottom: 50px;
+            position: relative;
+            overflow: hidden;
+        }
+        .glass-card::before {
+            content: ''; position: absolute; top: -50%; left: -50%; width: 200%; height: 200%;
+            background: radial-gradient(circle, rgba(212,175,55,0.05) 0%, transparent 60%);
+            pointer-events: none;
+        }
+
+        /* ڕۆژمێر */
+        .cal-header { font-size: 20px; font-weight: 700; color: var(--text-light); margin-bottom: 20px; }
+        .cal-grid { display: grid; grid-template-columns: repeat(7, 1fr); gap: 8px; direction: ltr; }
+        .cal-day-name { font-size: 13px; color: var(--gold-main); font-weight: 700; padding-bottom: 10px;}
+        .cal-num { font-size: 15px; color: var(--text-gray); padding: 10px 0; border-radius: 50%; transition: 0.3s;}
+        .cal-active {
+            background: var(--gold-gradient);
+            color: #000 !important;
+            font-weight: bold;
+            box-shadow: 0 5px 15px rgba(212, 175, 55, 0.4);
+            transform: scale(1.15);
+        }
+
+        /* ژمێریاری کات */
+        .countdown-wrapper { display: flex; justify-content: center; gap: 12px; direction: ltr; margin-top: 30px; }
+        .time-box {
+            width: 75px; height: 85px;
+            background: rgba(0,0,0,0.5);
+            border: 1px solid rgba(212, 175, 55, 0.3);
+            border-radius: 16px;
+            display: flex; flex-direction: column; justify-content: center; align-items: center;
+            box-shadow: inset 0 0 15px rgba(212, 175, 55, 0.05);
+        }
+        .time-val { font-family: 'Aref Ruqaa', serif; font-size: 32px; color: var(--gold-main); line-height: 1; text-shadow: 0 0 10px rgba(212,175,55,0.3);}
+        .time-label { font-size: 11px; color: var(--text-gray); font-weight: 700; margin-top: 5px;}
+
+        .timeline {
+            text-align: right;
+            padding-right: 30px;
+            border-right: 1px solid rgba(212, 175, 55, 0.3);
+            margin-right: 15px;
+        }
+        .timeline-item { position: relative; margin-bottom: 40px; }
+        .timeline-item:last-child { margin-bottom: 0; }
+        .timeline-item::before {
+            content: ''; position: absolute; right: -36px; top: 0;
+            width: 12px; height: 12px; background: var(--bg-black);
+            border-radius: 50%; border: 2px solid var(--gold-main);
+            box-shadow: 0 0 10px var(--gold-main);
+        }
+        .tl-time {
+            font-family: 'Tahoma', sans-serif;
+            font-size: 13px; color: #000; font-weight: bold; background: var(--gold-gradient);
+            padding: 2px 10px; border-radius: 10px;
+            display: inline-block; margin-bottom: 10px; direction: ltr;
+        }
+        .tl-title { font-size: 18px; font-weight: 700; color: var(--text-light); }
+        .tl-desc { font-size: 14px; color: var(--text-gray); margin-top: 5px; line-height: 1.6;}
+
+        /* نەخشەی تاریک (Dark Map Filter) */
+        .map-wrapper {
+            width: 100%; height: 250px; border-radius: 20px; overflow: hidden;
+            border: 1px solid rgba(212, 175, 55, 0.3); margin-bottom: 25px;
+        }
+        .map-wrapper iframe {
+            filter: invert(90%) hue-rotate(180deg) contrast(85%) brightness(85%); /* ئەمە نەخشەکە دەکاتە تاریک! */
+        }
+
+        /* دوگمەی زێڕین */
+        .btn-gold {
+            display: inline-flex; align-items: center; justify-content: center;
+            background: var(--gold-gradient);
+            color: #000 !important;
+            padding: 15px 40px;
+            border-radius: 30px;
+            font-size: 16px;
+            font-weight: 700;
+            text-decoration: none;
+            box-shadow: 0 10px 20px rgba(212, 175, 55, 0.3);
+            transition: all 0.3s;
+            cursor: pointer;
+            gap: 10px;
+            border: none;
+        }
+        .btn-gold:active { transform: translateY(2px); box-shadow: 0 5px 10px rgba(212, 175, 55, 0.3); }
+
+        .notes-list li {
+            list-style: none; font-size: 14px; line-height: 2; margin-bottom: 15px;
+            display: flex; align-items: flex-start; gap: 10px; color: var(--text-light);
+        }
+        .notes-list i { color: var(--gold-main); margin-top: 6px; font-size: 12px;}
+
+        /* دوگمەی مۆسیقا */
+        .music-player {
+            position: fixed; bottom: 30px; left: 30px; width: 55px; height: 55px;
+            background: rgba(10,10,10,0.8); backdrop-filter: blur(5px);
+            border-radius: 50%; border: 1px solid var(--gold-main);
+            display: flex; justify-content: center; align-items: center;
+            color: var(--gold-main); font-size: 20px;
+            z-index: 100; box-shadow: 0 10px 25px rgba(0,0,0,0.8);
+            cursor: pointer; opacity: 0; transition: opacity 1s ease;
+        }
+        .music-player::after {
+            content: ''; position: absolute; width: 16px; height: 16px;
+            background: var(--gold-gradient); border-radius: 50%;
+        }
+        .music-player i { z-index: 2; color: #000; font-size: 12px; }
+        .music-player.show { opacity: 1; }
+        .music-player.playing { animation: spinRecord 4s linear infinite; }
+        @keyframes spinRecord { 100% { transform: rotate(360deg); } }
+
+    </style>
+</head>
+<body class="locked">
+
+    <div id="envelope-wrapper">
+        <div id="particles-container"></div>
+        
+        <div class="envelope-box" id="envelope-box">
+            <div class="env-back"></div>
+            
+            <div class="env-letter">
+                <i class="fa-solid fa-crown" style="color: var(--gold-main); font-size: 32px; margin-bottom: 15px;"></i>
+                <h2>بانگهێشتنامە</h2>
+                <p style="color: var(--gold-light); font-size: 12px; letter-spacing: 2px;">VIP INVITATION</p>
+            </div>
+            
+            <div class="env-front"></div>
+            <div class="env-bottom"></div>
+            <div class="env-top"></div>
+            
+            <div class="wax-seal" onclick="openEnvelope()">
+                <h3>MB</h3>
+                <span>بیکەرەوە</span>
+            </div>
+        </div>
+    </div>
+
+    <!-- مۆسیقا -->
+    <audio id="bgMusic" loop>
+        <source src="https://www.soundhelix.com/examples/mp3/SoundHelix-Song-1.mp3" type="audio/mpeg">
+    </audio>
+    <div class="music-player" id="musicBtn" onclick="toggleMusic()">
+        <i class="fa-solid fa-music"></i>
+    </div>
+
+    <div class="app-container">
+        <div id="main-content">
+            
+            <!-- هێدەری سەرەوە -->
+            <div class="hero-section">
+                <div class="hero-overlay">
+                    <div class="bismillah-hero">بِسْمِ اللَّهِ الرَّحْمَنِ الرَّحِيمِ</div>
+                    <div class="couple-names-hero">مەهەند <span>و</span> بانوو</div>
+                </div>
+            </div>
+
+            <div class="content-container">
+                
+                <div class="reveal">
+                    <p class="intro-text">
+                        بە ناوی خوای گەورە و میهرەبان<br>
+                        لە ساتێکی پڕ لە درەوشانەوە و خۆشەویستیدا، شەرەفمەندین کە <strong>ئێوەی ئازیز</strong> هاوبەشی کاتەکانمان بن لە ئاهەنگی هاوسەرگیریمان.<br>
+                        ئامادەبوونتان تاجێکە لەسەر سەری شەوەکەمان.
+                    </p>
+                </div>
+
+                <!-- ڕۆژمێر و کاتژمێر لەناو شوشەی تاریک -->
+                <div class="reveal">
+                    <h2 class="section-title">کاتی ئاهەنگ</h2>
+                    <div class="glass-card">
+                        <div class="cal-header">تشرینی یەکەم ٢٠٢٦</div>
+                        <div class="cal-grid">
+                            <div class="cal-day-name">S</div><div class="cal-day-name">M</div><div class="cal-day-name">T</div><div class="cal-day-name">W</div><div class="cal-day-name">T</div><div class="cal-day-name">F</div><div class="cal-day-name">S</div>
+                            <div></div><div></div><div></div><div class="cal-num">1</div><div class="cal-num">2</div><div class="cal-num">3</div><div class="cal-num">4</div>
+                            <div class="cal-num">5</div><div class="cal-num">6</div><div class="cal-num">7</div><div class="cal-num">8</div><div class="cal-num">9</div><div class="cal-num">10</div><div class="cal-num">11</div>
+                            <div class="cal-num">12</div><div class="cal-num">13</div><div class="cal-num">14</div><div class="cal-num cal-active">15</div><div class="cal-num">16</div><div class="cal-num">17</div><div class="cal-num">18</div>
+                            <div class="cal-num">19</div><div class="cal-num">20</div><div class="cal-num">21</div><div class="cal-num">22</div><div class="cal-num">23</div><div class="cal-num">24</div><div class="cal-num">25</div>
+                        </div>
+                        
+                        <!-- ژمێریاری (Countdown) -->
+                        <div class="countdown-wrapper" id="countdown">
+                            <div class="time-box"><span class="time-val" id="days">00</span><span class="time-label">ڕۆژ</span></div>
+                            <div class="time-box"><span class="time-val" id="hours">00</span><span class="time-label">کاتژمێر</span></div>
+                            <div class="time-box"><span class="time-val" id="minutes">00</span><span class="time-label">خولەک</span></div>
+                            <div class="time-box"><span class="time-val" id="seconds">00</span><span class="time-label">چرکە</span></div>
+                        </div>
+                    </div>
+                </div>
+
+                <!-- خشتەی بەرنامەکان -->
+                <div class="reveal">
+                    <h2 class="section-title">بەرنامەی ئاهەنگ</h2>
+                    <div class="glass-card" style="padding: 40px 20px;">
+                        <div class="timeline">
+                            <div class="timeline-item">
+                                <div class="tl-time">7:00 PM</div>
+                                <div class="tl-title">پێشوازی لە میوانەکان</div>
+                                <div class="tl-desc">بەخێرهاتنی ئازیزانمان لەسەر فەرشی سوور.</div>
+                            </div>
+                            <div class="timeline-item">
+                                <div class="tl-time">8:00 PM</div>
+                                <div class="tl-title">دەرکەوتنی شاهانە</div>
+                                <div class="tl-desc">هاتنی بووک و زاوا و دەستپێکی سەمای یەکەم.</div>
+                            </div>
+                            <div class="timeline-item">
+                                <div class="tl-time">9:30 PM</div>
+                                <div class="tl-title">ژەمی ئێوارەی ڤی ئای پی</div>
+                                <div class="tl-desc">پێشکەشکردنی بوفەی کراوەی شاهانە.</div>
+                            </div>
+                        </div>
+                    </div>
+                </div>
+
+                <!-- ناونیشان و نەخشەی تاریک -->
+                <div class="reveal">
+                    <h2 class="section-title">شوێنی ئاهەنگ</h2>
+                    <p style="font-size: 18px; color: var(--gold-main); font-weight: 700; margin-bottom: 20px;">
+                        هۆڵی تەلاری زێڕین - ڕێگای سەرەکی
+                    </p>
+                    <div class="map-wrapper">
+                        <!-- نەخشەی گوگڵ کە بە CSS تاریک کراوە -->
+                        <iframe src="https://www.google.com/maps/embed?pb=!1m18!1m12!1m3!1d3246.368819075355!2d45.4371404!3d35.5606117!2m3!1f0!2f0!3f0!3m2!1i1024!2i768!4f13.1!3m3!1m2!1s0x0%3A0x0!2zMzXCsDMzJzM4LjIiTiA0NcKwMjYnMTMuNyJF!5e0!3m2!1sen!2siq!4v1620000000000!5m2!1sen!2siq" width="100%" height="100%" style="border:0;" allowfullscreen="" loading="lazy"></iframe>
+                    </div>
+                    <a href="#" class="btn-gold"><i class="fa-solid fa-map-location-dot"></i> کردنەوە لە نەخشە</a>
+                </div>
+
+                <!-- تێبینی و پەیوەندی -->
+                <div class="reveal">
+                    <div class="glass-card" style="margin-top: 50px;">
+                        <h2 class="section-title" style="font-size: 26px;">تێبینی گرنگ</h2>
+                        <ul class="notes-list">
+                            <li><i class="fa-solid fa-diamond"></i> ئامادەبوونتان لە کاتی خۆیدا ڕێزگرتنە لە کاتەکانمان.</li>
+                            <li><i class="fa-solid fa-diamond"></i> لەبەر تایبەتمەندی ئاهەنگەکە، وێنەگرتن بە مۆبایل بە توندی قەدەغەیە.</li>
+                            <li><i class="fa-solid fa-diamond"></i> هیوای کاتێکی پڕ لە خۆشی بۆ هەمووان دەخوازین.</li>
+                        </ul>
+                        
+                        <div style="margin-top: 35px; border-top: 1px solid rgba(212, 175, 55, 0.2); padding-top: 30px;">
+                            <p style="font-size: 13px; color: var(--text-gray); margin-bottom: 15px;">بۆ پشتڕاستکردنەوەی ئامادەبوونتان:</p>
+                            <a href="tel:07500000000" class="btn-gold">
+                                <i class="fa-solid fa-phone"></i> پەیوەندی کردن
+                            </a>
+                        </div>
+                    </div>
+                </div>
+
+                <!-- کۆتایی -->
+                <div class="reveal" style="margin-top: 30px; opacity: 0.5;">
+                    <i class="fa-solid fa-gem" style="color: var(--gold-main); font-size: 20px; margin-bottom: 10px;"></i>
+                    <p style="font-size: 12px; color: var(--text-gray); letter-spacing: 2px;">EXCLUSIVE INVITATION</p>
+                </div>
+
+            </div>
+        </div>
+    </div>
+
+    <script>
+        // دروستکردنی پڕیشکە زێڕینەکان بۆ پاشبنەما
+        function createParticles() {
+            const container = document.getElementById('particles-container');
+            const particleCount = 30;
+            
+            for (let i = 0; i < particleCount; i++) {
+                let particle = document.createElement('div');
+                particle.className = 'particle';
+                
+                let size = Math.random() * 4 + 1;
+                let left = Math.random() * 100;
+                let delay = Math.random() * 10;
+                let duration = Math.random() * 5 + 5;
+                
+                particle.style.width = size + 'px';
+                particle.style.height = size + 'px';
+                particle.style.left = left + '%';
+                particle.style.animationDelay = delay + 's';
+                particle.style.animationDuration = duration + 's';
+                
+                container.appendChild(particle);
+            }
+        }
+        createParticles();
+
+        // فەنکشنی کردنەوەی زەرفەکە (ئەنیمەیشنی سینەمایی پێشکەوتوو)
+        function openEnvelope() {
+            const envelopeBox = document.getElementById('envelope-box');
+            const envelopeWrapper = document.getElementById('envelope-wrapper');
+            const mainContent = document.getElementById('main-content');
+            const musicBtn = document.getElementById('musicBtn');
+            const audio = document.getElementById('bgMusic');
+            
+            // ١. کردنەوەی سەری زەرفەکە و هاتنە دەرەوەی نامەکە
+            envelopeBox.classList.add('open');
+            
+            if(audio) {
+                audio.volume = 0.5;
+                audio.play().then(() => { musicBtn.classList.add('playing'); }).catch(e => console.log("لێدانی ئۆتۆماتیکی ڕاگیراوە"));
+            }
+
+            // ٢. زووم کردنە ناو نامەکە بەشێوەیەکی سینەمایی
+            setTimeout(() => {
+                envelopeBox.classList.add('zoom-in'); 
+                
+                // ٣. ونبوونی زەرفەکە و دەرکەوتنی پەڕە سەرەکییەکە
+                setTimeout(() => {
+                    envelopeWrapper.style.display = 'none'; 
+                    document.body.classList.remove('locked'); 
+                    mainContent.classList.add('show'); 
+                    musicBtn.classList.add('show'); 
+                    
+                    triggerReveals();
+                }, 1000);
+
+            }, 2000); // چاوەڕێ دەکات نامەکە بە تەواوی بێتە دەرەوە
+        }
+
+        // ئەنیمەیشنی سکرۆڵ
+        function triggerReveals() {
+            const reveals = document.querySelectorAll('.reveal');
+            const windowHeight = window.innerHeight;
+            
+            reveals.forEach(reveal => {
+                const elementTop = reveal.getBoundingClientRect().top;
+                const elementVisible = 100;
+                
+                if (elementTop < windowHeight - elementVisible) {
+                    reveal.classList.add('active');
+                }
+            });
+        }
+        window.addEventListener('scroll', triggerReveals);
+
+        // کۆنترۆڵی مۆسیقا
+        function toggleMusic() {
+            const btn = document.getElementById('musicBtn');
+            const audio = document.getElementById('bgMusic');
+            
+            if (btn.classList.contains('playing')) {
+                btn.classList.remove('playing');
+                audio.pause();
+            } else {
+                btn.classList.add('playing');
+                audio.play();
+            }
+        }
+
+        // ژمێریاری کات (Countdown)
+        const countDownDate = new Date("Oct 15, 2026 19:00:00").getTime();
+
+        const countdownInterval = setInterval(function() {
+            const now = new Date().getTime();
+            const distance = countDownDate - now;
+
+            if (distance < 0) {
+                clearInterval(countdownInterval);
+                document.getElementById("days").innerHTML = "00";
+                document.getElementById("hours").innerHTML = "00";
+                document.getElementById("minutes").innerHTML = "00";
+                document.getElementById("seconds").innerHTML = "00";
+                return;
+            }
+
+            const days = Math.floor(distance / (1000 * 60 * 60 * 24));
+            const hours = Math.floor((distance % (1000 * 60 * 60 * 24)) / (1000 * 60 * 60));
+            const minutes = Math.floor((distance % (1000 * 60 * 60)) / (1000 * 60));
+            const seconds = Math.floor((distance % (1000 * 60)) / 1000);
+
+            document.getElementById("days").innerHTML = days < 10 ? "0" + days : days;
+            document.getElementById("hours").innerHTML = hours < 10 ? "0" + hours : hours;
+            document.getElementById("minutes").innerHTML = minutes < 10 ? "0" + minutes : minutes;
+            document.getElementById("seconds").innerHTML = seconds < 10 ? "0" + seconds : seconds;
+            
+        }, 1000);
+
+    </script>
+</body>
+</html>
