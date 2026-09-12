@@ -1,0 +1,678 @@
+<!DOCTYPE html>
+<html lang="ckb" dir="rtl">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>دروستکەری لێبڵی دەفتەر - Horaz IT</title>
+    
+    <!-- بەکارهێنانی Tailwind CSS -->
+    <script src="https://cdn.tailwindcss.com"></script>
+    
+    <!-- فۆنتی کوردی/عەرەبی -->
+    <link href="https://fonts.googleapis.com/css2?family=Noto+Kufi+Arabic:wght@400;700;900&display=swap" rel="stylesheet">
+    
+    <style>
+        body {
+            font-family: 'Noto Kufi Arabic', sans-serif;
+            background-color: #f8fafc;
+            /* زۆر گرنگە بۆ پرێنتکردنی باکگراوندەکان */
+            -webkit-print-color-adjust: exact !important;
+            print-color-adjust: exact !important;
+        }
+        
+        @media print {
+            body { background-color: white; }
+            .no-print { display: none !important; }
+            .print-area {
+                display: block;
+                width: 100%;
+                margin: 0;
+                padding: 0;
+            }
+            .labels-container {
+                display: grid;
+                grid-template-columns: repeat(2, 1fr);
+                gap: 15px; /* بۆشایی نێوان لێبڵەکان لە کاتی چاپکردن */
+                page-break-inside: avoid;
+            }
+            .label-card {
+                break-inside: avoid;
+                box-shadow: none !important;
+                border-width: 2px !important;
+            }
+        }
+
+        /* نەخشی خاڵ خاڵی بۆ باکگراوندی دیزاینی ژمارە ٢ */
+        .card-bg-pattern {
+            background-image: radial-gradient(#ffffff60 2px, transparent 2px);
+            background-size: 14px 14px;
+        }
+
+        /* شێوازی پەڕەی دەفتەر بۆ دیزاینی ١٠ */
+        .notebook-pattern {
+            background-image: repeating-linear-gradient(transparent, transparent 24px, #60a5fa 25px);
+            background-position: 0 10px;
+        }
+        
+        .text-outline {
+            text-shadow: 1px 1px 0px white, -1px -1px 0px white, 1px -1px 0px white, -1px 1px 0px white, 0px 3px 5px rgba(0,0,0,0.15);
+        }
+        
+        /* شاردنەوەی سکڕۆڵبار */
+        ::-webkit-scrollbar { width: 8px; }
+        ::-webkit-scrollbar-track { background: #f1f1f1; border-radius: 10px; }
+        ::-webkit-scrollbar-thumb { background: #cbd5e1; border-radius: 10px; }
+        ::-webkit-scrollbar-thumb:hover { background: #94a3b8; }
+        
+        @keyframes spin { 100% { transform: rotate(360deg); } }
+        .spinner { animation: spin 1s linear infinite; }
+    </style>
+
+    <script type="module">
+        import imglyRemoveBackground from "https://unpkg.com/@imgly/background-removal@1.4.3/dist/imglyRemoveBackground.js";
+        window.removeBg = imglyRemoveBackground;
+    </script>
+</head>
+<body class="p-4 md:p-8 selection:bg-blue-200 selection:text-blue-900">
+
+    <div class="max-w-6xl mx-auto">
+        <div class="no-print bg-white p-6 md:p-10 rounded-[2.5rem] shadow-2xl mb-12 border border-gray-100 relative overflow-hidden">
+            
+            <div class="absolute top-0 right-0 w-72 h-72 bg-blue-100 rounded-full blur-3xl -z-10 -mr-20 -mt-20 opacity-60"></div>
+            <div class="absolute bottom-0 left-0 w-96 h-96 bg-purple-100 rounded-full blur-3xl -z-10 -ml-20 -mb-20 opacity-60"></div>
+
+            <div class="text-center mb-10">
+                <h1 class="text-3xl md:text-5xl font-black mb-4 text-gray-800 tracking-tight">
+                    دروستکەری لێبڵی <span class="text-transparent bg-clip-text bg-gradient-to-r from-blue-600 to-indigo-600">دەفتەر</span> 🎒
+                </h1>
+                <p class="text-gray-500 font-medium">زانیارییەکان پڕبکەرەوە، وێنەیەک دابنێ، و دیزاینێک هەڵبژێرە بۆ چاپکردن.</p>
+            </div>
+            
+            <div class="grid grid-cols-1 md:grid-cols-2 gap-8 mb-10">
+                <div class="space-y-6 bg-white/80 backdrop-blur-md p-6 rounded-[2rem] border border-gray-100 shadow-sm shadow-blue-50">
+                    <h3 class="font-black text-gray-800 text-lg mb-2 flex items-center gap-2">
+                        <span class="text-2xl">📝</span> زانیارییەکان
+                    </h3>
+                    
+                    <div class="space-y-4">
+                        <div>
+                            <label class="block text-sm font-bold text-gray-700 mb-2">ناوی قوتابی:</label>
+                            <input type="text" id="studentName" placeholder="نموونە: ئەحمەد ئازاد" class="w-full px-5 py-3.5 bg-gray-50 border-2 border-gray-100 rounded-2xl focus:outline-none focus:border-blue-500 focus:bg-white transition-all text-gray-800 font-bold placeholder:font-normal">
+                        </div>
+                        <div class="grid grid-cols-2 gap-4">
+                            <div>
+                                <label class="block text-sm font-bold text-gray-700 mb-2">پۆل:</label>
+                                <input type="text" id="studentClass" placeholder="نموونە: یەکەم" class="w-full px-5 py-3.5 bg-gray-50 border-2 border-gray-100 rounded-2xl focus:outline-none focus:border-blue-500 focus:bg-white transition-all text-gray-800 font-bold placeholder:font-normal">
+                            </div>
+                            <div>
+                                <label class="block text-sm font-bold text-gray-700 mb-2">قوتابخانە:</label>
+                                <input type="text" id="schoolName" placeholder="نموونە: ڕوناکی" class="w-full px-5 py-3.5 bg-gray-50 border-2 border-gray-100 rounded-2xl focus:outline-none focus:border-blue-500 focus:bg-white transition-all text-gray-800 font-bold placeholder:font-normal">
+                            </div>
+                        </div>
+                    </div>
+                </div>
+
+                <div class="bg-white/80 backdrop-blur-md p-6 rounded-[2rem] border border-gray-100 shadow-sm shadow-purple-50 flex flex-col relative overflow-hidden">
+                    <h3 class="font-black text-gray-800 text-lg mb-4 flex items-center gap-2">
+                        <span class="text-2xl">✨</span> وێنەی قوتابی
+                    </h3>
+                    
+                    <div id="uploadBox" class="flex-grow relative border-2 border-dashed border-blue-300 rounded-[1.5rem] p-6 hover:bg-blue-50 hover:border-blue-400 transition-all duration-300 text-center cursor-pointer group flex items-center justify-center bg-gray-50/50">
+                        <input type="file" id="imageInput" accept="image/*" class="absolute inset-0 w-full h-full opacity-0 cursor-pointer z-20">
+                        
+                        <div class="space-y-4 pointer-events-none relative z-10 flex flex-col items-center">
+                            <div id="uploadIcon" class="w-16 h-16 bg-gradient-to-tr from-blue-100 to-indigo-100 text-blue-600 rounded-full flex items-center justify-center mx-auto group-hover:scale-110 group-hover:rotate-3 transition-transform duration-300 shadow-sm">
+                                <svg xmlns="http://www.w3.org/2000/svg" class="h-8 w-8" fill="none" viewBox="0 0 24 24" stroke="currentColor">
+                                    <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M3 9a2 2 0 012-2h.93a2 2 0 001.664-.89l.812-1.22A2 2 0 0110.07 4h3.86a2 2 0 011.664.89l.812 1.22A2 2 0 0018.07 7H19a2 2 0 012 2v9a2 2 0 01-2 2H5a2 2 0 01-2-2V9z" />
+                                    <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M15 13a3 3 0 11-6 0 3 3 0 016 0z" />
+                                </svg>
+                            </div>
+
+                            <div id="loadingSpinner" class="hidden flex flex-col items-center gap-3">
+                                <div class="w-14 h-14 bg-white text-blue-600 rounded-full flex items-center justify-center shadow-lg border border-gray-100">
+                                    <svg class="spinner h-7 w-7" xmlns="http://www.w3.org/2000/svg" fill="none" viewBox="0 0 24 24">
+                                        <circle class="opacity-25" cx="12" cy="12" r="10" stroke="currentColor" stroke-width="4"></circle>
+                                        <path class="opacity-75" fill="currentColor" d="M4 12a8 8 0 018-8V0C5.373 0 0 5.373 0 12h4zm2 5.291A7.962 7.962 0 014 12H0c0 3.042 1.135 5.824 3 7.938l3-2.647z"></path>
+                                    </svg>
+                                </div>
+                                <span class="text-sm font-bold text-blue-600 animate-pulse">سڕینەوەی باکگراوند بە زیرەکی دەستکرد...</span>
+                            </div>
+
+                            <div id="textContainer">
+                                <p id="uploadText" class="text-base font-bold text-gray-700">کلیک بکە بۆ دانانی وێنە</p>
+                                <p id="subText" class="text-xs font-semibold text-gray-500 mt-2 bg-blue-100 text-blue-800 px-3 py-1.5 rounded-full inline-block">باکگراوندەکەی ڕاستەوخۆ دەسڕێتەوە! 🪄</p>
+                            </div>
+                        </div>
+                    </div>
+                </div>
+            </div>
+
+            <div class="mb-10 bg-gray-50/50 p-6 rounded-[2rem] border border-gray-100">
+                <h3 class="font-black text-gray-800 text-lg mb-5 text-center flex items-center justify-center gap-2">
+                    <span>🎨</span> شێوازی دیزاین هەڵبژێرە:
+                </h3>
+                
+                <div class="flex flex-wrap justify-center gap-3">
+                    <button onclick="selectDesign('design1')" id="btn-design1" class="design-btn relative px-5 py-3 rounded-2xl border-2 border-gray-200 bg-white hover:bg-gray-50 transition-all text-center group ring-0 flex-grow sm:flex-grow-0">
+                        <span class="font-bold text-gray-700 group-hover:text-blue-600 transition-colors">کلاسیک</span>
+                    </button>
+
+                    <button onclick="selectDesign('design2')" id="btn-design2" class="design-btn relative px-5 py-3 rounded-2xl border-2 border-transparent bg-white hover:bg-gray-50 transition-all text-center group ring-4 ring-blue-500 flex-grow sm:flex-grow-0">
+                        <span class="font-bold text-blue-600 group-hover:text-blue-700 transition-colors">ڕەنگاوڕەنگ</span>
+                    </button>
+
+                    <button onclick="selectDesign('design3')" id="btn-design3" class="design-btn relative px-5 py-3 rounded-2xl border-2 border-gray-200 bg-white hover:bg-gray-50 transition-all text-center group ring-0 flex-grow sm:flex-grow-0">
+                        <span class="font-bold text-gray-700 group-hover:text-green-600 transition-colors">ستوونی</span>
+                    </button>
+                    
+                    <button onclick="selectDesign('design4')" id="btn-design4" class="design-btn relative px-5 py-3 rounded-2xl border-2 border-gray-200 bg-white hover:bg-gray-50 transition-all text-center group ring-0 flex-grow sm:flex-grow-0">
+                        <span class="font-bold text-gray-700 group-hover:text-blue-600 transition-colors">مۆدێرن</span>
+                    </button>
+
+                    <button onclick="selectDesign('design5')" id="btn-design5" class="design-btn relative px-5 py-3 rounded-2xl border-2 border-gray-200 bg-white hover:bg-gray-50 transition-all text-center group ring-0 flex-grow sm:flex-grow-0">
+                        <span class="font-bold text-gray-700 group-hover:text-pink-600 transition-colors">کیوت</span>
+                    </button>
+
+                    <button onclick="selectDesign('design6')" id="btn-design6" class="design-btn relative px-5 py-3 rounded-2xl border-2 border-gray-200 bg-white hover:bg-gray-50 transition-all text-center group ring-0 flex-grow sm:flex-grow-0">
+                        <span class="font-bold text-gray-700 group-hover:text-indigo-600 transition-colors">شیک و سادە</span>
+                    </button>
+
+                    <button onclick="selectDesign('design7')" id="btn-design7" class="design-btn relative px-5 py-3 rounded-2xl border-2 border-gray-200 bg-white hover:bg-gray-50 transition-all text-center group ring-0 flex-grow sm:flex-grow-0 bg-gray-900 text-gray-100">
+                        <span class="font-bold group-hover:text-yellow-400 transition-colors">گەردوون ✨</span>
+                    </button>
+
+                    <button onclick="selectDesign('design8')" id="btn-design8" class="design-btn relative px-5 py-3 rounded-2xl border-2 border-gray-200 bg-white hover:bg-gray-50 transition-all text-center group ring-0 flex-grow sm:flex-grow-0">
+                        <span class="font-bold text-gray-700 group-hover:text-blue-600 transition-colors">شێوازی باج</span>
+                    </button>
+                    
+                    <!-- دوو دیزاینە نوێیەکە -->
+                    <button onclick="selectDesign('design9')" id="btn-design9" class="design-btn relative px-5 py-3 rounded-2xl border-2 border-gray-200 bg-white hover:bg-gray-50 transition-all text-center group ring-0 flex-grow sm:flex-grow-0">
+                        <span class="font-bold text-gray-700 group-hover:text-cyan-600 transition-colors">ئەندازەیی 📐</span>
+                    </button>
+                    
+                    <button onclick="selectDesign('design10')" id="btn-design10" class="design-btn relative px-5 py-3 rounded-2xl border-2 border-gray-200 bg-white hover:bg-gray-50 transition-all text-center group ring-0 flex-grow sm:flex-grow-0">
+                        <span class="font-bold text-gray-700 group-hover:text-amber-600 transition-colors">دەفتەر ✏️</span>
+                    </button>
+                </div>
+            </div>
+
+            <div class="flex flex-col sm:flex-row justify-between items-center gap-4 pt-6 border-t border-gray-100">
+                <div class="bg-gray-900 rounded-[1.5rem] p-2 pr-4 flex items-center justify-between w-full sm:w-auto gap-4 shadow-lg">
+                    <div class="flex items-center gap-3">
+                        <div class="w-10 h-10 bg-white rounded-xl flex items-center justify-center font-black text-gray-900 text-xl shadow-inner">
+                            H
+                        </div>
+                        <div class="hidden sm:block text-right">
+                            <p class="font-bold text-[10px] text-gray-400">بەرهەمی</p>
+                            <p class="font-black text-sm text-white tracking-wider">Horaz IT</p>
+                        </div>
+                    </div>
+                    
+                    <a href="https://wa.me/9647501784002" target="_blank" class="px-4 py-2.5 bg-[#25D366] hover:bg-[#1ebd5b] rounded-xl text-sm font-bold transition-all flex items-center gap-2 text-white shadow-lg shadow-[#25D366]/30 hover:scale-105 active:scale-95">
+                        <svg xmlns="http://www.w3.org/2000/svg" class="h-5 w-5" fill="currentColor" viewBox="0 0 24 24">
+                            <path d="M17.472 14.382c-.297-.149-1.758-.867-2.03-.967-.273-.099-.471-.148-.67.15-.197.297-.767.966-.94 1.164-.173.199-.347.223-.644.075-.297-.15-1.255-.463-2.39-1.475-.883-.788-1.48-1.761-1.653-2.059-.173-.297-.018-.458.13-.606.134-.133.298-.347.446-.52.149-.174.198-.298.298-.497.099-.198.05-.371-.025-.52-.075-.149-.669-1.612-.916-2.207-.242-.579-.487-.5-.669-.51-.173-.008-.371-.01-.57-.01-.198 0-.52.074-.792.372-.272.297-1.04 1.016-1.04 2.479 0 1.462 1.065 2.875 1.213 3.074.149.198 2.096 3.2 5.077 4.487.709.306 1.262.489 1.694.625.712.227 1.36.195 1.871.118.571-.085 1.758-.719 2.006-1.413.248-.694.248-1.289.173-1.413-.074-.124-.272-.198-.57-.347m-5.421 7.403h-.004a9.87 9.87 0 01-5.031-1.378l-.361-.214-3.741.982.998-3.648-.235-.374a9.86 9.86 0 01-1.51-5.26c.001-5.45 4.436-9.884 9.888-9.884 2.64 0 5.122 1.03 6.988 2.898a9.825 9.825 0 012.893 6.994c-.003 5.45-4.437 9.884-9.885 9.884m8.413-18.297A11.815 11.815 0 0012.05 0C5.495 0 .16 5.335.157 11.892c0 2.096.547 4.142 1.588 5.945L.057 24l6.305-1.654a11.882 11.882 0 005.683 1.448h.005c6.554 0 11.89-5.335 11.893-11.893a11.821 11.821 0 00-3.48-8.413Z"/>
+                        </svg>
+                        <span class="dir-ltr">0750 178 4002</span>
+                    </a>
+                </div>
+
+                <button onclick="window.print()" class="w-full sm:w-auto px-10 py-3.5 bg-blue-600 text-white rounded-[1.5rem] hover:bg-blue-700 transition duration-300 shadow-lg shadow-blue-500/30 font-bold text-lg flex items-center justify-center gap-3 active:scale-95">
+                    <svg xmlns="http://www.w3.org/2000/svg" class="h-6 w-6" fill="none" viewBox="0 0 24 24" stroke="currentColor">
+                        <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M17 17h2a2 2 0 002-2v-4a2 2 0 00-2-2H5a2 2 0 00-2 2v4a2 2 0 002 2h2m2 4h6a2 2 0 002-2v-4a2 2 0 00-2-2H9a2 2 0 00-2 2v4a2 2 0 002 2zm8-12V5a2 2 0 00-2-2H9a2 2 0 00-2 2v4h10z" />
+                    </svg>
+                    چاپکردنی لێبڵەکان
+                </button>
+            </div>
+        </div>
+
+        <div class="print-area pb-20">
+            <div id="labelsContainer" class="labels-container grid grid-cols-1 sm:grid-cols-2 gap-x-6 gap-y-6">
+                <!-- لێبڵەکان لێرەدا دروست دەکرێن -->
+            </div>
+        </div>
+    </div>
+
+    <script>
+        const subjects = [
+            { title: "زانست",       bgTheme: "bg-blue-100",    borderStyle: "border-blue-400", titleColor: "text-blue-800", gradient: "from-blue-100 to-blue-200", icon: "🔬", textColor: "text-blue-600" },
+            { title: "عەرەبی",      bgTheme: "bg-amber-100",  borderStyle: "border-amber-400", titleColor: "text-amber-800", gradient: "from-amber-100 to-amber-200", icon: "📚", textColor: "text-amber-600" },
+            { title: "ئیسلامی",      bgTheme: "bg-purple-100", borderStyle: "border-purple-400", titleColor: "text-purple-800", gradient: "from-purple-100 to-purple-200", icon: "🕌", textColor: "text-purple-600" },
+            { title: "وەرزش",       bgTheme: "bg-emerald-100",   borderStyle: "border-emerald-400", titleColor: "text-emerald-800", gradient: "from-emerald-100 to-emerald-200", icon: "⚽", textColor: "text-emerald-600" },
+            { title: "کوردی",       bgTheme: "bg-rose-100",    borderStyle: "border-rose-400", titleColor: "text-rose-800", gradient: "from-rose-100 to-rose-200", icon: "📖", textColor: "text-rose-600" },
+            { title: "بیرکاری",      bgTheme: "bg-cyan-100",    borderStyle: "border-cyan-400", titleColor: "text-cyan-800", gradient: "from-cyan-100 to-cyan-200", icon: "🧮", textColor: "text-cyan-600" },
+            { title: "هونەر",       bgTheme: "bg-pink-100",    borderStyle: "border-pink-400", titleColor: "text-pink-800", gradient: "from-pink-100 to-pink-200", icon: "🎨", textColor: "text-pink-600" },
+            { title: "ئینگلیزی",     bgTheme: "bg-indigo-100",  borderStyle: "border-indigo-400", titleColor: "text-indigo-800", gradient: "from-indigo-100 to-indigo-200", icon: "ABC", textColor: "text-indigo-600" }
+        ];
+
+        let currentImageSrc = "https://cdn3d.iconscout.com/3d/premium/thumb/boy-avatar-6299533-5187871.png";
+        let currentDesign = 'design2';
+
+        document.getElementById('studentName').addEventListener('input', updateLabels);
+        document.getElementById('studentClass').addEventListener('input', updateLabels);
+        document.getElementById('schoolName').addEventListener('input', updateLabels);
+
+        document.getElementById('imageInput').addEventListener('change', async function(e) {
+            const file = e.target.files[0];
+            if (!file) return;
+
+            const uploadText = document.getElementById('uploadText');
+            const subText = document.getElementById('subText');
+            const uploadIcon = document.getElementById('uploadIcon');
+            const loadingSpinner = document.getElementById('loadingSpinner');
+            const textContainer = document.getElementById('textContainer');
+            
+            const originalUrl = URL.createObjectURL(file);
+            currentImageSrc = originalUrl;
+            updateLabels();
+
+            uploadIcon.classList.add('hidden');
+            textContainer.classList.add('hidden');
+            loadingSpinner.classList.remove('hidden');
+
+            try {
+                if(window.removeBg) {
+                    const blob = await window.removeBg(file);
+                    const url = URL.createObjectURL(blob);
+                    
+                    currentImageSrc = url; 
+                    updateLabels();
+                    
+                    uploadText.innerText = "باکگراوند سەرکەوتووانە سڕایەوە! ✅";
+                    subText.innerText = "وێنەکە بە جوانی خراوەتە ناو چوارچێوەکەی";
+                    subText.className = "text-xs font-bold text-green-700 bg-green-100 px-3 py-1.5 rounded-full inline-block mt-2";
+                } else {
+                    throw new Error("کتێبخانەی سڕینەوە لۆد نەبووە");
+                }
+            } catch (error) {
+                console.error("کێشە لە سڕینەوەی باکگراوند:", error);
+                uploadText.innerText = "کێشە لە سڕینەوە ڕوویدا";
+                subText.innerText = "وێنەکە بە باکگراوندەکەیەوە دانرا";
+                subText.className = "text-xs font-bold text-orange-700 bg-orange-100 px-3 py-1.5 rounded-full inline-block mt-2";
+            } finally {
+                loadingSpinner.classList.add('hidden');
+                uploadIcon.classList.remove('hidden');
+                textContainer.classList.remove('hidden');
+            }
+        });
+
+        function selectDesign(designName) {
+            currentDesign = designName;
+            
+            document.querySelectorAll('.design-btn').forEach(btn => {
+                btn.classList.remove('ring-4', 'ring-blue-500', 'border-transparent');
+                if(!btn.classList.contains('bg-gray-900')) {
+                    btn.classList.add('border-gray-200');
+                } else {
+                    btn.classList.remove('border-gray-200'); 
+                    btn.classList.add('border-gray-700'); 
+                }
+            });
+
+            const selectedBtn = document.getElementById('btn-' + designName);
+            
+            if(!selectedBtn.classList.contains('bg-gray-900')) {
+                selectedBtn.classList.remove('border-gray-200');
+            }
+            selectedBtn.classList.add('ring-4', 'ring-blue-500', 'border-transparent');
+            
+            updateLabels(); 
+        }
+
+        function updateLabels() {
+            let nameValue = document.getElementById('studentName').value.trim();
+            let classValue = document.getElementById('studentClass').value.trim();
+            let schoolValue = document.getElementById('schoolName').value.trim();
+
+            const displayEmpty = "................";
+            
+            const isNameEmpty = !nameValue;
+            const isClassEmpty = !classValue;
+            const isSchoolEmpty = !schoolValue;
+
+            nameValue = nameValue || displayEmpty;
+            classValue = classValue || displayEmpty;
+            schoolValue = schoolValue || displayEmpty;
+
+            const container = document.getElementById('labelsContainer');
+            container.innerHTML = ''; 
+
+            subjects.forEach(subject => {
+                const card = document.createElement('div');
+                
+                // --- دیزاینی ١: کلاسیک ---
+                // گۆڕانکاری: وێنەکە بە تەواوی لەناو چوارگۆشەیەکی خڕکراودایە بێ ئەوەی دەربچێت
+                if (currentDesign === 'design1') {
+                    card.className = `label-card flex flex-row bg-white rounded-[1.5rem] shadow-sm border-r-8 ${subject.borderStyle} border border-gray-200 h-40 overflow-hidden`;
+                    card.innerHTML = `
+                        <div class="w-[35%] h-full p-2 ${subject.bgTheme} border-l border-gray-100 flex items-center justify-center">
+                            <div class="w-full h-full rounded-xl overflow-hidden bg-white/50 border border-white">
+                                <img src="${currentImageSrc}" class="w-full h-full object-cover object-top drop-shadow-sm">
+                            </div>
+                        </div>
+                        <div class="w-[65%] h-full p-4 flex flex-col justify-center bg-white">
+                            <div class="flex items-center gap-2 mb-2 border-b pb-2 ${subject.borderStyle} border-dashed">
+                                <span class="text-2xl">${subject.icon}</span>
+                                <h2 class="text-xl font-black ${subject.titleColor}">${subject.title}</h2>
+                            </div>
+                            <div class="space-y-1.5 text-[13px]">
+                                <div class="flex items-center"><span class="font-bold text-gray-500 w-14 shrink-0">ناو:</span> <span class="font-bold text-gray-900 ${isNameEmpty ? 'text-gray-300' : ''} truncate">${nameValue}</span></div>
+                                <div class="flex items-center"><span class="font-bold text-gray-500 w-14 shrink-0">پۆل:</span> <span class="font-bold text-gray-800 ${isClassEmpty ? 'text-gray-300' : ''}">${classValue}</span></div>
+                                <div class="flex items-center"><span class="font-bold text-gray-500 w-14 shrink-0">قوتابخانە:</span> <span class="font-bold text-gray-800 ${isSchoolEmpty ? 'text-gray-300' : ''}">${schoolValue}</span></div>
+                            </div>
+                        </div>
+                    `;
+                } 
+                // --- دیزاینی ٢: ڕەنگاوڕەنگ ---
+                // گۆڕانکاری: وێنەکە چووەتە ناو بازنەیەک
+                else if (currentDesign === 'design2') {
+                    card.className = `label-card relative rounded-[1.5rem] border-2 ${subject.borderStyle} flex flex-row h-44 bg-gradient-to-br ${subject.gradient} overflow-hidden`;
+                    card.innerHTML = `
+                        <div class="absolute inset-0 card-bg-pattern opacity-60 z-0 pointer-events-none rounded-[1.5rem]"></div>
+                        
+                        <div class="w-[40%] h-full flex items-center justify-center p-2 z-10 relative">
+                            <div class="w-[90px] h-[90px] rounded-full overflow-hidden bg-white/80 border-[3px] border-white shadow-md">
+                                <img src="${currentImageSrc}" class="w-full h-full object-cover object-top drop-shadow-sm">
+                            </div>
+                        </div>
+
+                        <div class="w-[60%] h-full flex flex-col justify-center p-3 z-10 relative">
+                            <div class="flex items-center justify-between mb-3 w-full pr-1">
+                                <h2 class="text-2xl font-black ${subject.titleColor} text-outline leading-none text-right w-full">
+                                    ${subject.title}
+                                </h2>
+                                <div class="text-3xl opacity-90 pl-1">${subject.icon}</div>
+                            </div>
+
+                            <div class="bg-white/90 backdrop-blur-sm rounded-xl p-2.5 w-full z-10 flex flex-col gap-1.5 relative shadow-sm border border-white/60 text-[13px]">
+                                <div class="flex items-center border-b border-gray-100 pb-1 border-dashed">
+                                    <span class="font-bold text-gray-500 w-14 shrink-0">ناو:</span> 
+                                    <span class="text-gray-900 font-bold ${isNameEmpty ? 'text-gray-300' : ''} truncate">${nameValue}</span>
+                                </div>
+                                <div class="flex items-center border-b border-gray-100 pb-1 border-dashed">
+                                    <span class="font-bold text-gray-500 w-14 shrink-0">پۆل:</span> 
+                                    <span class="text-gray-800 font-bold ${isClassEmpty ? 'text-gray-300' : ''}">${classValue}</span>
+                                </div>
+                                <div class="flex items-center">
+                                    <span class="font-bold text-gray-500 w-14 shrink-0">قوتابخانە:</span> 
+                                    <span class="text-gray-800 font-bold ${isSchoolEmpty ? 'text-gray-300' : ''}">${schoolValue}</span>
+                                </div>
+                            </div>
+                        </div>
+                    `;
+                }
+                // --- دیزاینی ٣: ستوونی ---
+                // گۆڕانکاری: وێنەکە لەناو بازنەیەکی ناوەڕاستدایە
+                else if (currentDesign === 'design3') {
+                    card.className = `label-card flex flex-col relative rounded-[2rem] border-2 ${subject.borderStyle} bg-white text-center h-[260px] shadow-sm overflow-hidden`;
+                    card.innerHTML = `
+                        <div class="w-full h-24 ${subject.bgTheme} relative">
+                            <div class="absolute top-2 left-4 text-3xl opacity-80 bg-white/40 p-1.5 rounded-xl border border-white/50">${subject.icon}</div>
+                            <svg class="absolute -bottom-1 left-0 w-full text-white drop-shadow-sm" viewBox="0 0 1440 100" fill="currentColor" xmlns="http://www.w3.org/2000/svg">
+                                <path d="M0,32L60,42.7C120,53,240,75,360,74.7C480,75,600,53,720,42.7C840,32,960,32,1080,42.7C1200,53,1320,75,1380,85.3L1440,96L1440,120L1380,120C1320,120,1200,120,1080,120C960,120,840,120,720,120C600,120,480,120,360,120C240,120,120,120,60,120L0,120Z"></path>
+                            </svg>
+                        </div>
+                        
+                        <div class="absolute left-1/2 -translate-x-1/2 top-10 z-20 w-24 h-24 rounded-full overflow-hidden border-[4px] border-white shadow-md bg-white">
+                            <img src="${currentImageSrc}" class="w-full h-full object-cover object-top">
+                        </div>
+
+                        <div class="pt-10 pb-4 px-4 flex-grow flex flex-col justify-end items-center z-10 bg-white">
+                            <h2 class="text-xl font-black ${subject.titleColor} mb-2 border-b-2 ${subject.borderStyle} pb-1 px-6 inline-block">
+                                ${subject.title}
+                            </h2>
+                            
+                            <div class="w-full bg-gray-50 rounded-xl p-2 text-[12.5px] space-y-1.5 border border-gray-100">
+                                <div class="flex justify-between items-center px-2">
+                                    <span class="text-gray-400 font-bold">ناو:</span>
+                                    <span class="font-bold text-gray-800 ${isNameEmpty ? 'text-gray-300' : ''}">${nameValue}</span>
+                                </div>
+                                <div class="flex justify-between items-center px-2">
+                                    <span class="text-gray-400 font-bold">پۆل:</span>
+                                    <span class="font-bold text-gray-700 ${isClassEmpty ? 'text-gray-300' : ''}">${classValue}</span>
+                                </div>
+                                <div class="flex justify-between items-center px-2">
+                                    <span class="text-gray-400 font-bold">قوتابخانە:</span>
+                                    <span class="font-bold text-gray-700 ${isSchoolEmpty ? 'text-gray-300' : ''}">${schoolValue}</span>
+                                </div>
+                            </div>
+                        </div>
+                    `;
+                }
+                // --- دیزاینی ٤: مۆدێرن ---
+                // گۆڕانکاری: وێنەکە چوو بۆ ناو چوارگۆشەیەکی سوک لە لای چەپ
+                else if (currentDesign === 'design4') {
+                    card.className = `label-card flex flex-row bg-white rounded-2xl h-40 shadow-sm border border-gray-200 overflow-hidden`;
+                    card.innerHTML = `
+                        <!-- بەشی ڕاست (بابەت) -->
+                        <div class="w-[30%] ${subject.bgTheme} flex flex-col items-center justify-center p-2 relative z-10 border-l border-gray-100">
+                            <span class="text-3xl mb-1 drop-shadow-sm">${subject.icon}</span>
+                            <h2 class="text-lg font-black ${subject.titleColor} text-center leading-tight">${subject.title}</h2>
+                        </div>
+                        
+                        <!-- بەشی چەپ (زانیاری و وێنە) -->
+                        <div class="w-[70%] flex flex-row relative bg-white p-2 items-center justify-between">
+                            
+                            <div class="w-[65%] pl-2 pr-1 space-y-2 flex flex-col justify-center text-[12px]">
+                                <div class="flex items-end justify-between border-b border-gray-100 pb-1">
+                                    <span class="text-gray-400 font-bold shrink-0">ناو:</span>
+                                    <span class="font-bold text-gray-800 text-left ${isNameEmpty ? 'text-gray-300' : ''} truncate block pl-1">${nameValue}</span>
+                                </div>
+                                <div class="flex items-end justify-between border-b border-gray-100 pb-1">
+                                    <span class="text-gray-400 font-bold shrink-0">پۆل:</span>
+                                    <span class="font-bold text-gray-800 text-left ${isClassEmpty ? 'text-gray-300' : ''} pl-1">${classValue}</span>
+                                </div>
+                                <div class="flex items-end justify-between">
+                                    <span class="text-gray-400 font-bold shrink-0">قوتابخانە:</span>
+                                    <span class="font-bold text-gray-800 text-left ${isSchoolEmpty ? 'text-gray-300' : ''} pl-1">${schoolValue}</span>
+                                </div>
+                            </div>
+
+                            <div class="w-[35%] h-full p-1">
+                                <div class="w-full h-full rounded-xl overflow-hidden bg-gray-50 border border-gray-100">
+                                   <img src="${currentImageSrc}" class="w-full h-full object-cover object-top drop-shadow-sm">
+                                </div>
+                            </div>
+                        </div>
+                    `;
+                }
+                // --- دیزاینی ٥: کیوت ---
+                // گۆڕانکاری: وێنە چووە ناو بازنەیەکی تەنیشت
+                else if (currentDesign === 'design5') {
+                    card.className = `label-card relative bg-white rounded-[2rem] border-4 border-dashed ${subject.borderStyle} p-3 flex flex-col h-[190px] shadow-sm overflow-hidden`;
+                    card.innerHTML = `
+                        <!-- بازنەکانی باکگراوند -->
+                        <div class="absolute -top-6 -right-6 w-20 h-20 ${subject.bgTheme} rounded-full opacity-70 z-0"></div>
+                        <div class="absolute -bottom-6 -left-6 w-20 h-20 ${subject.bgTheme} rounded-full opacity-70 z-0"></div>
+                        
+                        <div class="relative z-10 flex items-center justify-between mb-2">
+                            <h2 class="text-lg font-black ${subject.titleColor} bg-white/90 backdrop-blur-sm px-4 py-1.5 rounded-full shadow-sm border border-gray-100 flex items-center gap-2">
+                                ${subject.title} <span class="text-xl">${subject.icon}</span>
+                            </h2>
+                        </div>
+                        
+                        <div class="flex flex-row items-center justify-between h-full relative z-10">
+                            <!-- زانیاری -->
+                            <div class="w-[60%] bg-white/90 backdrop-blur-md rounded-[1.2rem] p-2 flex flex-col justify-center gap-1.5 shadow-sm border border-gray-100">
+                                <div class="flex items-center text-[11px] bg-gray-50/80 p-1.5 rounded-lg border border-gray-100">
+                                    <span class="font-bold text-gray-500 w-12 shrink-0">ناو:</span> 
+                                    <span class="font-bold text-gray-900 ${isNameEmpty ? 'text-gray-300' : ''} truncate">${nameValue}</span>
+                                </div>
+                                <div class="flex items-center text-[11px] bg-gray-50/80 p-1.5 rounded-lg border border-gray-100">
+                                    <span class="font-bold text-gray-500 w-12 shrink-0">پۆل:</span> 
+                                    <span class="font-bold text-gray-800 ${isClassEmpty ? 'text-gray-300' : ''}">${classValue}</span>
+                                </div>
+                                <div class="flex items-center text-[11px] bg-gray-50/80 p-1.5 rounded-lg border border-gray-100">
+                                    <span class="font-bold text-gray-500 w-16 shrink-0">قوتابخانە:</span> 
+                                    <span class="font-bold text-gray-800 ${isSchoolEmpty ? 'text-gray-300' : ''}">${schoolValue}</span>
+                                </div>
+                            </div>
+                            
+                            <!-- وێنە -->
+                            <div class="w-[35%] flex justify-end">
+                                <div class="w-20 h-20 rounded-2xl overflow-hidden bg-white shadow-sm border-2 ${subject.borderStyle} rotate-3">
+                                   <img src="${currentImageSrc}" class="w-full h-full object-cover object-top">
+                                </div>
+                            </div>
+                        </div>
+                    `;
+                }
+                // --- دیزاینی ٦: شیک و سادە (Minimalist) ---
+                // گۆڕانکاری: وێنە سنووردار کرا بە لای چەپەوە
+                else if (currentDesign === 'design6') {
+                    card.className = `label-card flex flex-row bg-white rounded-3xl h-44 shadow-sm border border-gray-200 overflow-hidden`;
+                    card.innerHTML = `
+                        <div class="w-2/3 p-4 pr-5 flex flex-col justify-center relative z-10 border-l border-gray-100">
+                            <!-- تاگی بابەت -->
+                            <div class="inline-flex items-center gap-2 ${subject.bgTheme} px-4 py-1.5 rounded-full mb-4 self-start border border-white shadow-sm ring-1 ring-gray-100">
+                                <span class="text-xl drop-shadow-sm">${subject.icon}</span>
+                                <span class="font-black ${subject.titleColor} text-sm">${subject.title}</span>
+                            </div>
+                            <!-- زانیاری -->
+                            <div class="space-y-2.5 text-[13px]">
+                                <div class="flex items-center"><span class="text-gray-400 font-bold w-16 shrink-0">ناو:</span> <span class="font-bold text-gray-800 truncate ${isNameEmpty ? 'text-gray-300' : ''}">${nameValue}</span></div>
+                                <div class="flex items-center"><span class="text-gray-400 font-bold w-16 shrink-0">پۆل:</span> <span class="font-bold text-gray-800 ${isClassEmpty ? 'text-gray-300' : ''}">${classValue}</span></div>
+                                <div class="flex items-center"><span class="text-gray-400 font-bold w-16 shrink-0">قوتابخانە:</span> <span class="font-bold text-gray-800 ${isSchoolEmpty ? 'text-gray-300' : ''}">${schoolValue}</span></div>
+                            </div>
+                        </div>
+                        <div class="w-1/3 relative z-20 flex justify-center items-center ${subject.bgTheme} p-2 opacity-80">
+                             <div class="w-full h-full rounded-2xl overflow-hidden bg-white/60">
+                                 <img src="${currentImageSrc}" class="w-full h-full object-cover object-top">
+                             </div>
+                        </div>
+                    `;
+                }
+                // --- دیزاینی ٧: گەردوون (Dark Theme / Neon) ---
+                // گۆڕانکاری: وێنە خرایە ناو بازنەیەکی بریقەدار
+                else if (currentDesign === 'design7') {
+                    card.className = `label-card flex flex-row bg-gray-900 rounded-2xl h-44 shadow-xl overflow-hidden border-2 border-gray-800`;
+                    card.innerHTML = `
+                        <div class="w-[35%] flex flex-col items-center justify-center relative z-10 bg-gradient-to-br ${subject.gradient} border-l-4 border-gray-900 p-2">
+                            <span class="text-4xl drop-shadow-md mb-2 scale-110">${subject.icon}</span>
+                            <h2 class="text-lg font-black text-gray-900 text-center leading-tight">${subject.title}</h2>
+                        </div>
+                        <div class="w-[65%] p-3 pr-4 flex flex-row items-center justify-between">
+                            <!-- زانیاری -->
+                            <div class="w-[60%] space-y-2 text-[12px] text-gray-300">
+                                <div class="flex items-center border-b border-gray-700 pb-1.5"><span class="font-bold text-gray-500 w-10 shrink-0">ناو:</span> <span class="font-bold text-white truncate ${isNameEmpty ? 'opacity-30' : ''}">${nameValue}</span></div>
+                                <div class="flex items-center border-b border-gray-700 pb-1.5"><span class="font-bold text-gray-500 w-10 shrink-0">پۆل:</span> <span class="font-bold text-white ${isClassEmpty ? 'opacity-30' : ''}">${classValue}</span></div>
+                                <div class="flex items-center"><span class="font-bold text-gray-500 w-14 shrink-0">قوتابخانە:</span> <span class="font-bold text-white ${isSchoolEmpty ? 'opacity-30' : ''}">${schoolValue}</span></div>
+                            </div>
+                            
+                            <!-- وێنە -->
+                            <div class="w-[35%] flex justify-end">
+                                <div class="w-[70px] h-[70px] rounded-full overflow-hidden border-2 ${subject.borderStyle} bg-gray-800 shadow-[0_0_15px_rgba(255,255,255,0.2)]">
+                                    <img src="${currentImageSrc}" class="w-full h-full object-cover object-top">
+                                </div>
+                            </div>
+                        </div>
+                    `;
+                }
+                // --- دیزاینی ٨: شێوازی باج (ID Card Portrait) ---
+                // گۆڕانکاری: وێنە هاتە خوارەوە، چوارچێوەکەی داخرا، نەچێتە سەر نوسین
+                else if (currentDesign === 'design8') {
+                    card.className = `label-card flex flex-col bg-white rounded-[2rem] h-[290px] shadow-sm border border-gray-200 relative overflow-hidden`;
+                    card.innerHTML = `
+                        <!-- هێدەری سەرەوە (قەبارەکەی گەورە کرا بۆ جێگەی وێنە) -->
+                        <div class="h-[100px] w-full ${subject.bgTheme} flex items-start justify-center pt-3 relative z-0">
+                            <h2 class="text-2xl font-black ${subject.titleColor} flex items-center gap-2">
+                                <span class="drop-shadow-sm">${subject.icon}</span> ${subject.title}
+                            </h2>
+                        </div>
+                        
+                        <!-- وێنەی بازنەیی ناوەڕاست (هاتە خوارەوە و داخرا) -->
+                        <div class="absolute top-[50px] left-1/2 -translate-x-1/2 w-[90px] h-[90px] bg-white rounded-full border-4 ${subject.borderStyle} z-20 overflow-hidden shadow-sm">
+                            <img src="${currentImageSrc}" class="w-full h-full object-cover object-top">
+                        </div>
+                        
+                        <!-- زانیارییەکانی خوارەوە -->
+                        <div class="pt-12 pb-4 px-4 flex-grow flex flex-col justify-end items-center bg-white z-10">
+                            <div class="w-full space-y-2 text-[12px]">
+                                <div class="bg-gray-50 py-2 px-3 rounded-xl border border-gray-100 flex justify-between items-center">
+                                    <span class="text-gray-400 font-bold">ناو:</span>
+                                    <span class="font-bold text-gray-800 ${isNameEmpty ? 'text-gray-300' : ''}">${nameValue}</span>
+                                </div>
+                                <div class="flex gap-2">
+                                    <div class="bg-gray-50 py-2 px-3 rounded-xl border border-gray-100 flex-1 flex flex-col items-center justify-center gap-1">
+                                        <span class="text-gray-400 font-bold text-[10px]">پۆل</span>
+                                        <span class="font-bold text-gray-800 text-center ${isClassEmpty ? 'text-gray-300' : ''}">${classValue}</span>
+                                    </div>
+                                    <div class="bg-gray-50 py-2 px-3 rounded-xl border border-gray-100 flex-[1.5] flex flex-col items-center justify-center gap-1">
+                                        <span class="text-gray-400 font-bold text-[10px]">قوتابخانە</span>
+                                        <span class="font-bold text-gray-800 text-center ${isSchoolEmpty ? 'text-gray-300' : ''}">${schoolValue}</span>
+                                    </div>
+                                </div>
+                            </div>
+                        </div>
+                    `;
+                }
+                // --- دیزاینی ٩: ئەندازەیی (تازە) ---
+                else if (currentDesign === 'design9') {
+                    card.className = `label-card flex flex-row bg-white rounded-xl h-40 shadow-sm border border-gray-200 overflow-hidden relative`;
+                    card.innerHTML = `
+                        <!-- نەخشی پشتەوە -->
+                        <div class="absolute top-0 right-0 w-32 h-32 bg-gradient-to-bl ${subject.gradient} opacity-30 transform rotate-45 -translate-y-16 translate-x-16"></div>
+                        <div class="absolute bottom-0 left-0 w-24 h-24 bg-gradient-to-tr ${subject.gradient} opacity-30 transform rotate-45 translate-y-10 -translate-x-10"></div>
+                        
+                        <div class="w-[70%] p-4 flex flex-col justify-center relative z-10 border-l border-dashed border-gray-200">
+                            <div class="flex items-center gap-2 mb-3">
+                                <div class="w-8 h-8 rounded-lg ${subject.bgTheme} flex items-center justify-center text-lg">${subject.icon}</div>
+                                <h2 class="text-lg font-black text-gray-800 uppercase tracking-wider">${subject.title}</h2>
+                            </div>
+                            <div class="space-y-1.5 text-[12.5px]">
+                                <div class="flex items-center bg-gray-50/50 px-2 py-1 rounded"><span class="text-gray-400 font-bold w-16">ناو:</span> <span class="font-bold text-gray-800 ${isNameEmpty ? 'text-gray-300' : ''}">${nameValue}</span></div>
+                                <div class="flex items-center bg-gray-50/50 px-2 py-1 rounded"><span class="text-gray-400 font-bold w-16">پۆل:</span> <span class="font-bold text-gray-800 ${isClassEmpty ? 'text-gray-300' : ''}">${classValue}</span></div>
+                                <div class="flex items-center bg-gray-50/50 px-2 py-1 rounded"><span class="text-gray-400 font-bold w-16">قوتابخانە:</span> <span class="font-bold text-gray-800 ${isSchoolEmpty ? 'text-gray-300' : ''}">${schoolValue}</span></div>
+                            </div>
+                        </div>
+                        
+                        <div class="w-[30%] flex items-center justify-center relative z-10 bg-gray-50">
+                            <div class="w-[85px] h-[85px] bg-white rounded-full p-1 shadow-sm border border-gray-200">
+                                <div class="w-full h-full rounded-full overflow-hidden ${subject.bgTheme}">
+                                    <img src="${currentImageSrc}" class="w-full h-full object-cover object-top">
+                                </div>
+                            </div>
+                        </div>
+                    `;
+                }
+                // --- دیزاینی ١٠: دەفتەر (تازە) ---
+                else if (currentDesign === 'design10') {
+                    card.className = `label-card flex flex-row bg-[#fdfbf7] rounded-sm h-40 shadow-md border-l-4 border-red-400 overflow-hidden relative notebook-pattern`;
+                    card.innerHTML = `
+                        <!-- کونی لای ڕاستی دەفتەر -->
+                        <div class="absolute right-2 top-4 w-3 h-3 rounded-full bg-gray-200 border border-gray-300 shadow-inner"></div>
+                        <div class="absolute right-2 top-1/2 -translate-y-1/2 w-3 h-3 rounded-full bg-gray-200 border border-gray-300 shadow-inner"></div>
+                        <div class="absolute right-2 bottom-4 w-3 h-3 rounded-full bg-gray-200 border border-gray-300 shadow-inner"></div>
+                        
+                        <div class="w-[70%] p-4 pr-8 flex flex-col justify-center relative z-10">
+                            <h2 class="text-xl font-black ${subject.textColor} mb-2 inline-block border-b-2 border-red-300 pb-1" style="font-family: 'Comic Sans MS', cursive, sans-serif;">
+                                ${subject.icon} ${subject.title}
+                            </h2>
+                            <div class="space-y-[6px] text-[13px] font-bold text-gray-700">
+                                <div><span class="text-gray-400">ناو:</span> <span class="${isNameEmpty ? 'text-gray-300' : ''} border-b border-gray-300 pb-0.5">${nameValue}</span></div>
+                                <div><span class="text-gray-400">پۆل:</span> <span class="${isClassEmpty ? 'text-gray-300' : ''} border-b border-gray-300 pb-0.5">${classValue}</span></div>
+                                <div><span class="text-gray-400">قوتابخانە:</span> <span class="${isSchoolEmpty ? 'text-gray-300' : ''} border-b border-gray-300 pb-0.5">${schoolValue}</span></div>
+                            </div>
+                        </div>
+                        
+                        <div class="w-[30%] flex items-center justify-center relative z-10 p-2">
+                            <!-- وێنە بە شێوازی پۆلارۆید (کارت) -->
+                            <div class="w-full h-full bg-white p-1.5 pb-4 shadow-md border border-gray-200 transform rotate-2 flex flex-col">
+                                <div class="w-full flex-grow bg-gray-100 overflow-hidden border border-gray-200">
+                                    <img src="${currentImageSrc}" class="w-full h-full object-cover object-top filter contrast-105">
+                                </div>
+                            </div>
+                        </div>
+                    `;
+                }
+
+                container.appendChild(card);
+            });
+        }
+
+        // کارپێکردن لەکاتی کردنەوەی پەڕەکە
+        window.onload = function() {
+            updateLabels();
+        };
+    </script>
+</body>
+</html>
